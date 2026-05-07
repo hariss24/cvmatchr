@@ -13,6 +13,8 @@ matches what you see in a browser.
 - One-click conversion + auto-download
 - Tiny tkinter control window with a "Quit" button to stop the server
 - No console window on Windows (when run as `.pyw`)
+- **MCP server** so Claude desktop can convert HTML to PDF directly,
+  without copy-paste (see below)
 
 ## Requirements
 
@@ -75,6 +77,44 @@ To make a desktop shortcut: right-click `app.pyw` → **Send to** → **Desktop*
 - The PDF bytes stream back to the browser as an attachment.
 
 Everything runs on `127.0.0.1` — your HTML never leaves your machine.
+
+## MCP server (Claude desktop integration)
+
+The repo also ships an MCP server at `mcp_server.py` that exposes the
+converter as a tool to Claude desktop. With it configured, Claude can
+generate the HTML and convert it to a PDF in one move — no copy-paste.
+
+### Tools exposed
+
+- `convert_html_to_pdf(html, company, role, doc_type, page_format, margin, notes, open_after)`
+  Converts HTML to PDF, archives it under `~/Documents/CV-Archive/`,
+  and optionally opens the result.
+- `list_recent_documents(limit)` lists recent entries from the archive.
+- `get_archive_dir()` returns the absolute path of the archive folder.
+
+### Configure Claude desktop
+
+Edit `%APPDATA%\Claude\claude_desktop_config.json` (Windows) or
+`~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
+
+```json
+{
+  "mcpServers": {
+    "html-to-pdf": {
+      "command": "python",
+      "args": ["C:\\path\\to\\html-to-pdf\\mcp_server.py"]
+    }
+  }
+}
+```
+
+Restart Claude desktop. The new tools appear in the tool palette.
+
+### Archive
+
+Each conversion is saved alongside its HTML source under
+`~/Documents/CV-Archive/`, with metadata kept in `history.json`. Filenames
+follow the pattern `{doc_type}_Hariss_{company}_{YYYY-MM-DD}.pdf`.
 
 ## License
 

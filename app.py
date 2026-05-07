@@ -16,11 +16,11 @@ import sys
 import threading
 import time
 import webbrowser
-from datetime import datetime
 
 import tkinter as tk
 from flask import Flask, render_template_string, request, send_file, jsonify
-from playwright.sync_api import sync_playwright
+
+from pdf_engine import html_to_pdf_bytes
 
 PORT = 5050
 URL = f"http://127.0.0.1:{PORT}"
@@ -181,17 +181,7 @@ def convert():
         return jsonify({"error": "HTML vide."}), 400
 
     try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch()
-            page = browser.new_page()
-            page.set_content(html, wait_until="networkidle")
-            pdf_bytes = page.pdf(
-                format=fmt,
-                print_background=background,
-                prefer_css_page_size=True,
-                margin={"top": margin, "right": margin, "bottom": margin, "left": margin},
-            )
-            browser.close()
+        pdf_bytes = html_to_pdf_bytes(html, page_format=fmt, margin=margin, background=background)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
