@@ -6,6 +6,7 @@ generated documents.
 """
 
 import json
+import os
 import re
 import unicodedata
 import uuid
@@ -15,7 +16,17 @@ from typing import Iterable
 
 OWNER = "Hariss"
 
-ARCHIVE_DIR = Path.home() / "Documents" / "CV-Archive"
+# Sur Vercel / Lambda le home n'est pas accessible en écriture → /tmp
+_IS_SERVERLESS = bool(
+    os.environ.get("VERCEL")
+    or os.environ.get("AWS_LAMBDA_FUNCTION_NAME")
+    or os.environ.get("PDF_ENGINE", "").lower() == "weasyprint"
+)
+ARCHIVE_DIR = (
+    Path("/tmp") / "CV-Archive"
+    if _IS_SERVERLESS
+    else Path.home() / "Documents" / "CV-Archive"
+)
 HISTORY_FILE = ARCHIVE_DIR / "history.json"
 
 DOC_TYPES = ("CV", "Lettre", "Autre")

@@ -22,7 +22,12 @@ import time
 import webbrowser
 from pathlib import Path
 
-import tkinter as tk
+try:
+    import tkinter as tk
+    _HAS_TKINTER = True
+except ImportError:
+    _HAS_TKINTER = False
+
 from flask import Flask, abort, jsonify, render_template_string, request, send_file
 
 import archive
@@ -1071,6 +1076,16 @@ def lancer_navigateur():
 
 
 def fenetre_controle():
+    if not _HAS_TKINTER:
+        print(f"Serveur disponible sur {URL}  (Ctrl-C pour quitter)")
+        # Bloc le thread principal jusqu'à Ctrl-C
+        try:
+            while True:
+                time.sleep(3600)
+        except KeyboardInterrupt:
+            sys.exit(0)
+        return
+
     root = tk.Tk()
     root.title("Convertisseur HTML -> PDF")
     root.resizable(False, False)
