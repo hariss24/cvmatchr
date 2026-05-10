@@ -10,3 +10,5 @@ env/
 .vscode/
 *.pdf
 *.log
+
+.vercel

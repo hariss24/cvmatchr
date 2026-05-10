@@ -16,6 +16,7 @@ Pour quitter :
 import io
 import json as _json
 import os
+import socket
 import sys
 import threading
 import time
@@ -28,14 +29,22 @@ try:
 except ImportError:
     _HAS_TKINTER = False
 
-from flask import Flask, abort, jsonify, render_template_string, request, send_file
+from flask import Flask, Response, abort, jsonify, render_template_string, request, send_file
 
 import archive
-from pdf_engine import html_to_pdf_bytes
+from pdf_engine import html_to_pdf_bytes, VALID_FORMATS, VALID_MARGINS
 
 PORT = 5050
 URL = f"http://127.0.0.1:{PORT}"
 
+# Limite de taille du corps de requête pour /convert (8 Mo)
+MAX_HTML_BYTES = 8 * 1024 * 1024
+
+# ---------------------------------------------------------------------------
+# PAGE PRINCIPALE (éditeur Monaco + prévisualisation)
+# Raw string : évite les warnings de syntaxe Python sur les regex JS.
+# N'utilise PAS Jinja2 — retourné comme Response directe.
+# ---------------------------------------------------------------------------
 PAGE = r"""<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -202,8 +211,9 @@ const $ = (id) => document.getElementById(id);
 const setStatus = (msg, cls) => { const s = $('status'); s.textContent = msg; s.className = cls || ''; };
 
 const STORAGE_KEY_HTML = 'html-to-pdf:draft:html';
-const STORAGE_KEY_CSS = 'html-to-pdf:draft:css';
-const STORAGE_KEY_TAB = 'html-to-pdf:draft:tab';
+const STORAGE_KEY_CSS  = 'html-to-pdf:draft:css';
+const STORAGE_KEY_TAB  = 'html-to-pdf:draft:tab';
+const HISTORY_KEY      = 'cv-history';
 
 const TEMPLATES = {
   sobre: {
@@ -618,17 +628,22 @@ let htmlModel;
 let cssModel;
 let activeTab = 'html';
 
+// ---- mergedHtml : fusion HTML + CSS avec échappement anti-injection --------
 function mergedHtml() {
   const html = htmlModel ? htmlModel.getValue() : '';
-  const css = cssModel ? cssModel.getValue() : '';
+  const css  = cssModel  ? cssModel.getValue()  : '';
   if (!css.trim()) return html;
+  // Empêcher la fermeture prématurée du bloc <style> par du CSS malformé.
+  // <\/style> est reconnu par les parseurs CSS comme du contenu valide
+  // tout en bloquant la correspondance du tokeniseur HTML.
+  const safeCss = css.replace(/<\/style\s*>/gi, '<\\/style>');
   if (/<\/head>/i.test(html)) {
-    return html.replace(/<\/head>/i, `<style>\n${css}\n</style>\n</head>`);
+    return html.replace(/<\/head>/i, `<style>\n${safeCss}\n</style>\n</head>`);
   }
   if (/<html[\s>]/i.test(html)) {
-    return html.replace(/<html([^>]*)>/i, `<html$1>\n<head><meta charset="utf-8"><style>\n${css}\n</style></head>`);
+    return html.replace(/<html([^>]*)>/i, `<html$1>\n<head><meta charset="utf-8"><style>\n${safeCss}\n</style></head>`);
   }
-  return `<!DOCTYPE html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n<style>\n${css}\n</style>\n</head>\n<body>\n${html}\n</body>\n</html>`;
+  return `<!DOCTYPE html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n<style>\n${safeCss}\n</style>\n</head>\n<body>\n${html}\n</body>\n</html>`;
 }
 
 function switchTab(tab) {
@@ -638,47 +653,56 @@ function switchTab(tab) {
   try { localStorage.setItem(STORAGE_KEY_TAB, tab); } catch (_) {}
 }
 
+// ---- slug JS : aligné avec la version Python (NFKD + ASCII) ---------------
 function slug(s) {
   if (!s) return '';
-  return s.normalize('NFKD').replace(/[̀-ͯ]/g, '')
-          .replace(/[^\w\s-]/g, '').trim().replace(/[\s_-]+/g, '');
+  // Supprimer les diacritiques (U+0300-U+036F : bloc "Combining Diacritical Marks")
+  return s.normalize('NFKD')
+          .replace(/[̀-ͯ]/g, '')
+          .replace(/[^\w\s-]/gu, '')
+          .trim()
+          .replace(/[\s_-]+/g, '');
 }
 
 function autoFilename() {
-  const today = new Date().toISOString().slice(0, 10);
+  const today   = new Date().toISOString().slice(0, 10);
   const docType = $('doc_type').value || 'Document';
   const company = slug($('company').value);
-  const role = slug($('role').value);
-  const tail = company || role || '';
+  const role    = slug($('role').value);
+  const tail    = company || role || '';
   return tail ? `${docType}_Hariss_${tail}_${today}.pdf` : `${docType}_Hariss_${today}.pdf`;
 }
 
 function refreshFilenamePreview() {
   const custom = $('filename').value.trim();
-  const auto = autoFilename();
+  const auto   = autoFilename();
   $('filename_preview').textContent = custom ? `Nom : ${custom}` : `Nom auto : ${auto}`;
 }
 
-['doc_type', 'company', 'role', 'filename'].forEach(id => $(id).addEventListener('input', refreshFilenamePreview));
+['doc_type', 'company', 'role', 'filename'].forEach(id =>
+  $(id).addEventListener('input', refreshFilenamePreview)
+);
 refreshFilenamePreview();
 
+// ---- Prévisualisation avec debounce ----------------------------------------
 let previewTimer;
 function schedulePreview() {
   clearTimeout(previewTimer);
-  previewTimer = setTimeout(() => {
-    $('preview').srcdoc = mergedHtml();
-  }, 400);
+  previewTimer = setTimeout(() => { $('preview').srcdoc = mergedHtml(); }, 400);
 }
 
+// ---- Initialisation Monaco -------------------------------------------------
 require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } });
 require(['vs/editor/editor.main'], function () {
   const storedHtml = localStorage.getItem(STORAGE_KEY_HTML);
-  const storedCss = localStorage.getItem(STORAGE_KEY_CSS);
-  const wantTab = localStorage.getItem(STORAGE_KEY_TAB) || 'html';
-  const fallback = TEMPLATES.sobre;
+  const storedCss  = localStorage.getItem(STORAGE_KEY_CSS);
+  const wantTab    = localStorage.getItem(STORAGE_KEY_TAB) || 'html';
+  const fallback   = TEMPLATES.sobre;
 
-  htmlModel = monaco.editor.createModel(storedHtml !== null ? storedHtml : fallback.html, 'html');
-  cssModel  = monaco.editor.createModel(storedCss  !== null ? storedCss  : fallback.css,  'css');
+  htmlModel = monaco.editor.createModel(
+    storedHtml !== null ? storedHtml : fallback.html, 'html');
+  cssModel  = monaco.editor.createModel(
+    storedCss  !== null ? storedCss  : fallback.css,  'css');
 
   editor = monaco.editor.create($('editor'), {
     model: htmlModel,
@@ -707,9 +731,17 @@ require(['vs/editor/editor.main'], function () {
 
   $('preview').srcdoc = mergedHtml();
 
-  $('format-btn').onclick = () => editor.getAction('editor.action.formatDocument').run();
-  $('snippet-page').onclick = () => { switchTab('css'); insertSnippet('@page { size: A4; margin: 15mm; }\n'); };
-  $('snippet-pagebreak').onclick = () => { switchTab('html'); insertSnippet('<div style="page-break-after: always;"></div>\n'); };
+  // Bouton Format — guard contre un model sans formateur disponible
+  $('format-btn').onclick = () => {
+    const action = editor.getAction('editor.action.formatDocument');
+    if (action) action.run();
+  };
+  $('snippet-page').onclick = () => {
+    switchTab('css'); insertSnippet('@page { size: A4; margin: 15mm; }\n');
+  };
+  $('snippet-pagebreak').onclick = () => {
+    switchTab('html'); insertSnippet('<div style="page-break-after: always;"></div>\n');
+  };
   $('refresh-preview').onclick = () => { $('preview').srcdoc = mergedHtml(); };
 
   $('template-select').onchange = (e) => {
@@ -724,38 +756,67 @@ require(['vs/editor/editor.main'], function () {
     cssModel.setValue(tpl.css);
   };
 
-  const params = new URLSearchParams(location.search);
-  const loadId  = params.get('load');
-  const htmlUrl = params.get('htmlUrl');   // blob URL si disponible
+  // ---- Chargement depuis l'historique (?load= ou ?htmlUrl=) ----------------
+  const params   = new URLSearchParams(location.search);
+  const loadId   = params.get('load');
+  const htmlUrl  = params.get('htmlUrl');  // URL Blob directe (optionnel)
+
   if (loadId) {
-    // Charger les métadonnées depuis localStorage d'abord, sinon API
-    const localHist = JSON.parse(localStorage.getItem('cv-history') || '[]');
-    const localEntry = localHist.find(e => e.id === loadId);
+    // 1. Chercher d'abord dans le localStorage (plus rapide, marche offline)
+    let localEntry = null;
+    try {
+      const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+      localEntry = hist.find(e => e.id === loadId) || null;
+    } catch (_) {}
+
     if (localEntry) {
+      // Restaurer les métadonnées immédiatement
       $('doc_type').value = localEntry.doc_type || 'CV';
       $('company').value  = localEntry.company  || '';
       $('role').value     = localEntry.role     || '';
+      $('notes').value    = localEntry.notes    || '';
+      refreshFilenamePreview();
+
+      // Charger le HTML depuis le Blob ou l'URL passée en param
       const src = htmlUrl || localEntry.html_url || '';
       if (src) {
-        fetch(src).then(r => r.text()).then(html => {
-          htmlModel.setValue(html); cssModel.setValue(''); switchTab('html');
-        }).then(refreshFilenamePreview);
+        fetch(src)
+          .then(r => {
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return r.text();
+          })
+          .then(h => {
+            htmlModel.setValue(h);
+            cssModel.setValue('');
+            switchTab('html');
+          })
+          .catch(err => setStatus('Chargement HTML echoue : ' + err.message, 'err'));
       }
     } else {
-      fetch(`/api/history/${encodeURIComponent(loadId)}`).then(r => r.json()).then(entry => {
-        if (!entry || !entry.id) return;
-        $('doc_type').value = entry.doc_type || 'CV';
-        $('company').value  = entry.company  || '';
-        $('role').value     = entry.role     || '';
-        $('notes').value    = entry.notes    || '';
-        const src = htmlUrl || '';
-        const fetchHtml = src
-          ? fetch(src).then(r => r.text())
-          : fetch(`/api/history/${encodeURIComponent(loadId)}/html`).then(r => r.text());
-        return fetchHtml.then(html => {
-          htmlModel.setValue(html); cssModel.setValue(''); switchTab('html');
-        });
-      }).then(refreshFilenamePreview);
+      // 2. Fallback : API serveur (local dev ou entrée sans localStorage)
+      fetch(`/api/history/${encodeURIComponent(loadId)}`)
+        .then(r => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+        .then(entry => {
+          if (!entry || !entry.id) return;
+          $('doc_type').value = entry.doc_type || 'CV';
+          $('company').value  = entry.company  || '';
+          $('role').value     = entry.role     || '';
+          $('notes').value    = entry.notes    || '';
+          refreshFilenamePreview();
+
+          const src = htmlUrl || entry.html_blob_url || '';
+          return (src
+            ? fetch(src)
+            : fetch(`/api/history/${encodeURIComponent(loadId)}/html`)
+          )
+            .then(r => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`))))
+            .then(h => {
+              htmlModel.setValue(h);
+              cssModel.setValue('');
+              switchTab('html');
+            });
+        })
+        .catch(err => setStatus('Chargement echoue : ' + err.message, 'err'));
     }
   }
 });
@@ -767,18 +828,26 @@ function insertSnippet(text) {
   editor.focus();
 }
 
+// ---- Effacer ---------------------------------------------------------------
 $('clear').onclick = () => {
   if (htmlModel) htmlModel.setValue('');
-  if (cssModel) cssModel.setValue('');
+  if (cssModel)  cssModel.setValue('');
   ['company', 'role', 'filename', 'notes'].forEach(id => $(id).value = '');
-  setStatus(''); refreshFilenamePreview();
-  try { localStorage.removeItem(STORAGE_KEY_HTML); localStorage.removeItem(STORAGE_KEY_CSS); } catch (_) {}
+  setStatus('');
+  refreshFilenamePreview();
+  try {
+    localStorage.removeItem(STORAGE_KEY_HTML);
+    localStorage.removeItem(STORAGE_KEY_CSS);
+  } catch (_) {}
 };
 
+// ---- Convertir en PDF ------------------------------------------------------
 $('go').onclick = async () => {
   const html = mergedHtml();
   if (!html.trim()) { setStatus("Editez du HTML d'abord.", 'err'); return; }
-  const btn = $('go'); btn.disabled = true; btn.textContent = 'Conversion...';
+  const btn = $('go');
+  btn.disabled = true;
+  btn.textContent = 'Conversion...';
   setStatus('Generation du PDF...', '');
   try {
     const res = await fetch('/convert', {
@@ -786,14 +855,14 @@ $('go').onclick = async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         html,
-        doc_type: $('doc_type').value,
-        company: $('company').value.trim(),
-        role: $('role').value.trim(),
-        notes: $('notes').value.trim(),
-        format: $('format').value,
-        margin: $('margin').value,
+        doc_type:   $('doc_type').value,
+        company:    $('company').value.trim(),
+        role:       $('role').value.trim(),
+        notes:      $('notes').value.trim(),
+        format:     $('format').value,
+        margin:     $('margin').value,
         background: $('bg').checked,
-        filename: $('filename').value.trim(),
+        filename:   $('filename').value.trim(),
       }),
     });
     if (!res.ok) {
@@ -801,56 +870,81 @@ $('go').onclick = async () => {
       setStatus('Erreur : ' + (err.error || res.statusText), 'err');
       return;
     }
-    const meta = JSON.parse(res.headers.get('X-Archive-Entry') || '{}');
+    const meta        = JSON.parse(res.headers.get('X-Archive-Entry') || '{}');
     const pdfBlobUrl  = res.headers.get('X-Blob-PDF-URL')  || '';
     const htmlBlobUrl = res.headers.get('X-Blob-HTML-URL') || '';
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = meta.filename || 'document.pdf';
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-    setStatus(`PDF telecharge et archive sous ${meta.filename}`, 'ok');
-    // Persistance locale si Vercel Blob est actif
+
+    const blob    = await res.blob();
+    const objUrl  = URL.createObjectURL(blob);
+    const a       = document.createElement('a');
+    a.href        = objUrl;
+    a.download    = meta.filename || 'document.pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    // Révoquer après un délai pour laisser le téléchargement commencer
+    setTimeout(() => URL.revokeObjectURL(objUrl), 10_000);
+
+    setStatus(`PDF telecharge : ${meta.filename}`, 'ok');
+
+    // Persistance dans localStorage si Vercel Blob est actif
     if (pdfBlobUrl) {
       try {
-        const hist = JSON.parse(localStorage.getItem('cv-history') || '[]');
+        const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
         hist.unshift({
-          id: meta.id, filename: meta.filename, created_at: meta.created_at,
-          doc_type: $('doc_type').value, company: $('company').value.trim(),
-          role: $('role').value.trim(), pdf_url: pdfBlobUrl, html_url: htmlBlobUrl,
+          id:         meta.id || crypto.randomUUID(),
+          filename:   meta.filename,
+          created_at: meta.created_at,
+          doc_type:   $('doc_type').value,
+          company:    $('company').value.trim(),
+          role:       $('role').value.trim(),
+          notes:      $('notes').value.trim(),
+          pdf_url:    pdfBlobUrl,
+          html_url:   htmlBlobUrl,
         });
-        localStorage.setItem('cv-history', JSON.stringify(hist.slice(0, 100)));
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(hist.slice(0, 100)));
       } catch (_) {}
     }
   } catch (e) {
     setStatus('Erreur : ' + e.message, 'err');
   } finally {
-    btn.disabled = false; btn.textContent = 'Convertir en PDF';
+    btn.disabled = false;
+    btn.textContent = 'Convertir en PDF';
   }
 };
 
+// ---- Splitter redimensionnable ---------------------------------------------
 (function initSplitter() {
-  const split = $('split');
-  const splitter = $('splitter');
+  const split      = $('split');
+  const splitter   = $('splitter');
   const editorPane = $('editor-pane');
-  let dragging = false;
-  splitter.addEventListener('mousedown', e => { dragging = true; e.preventDefault(); document.body.style.cursor = 'col-resize'; });
+  let dragging     = false;
+  splitter.addEventListener('mousedown', e => {
+    dragging = true;
+    e.preventDefault();
+    document.body.style.cursor = 'col-resize';
+  });
   window.addEventListener('mousemove', e => {
     if (!dragging) return;
     const rect = split.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const pct = Math.max(15, Math.min(85, (x / rect.width) * 100));
+    const x    = e.clientX - rect.left;
+    const pct  = Math.max(15, Math.min(85, (x / rect.width) * 100));
     editorPane.style.flexBasis = `${pct}%`;
   });
-  window.addEventListener('mouseup', () => { dragging = false; document.body.style.cursor = ''; });
+  window.addEventListener('mouseup', () => {
+    dragging = false;
+    document.body.style.cursor = '';
+  });
 })();
 </script>
 </body>
 </html>
 """
 
+# ---------------------------------------------------------------------------
+# PAGE HISTORIQUE
+# Utilise Jinja2 pour injecter IS_SERVERLESS côté serveur.
+# ---------------------------------------------------------------------------
 HISTORY_PAGE = """<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -878,6 +972,7 @@ HISTORY_PAGE = """<!DOCTYPE html>
   button.danger { background: #5a1e1e; }
   button.danger:hover { background: #7a2828; }
   .empty { color: #9aa0a6; padding: 24px; text-align: center; }
+  .error { color: #ff6b6b; padding: 24px; text-align: center; }
   .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; background: #2a2f3a; color: #c8c8c8; }
   tr:hover { background: #14181f; }
   .filename { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: #c8c8c8; }
@@ -894,8 +989,9 @@ HISTORY_PAGE = """<!DOCTYPE html>
 </div>
 <script>
 const $ = (id) => document.getElementById(id);
-// Injecté côté serveur — true sur Vercel (serverless), false en local
+// Injecté par Flask — true sur Vercel (serverless), false en local
 const IS_SERVERLESS = {{ is_serverless | tojson }};
+const HISTORY_KEY   = 'cv-history';
 let entries = [];
 
 function fmtDate(iso) {
@@ -903,12 +999,14 @@ function fmtDate(iso) {
   return new Date(iso).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
 }
 
-function el(tag, attrs = {}, children = []) {
+function el(tag, attrs, children) {
+  attrs    = attrs    || {};
+  children = children || [];
   const node = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
-    if (k === 'class') node.className = v;
+    if (k === 'class')   node.className = v;
     else if (k === 'onclick') node.onclick = v;
-    else if (k === 'text') node.textContent = v;
+    else if (k === 'text')    node.textContent = v;
     else if (v !== null && v !== undefined) node.setAttribute(k, v);
   }
   for (const c of [].concat(children)) {
@@ -922,32 +1020,40 @@ function el(tag, attrs = {}, children = []) {
 function buildRow(e) {
   const id = e.id;
   // Préférer les URLs Blob permanentes si disponibles
-  const pdfHref = e.pdf_url  || `/api/history/${encodeURIComponent(id)}/pdf`;
-  const reloadHref = e.html_url
-    ? `/?load=${encodeURIComponent(id)}&htmlUrl=${encodeURIComponent(e.html_url)}`
-    : `/?load=${encodeURIComponent(id)}`;
+  const pdfHref    = e.pdf_url  || e.pdf_blob_url  || ('/api/history/' + encodeURIComponent(id) + '/pdf');
+  const reloadBase = '/?load=' + encodeURIComponent(id);
+  const htmlSrc    = e.html_url || e.html_blob_url  || '';
+  const reloadHref = htmlSrc
+    ? (reloadBase + '&htmlUrl=' + encodeURIComponent(htmlSrc))
+    : reloadBase;
+
+  const actions = [
+    el('a',      { class: 'btn',         href: pdfHref,    target: '_blank', text: 'Voir PDF' }),
+    el('a',      { class: 'btn',         href: reloadHref,                   text: 'Recharger' }),
+    !IS_SERVERLESS
+      ? el('button', { class: 'ghost', onclick: function() { openLocal(id); }, text: 'Ouvrir local' })
+      : null,
+    el('button', { class: 'ghost danger', onclick: function() { del(id); },  text: 'Supprimer' }),
+  ].filter(Boolean);
+
   return el('tr', { 'data-id': id }, [
     el('td', { text: fmtDate(e.created_at) }),
     el('td', {}, [el('span', { class: 'badge', text: e.doc_type || '' })]),
     el('td', { text: e.company || '-' }),
-    el('td', { text: e.role || '-' }),
+    el('td', { text: e.role    || '-' }),
     el('td', { class: 'filename', title: e.filename, text: e.filename || '' }),
-    el('td', { class: 'actions' }, [
-      el('a', { class: 'btn', href: pdfHref, target: '_blank', text: 'Voir PDF' }),
-      el('a', { class: 'btn', href: reloadHref, text: 'Recharger' }),
-      !IS_SERVERLESS && el('button', { class: 'ghost', onclick: () => openLocal(id), text: 'Ouvrir local' }),
-      el('button', { class: 'ghost danger', onclick: () => del(id), text: 'Supprimer' }),
-    ].filter(Boolean)),
+    el('td', { class: 'actions' }, actions),
   ]);
 }
 
-function render(filter='') {
-  const f = filter.toLowerCase();
+function render(filter) {
+  filter = filter || '';
+  const f        = filter.toLowerCase();
   const filtered = !f ? entries : entries.filter(e =>
-    (e.company || '').toLowerCase().includes(f) ||
-    (e.role || '').toLowerCase().includes(f) ||
+    (e.company  || '').toLowerCase().includes(f) ||
+    (e.role     || '').toLowerCase().includes(f) ||
     (e.doc_type || '').toLowerCase().includes(f) ||
-    (e.notes || '').toLowerCase().includes(f) ||
+    (e.notes    || '').toLowerCase().includes(f) ||
     (e.filename || '').toLowerCase().includes(f)
   );
   const root = $('root');
@@ -968,52 +1074,88 @@ function render(filter='') {
   root.appendChild(el('table', {}, [head, body]));
 }
 
+function showError(msg) {
+  const root = $('root');
+  root.replaceChildren();
+  root.appendChild(el('div', { class: 'error', text: msg }));
+}
+
 async function load() {
-  // Priorité : localStorage (Vercel Blob) → API serveur (local)
-  const local = localStorage.getItem('cv-history');
-  if (local) {
-    try {
-      entries = JSON.parse(local);
+  // 1. Priorité : localStorage (Vercel Blob — persistant)
+  try {
+    const raw    = localStorage.getItem(HISTORY_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    // Utiliser localStorage si : entrées présentes OU mode serverless
+    // (sur Vercel, l'API /api/history ne persiste pas entre les cold starts)
+    if (parsed !== null && (parsed.length > 0 || IS_SERVERLESS)) {
+      entries = parsed;
       render($('search').value);
       return;
-    } catch (_) {}
+    }
+  } catch (_) {}
+
+  // 2. Fallback : API serveur (local dev avec archive persistante)
+  try {
+    const r = await fetch('/api/history');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    entries = await r.json();
+    render($('search').value);
+  } catch (err) {
+    showError('Impossible de charger l\'historique : ' + err.message);
   }
-  const r = await fetch('/api/history');
-  if (r.ok) { entries = await r.json(); render($('search').value); }
 }
 
 async function del(id) {
   if (!confirm('Supprimer cette entree ?')) return;
-  // Retirer du localStorage
-  const local = localStorage.getItem('cv-history');
-  if (local) {
-    try {
-      const hist = JSON.parse(local).filter(e => e.id !== id);
-      localStorage.setItem('cv-history', JSON.stringify(hist));
-    } catch (_) {}
-  }
-  // Aussi côté serveur (local dev — ignore si absent)
-  fetch(`/api/history/${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => {});
-  load();
+
+  // Supprimer du localStorage
+  try {
+    const raw  = localStorage.getItem(HISTORY_KEY);
+    if (raw) {
+      const hist = JSON.parse(raw).filter(function(e) { return e.id !== id; });
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+    }
+  } catch (_) {}
+
+  // Supprimer côté serveur (best-effort — ignore les erreurs réseau / 404)
+  try {
+    await fetch('/api/history/' + encodeURIComponent(id), { method: 'DELETE' });
+  } catch (_) {}
+
+  // Recharger la liste depuis la source mise à jour
+  await load();
 }
 
 async function openLocal(id) {
-  await fetch(`/api/history/${encodeURIComponent(id)}/open`, { method: 'POST' });
+  try {
+    const r = await fetch('/api/history/' + encodeURIComponent(id) + '/open', { method: 'POST' });
+    if (!r.ok) {
+      const body = await r.json().catch(function() { return {}; });
+      alert('Impossible d\'ouvrir le fichier : ' + (body.error || r.status));
+    }
+  } catch (err) {
+    alert('Erreur reseau : ' + err.message);
+  }
 }
 
-$('search').addEventListener('input', e => render(e.target.value));
+$('search').addEventListener('input', function(e) { render(e.target.value); });
 load();
 </script>
 </body>
 </html>
 """
 
+# ---------------------------------------------------------------------------
+# Application Flask
+# ---------------------------------------------------------------------------
 app = Flask(__name__)
 
 
 @app.route("/")
 def index():
-    return render_template_string(PAGE)
+    # PAGE est un raw string sans expression Jinja2 — retourné directement
+    # pour éviter tout risque d'interprétation accidentelle.
+    return Response(PAGE, mimetype="text/html")
 
 
 @app.route("/history")
@@ -1023,47 +1165,78 @@ def history_page():
 
 @app.route("/convert", methods=["POST"])
 def convert():
+    # Limite de taille du corps de requête
+    if request.content_length and request.content_length > MAX_HTML_BYTES:
+        return jsonify({"error": f"Corps de requête trop grand (max {MAX_HTML_BYTES // 1024} Ko)."}), 413
+
     data = request.get_json(silent=True) or {}
     html = data.get("html", "")
     if not html.strip():
         return jsonify({"error": "HTML vide."}), 400
+    if len(html.encode()) > MAX_HTML_BYTES:
+        return jsonify({"error": "HTML trop grand."}), 413
 
-    fmt = data.get("format", "A4")
+    # Validation des options contre les valeurs autorisées
+    fmt    = data.get("format", "A4")
     margin = data.get("margin", "0")
-    background = bool(data.get("background", True))
-    doc_type = data.get("doc_type", "CV")
-    company = (data.get("company") or "").strip()
-    role = (data.get("role") or "").strip()
-    notes = (data.get("notes") or "").strip()
+    if fmt not in VALID_FORMATS:
+        return jsonify({"error": f"Format invalide : {fmt!r}"}), 400
+    if margin not in VALID_MARGINS:
+        return jsonify({"error": f"Marge invalide : {margin!r}"}), 400
+
+    background     = bool(data.get("background", True))
+    doc_type       = data.get("doc_type", "CV")
+    company        = (data.get("company") or "").strip()
+    role           = (data.get("role") or "").strip()
+    notes          = (data.get("notes") or "").strip()
     custom_filename = (data.get("filename") or "").strip()
 
     try:
         pdf_bytes = html_to_pdf_bytes(html, page_format=fmt, margin=margin, background=background)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"Erreur de rendu PDF : {e}"}), 500
 
-    entry = archive.save_document(
-        html=html,
-        pdf_bytes=pdf_bytes,
-        doc_type=doc_type,
-        company=company,
-        role=role,
-        notes=notes,
-        custom_filename=custom_filename,
-    )
+    # Archivage (best-effort : le PDF est retourné même si l'archive échoue)
+    entry: dict
+    try:
+        entry = archive.save_document(
+            html=html,
+            pdf_bytes=pdf_bytes,
+            doc_type=doc_type,
+            company=company,
+            role=role,
+            notes=notes,
+            custom_filename=custom_filename,
+        )
+    except Exception as e:
+        # Archivage impossible (disque plein, permissions…) — on retourne quand même le PDF
+        import uuid as _uuid
+        from datetime import datetime as _dt
+        entry = {
+            "id": str(_uuid.uuid4()),
+            "filename": custom_filename or f"document_{_dt.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+            "created_at": _dt.now().isoformat(timespec="seconds"),
+        }
 
-    # Vercel Blob — upload si le token est configuré (optionnel)
-    pdf_blob_url = ""
+    # Upload Vercel Blob (optionnel — dégradation gracieuse)
+    pdf_blob_url  = ""
     html_blob_url = ""
     if archive._BLOB_TOKEN:
         try:
-            pdf_blob_url = archive.upload_to_blob(pdf_bytes, entry["filename"], "application/pdf")
-            html_filename = entry["filename"].replace(".pdf", ".html")
+            pdf_blob_url  = archive.upload_to_blob(pdf_bytes, entry["filename"], "application/pdf")
+            html_filename = Path(entry["filename"]).stem + ".html"
             html_blob_url = archive.upload_to_blob(
-                html.encode("utf-8"), html_filename, "text/html; charset=utf-8"
+                html.encode("utf-8"), html_filename, "text/html"
             )
+            # Mettre à jour history.json avec les URLs Blob
+            try:
+                archive.update_document_blob_urls(entry["id"], pdf_blob_url, html_blob_url)
+            except Exception:
+                pass
         except Exception:
-            pass  # Dégradation gracieuse si le Blob est indisponible
+            pass  # Upload Blob non bloquant
 
     response = send_file(
         io.BytesIO(pdf_bytes),
@@ -1072,9 +1245,11 @@ def convert():
         download_name=entry["filename"],
     )
     response.headers["X-Archive-Entry"] = _json.dumps({
-        "id": entry["id"], "filename": entry["filename"], "created_at": entry["created_at"],
+        "id":         entry.get("id", ""),
+        "filename":   entry.get("filename", "document.pdf"),
+        "created_at": entry.get("created_at", ""),
     })
-    response.headers["X-Blob-PDF-URL"] = pdf_blob_url
+    response.headers["X-Blob-PDF-URL"]  = pdf_blob_url
     response.headers["X-Blob-HTML-URL"] = html_blob_url
     response.headers["Access-Control-Expose-Headers"] = (
         "X-Archive-Entry, X-Blob-PDF-URL, X-Blob-HTML-URL"
@@ -1114,11 +1289,19 @@ def api_history_pdf(doc_id):
     pdf_path = Path(entry["pdf_path"])
     if not pdf_path.exists():
         abort(404)
-    return send_file(pdf_path, mimetype="application/pdf", as_attachment=False, download_name=entry["filename"])
+    return send_file(
+        pdf_path,
+        mimetype="application/pdf",
+        as_attachment=False,
+        download_name=entry["filename"],
+    )
 
 
 @app.route("/api/history/<doc_id>/open", methods=["POST"])
 def api_history_open(doc_id):
+    # Uniquement disponible en mode local (pas serverless)
+    if archive._IS_SERVERLESS:
+        return jsonify({"error": "Non disponible en mode serverless."}), 400
     entry = archive.get_document(doc_id)
     if not entry:
         abort(404)
@@ -1139,19 +1322,33 @@ def api_history_delete(doc_id):
     abort(404)
 
 
-def lancer_serveur():
+# ---------------------------------------------------------------------------
+# Lanceur local (desktop)
+# ---------------------------------------------------------------------------
+
+def _wait_for_port(port: int, host: str = "127.0.0.1", timeout: float = 10.0) -> None:
+    """Attend que le serveur Flask accepte des connexions sur le port donné."""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        try:
+            with socket.create_connection((host, port), timeout=0.1):
+                return
+        except OSError:
+            time.sleep(0.05)
+
+
+def lancer_serveur() -> None:
     app.run(host="127.0.0.1", port=PORT, debug=False, use_reloader=False)
 
 
-def lancer_navigateur():
-    time.sleep(1.0)
+def lancer_navigateur() -> None:
+    _wait_for_port(PORT)
     webbrowser.open(URL)
 
 
-def fenetre_controle():
+def fenetre_controle() -> None:
     if not _HAS_TKINTER:
         print(f"Serveur disponible sur {URL}  (Ctrl-C pour quitter)")
-        # Bloc le thread principal jusqu'à Ctrl-C
         try:
             while True:
                 time.sleep(3600)
@@ -1163,18 +1360,20 @@ def fenetre_controle():
     root.title("Convertisseur HTML -> PDF")
     root.resizable(False, False)
     largeur, hauteur = 360, 160
-    x = (root.winfo_screenwidth() - largeur) // 2
+    x = (root.winfo_screenwidth()  - largeur) // 2
     y = (root.winfo_screenheight() - hauteur) // 2
     root.geometry(f"{largeur}x{hauteur}+{x}+{y}")
 
     tk.Label(root, text="Le serveur tourne sur :", pady=8).pack()
-    lien = tk.Label(root, text=URL, fg="#1a73e8", cursor="hand2", font=("Segoe UI", 10, "underline"))
+    lien = tk.Label(
+        root, text=URL, fg="#1a73e8", cursor="hand2",
+        font=("Segoe UI", 10, "underline"),
+    )
     lien.pack()
     lien.bind("<Button-1>", lambda _e: webbrowser.open(URL))
-
     tk.Label(root, text="Fermez cette fenetre pour arreter.", fg="#666", pady=8).pack()
 
-    def quitter():
+    def quitter() -> None:
         root.destroy()
         sys.exit(0)
 
@@ -1183,9 +1382,9 @@ def fenetre_controle():
     root.mainloop()
 
 
-def main():
+def main() -> None:
     archive.ensure_archive_dir()
-    threading.Thread(target=lancer_serveur, daemon=True).start()
+    threading.Thread(target=lancer_serveur,    daemon=True).start()
     threading.Thread(target=lancer_navigateur, daemon=True).start()
     fenetre_controle()
 
