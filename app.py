@@ -1368,10 +1368,10 @@ async function openLocal(id) {
     const r = await fetch('/api/history/' + encodeURIComponent(id) + '/open', { method: 'POST' });
     if (!r.ok) {
       const body = await r.json().catch(function() { return {}; });
-      alert('Impossible d\'ouvrir le fichier : ' + (body.error || r.status));
+      alert("Impossible d'ouvrir le fichier : " + (body.error || r.status));
     }
   } catch (err) {
-    alert('Erreur reseau : ' + err.message);
+    alert("Erreur réseau : " + err.message);
   }
 }
 
