@@ -857,6 +857,8 @@ require(['vs/editor/editor.main'], function () {
       $('company').value  = localEntry.company  || '';
       $('role').value     = localEntry.role     || '';
       $('notes').value    = localEntry.notes    || '';
+      $('ia-job-desc').value = localEntry.job_desc || '';
+      if(typeof updatePrompt === 'function') updatePrompt();
       refreshFilenamePreview();
 
       // Charger le HTML depuis le Blob ou l'URL passée en param
@@ -884,6 +886,8 @@ require(['vs/editor/editor.main'], function () {
           $('company').value  = entry.company  || '';
           $('role').value     = entry.role     || '';
           $('notes').value    = entry.notes    || '';
+          $('ia-job-desc').value = entry.job_desc || '';
+          if(typeof updatePrompt === 'function') updatePrompt();
           refreshFilenamePreview();
 
           const src = htmlUrl || entry.html_blob_url || '';
@@ -941,6 +945,7 @@ $('go').onclick = async () => {
         company:    $('company').value.trim(),
         role:       $('role').value.trim(),
         notes:      $('notes').value.trim(),
+        job_desc:   $('ia-job-desc').value.trim(),
         format:     $('format').value,
         margin:     $('margin').value,
         background: $('bg').checked,
@@ -981,6 +986,7 @@ $('go').onclick = async () => {
           company:    $('company').value.trim(),
           role:       $('role').value.trim(),
           notes:      $('notes').value.trim(),
+          job_desc:   $('ia-job-desc').value.trim(),
           pdf_url:    pdfBlobUrl,
           html_url:   htmlBlobUrl,
         });
@@ -1284,6 +1290,7 @@ function render(filter) {
     (e.role     || '').toLowerCase().includes(f) ||
     (e.doc_type || '').toLowerCase().includes(f) ||
     (e.notes    || '').toLowerCase().includes(f) ||
+    (e.job_desc || '').toLowerCase().includes(f) ||
     (e.filename || '').toLowerCase().includes(f)
   );
   const root = $('root');
@@ -1419,6 +1426,7 @@ def convert():
     company        = (data.get("company") or "").strip()
     role           = (data.get("role") or "").strip()
     notes          = (data.get("notes") or "").strip()
+    job_desc       = (data.get("job_desc") or "").strip()
     custom_filename = (data.get("filename") or "").strip()
 
     try:
@@ -1439,6 +1447,7 @@ def convert():
             role=role,
             notes=notes,
             custom_filename=custom_filename,
+            job_desc=job_desc,
         )
     except Exception as e:
         # Archivage impossible (disque plein, permissions…) — on retourne quand même le PDF
