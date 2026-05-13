@@ -1679,6 +1679,55 @@ def api_text_to_html():
     )
 
 
+@app.route("/api/pdf-to-html", methods=["POST"])
+def api_pdf_to_html():
+    if "file" not in request.files:
+        return jsonify({"error": "Aucun fichier reçu."}), 400
+
+    f = request.files["file"]
+    if not f.filename.lower().endswith(".pdf"):
+        return jsonify({"error": "Le fichier doit être un PDF (.pdf)."}), 400
+
+    pdf_bytes = f.read()
+    if len(pdf_bytes) > MAX_PDF_BYTES:
+        return jsonify({"error": "PDF trop volumineux (max 20 Mo)."}), 413
+
+    user_key = (request.headers.get("X-Api-Key") or "").strip() or None
+
+    if not user_key:
+        if not quota.check_and_increment():
+            return jsonify({"error": (
+                "Quota journalier atteint — colle ton texte manuellement "
+                "ou ajoute ta propre clé dans ⚙️ Paramètres."
+            )}), 429
+
+    def generate():
+        try:
+            import fitz
+            doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+            for page_num in range(len(doc)):
+                page = doc[page_num]
+                pix = page.get_pixmap(dpi=150)
+                img_bytes = pix.tobytes("png")
+                for chunk in ai_engine.stream_completion(
+                    f"Page {page_num + 1} du CV :",
+                    _SYSTEM_PDF_PAGE,
+                    images=[img_bytes],
+                    api_key=user_key,
+                ):
+                    yield f"data: {_json_ai.dumps(chunk)}\n\n"
+            doc.close()
+            yield "data: [DONE]\n\n"
+        except Exception as exc:
+            yield f"data: [ERROR] {exc}\n\n"
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
 # ---------------------------------------------------------------------------
 # Lanceur local (desktop)
 # ---------------------------------------------------------------------------
