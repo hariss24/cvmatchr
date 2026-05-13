@@ -29,10 +29,14 @@ try:
 except ImportError:
     _HAS_TKINTER = False
 
-from flask import Flask, Response, abort, jsonify, redirect, render_template_string, request, send_file
+from flask import Flask, Response, abort, jsonify, redirect, render_template_string, request, send_file, stream_with_context
 
 import archive
 from pdf_engine import html_to_pdf_bytes, VALID_FORMATS, VALID_MARGINS
+
+import ai_engine
+import quota
+import json as _json_ai
 
 PORT = 5050
 URL = f"http://127.0.0.1:{PORT}"
@@ -1607,6 +1611,72 @@ def api_history_delete(doc_id):
     if archive.delete_document(doc_id):
         return jsonify({"ok": True})
     abort(404)
+
+
+# ---------------------------------------------------------------------------
+# Constantes IA
+# ---------------------------------------------------------------------------
+_SYSTEM_TEXT_TO_HTML = (
+    "Tu reçois le contenu texte brut d'un CV. "
+    "Retourne uniquement le HTML structuré correspondant : utilise des balises sémantiques "
+    "(h1, h2, h3, p, ul, li, strong). Ne génère pas de CSS. Ne génère pas de design. "
+    "Uniquement la structure HTML du contenu, fidèle au texte fourni."
+)
+
+_SYSTEM_PDF_PAGE = (
+    "Voici une page d'un CV en image. "
+    "Retourne uniquement le HTML structuré du contenu visible : titres, paragraphes, listes, "
+    "dates, intitulés. Pas de CSS, pas de style inline, uniquement les balises HTML sémantiques. "
+    "Texte en français si c'est en français, anglais si c'est en anglais."
+)
+
+_SYSTEM_TAILOR = (
+    "Tu reçois un CV en HTML et une offre d'emploi. "
+    "Adapte le CV pour ce poste : réécris le résumé/accroche, réordonne et ajuste les "
+    "compétences pour mettre en avant celles qui correspondent à l'offre, adapte légèrement "
+    "les descriptions d'expériences pour coller aux mots-clés du poste. "
+    "Ne supprime aucune expérience. Ne mens pas. Ne change pas les dates, les entreprises, "
+    "les diplômes. Retourne uniquement le HTML complet modifié, rien d'autre."
+)
+
+MAX_PDF_BYTES = 20 * 1024 * 1024  # 20 Mo
+
+
+# ---------------------------------------------------------------------------
+# Endpoints IA
+# ---------------------------------------------------------------------------
+
+@app.route("/api/text-to-html", methods=["POST"])
+def api_text_to_html():
+    data = request.get_json(force=True) or {}
+    text = (data.get("text") or "").strip()
+    if not text:
+        return jsonify({"error": "Texte vide."}), 400
+
+    user_key = request.headers.get("X-Api-Key") or None
+
+    if not user_key:
+        if not quota.check_and_increment():
+            return jsonify({"error": (
+                "Quota journalier atteint — colle ton texte manuellement "
+                "ou ajoute ta propre clé dans ⚙️ Paramètres."
+            )}), 429
+
+    def generate():
+        try:
+            for chunk in ai_engine.stream_completion(
+                text, _SYSTEM_TEXT_TO_HTML, api_key=user_key
+            ):
+                yield f"data: {_json_ai.dumps(chunk)}\n\n"
+            yield "data: [DONE]\n\n"
+        except Exception as exc:
+            yield f"data: [ERROR] {exc}\n\n"
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 # ---------------------------------------------------------------------------
