@@ -146,6 +146,46 @@ PAGE = r"""<!DOCTYPE html>
     .ia-options { flex-direction: column; align-items: flex-start; gap: 12px; }
     .ia-options select { width: 100%; }
   }
+  /* ---- Panneau Import ---- */
+  #import-panel { border: 1px solid #2a2f3a; border-radius: 8px; background: #14181f; padding: 14px 16px; }
+  #import-collapse-bar { display: none; background: #1b1f27; border: 1px solid #2a2f3a; border-radius: 6px; padding: 7px 14px; cursor: pointer; font-size: 12px; color: #9aa0a6; text-align: left; width: 100%; }
+  #import-collapse-bar:hover { background: #2a2f3a; color: #e6e6e6; }
+  .import-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+  .import-tab { background: transparent; border: 1px solid #2a2f3a; border-radius: 6px; padding: 6px 14px; font-size: 12px; color: #9aa0a6; cursor: pointer; }
+  .import-tab.active { background: #2a2f3a; color: #e6e6e6; border-color: #4f8cff; }
+  .import-content { display: none; }
+  .import-content.active { display: block; }
+  #cv-text-input { width: 100%; min-height: 110px; resize: vertical; font-family: monospace; font-size: 12px; margin-bottom: 4px; }
+  .import-btn { background: #4f8cff; color: white; border: 0; border-radius: 6px; padding: 7px 18px; font-size: 13px; cursor: pointer; margin-top: 8px; }
+  .import-btn:hover { background: #3a7ae0; }
+  .import-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .import-status { font-size: 12px; color: #9aa0a6; margin-top: 6px; min-height: 18px; }
+  /* ---- Panneau Tailoring ---- */
+  #tailor-panel { border: 1px solid #2a2f3a; border-radius: 8px; background: #14181f; overflow: hidden; }
+  .tailor-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; cursor: pointer; font-size: 12px; color: #9aa0a6; }
+  .tailor-header:hover { background: #1b1f27; }
+  .tailor-body { padding: 12px 14px; display: none; }
+  .tailor-body.open { display: block; }
+  #job-desc-input { width: 100%; min-height: 80px; resize: vertical; font-size: 13px; margin-bottom: 4px; }
+  .tailor-btn { background: #f5a623; color: #0f1115; border: 0; border-radius: 6px; padding: 7px 18px; font-size: 13px; cursor: pointer; font-weight: 600; margin-top: 6px; }
+  .tailor-btn:hover { background: #e09510; }
+  .tailor-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .tailor-status { font-size: 12px; color: #9aa0a6; margin-top: 6px; min-height: 18px; }
+  /* ---- Modal Paramètres ---- */
+  #modal-settings { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
+  #modal-settings.open { display: flex; }
+  .settings-content { background: #1b1f27; border: 1px solid #2a2f3a; border-radius: 12px; padding: 24px; width: 420px; max-width: 95vw; position: relative; }
+  .settings-content h2 { margin: 0 0 8px; font-size: 16px; }
+  .settings-desc { font-size: 13px; color: #9aa0a6; margin: 0 0 14px; line-height: 1.5; }
+  .settings-content input[type=password] { width: 100%; font-family: monospace; font-size: 13px; }
+  .settings-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .settings-actions button { flex: 1; padding: 8px; border-radius: 6px; border: 0; cursor: pointer; font-size: 13px; }
+  #btn-settings-save { background: #4f8cff; color: white; }
+  #btn-settings-clear { background: #2a2f3a; color: #e6e6e6; }
+  .key-active { font-size: 11px; color: #4caf50; margin-top: 6px; display: none; }
+  /* ---- Bouton paramètres topbar ---- */
+  #btn-settings { background: transparent; border: 0; color: #9aa0a6; font-size: 15px; cursor: pointer; padding: 4px 6px; border-radius: 4px; line-height: 1; }
+  #btn-settings:hover { color: #e6e6e6; background: #2a2f3a; }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.css" />
 </head>
@@ -156,8 +196,30 @@ PAGE = r"""<!DOCTYPE html>
     <div style="display: flex; align-items: center; gap: 12px;">
       <button id="btn-ia" class="ghost" style="color: #f5a623; border: 1px solid #f5a623; padding: 6px 12px;">✨ Assistant IA</button>
       <a href="/history">Historique &rsaquo;</a>
+      <button id="btn-settings" type="button" title="Paramètres API">⚙️</button>
     </div>
   </div>
+
+  <!-- Panneau d'import CV (visible au départ, se replie après conversion) -->
+  <div id="import-panel">
+    <div class="import-tabs">
+      <button class="import-tab active" data-tab="text">📋 Coller le texte</button>
+      <button class="import-tab" data-tab="pdf">📄 Importer un PDF</button>
+    </div>
+    <div id="import-tab-text" class="import-content active">
+      <textarea id="cv-text-input" placeholder="Colle ici le contenu texte de ton CV (copié depuis Word, PDF, n'importe quoi)..."></textarea>
+      <div><button id="btn-text-to-html" class="import-btn" type="button">Convertir en HTML</button></div>
+      <div class="import-status" id="import-text-status"></div>
+    </div>
+    <div id="import-tab-pdf" class="import-content">
+      <input type="file" id="pdf-upload-input" accept=".pdf" style="display:none">
+      <button id="btn-pdf-pick" class="import-btn" type="button">📁 Choisir un fichier PDF</button>
+      <span id="pdf-filename" style="font-size:12px; color:#9aa0a6; margin-left:10px;"></span>
+      <div><button id="btn-pdf-to-html" class="import-btn" type="button" disabled>Convertir le PDF</button></div>
+      <div class="import-status" id="import-pdf-status"></div>
+    </div>
+  </div>
+  <button id="import-collapse-bar" type="button">▶ Importer un autre CV</button>
 
   <div class="meta">
     <div class="field">
