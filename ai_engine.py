@@ -7,6 +7,10 @@ Usage :
 import os
 from typing import Generator
 
+# Modèle Gemini utilisé. gemini-1.5-flash est disponible sur le free tier.
+# Remplacer par gemini-2.0-flash si le projet a la facturation activée.
+GEMINI_MODEL: str = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
+
 
 def stream_completion(
     prompt: str,
@@ -72,7 +76,7 @@ def _stream_gemini(
     config = types.GenerateContentConfig(system_instruction=system)
 
     for chunk in client.models.generate_content_stream(
-        model="gemini-2.0-flash",
+        model=GEMINI_MODEL,
         contents=contents,
         config=config,
     ):

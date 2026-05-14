@@ -45,7 +45,8 @@ def test_stream_gemini_text():
     mock_genai.Client.assert_called_once_with(api_key="fake-key")
     mock_client.models.generate_content_stream.assert_called_once()
     call_kwargs = mock_client.models.generate_content_stream.call_args[1]
-    assert call_kwargs["model"] == "gemini-2.0-flash"
+    import ai_engine
+    assert call_kwargs["model"] == ai_engine.GEMINI_MODEL
 
 
 def test_stream_gemini_skips_empty_chunks():
