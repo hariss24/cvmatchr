@@ -32,7 +32,8 @@ def stream_completion(
     if not key:
         raise ValueError(
             "Aucune clé API configurée. "
-            "Ajoutez GEMINI_API_KEY ou une clé dans ⚙️ Paramètres."
+            "Ajoutez GEMINI_API_KEY dans les variables d'environnement Render.com "
+            "ou une clé personnelle dans ⚙️ Paramètres."
         )
 
     if _is_anthropic_key(key):
@@ -56,18 +57,25 @@ def _stream_gemini(
     images: list[bytes],
     api_key: str,
 ) -> Generator[str, None, None]:
-    import google.generativeai as genai
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel(
-        model_name="gemini-2.0-flash",
-        system_instruction=system,
-    )
+    from google import genai
+    from google.genai import types
+
+    client = genai.Client(api_key=api_key)
+
     contents: list = []
     for img_bytes in images:
-        contents.append({"mime_type": "image/png", "data": img_bytes})
+        contents.append(
+            types.Part.from_bytes(data=img_bytes, mime_type="image/png")
+        )
     contents.append(prompt)
-    response = model.generate_content(contents, stream=True)
-    for chunk in response:
+
+    config = types.GenerateContentConfig(system_instruction=system)
+
+    for chunk in client.models.generate_content_stream(
+        model="gemini-2.0-flash",
+        contents=contents,
+        config=config,
+    ):
         if chunk.text:
             yield chunk.text
 

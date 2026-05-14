@@ -3,6 +3,16 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 
+def _make_genai_mocks(chunks):
+    """Crée les mocks pour google.genai (nouveau SDK)."""
+    mock_client = MagicMock()
+    mock_client.models.generate_content_stream.return_value = chunks
+    mock_genai = MagicMock()
+    mock_genai.Client.return_value = mock_client
+    mock_types = MagicMock()
+    return mock_genai, mock_types, mock_client
+
+
 def test_raises_without_api_key(monkeypatch):
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     import ai_engine
@@ -24,22 +34,18 @@ def test_is_anthropic_key_false():
 def test_stream_gemini_text():
     mock_chunk = MagicMock()
     mock_chunk.text = "<h1>Test</h1>"
-    mock_model = MagicMock()
-    mock_model.generate_content.return_value = [mock_chunk]
-    mock_genai = MagicMock()
-    mock_genai.GenerativeModel.return_value = mock_model
+    mock_genai, mock_types, mock_client = _make_genai_mocks([mock_chunk])
 
-    with patch.dict("sys.modules", {"google.generativeai": mock_genai}):
+    with patch.dict("sys.modules", {"google.genai": mock_genai, "google.genai.types": mock_types}):
         import ai_engine
         importlib.reload(ai_engine)
         result = list(ai_engine._stream_gemini("prompt", "system", [], "fake-key"))
 
     assert result == ["<h1>Test</h1>"]
-    mock_genai.configure.assert_called_once_with(api_key="fake-key")
-    mock_genai.GenerativeModel.assert_called_once_with(
-        model_name="gemini-2.0-flash",
-        system_instruction="system",
-    )
+    mock_genai.Client.assert_called_once_with(api_key="fake-key")
+    mock_client.models.generate_content_stream.assert_called_once()
+    call_kwargs = mock_client.models.generate_content_stream.call_args[1]
+    assert call_kwargs["model"] == "gemini-2.0-flash"
 
 
 def test_stream_gemini_skips_empty_chunks():
@@ -47,12 +53,9 @@ def test_stream_gemini_skips_empty_chunks():
     chunk1.text = ""
     chunk2 = MagicMock()
     chunk2.text = "<p>Contenu</p>"
-    mock_model = MagicMock()
-    mock_model.generate_content.return_value = [chunk1, chunk2]
-    mock_genai = MagicMock()
-    mock_genai.GenerativeModel.return_value = mock_model
+    mock_genai, mock_types, mock_client = _make_genai_mocks([chunk1, chunk2])
 
-    with patch.dict("sys.modules", {"google.generativeai": mock_genai}):
+    with patch.dict("sys.modules", {"google.genai": mock_genai, "google.genai.types": mock_types}):
         import ai_engine
         importlib.reload(ai_engine)
         result = list(ai_engine._stream_gemini("p", "s", [], "k"))
@@ -63,21 +66,21 @@ def test_stream_gemini_skips_empty_chunks():
 def test_stream_gemini_with_images():
     mock_chunk = MagicMock()
     mock_chunk.text = "<p>Page 1</p>"
-    mock_model = MagicMock()
-    mock_model.generate_content.return_value = [mock_chunk]
-    mock_genai = MagicMock()
-    mock_genai.GenerativeModel.return_value = mock_model
     fake_png = b"\x89PNG\r\n\x1a\n"
+    mock_genai, mock_types, mock_client = _make_genai_mocks([mock_chunk])
 
-    with patch.dict("sys.modules", {"google.generativeai": mock_genai}):
+    with patch.dict("sys.modules", {"google.genai": mock_genai, "google.genai.types": mock_types}):
         import ai_engine
         importlib.reload(ai_engine)
         result = list(ai_engine._stream_gemini("Page 1 du CV :", "system", [fake_png], "key"))
 
     assert result == ["<p>Page 1</p>"]
-    call_contents = mock_model.generate_content.call_args[0][0]
-    assert {"mime_type": "image/png", "data": fake_png} in call_contents
-    assert "Page 1 du CV :" in call_contents
+    # Vérifie que Part.from_bytes a été appelé avec l'image
+    # (types est résolu via mock_genai.types, pas mock_types directement)
+    mock_genai.types.Part.from_bytes.assert_called_once_with(data=fake_png, mime_type="image/png")
+    # Vérifie que la requête contient le prompt textuel
+    call_kwargs = mock_client.models.generate_content_stream.call_args[1]
+    assert "Page 1 du CV :" in call_kwargs["contents"]
 
 
 def test_anthropic_rejects_images():

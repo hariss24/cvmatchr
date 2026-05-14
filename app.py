@@ -1435,7 +1435,7 @@ document.getElementById('import-collapse-bar').addEventListener('click', () => {
 // ============================================================
 document.getElementById('btn-text-to-html').addEventListener('click', async () => {
   const text = document.getElementById('cv-text-input').value.trim();
-  if (!text) { showToast("Colle d'abord le contenu de ton CV.", 'error'); return; }
+  if (!text) { showToast("Colle d'abord le contenu de ton CV.", 'err'); return; }
 
   const btn = document.getElementById('btn-text-to-html');
   const status = document.getElementById('import-text-status');
@@ -1454,8 +1454,8 @@ document.getElementById('btn-text-to-html').addEventListener('click', async () =
     showToast('CV converti en HTML avec succès.', 'ok');
     status.textContent = '';
   } catch (err) {
-    showToast(err.message, 'error');
-    status.textContent = '';
+    showToast(err.message, 'err');
+    status.textContent = '❌ ' + err.message;
   } finally {
     btn.disabled = false;
   }
@@ -1503,8 +1503,8 @@ document.getElementById('btn-pdf-to-html').addEventListener('click', async () =>
     showToast('PDF converti en HTML avec succès.', 'ok');
     status.textContent = '';
   } catch (err) {
-    showToast(err.message, 'error');
-    status.textContent = '';
+    showToast(err.message, 'err');
+    status.textContent = '❌ ' + err.message;
   } finally {
     btn.disabled = false;
   }
@@ -1523,9 +1523,9 @@ document.getElementById('tailor-toggle').addEventListener('click', () => {
 
 document.getElementById('btn-tailor').addEventListener('click', async () => {
   const jobDesc = document.getElementById('job-desc-input').value.trim();
-  if (!jobDesc) { showToast("Colle d'abord une offre d'emploi.", 'error'); return; }
+  if (!jobDesc) { showToast("Colle d'abord une offre d'emploi.", 'err'); return; }
   if (!htmlModel || !htmlModel.getValue().trim()) {
-    showToast("Charge d'abord un CV dans l'éditeur.", 'error'); return;
+    showToast("Charge d'abord un CV dans l'éditeur.", 'err'); return;
   }
 
   const btn = document.getElementById('btn-tailor');
@@ -1547,8 +1547,8 @@ document.getElementById('btn-tailor').addEventListener('click', async () => {
     showToast('CV adapté avec succès.', 'ok');
     status.textContent = '';
   } catch (err) {
-    showToast(err.message, 'error');
-    status.textContent = '';
+    showToast(err.message, 'err');
+    status.textContent = '❌ ' + err.message;
   } finally {
     btn.disabled = false;
   }
@@ -1980,6 +1980,19 @@ MAX_PDF_BYTES = 20 * 1024 * 1024  # 20 Mo
 # ---------------------------------------------------------------------------
 # Endpoints IA
 # ---------------------------------------------------------------------------
+
+@app.route("/api/status", methods=["GET"])
+def api_status():
+    """Vérifie si la clé API serveur est configurée (sans la révéler)."""
+    key = os.environ.get("GEMINI_API_KEY", "")
+    quota_remaining = quota.remaining()
+    return jsonify({
+        "server_key_configured": bool(key),
+        "server_key_preview": (key[:4] + "…") if key else None,
+        "quota_remaining": quota_remaining,
+        "quota_limit": quota.DAILY_LIMIT,
+    })
+
 
 @app.route("/api/text-to-html", methods=["POST"])
 def api_text_to_html():
