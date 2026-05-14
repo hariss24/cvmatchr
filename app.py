@@ -2132,8 +2132,9 @@ def api_pdf_to_html():
             )}), 429
 
     def generate():
+        import fitz
+        doc = None
         try:
-            import fitz
             doc = fitz.open(stream=pdf_bytes, filetype="pdf")
             for page_num in range(len(doc)):
                 page = doc[page_num]
@@ -2146,10 +2147,12 @@ def api_pdf_to_html():
                     api_key=user_key,
                 ):
                     yield f"data: {_json_ai.dumps(chunk, ensure_ascii=False)}\n\n"
-            doc.close()
             yield "data: [DONE]\n\n"
         except Exception as exc:
             yield f"data: [ERROR] {exc}\n\n"
+        finally:
+            if doc is not None:
+                doc.close()
 
     return Response(
         stream_with_context(generate()),
