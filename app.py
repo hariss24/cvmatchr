@@ -146,31 +146,43 @@ PAGE = r"""<!DOCTYPE html>
     .ia-options { flex-direction: column; align-items: flex-start; gap: 12px; }
     .ia-options select { width: 100%; }
   }
-  /* ---- Panneau Import ---- */
-  #import-panel { border: 1px solid #2a2f3a; border-radius: 8px; background: #14181f; padding: 14px 16px; }
-  #import-collapse-bar { display: none; background: #1b1f27; border: 1px solid #2a2f3a; border-radius: 6px; padding: 7px 14px; cursor: pointer; font-size: 12px; color: #9aa0a6; text-align: left; width: 100%; }
-  #import-collapse-bar:hover { background: #2a2f3a; color: #e6e6e6; }
-  .import-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
-  .import-tab { background: transparent; border: 1px solid #2a2f3a; border-radius: 6px; padding: 6px 14px; font-size: 12px; color: #9aa0a6; cursor: pointer; }
+  /* ---- Panneau Import (intégré dans l'onglet éditeur) ---- */
+  #import-pane { display: none; flex-direction: column; gap: 12px; padding: 14px 16px; overflow-y: auto; flex: 1; min-height: 0; }
+  #import-pane.active { display: flex; }
+  .import-tabs { display: flex; gap: 4px; }
+  .import-tab { background: transparent; border: 1px solid #2a2f3a; border-radius: 6px; padding: 5px 12px; font-size: 12px; color: #9aa0a6; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: background 150ms, color 150ms, border-color 150ms; }
   .import-tab.active { background: #2a2f3a; color: #e6e6e6; border-color: #4f8cff; }
-  .import-content { display: none; }
-  .import-content.active { display: block; }
-  #cv-text-input { width: 100%; min-height: 110px; resize: vertical; font-family: monospace; font-size: 12px; margin-bottom: 4px; }
-  .import-btn { background: #4f8cff; color: white; border: 0; border-radius: 6px; padding: 7px 18px; font-size: 13px; cursor: pointer; margin-top: 8px; }
+  .import-tab:hover:not(.active) { background: #1b1f27; color: #c8c8c8; }
+  .import-content { display: none; flex-direction: column; gap: 8px; }
+  .import-content.active { display: flex; }
+  #cv-text-input { width: 100%; min-height: 180px; resize: vertical; font-family: monospace; font-size: 12px; }
+  .import-btn { background: #4f8cff; color: white; border: 0; border-radius: 6px; padding: 7px 16px; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 150ms; align-self: flex-start; }
   .import-btn:hover { background: #3a7ae0; }
   .import-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .import-status { font-size: 12px; color: #9aa0a6; margin-top: 6px; min-height: 18px; }
+  .import-status { font-size: 12px; color: #9aa0a6; min-height: 18px; }
   /* ---- Panneau Tailoring ---- */
   #tailor-panel { border: 1px solid #2a2f3a; border-radius: 8px; background: #14181f; overflow: hidden; }
-  .tailor-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; cursor: pointer; font-size: 12px; color: #9aa0a6; }
-  .tailor-header:hover { background: #1b1f27; }
-  .tailor-body { padding: 12px 14px; display: none; }
-  .tailor-body.open { display: block; }
-  #job-desc-input { width: 100%; min-height: 80px; resize: vertical; font-size: 13px; margin-bottom: 4px; }
-  .tailor-btn { background: #f5a623; color: #0f1115; border: 0; border-radius: 6px; padding: 7px 18px; font-size: 13px; cursor: pointer; font-weight: 600; margin-top: 6px; }
-  .tailor-btn:hover { background: #e09510; }
+  .tailor-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; cursor: pointer; font-size: 12px; color: #9aa0a6; user-select: none; transition: background 150ms, color 150ms; }
+  .tailor-header:hover { background: #1b1f27; color: #c8c8c8; }
+  .tailor-chevron { display: flex; align-items: center; transition: transform 0.25s ease; }
+  .tailor-chevron.open { transform: rotate(180deg); }
+  .tailor-body { overflow: hidden; max-height: 0; transition: max-height 0.3s ease; }
+  .tailor-body.open { max-height: 320px; }
+  .tailor-body-inner { padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+  #job-desc-input { width: 100%; min-height: 80px; resize: vertical; font-size: 13px; }
+  .tailor-btn { background: #4f8cff; color: white; border: 0; border-radius: 6px; padding: 7px 18px; font-size: 13px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; transition: background 150ms; }
+  .tailor-btn:hover { background: #3a7ae0; }
   .tailor-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .tailor-status { font-size: 12px; color: #9aa0a6; margin-top: 6px; min-height: 18px; }
+  .tailor-status { font-size: 12px; color: #9aa0a6; min-height: 18px; }
+  /* ---- Icônes SVG dans les boutons et onglets ---- */
+  .tab { display: inline-flex; align-items: center; gap: 5px; }
+  .tab svg, .import-tab svg, button svg { flex-shrink: 0; vertical-align: middle; }
+  /* ---- Indicateur de chargement (CSS pur) ---- */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .status-busy { color: #9aa0a6; }
+  .status-busy::before { content: ''; display: inline-block; width: 8px; height: 8px; border: 1.5px solid #3a4050; border-top-color: #4f8cff; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 6px; vertical-align: middle; }
+  .status-err { color: #ff6b6b; }
+  .status-ok { color: #5dd39e; }
   /* ---- Modal Paramètres ---- */
   #modal-settings { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
   #modal-settings.open { display: flex; }
@@ -184,8 +196,10 @@ PAGE = r"""<!DOCTYPE html>
   #btn-settings-clear { background: #2a2f3a; color: #e6e6e6; }
   .key-active { font-size: 11px; color: #4caf50; margin-top: 6px; display: none; }
   /* ---- Bouton paramètres topbar ---- */
-  #btn-settings { background: transparent; border: 0; color: #9aa0a6; font-size: 15px; cursor: pointer; padding: 4px 6px; border-radius: 4px; line-height: 1; }
+  #btn-settings { background: transparent; border: 0; color: #9aa0a6; cursor: pointer; padding: 5px 7px; border-radius: 4px; display: inline-flex; align-items: center; transition: color 150ms, background 150ms; }
   #btn-settings:hover { color: #e6e6e6; background: #2a2f3a; }
+  button.ghost { transition: background 150ms; }
+  button.go { transition: background 150ms; }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.css" />
 </head>
@@ -194,32 +208,16 @@ PAGE = r"""<!DOCTYPE html>
   <div class="topbar">
     <h1>HTML/CSS -> PDF</h1>
     <div style="display: flex; align-items: center; gap: 12px;">
-      <button id="btn-ia" class="ghost" style="color: #f5a623; border: 1px solid #f5a623; padding: 6px 12px;">✨ Assistant IA</button>
+      <button id="btn-ia" class="ghost" style="color: #f5a623; border: 1px solid #f5a623; padding: 6px 12px; display:inline-flex; align-items:center; gap:6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+        Assistant IA
+      </button>
       <a href="/history">Historique &rsaquo;</a>
-      <button id="btn-settings" type="button" title="Paramètres API">⚙️</button>
+      <button id="btn-settings" type="button" title="Paramètres API">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
     </div>
   </div>
-
-  <!-- Panneau d'import CV (visible au départ, se replie après conversion) -->
-  <div id="import-panel">
-    <div class="import-tabs">
-      <button class="import-tab active" data-tab="text">📋 Coller le texte</button>
-      <button class="import-tab" data-tab="pdf">📄 Importer un PDF</button>
-    </div>
-    <div id="import-tab-text" class="import-content active">
-      <textarea id="cv-text-input" placeholder="Colle ici le contenu texte de ton CV (copié depuis Word, PDF, n'importe quoi)..."></textarea>
-      <div><button id="btn-text-to-html" class="import-btn" type="button">Convertir en HTML</button></div>
-      <div class="import-status" id="import-text-status"></div>
-    </div>
-    <div id="import-tab-pdf" class="import-content">
-      <input type="file" id="pdf-upload-input" accept=".pdf" style="display:none">
-      <button id="btn-pdf-pick" class="import-btn" type="button">📁 Choisir un fichier PDF</button>
-      <span id="pdf-filename" style="font-size:12px; color:#9aa0a6; margin-left:10px;"></span>
-      <div><button id="btn-pdf-to-html" class="import-btn" type="button" disabled>Convertir le PDF</button></div>
-      <div class="import-status" id="import-pdf-status"></div>
-    </div>
-  </div>
-  <button id="import-collapse-bar" type="button">▶ Importer un autre CV</button>
 
   <div class="meta">
     <div class="field">
@@ -246,6 +244,10 @@ PAGE = r"""<!DOCTYPE html>
         <div class="tabs">
           <button class="tab active" type="button" data-tab="html">HTML</button>
           <button class="tab" type="button" data-tab="css">CSS</button>
+          <button class="tab" type="button" data-tab="import">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Importer CV
+          </button>
           <span id="autosave">&#10003; Brouillon sauvegardé</span>
         </div>
         <div class="actions-mini">
@@ -261,6 +263,42 @@ PAGE = r"""<!DOCTYPE html>
         </div>
       </div>
       <div id="editor"></div>
+      <!-- Panneau import — affiché quand l'onglet "Importer CV" est actif -->
+      <div id="import-pane">
+        <div class="import-tabs">
+          <button class="import-tab active" data-tab="text">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Coller le texte
+          </button>
+          <button class="import-tab" data-tab="pdf">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Importer un PDF
+          </button>
+        </div>
+        <div id="import-tab-text" class="import-content active">
+          <textarea id="cv-text-input" placeholder="Colle ici le contenu texte de ton CV (copié depuis Word, PDF, n'importe quoi)..."></textarea>
+          <button id="btn-text-to-html" class="import-btn" type="button">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Convertir en HTML
+          </button>
+          <div class="import-status" id="import-text-status"></div>
+        </div>
+        <div id="import-tab-pdf" class="import-content">
+          <input type="file" id="pdf-upload-input" accept=".pdf" style="display:none">
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <button id="btn-pdf-pick" class="import-btn" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              Choisir un PDF
+            </button>
+            <span id="pdf-filename" style="font-size:12px; color:#9aa0a6;"></span>
+          </div>
+          <button id="btn-pdf-to-html" class="import-btn" type="button" disabled>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Convertir le PDF
+          </button>
+          <div class="import-status" id="import-pdf-status"></div>
+        </div>
+      </div>
     </div>
     <div class="splitter" id="splitter"></div>
     <div class="pane preview-pane">
@@ -268,7 +306,10 @@ PAGE = r"""<!DOCTYPE html>
         <span>Prévisualisation</span>
         <div class="actions-mini">
           <input type="file" id="photo-upload" accept="image/*" style="display: none;">
-          <button type="button" id="btn-photo" title="Insérer une image dans le HTML">📸 Insérer ma photo</button>
+          <button type="button" id="btn-photo" title="Insérer une image dans le HTML" style="display:inline-flex;align-items:center;gap:5px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Photo
+          </button>
           <button type="button" id="refresh-preview">Rafraichir</button>
         </div>
       </div>
@@ -279,13 +320,23 @@ PAGE = r"""<!DOCTYPE html>
   <!-- Panneau tailoring (toujours accessible) -->
   <div id="tailor-panel">
     <div class="tailor-header" id="tailor-toggle">
-      <span>🎯 Adapter à une offre d'emploi</span>
-      <span id="tailor-chevron">▼</span>
+      <span style="display:inline-flex;align-items:center;gap:7px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        Adapter à une offre d'emploi
+      </span>
+      <span id="tailor-chevron" class="tailor-chevron">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </span>
     </div>
     <div class="tailor-body" id="tailor-body">
-      <textarea id="job-desc-input" placeholder="Colle l'offre d'emploi ici..."></textarea>
-      <div><button id="btn-tailor" class="tailor-btn" type="button">Adapter le CV</button></div>
-      <div class="tailor-status" id="tailor-status"></div>
+      <div class="tailor-body-inner">
+        <textarea id="job-desc-input" placeholder="Colle l'offre d'emploi ici..."></textarea>
+        <button id="btn-tailor" class="tailor-btn" type="button">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Adapter le CV
+        </button>
+        <div class="tailor-status" id="tailor-status"></div>
+      </div>
     </div>
   </div>
 
@@ -334,10 +385,13 @@ PAGE = r"""<!DOCTYPE html>
 <div id="modal-settings">
   <div class="settings-content">
     <span id="close-settings" style="position:absolute;top:14px;right:16px;cursor:pointer;font-size:18px;color:#9aa0a6;">&times;</span>
-    <h2>⚙️ Paramètres</h2>
+    <h2 style="display:flex;align-items:center;gap:8px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Paramètres
+    </h2>
     <p class="settings-desc">Clé Gemini ou Anthropic personnelle. Jamais stockée sur le serveur — conservée dans ton navigateur uniquement. Pas de limite de quota avec ta propre clé.</p>
     <input type="password" id="settings-api-key" placeholder="AIza… (Gemini) ou sk-ant-… (Anthropic)" autocomplete="off" />
-    <div class="key-active" id="key-active-indicator">✓ Clé personnelle active — quota non appliqué</div>
+    <div class="key-active" id="key-active-indicator">Clé personnelle active — quota non appliqué</div>
     <div class="settings-actions">
       <button id="btn-settings-save" type="button">Enregistrer</button>
       <button id="btn-settings-clear" type="button">Effacer</button>
@@ -349,7 +403,10 @@ PAGE = r"""<!DOCTYPE html>
 <div id="modal-ia" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2><span style="font-size: 24px;">✨</span> Assistant IA</h2>
+      <h2 style="display:flex;align-items:center;gap:10px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f5a623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+        Assistant IA
+      </h2>
       <span class="close-modal" id="close-modal">&times;</span>
     </div>
     <div class="modal-body">
@@ -379,7 +436,10 @@ PAGE = r"""<!DOCTYPE html>
       <p style="font-size: 12px; color: #9aa0a6; margin-bottom: 8px;">Donnez ce texte à l'IA, en lui fournissant votre ancien CV en pièce jointe.</p>
       <textarea id="ia-prompt" readonly style="height: 180px; font-family: 'Consolas', monospace; font-size: 12px;"></textarea>
       
-      <button id="ia-copy-btn" class="btn-copier">📋 Copier le prompt magique</button>
+      <button id="ia-copy-btn" class="btn-copier" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copier le prompt magique
+      </button>
     </div>
   </div>
 </div>
@@ -860,7 +920,16 @@ function mergedHtml() {
 function switchTab(tab) {
   activeTab = tab;
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  if (editor) editor.setModel(tab === 'css' ? cssModel : htmlModel);
+  const importPane = $('import-pane');
+  const editorDiv  = $('editor');
+  if (tab === 'import') {
+    if (editorDiv)   editorDiv.style.display   = 'none';
+    if (importPane)  importPane.classList.add('active');
+  } else {
+    if (editorDiv)  editorDiv.style.display   = '';
+    if (importPane) importPane.classList.remove('active');
+    if (editor) editor.setModel(tab === 'css' ? cssModel : htmlModel);
+  }
   try { localStorage.setItem(STORAGE_KEY_TAB, tab); } catch (_) {}
 }
 
@@ -1340,7 +1409,7 @@ $('ia-copy-btn').onclick = () => {
     const btn = $('ia-copy-btn');
     const oldText = btn.textContent;
     const oldBg = btn.style.background;
-    btn.textContent = '✅ Copié ! Collez-le dans ChatGPT/Claude';
+    btn.textContent = 'Copié ! Collez-le dans ChatGPT ou Claude';
     btn.style.background = '#5dd39e';
     setTimeout(() => {
       btn.textContent = oldText;
@@ -1352,7 +1421,7 @@ $('ia-copy-btn').onclick = () => {
 // ---- Insertion Photo Base64 ------------------------------------------------
 $('btn-photo').onclick = () => {
   if (htmlModel && !htmlModel.getValue().includes('URL_DE_VOTRE_PHOTO_ICI')) {
-    alert("ℹ️ Aucun emplacement automatique de photo détecté.\n\nVotre photo sera insérée exactement là où se trouve actuellement votre curseur clignotant dans le code HTML.\n\nAssurez-vous d'avoir cliqué au bon endroit dans l'éditeur avant de choisir votre image !");
+    alert("Aucun emplacement automatique de photo détecté.\n\nVotre photo sera insérée exactement là où se trouve actuellement votre curseur clignotant dans le code HTML.\n\nAssurez-vous d'avoir cliqué au bon endroit dans l'éditeur avant de choisir votre image !");
   }
   $('photo-upload').click();
 };
@@ -1503,14 +1572,9 @@ document.querySelectorAll('.import-tab').forEach(tab => {
 });
 
 function markCvLoaded() {
-  document.getElementById('import-panel').style.display = 'none';
-  document.getElementById('import-collapse-bar').style.display = '';
+  // Après conversion, basculer vers l'onglet HTML pour voir le résultat
+  switchTab('html');
 }
-
-document.getElementById('import-collapse-bar').addEventListener('click', () => {
-  document.getElementById('import-panel').style.display = '';
-  document.getElementById('import-collapse-bar').style.display = 'none';
-});
 
 // ============================================================
 // Import texte → HTML
@@ -1522,7 +1586,8 @@ document.getElementById('btn-text-to-html').addEventListener('click', async () =
   const btn = document.getElementById('btn-text-to-html');
   const status = document.getElementById('import-text-status');
   btn.disabled = true;
-  status.textContent = '⏳ Conversion en cours…';
+  status.textContent = 'Conversion en cours';
+  status.className = 'import-status status-busy';
 
   try {
     const html = await streamToMonaco(
@@ -1535,9 +1600,11 @@ document.getElementById('btn-text-to-html').addEventListener('click', async () =
     markCvLoaded();
     showToast('CV converti en HTML avec succès.', 'ok');
     status.textContent = '';
+    status.className = 'import-status';
   } catch (err) {
     showToast(err.message, 'err');
-    status.textContent = '❌ ' + err.message;
+    status.textContent = err.message;
+    status.className = 'import-status status-err';
   } finally {
     btn.disabled = false;
   }
@@ -1565,7 +1632,8 @@ document.getElementById('btn-pdf-to-html').addEventListener('click', async () =>
   const btn = document.getElementById('btn-pdf-to-html');
   const status = document.getElementById('import-pdf-status');
   btn.disabled = true;
-  status.textContent = '⏳ Lecture du PDF…';
+  status.textContent = 'Lecture du PDF';
+  status.className = 'import-status status-busy';
 
   const formData = new FormData();
   formData.append('file', _selectedPdfFile);
@@ -1577,16 +1645,19 @@ document.getElementById('btn-pdf-to-html').addEventListener('click', async () =>
       getApiHeaders(),
       (partial) => {
         if (htmlModel) htmlModel.setValue(partial);
-        status.textContent = `⏳ ${partial.length} caractères générés…`;
+        status.textContent = `${partial.length} car. générés`;
+        status.className = 'import-status status-busy';
       }
     );
     if (htmlModel) htmlModel.setValue(html);
     markCvLoaded();
     showToast('PDF converti en HTML avec succès.', 'ok');
     status.textContent = '';
+    status.className = 'import-status';
   } catch (err) {
     showToast(err.message, 'err');
-    status.textContent = '❌ ' + err.message;
+    status.textContent = err.message;
+    status.className = 'import-status status-err';
   } finally {
     btn.disabled = false;
   }
@@ -1596,11 +1667,11 @@ document.getElementById('btn-pdf-to-html').addEventListener('click', async () =>
 // Tailoring — adapter à une offre
 // ============================================================
 document.getElementById('tailor-toggle').addEventListener('click', () => {
-  const body = document.getElementById('tailor-body');
+  const body    = document.getElementById('tailor-body');
   const chevron = document.getElementById('tailor-chevron');
-  const isOpen = body.classList.contains('open');
+  const isOpen  = body.classList.contains('open');
   body.classList.toggle('open', !isOpen);
-  chevron.textContent = isOpen ? '▼' : '▲';
+  chevron.classList.toggle('open', !isOpen);
 });
 
 document.getElementById('btn-tailor').addEventListener('click', async () => {
@@ -1613,7 +1684,8 @@ document.getElementById('btn-tailor').addEventListener('click', async () => {
   const btn = document.getElementById('btn-tailor');
   const status = document.getElementById('tailor-status');
   btn.disabled = true;
-  status.textContent = '⏳ Adaptation en cours…';
+  status.textContent = 'Adaptation en cours';
+  status.className = 'tailor-status status-busy';
 
   try {
     const adapted = await streamToMonaco(
@@ -1622,15 +1694,18 @@ document.getElementById('btn-tailor').addEventListener('click', async () => {
       getApiHeaders(),
       (partial) => {
         if (htmlModel) htmlModel.setValue(partial);
-        status.textContent = `⏳ ${partial.length} caractères générés…`;
+        status.textContent = `${partial.length} car. générés`;
+        status.className = 'tailor-status status-busy';
       }
     );
     if (htmlModel) htmlModel.setValue(adapted);
     showToast('CV adapté avec succès.', 'ok');
     status.textContent = '';
+    status.className = 'tailor-status';
   } catch (err) {
     showToast(err.message, 'err');
-    status.textContent = '❌ ' + err.message;
+    status.textContent = err.message;
+    status.className = 'tailor-status status-err';
   } finally {
     btn.disabled = false;
   }
