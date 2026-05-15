@@ -7,9 +7,10 @@ Usage :
 import os
 from typing import Generator
 
-# Modèle Gemini utilisé. gemini-1.5-flash est disponible sur le free tier.
-# Remplacer par gemini-2.0-flash si le projet a la facturation activée.
-GEMINI_MODEL: str = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
+# Modèle Gemini utilisé.
+# gemini-2.0-flash-lite : free tier, rapide, recommandé par défaut.
+# gemini-2.0-flash      : meilleur mais peut requérir la facturation.
+GEMINI_MODEL: str = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash-lite")
 
 
 def stream_completion(
