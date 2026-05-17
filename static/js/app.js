@@ -912,11 +912,49 @@ $('btn-ia').onclick = () => { modalIa.style.display = 'flex'; updatePrompt(); };
 $('close-modal').onclick = () => { modalIa.style.display = 'none'; };
 window.addEventListener('click', e => { if (e.target === modalIa) modalIa.style.display = 'none'; });
 
+// ---- Sélecteurs de niveau ----------------------------------------
+let _tailorLevel = 'adapte';
+let _iaLevel = 'adapte';
+
+function _initLevelSelector(selectorId, onChange) {
+  const el = $(selectorId);
+  if (!el) return;
+  el.querySelectorAll('.level-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      el.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      onChange(btn.dataset.level);
+    });
+  });
+}
+
+_initLevelSelector('tailor-level-selector', (lvl) => { _tailorLevel = lvl; });
+_initLevelSelector('ia-level-selector', (lvl) => { _iaLevel = lvl; updatePrompt(); });
+
+// ---- Prompts par niveau pour l'assistant IA ----------------------
+const LEVEL_PROMPT_RULES = {
+  peu: `Règles d'adaptation (niveau SUBTIL — peu adapté) :
+- Glisse 2 à 3 mots-clés de l'offre dans le résumé/accroche de façon naturelle.
+- NE modifie PAS les compétences, les expériences, les langues, les centres d'intérêt, la formation.
+- Le CV doit rester fidèle à l'original à 95%.`,
+  adapte: `Règles d'adaptation (niveau MODÉRÉ — adapté) :
+- Réécris le résumé/accroche pour le poste visé.
+- Réordonne les compétences existantes (sans en ajouter ni supprimer).
+- Reformule au maximum 2 puces par expérience pour intégrer les mots-clés du poste.
+- NE touche PAS aux langues (garde-les toutes), aux centres d'intérêt, aux dates, aux entreprises.`,
+  hyper: `Règles d'adaptation (niveau MAXIMUM — hyper-adapté) :
+- Réécris complètement le résumé/accroche.
+- Réorganise et reformule les compétences existantes (sans en inventer de nouvelles).
+- Réécris les puces d'expériences pour aligner au maximum avec les mots-clés du poste.
+- ABSOLUMENT INTERDIT : supprimer des langues (toutes doivent rester), supprimer les centres d'intérêt, inventer des compétences absentes du CV original, modifier les dates/entreprises/diplômes.`,
+};
+
 function updatePrompt() {
   const jobDesc    = $('ia-job-desc').value.trim();
   const tplName    = $('ia-template').value;
   const wantLetter = $('ia-cover-letter').checked;
   const tpl        = TEMPLATES[tplName] || TEMPLATES['sobre'];
+  const levelRules = LEVEL_PROMPT_RULES[_iaLevel] || LEVEL_PROMPT_RULES['adapte'];
 
   let prompt = `Agis en tant qu'expert en recrutement. Je te fournis en pièce jointe mon CV actuel en .pdf ou html.
 
@@ -927,15 +965,17 @@ ${jobDesc || "[Collez votre offre d'emploi ici ou décrivez le poste visé]"}
 
 Ton objectif est de rédiger mon nouveau CV${wantLetter ? ' ET MA LETTRE DE MOTIVATION' : ''} optimisé(s) pour ce poste, en utilisant STRICTEMENT la structure HTML fournie ci-dessous.
 
-Règles :
+${levelRules}
+
+Règles générales (non négociables) :
 1. Fais d'abord une brève analyse des mots-clés de l'offre et de mon profil.
 2. Remplis les balises HTML avec mes informations. Le CV doit tenir sur 1 page A4.
-3. Ne modifie AUCUNE classe CSS, ne touche pas à la structure.
+3. Ne modifie AUCUNE classe CSS, ne touche pas à la structure HTML.
 4. Pour la photo de profil, laisse exactement le tag suivant sans le modifier : src="URL_DE_VOTRE_PHOTO_ICI".
 5. Rends UNIQUEMENT le(s) bloc(s) de code HTML final, prêt(s) à être copié(s).
-6. Pour les compétences, liste 9 compétences maximum les plus pertinentes pour le poste et pas plus de 3 par catégorie.
-7. Pour chaque expériences professionnelles, liste 3 à 4 tâches maximum.
-8. Pour les expériences professionnelles, liste les dates en format : MM/AAAA - MM/AAAA ou MM/AAAA - Présent.
+6. Pour les compétences, liste au maximum 9 compétences, pas plus de 3 par catégorie.
+7. Pour chaque expérience professionnelle, liste 3 à 4 tâches maximum.
+8. Pour les dates d'expériences, utilise le format : MM/AAAA - MM/AAAA ou MM/AAAA - Présent.
 
 Voici le squelette du CV à remplir :
 \`\`\`html
@@ -1243,19 +1283,20 @@ $('btn-tailor').addEventListener('click', async () => {
     showToast("Charge d'abord un CV dans l'éditeur.", 'err'); return;
   }
 
-  // Snapshot avant tailoring (non-bloquant)
   saveSnapshot('Avant tailoring');
 
   const btn    = $('btn-tailor');
   const status = $('tailor-status');
+  const atsPanel = $('ats-panel');
   btn.disabled = true;
+  atsPanel.style.display = 'none';
   status.textContent = 'Adaptation en cours';
   status.className   = 'tailor-status status-busy';
 
   try {
     const adapted = await streamToMonaco(
       '/api/tailor',
-      { html: htmlModel.getValue(), job_desc: jobDesc },
+      { html: htmlModel.getValue(), job_desc: jobDesc, level: _tailorLevel },
       getApiHeaders(),
       (partial) => {
         if (htmlModel) htmlModel.setValue(partial);
@@ -1267,6 +1308,7 @@ $('btn-tailor').addEventListener('click', async () => {
     showToast('CV adapté avec succès.', 'ok');
     status.textContent = '';
     status.className   = 'tailor-status';
+    _renderAts(adapted, jobDesc);
   } catch (err) {
     showToast(err.message, 'err');
     status.textContent = err.message;
@@ -1275,3 +1317,83 @@ $('btn-tailor').addEventListener('click', async () => {
     btn.disabled = false;
   }
 });
+
+// ============================================================
+// Score ATS
+// ============================================================
+
+const _ATS_STOP_WORDS = new Set([
+  'le','la','les','de','du','des','un','une','et','ou','à','au','aux',
+  'en','dans','sur','pour','par','avec','sans','que','qui','quoi','dont',
+  'il','elle','ils','elles','je','tu','nous','vous','on','ce','se','sa',
+  'son','ses','mon','ton','notre','votre','leur','leurs','est','sont',
+  'être','avoir','faire','plus','très','bien','tout','tous','aussi',
+  'the','of','and','or','to','a','an','in','on','for','with','be','is',
+  'are','was','were','will','have','has','do','does','that','this','it',
+]);
+
+function _extractKeywords(text) {
+  return [...new Set(
+    text.toLowerCase()
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/[^a-zàâäéèêëïîôùûüœç\s-]/gi, ' ')
+        .split(/\s+/)
+        .map(w => w.replace(/^-+|-+$/g, ''))
+        .filter(w => w.length >= 4 && !_ATS_STOP_WORDS.has(w))
+  )];
+}
+
+function _detectSections(html) {
+  const lower = html.toLowerCase();
+  return {
+    'Résumé / Accroche': /(résumé|accroche|profil|summary|about|à propos)/i.test(html),
+    'Expériences':       /(expérience|experience|emploi|poste|travail)/i.test(html),
+    'Compétences':       /(compétence|competence|skill|technologie|technique)/i.test(html),
+    'Langues':           /(langue|langu|language|anglais|français|allemand|espagnol|english|french)/i.test(html),
+    'Formation':         /(formation|diplôme|diplome|école|ecole|université|universite|education|degree)/i.test(html),
+    "Centres d'intérêt": /(intérêt|interêt|loisir|hobby|centre d|passion)/i.test(html),
+  };
+}
+
+function _renderAts(cvHtml, jobDesc) {
+  const panel = $('ats-panel');
+  if (!panel) return;
+
+  const jobKw  = _extractKeywords(jobDesc);
+  const cvText = cvHtml.toLowerCase().replace(/<[^>]+>/g, ' ');
+  const matched = jobKw.filter(kw => cvText.includes(kw));
+  const missing = jobKw.filter(kw => !cvText.includes(kw)).slice(0, 20);
+  const score   = jobKw.length ? Math.round((matched.length / jobKw.length) * 100) : 0;
+  const cls     = score >= 70 ? 'ats-ok' : score >= 45 ? 'ats-mid' : 'ats-low';
+  const barColor= score >= 70 ? '#5dd39e' : score >= 45 ? '#f5a623' : '#ff6b6b';
+  const sections = _detectSections(cvHtml);
+
+  const matchedTop = matched.slice(0, 20);
+  const pillsMatched = matchedTop.map(k => `<span class="ats-pill match">${k}</span>`).join('');
+  const pillsMissing = missing.map(k  => `<span class="ats-pill missing">${k}</span>`).join('');
+  const sectBadges = Object.entries(sections).map(([name, ok]) =>
+    `<span class="ats-section-badge ${ok ? 'found' : 'missing'}">${ok ? '✓' : '✗'} ${name}</span>`
+  ).join('');
+
+  panel.innerHTML = `
+    <div class="ats-score-row">
+      <div class="ats-score-circle ${cls}">${score}</div>
+      <div class="ats-score-label">
+        Score ATS estimé
+        <span>${matched.length} / ${jobKw.length} mots-clés détectés</span>
+      </div>
+    </div>
+    <div class="ats-bar"><div class="ats-bar-fill" style="width:0%;background:${barColor}" data-target="${score}"></div></div>
+    ${matchedTop.length ? `<div class="ats-keywords-title">Mots-clés présents</div><div class="ats-pills">${pillsMatched}</div>` : ''}
+    ${missing.length    ? `<div class="ats-keywords-title">Mots-clés absents</div><div class="ats-pills">${pillsMissing}</div>` : ''}
+    <div class="ats-keywords-title">Sections détectées</div>
+    <div class="ats-sections">${sectBadges}</div>
+  `;
+  panel.style.display = 'block';
+
+  // Animate bar
+  requestAnimationFrame(() => {
+    const fill = panel.querySelector('.ats-bar-fill');
+    if (fill) fill.style.width = fill.dataset.target + '%';
+  });
+}

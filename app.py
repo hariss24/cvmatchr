@@ -270,14 +270,47 @@ _SYSTEM_PDF_PAGE = (
     "Texte en français si c'est en français, anglais si c'est en anglais."
 )
 
-_SYSTEM_TAILOR = (
-    "Tu reçois un CV en HTML et une offre d'emploi. "
-    "Adapte le CV pour ce poste : réécris le résumé/accroche, réordonne et ajuste les "
-    "compétences pour mettre en avant celles qui correspondent à l'offre, adapte légèrement "
-    "les descriptions d'expériences pour coller aux mots-clés du poste. "
-    "Ne supprime aucune expérience. Ne mens pas. Ne change pas les dates, les entreprises, "
-    "les diplômes. Retourne uniquement le HTML complet modifié, rien d'autre."
-)
+_TAILOR_SYSTEMS = {
+    "peu": (
+        "Tu reçois un CV en HTML et une offre d'emploi. "
+        "Niveau d'adaptation : SUBTIL (peu adapté). "
+        "Tu peux UNIQUEMENT modifier la section résumé/accroche (h2 + paragraphe d'intro) "
+        "pour y glisser 2 à 3 mots-clés de l'offre de façon naturelle. "
+        "INTERDIT : toucher aux compétences (ni en ajouter, ni en retirer, ni les réordonner), "
+        "modifier les descriptions de postes ou les listes à puces des expériences, "
+        "supprimer ou modifier les langues, les centres d'intérêt, la formation, "
+        "les dates, les entreprises, les intitulés de poste. "
+        "Le CV doit rester à 95% identique à l'original. "
+        "Retourne uniquement le HTML complet, sans commentaire, sans markdown."
+    ),
+    "adapte": (
+        "Tu reçois un CV en HTML et une offre d'emploi. "
+        "Niveau d'adaptation : MODÉRÉ (adapté). "
+        "Tu peux : réécrire le résumé/accroche pour le poste visé ; "
+        "réordonner les compétences existantes pour mettre les plus pertinentes en premier "
+        "(SANS EN AJOUTER NI EN SUPPRIMER) ; "
+        "reformuler au maximum 2 puces par expérience pour coller aux mots-clés du poste. "
+        "INTERDIT : inventer ou supprimer des compétences, "
+        "toucher à la section langues (doit rester intacte, avec TOUTES les langues listées), "
+        "toucher à la section centres d'intérêt (doit rester intacte), "
+        "modifier les dates, entreprises, intitulés de poste ou diplômes. "
+        "Retourne uniquement le HTML complet, sans commentaire, sans markdown."
+    ),
+    "hyper": (
+        "Tu reçois un CV en HTML et une offre d'emploi. "
+        "Niveau d'adaptation : MAXIMUM (hyper-adapté). "
+        "Tu peux : réécrire complètement le résumé/accroche ; "
+        "réorganiser ET reformuler les compétences existantes pour maximiser la pertinence "
+        "(SANS en inventer de nouvelles — uniquement celles déjà présentes dans le CV original) ; "
+        "réécrire les puces d'expériences pour aligner au maximum avec les mots-clés du poste. "
+        "ABSOLUMENT INTERDIT : "
+        "supprimer la section langues ou retirer une seule langue (toutes doivent rester), "
+        "supprimer ou modifier la section centres d'intérêt, "
+        "inventer des compétences absentes du CV original, "
+        "modifier les dates, entreprises, intitulés de poste, diplômes ou noms propres. "
+        "Retourne uniquement le HTML complet, sans commentaire, sans markdown."
+    ),
+}
 
 
 def _stream_ai(generator_fn):
@@ -379,6 +412,9 @@ def api_tailor():
     data     = request.get_json(force=True) or {}
     html     = (data.get("html") or "").strip()
     job_desc = (data.get("job_desc") or "").strip()
+    level    = (data.get("level") or "adapte").strip()
+    if level not in _TAILOR_SYSTEMS:
+        level = "adapte"
     if not html or not job_desc:
         return jsonify({"error": "Le HTML du CV et la description du poste sont requis."}), 400
 
@@ -387,11 +423,12 @@ def api_tailor():
     if err:
         return err
 
+    system_prompt = _TAILOR_SYSTEMS[level]
     prompt = f"CV HTML :\n{html}\n\nOffre d'emploi :\n{job_desc}"
 
     def generate():
         try:
-            for chunk in ai_engine.stream_completion(prompt, _SYSTEM_TAILOR, api_key=user_key):
+            for chunk in ai_engine.stream_completion(prompt, system_prompt, api_key=user_key):
                 yield f"data: {_json_ai.dumps(chunk, ensure_ascii=False)}\n\n"
             yield "data: [DONE]\n\n"
         except Exception as exc:
