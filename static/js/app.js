@@ -934,19 +934,23 @@ _initLevelSelector('ia-level-selector', (lvl) => { _iaLevel = lvl; updatePrompt(
 // ---- Prompts par niveau pour l'assistant IA ----------------------
 const LEVEL_PROMPT_RULES = {
   peu: `Règles d'adaptation (niveau SUBTIL — peu adapté) :
-- Glisse 2 à 3 mots-clés de l'offre dans le résumé/accroche de façon naturelle.
+- Ajuste le titre/tagline sous le nom pour refléter le type de poste visé de façon générique.
+- Réoriente le résumé/accroche avec 2-3 mots-clés du poste, de façon naturelle et non évidente.
 - NE modifie PAS les compétences, les expériences, les langues, les centres d'intérêt, la formation.
-- Le CV doit rester fidèle à l'original à 95%.`,
+- Le CV doit rester fidèle à l'original à 95%.
+- ANTI-DÉTECTION : N'écris JAMAIS le nom de l'entreprise ciblée dans le résumé ou le titre. Le CV doit sembler naturel, pas adapté spécifiquement à une seule offre.`,
   adapte: `Règles d'adaptation (niveau MODÉRÉ — adapté) :
-- Réécris le résumé/accroche pour le poste visé.
+- Ajuste le titre/tagline et réécris le résumé/accroche pour le type de poste visé.
 - Réordonne les compétences existantes (sans en ajouter ni supprimer).
-- Reformule au maximum 2 puces par expérience pour intégrer les mots-clés du poste.
-- NE touche PAS aux langues (garde-les toutes), aux centres d'intérêt, aux dates, aux entreprises.`,
+- Enrichis et reformule les puces d'expériences existantes (4 puces max par expérience, sans fabriquer de contenu absent du CV).
+- NE touche PAS aux langues (garde-les toutes), aux centres d'intérêt, aux dates, aux entreprises du parcours.
+- ANTI-DÉTECTION : N'écris JAMAIS le nom de l'entreprise ciblée dans le résumé ou le titre.`,
   hyper: `Règles d'adaptation (niveau MAXIMUM — hyper-adapté) :
-- Réécris complètement le résumé/accroche.
+- Ajuste le titre/tagline et réécris complètement le résumé/accroche.
 - Réorganise et reformule les compétences existantes (sans en inventer de nouvelles).
-- Réécris les puces d'expériences pour aligner au maximum avec les mots-clés du poste.
-- ABSOLUMENT INTERDIT : supprimer des langues (toutes doivent rester), supprimer les centres d'intérêt, inventer des compétences absentes du CV original, modifier les dates/entreprises/diplômes.`,
+- Réécris entièrement les puces d'expériences (4 puces max par expérience, sans fabriquer de contenu absent du CV).
+- ANTI-DÉTECTION : N'écris JAMAIS le nom de l'entreprise ciblée dans le résumé ou le titre.
+- ABSOLUMENT INTERDIT : supprimer des langues, supprimer les centres d'intérêt, inventer des compétences, modifier les dates/entreprises du parcours/diplômes.`,
 };
 
 function updatePrompt() {
