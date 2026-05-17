@@ -764,6 +764,35 @@ function insertSnippet(text) {
 }
 
 // ============================================================
+// Nouveau CV
+// ============================================================
+const modalNewCv = $('modal-new-cv');
+
+$('btn-new-cv').onclick = () => { modalNewCv.style.display = 'flex'; };
+$('close-new-cv').onclick = () => { modalNewCv.style.display = 'none'; };
+window.addEventListener('click', e => { if (e.target === modalNewCv) modalNewCv.style.display = 'none'; });
+
+document.querySelectorAll('.template-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const key = card.dataset.tpl;
+    const tpl = TEMPLATES[key];
+    if (!tpl) return;
+
+    saveSnapshot('Avant nouveau CV');
+
+    if (htmlModel) htmlModel.setValue(tpl.html);
+    if (cssModel)  cssModel.setValue(tpl.css);
+
+    ['company', 'role', 'filename', 'notes'].forEach(id => { const el = $(id); if (el) el.value = ''; });
+    refreshFilenamePreview();
+
+    modalNewCv.style.display = 'none';
+    switchTab('html');
+    showToast(`Template "${key}" chargé.`, 'ok');
+  });
+});
+
+// ============================================================
 // Effacer
 // ============================================================
 $('clear').onclick = () => {

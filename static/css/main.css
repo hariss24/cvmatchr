@@ -207,3 +207,22 @@ button.ghost:hover { background: #353b48; }
 .ats-section-badge { font-size: 11px; padding: 2px 8px; border-radius: 4px; }
 .ats-section-badge.found   { background: #1a3a2a; color: #5dd39e; }
 .ats-section-badge.missing { background: #3a1a1a; color: #ff8080; }
+
+/* ---- Modal Nouveau CV — cartes de templates ---- */
+.template-cards { display: flex; gap: 14px; }
+.template-card { flex: 1; background: #14181f; border: 2px solid #2a2f3a; border-radius: 10px; padding: 0; cursor: pointer; text-align: left; transition: border-color 150ms, transform 150ms; overflow: hidden; display: flex; flex-direction: column; }
+.template-card:hover { border-color: #4f8cff; transform: translateY(-2px); }
+.template-card-preview { height: 110px; padding: 14px; display: flex; flex-direction: column; gap: 5px; background: #0f1115; }
+.template-card-label { padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; }
+.template-card-label strong { font-size: 13px; color: #e6e6e6; }
+.template-card-label span { font-size: 11px; color: #9aa0a6; line-height: 1.4; }
+.tpl-line { height: 5px; border-radius: 3px; background: #2a2f3a; width: 100%; }
+.tpl-line.short { width: 60%; }
+.tpl-line.tpl-name { height: 8px; background: #3a4050; width: 80%; }
+.tpl-line.tpl-title { background: #3a4050; }
+.tpl-line.tpl-accent { background: #4f8cff55; }
+.tpl-divider { height: 1px; background: #2a2f3a; margin: 2px 0; }
+.tpl-moderne .tpl-accent { background: #4f8cff44; }
+@media (max-width: 540px) {
+  .template-cards { flex-direction: column; }
+}
