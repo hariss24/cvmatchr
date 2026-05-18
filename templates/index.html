@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="light">
 <head>
 <meta charset="utf-8">
 <title>HTML -> PDF</title>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+<script>var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);</script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.css" />
 </head>
 <body>
@@ -12,15 +13,19 @@
   <div class="topbar">
     <h1>HTML/CSS -> PDF</h1>
     <div style="display: flex; align-items: center; gap: 12px;">
-      <button id="btn-new-cv" type="button" style="background:#2a2f3a; border:1px solid #3a4050; color:#e6e6e6; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:13px; display:inline-flex; align-items:center; gap:6px;">
+      <button id="btn-new-cv" type="button" class="btn-nav">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Nouveau CV
       </button>
-      <button id="btn-ia" class="ghost" style="color: #f5a623; border: 1px solid #f5a623; padding: 6px 12px; display:inline-flex; align-items:center; gap:6px;">
+      <button id="btn-ia" class="btn-nav btn-ia-style">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
         Assistant IA
       </button>
       <a href="/history">Historique &rsaquo;</a>
+      <button id="btn-theme" type="button" title="Basculer thème clair/sombre" aria-label="Basculer thème">
+        <svg id="theme-icon-light" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg id="theme-icon-dark" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
       <button id="btn-settings" type="button" title="Paramètres API">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
@@ -98,7 +103,7 @@
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
               Choisir un PDF
             </button>
-            <span id="pdf-filename" style="font-size:12px; color:#9aa0a6;"></span>
+            <span id="pdf-filename" style="font-size:12px; color:var(--muted);"></span>
           </div>
           <button id="btn-pdf-to-html" class="import-btn" type="button" disabled>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
@@ -205,7 +210,7 @@
     <button id="go" class="go">Convertir en PDF</button>
     <button id="clear" class="ghost" type="button">Effacer</button>
     <span id="status"></span>
-    <span style="margin-left:auto; font-size:11px; color:#555;">
+    <span style="margin-left:auto; font-size:11px; color:var(--muted);">
       Ctrl+Enter → PDF &nbsp;·&nbsp; Ctrl+Shift+I → IA &nbsp;·&nbsp; Ctrl+Shift+S → Snapshots
     </span>
   </div>
@@ -363,5 +368,24 @@
 
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script>
+(function(){
+  var html = document.documentElement;
+  var btn = document.getElementById('btn-theme');
+  var iconLight = document.getElementById('theme-icon-light');
+  var iconDark = document.getElementById('theme-icon-dark');
+  var saved = localStorage.getItem('theme') || 'light';
+  function applyTheme(t) {
+    html.setAttribute('data-theme', t);
+    iconLight.style.display = t === 'dark' ? 'none' : '';
+    iconDark.style.display  = t === 'dark' ? ''     : 'none';
+    localStorage.setItem('theme', t);
+  }
+  applyTheme(saved);
+  btn.addEventListener('click', function(){
+    applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+})();
+</script>
 </body>
 </html>
