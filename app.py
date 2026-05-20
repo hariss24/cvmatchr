@@ -16,7 +16,9 @@ import socket
 import sys
 import threading
 import time
+import uuid
 import webbrowser
+from datetime import datetime
 from pathlib import Path
 
 try:
@@ -208,7 +210,7 @@ def index():
 
 @app.route("/history")
 def history_page():
-    return render_template("history.html", is_serverless=archive._IS_SERVERLESS)
+    return render_template("history.html")
 
 
 # ---------------------------------------------------------------------------
@@ -252,22 +254,19 @@ def convert():
             "hint": "Vérifiez que le HTML est valide et ne contient pas de ressources externes bloquées.",
         }), 500
 
-    # Archivage best-effort
-    entry: dict
-    try:
-        entry = archive.save_document(
-            html=html, pdf_bytes=pdf_bytes, doc_type=doc_type,
-            company=company, role=role, notes=notes,
-            custom_filename=custom_filename, job_desc=job_desc,
-        )
-    except Exception:
-        import uuid as _uuid
-        from datetime import datetime as _dt
-        entry = {
-            "id": str(_uuid.uuid4()),
-            "filename": custom_filename or f"document_{_dt.now().strftime('%Y%m%d_%H%M%S')}.pdf",
-            "created_at": _dt.now().isoformat(timespec="seconds"),
-        }
+    # Générer les métadonnées de téléchargement (pas de persistance serveur)
+    when = datetime.now()
+    doc_type_safe = doc_type if doc_type in archive.DOC_TYPES else "Autre"
+    filename = (
+        archive._safe_filename(custom_filename)
+        if custom_filename
+        else archive.make_filename(doc_type_safe, company, role, when)
+    )
+    entry = {
+        "id":         str(uuid.uuid4()),
+        "filename":   filename,
+        "created_at": when.isoformat(timespec="seconds"),
+    }
 
     response = send_file(
         io.BytesIO(pdf_bytes),
@@ -282,69 +281,6 @@ def convert():
     })
     response.headers["Access-Control-Expose-Headers"] = "X-Archive-Entry"
     return response
-
-
-# ---------------------------------------------------------------------------
-# API Historique
-# ---------------------------------------------------------------------------
-
-@app.route("/api/history")
-def api_history():
-    return jsonify(archive.list_documents())
-
-
-@app.route("/api/history/<doc_id>")
-def api_history_get(doc_id):
-    entry = archive.get_document(doc_id)
-    if not entry:
-        abort(404)
-    return jsonify(entry)
-
-
-@app.route("/api/history/<doc_id>/html")
-def api_history_html(doc_id):
-    entry = archive.get_document(doc_id)
-    if not entry:
-        abort(404)
-    html_path = Path(entry.get("html_path", ""))
-    if html_path.exists():
-        return html_path.read_text(encoding="utf-8"), 200, {"Content-Type": "text/plain; charset=utf-8"}
-    abort(404)
-
-
-@app.route("/api/history/<doc_id>/pdf")
-def api_history_pdf(doc_id):
-    entry = archive.get_document(doc_id)
-    if not entry:
-        abort(404)
-    pdf_path = Path(entry.get("pdf_path", ""))
-    if pdf_path.exists():
-        return send_file(pdf_path, mimetype="application/pdf", as_attachment=False, download_name=entry["filename"])
-    abort(404)
-
-
-@app.route("/api/history/<doc_id>/open", methods=["POST"])
-def api_history_open(doc_id):
-    if archive._IS_SERVERLESS:
-        return jsonify({"error": "Non disponible en mode serverless."}), 400
-    entry = archive.get_document(doc_id)
-    if not entry:
-        abort(404)
-    pdf_path = Path(entry["pdf_path"])
-    if not pdf_path.exists():
-        abort(404)
-    try:
-        os.startfile(str(pdf_path))
-        return jsonify({"ok": True})
-    except (AttributeError, OSError) as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/api/history/<doc_id>", methods=["DELETE"])
-def api_history_delete(doc_id):
-    if archive.delete_document(doc_id):
-        return jsonify({"ok": True})
-    abort(404)
 
 
 # ---------------------------------------------------------------------------

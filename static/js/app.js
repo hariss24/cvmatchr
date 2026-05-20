@@ -410,18 +410,59 @@ const IDB_DB    = 'html-to-pdf-snapshots';
 const IDB_STORE = 'snapshots';
 const MAX_SNAPS = 20;
 
+const IDB_HTML_STORE = 'cv-html-store';
+
 function _openIDB() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(IDB_DB, 1);
+    const req = indexedDB.open(IDB_DB, 2);
     req.onupgradeneeded = e => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains(IDB_STORE)) {
         db.createObjectStore(IDB_STORE, { keyPath: 'ts' });
       }
+      if (!db.objectStoreNames.contains(IDB_HTML_STORE)) {
+        db.createObjectStore(IDB_HTML_STORE, { keyPath: 'id' });
+      }
     };
     req.onsuccess = e => resolve(e.target.result);
     req.onerror   = e => reject(e.target.error);
   });
+}
+
+async function saveHtmlToIDB(id, html, css) {
+  try {
+    const db = await _openIDB();
+    await new Promise((res, rej) => {
+      const tx = db.transaction(IDB_HTML_STORE, 'readwrite');
+      tx.objectStore(IDB_HTML_STORE).put({ id, html, css });
+      tx.oncomplete = res;
+      tx.onerror    = e => rej(e.target.error);
+    });
+  } catch (_) {}
+}
+
+async function loadHtmlFromIDB(id) {
+  try {
+    const db = await _openIDB();
+    return await new Promise((res, rej) => {
+      const tx  = db.transaction(IDB_HTML_STORE, 'readonly');
+      const req = tx.objectStore(IDB_HTML_STORE).get(id);
+      req.onsuccess = () => res(req.result || null);
+      req.onerror   = e => rej(e.target.error);
+    });
+  } catch (_) { return null; }
+}
+
+async function deleteHtmlFromIDB(id) {
+  try {
+    const db = await _openIDB();
+    await new Promise((res, rej) => {
+      const tx = db.transaction(IDB_HTML_STORE, 'readwrite');
+      tx.objectStore(IDB_HTML_STORE).delete(id);
+      tx.oncomplete = res;
+      tx.onerror    = e => rej(e.target.error);
+    });
+  } catch (_) {}
 }
 
 async function saveSnapshot(label) {
@@ -703,9 +744,8 @@ require(['vs/editor/editor.main'], function () {
   });
 
   // ---- Chargement depuis l'historique (?load=) -------------------------
-  const params   = new URLSearchParams(location.search);
-  const loadId   = params.get('load');
-  const htmlUrl  = params.get('htmlUrl');
+  const params = new URLSearchParams(location.search);
+  const loadId = params.get('load');
 
   if (loadId) {
     let localEntry = null;
@@ -715,44 +755,24 @@ require(['vs/editor/editor.main'], function () {
     } catch (_) {}
 
     if (localEntry) {
-      $('doc_type').value = localEntry.doc_type || 'CV';
-      $('company').value  = localEntry.company  || '';
-      $('role').value     = localEntry.role     || '';
-      $('notes').value    = localEntry.notes    || '';
+      $('doc_type').value    = localEntry.doc_type || 'CV';
+      $('company').value     = localEntry.company  || '';
+      $('role').value        = localEntry.role     || '';
+      $('notes').value       = localEntry.notes    || '';
       $('ia-job-desc').value = localEntry.job_desc || '';
       if (typeof updatePrompt === 'function') updatePrompt();
       refreshFilenamePreview();
-
-      const src = htmlUrl || localEntry.html_url || '';
-      if (src) {
-        fetch(src)
-          .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
-          .then(h => { htmlModel.setValue(h); cssModel.setValue(''); switchTab('html'); })
-          .catch(err => setStatus('Chargement HTML echoue : ' + err.message, 'err'));
-      }
-    } else {
-      fetch(`/api/history/${encodeURIComponent(loadId)}`)
-        .then(r => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
-        .then(entry => {
-          if (!entry || !entry.id) return;
-          $('doc_type').value = entry.doc_type || 'CV';
-          $('company').value  = entry.company  || '';
-          $('role').value     = entry.role     || '';
-          $('notes').value    = entry.notes    || '';
-          $('ia-job-desc').value = entry.job_desc || '';
-          if (typeof updatePrompt === 'function') updatePrompt();
-          refreshFilenamePreview();
-
-          const src = htmlUrl || entry.html_blob_url || '';
-          return (src
-            ? fetch(src)
-            : fetch(`/api/history/${encodeURIComponent(loadId)}/html`)
-          )
-            .then(r => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`))))
-            .then(h => { htmlModel.setValue(h); cssModel.setValue(''); switchTab('html'); });
-        })
-        .catch(err => setStatus('Chargement echoue : ' + err.message, 'err'));
     }
+
+    loadHtmlFromIDB(loadId).then(stored => {
+      if (stored) {
+        htmlModel.setValue(stored.html || '');
+        if (cssModel) cssModel.setValue(stored.css || '');
+        switchTab('html');
+      } else if (!localEntry) {
+        setStatus('Document introuvable dans ce navigateur.', 'err');
+      }
+    });
   }
 });
 
@@ -851,9 +871,8 @@ $('go').onclick = async () => {
       setStatus('Erreur : ' + (err.error || res.statusText), 'err');
       return;
     }
-    const meta        = JSON.parse(res.headers.get('X-Archive-Entry') || '{}');
-    const pdfBlobUrl  = res.headers.get('X-Blob-PDF-URL')  || '';
-    const htmlBlobUrl = res.headers.get('X-Blob-HTML-URL') || '';
+    const meta = JSON.parse(res.headers.get('X-Archive-Entry') || '{}');
+    const entryId = meta.id || crypto.randomUUID();
 
     const blob   = await res.blob();
     const objUrl = URL.createObjectURL(blob);
@@ -867,11 +886,11 @@ $('go').onclick = async () => {
 
     setStatus(`PDF téléchargé : ${meta.filename}`, 'ok');
 
-    // Persistance localStorage (fallback Vercel / offline)
+    // Persistance navigateur : métadonnées dans localStorage, HTML+CSS dans IndexedDB
     try {
       const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
       hist.unshift({
-        id:         meta.id || crypto.randomUUID(),
+        id:         entryId,
         filename:   meta.filename,
         created_at: meta.created_at,
         doc_type:   $('doc_type').value,
@@ -879,11 +898,10 @@ $('go').onclick = async () => {
         role:       $('role').value.trim(),
         notes:      $('notes').value.trim(),
         job_desc:   $('ia-job-desc').value.trim(),
-        pdf_url:    pdfBlobUrl || null,
-        html_url:   htmlBlobUrl || null,
       });
       localStorage.setItem(HISTORY_KEY, JSON.stringify(hist.slice(0, 100)));
     } catch (_) {}
+    await saveHtmlToIDB(entryId, htmlModel.getValue(), cssModel ? cssModel.getValue() : '');
   } catch (e) {
     setStatus('Erreur réseau : ' + e.message, 'err');
   } finally {

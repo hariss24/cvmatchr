@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Historique</title>
-<meta name="is-serverless" content="{{ is_serverless | tojson }}">
+<title>Historique — CV Forge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/history.css') }}">
 <script>var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);</script>
 </head>
@@ -13,10 +15,18 @@
   <div class="topbar">
     <h1>Historique</h1>
     <div style="display:flex;align-items:center;gap:10px;">
-      <button id="btn-theme" type="button" title="Basculer thème clair/sombre">
-        <svg id="theme-icon-light" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        <svg id="theme-icon-dark" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      </button>
+      <button id="btn-import" type="button" class="ghost" title="Importer un fichier d'export">⬆ Importer</button>
+      <button id="btn-export" type="button" class="ghost" title="Exporter toutes les données">⬇ Exporter</button>
+      <input id="file-import" type="file" accept=".json" style="display:none">
+      <div id="btn-theme" role="button" tabindex="0" title="Basculer thème clair/sombre">
+        <span class="toggle-icon toggle-sun">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        </span>
+        <span class="toggle-knob"></span>
+        <span class="toggle-icon toggle-moon">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </span>
+      </div>
       <a href="/">&lsaquo; Retour</a>
     </div>
   </div>
@@ -28,13 +38,9 @@
 (function(){
   var html = document.documentElement;
   var btn = document.getElementById('btn-theme');
-  var iconLight = document.getElementById('theme-icon-light');
-  var iconDark = document.getElementById('theme-icon-dark');
   var saved = localStorage.getItem('theme') || 'light';
   function applyTheme(t) {
     html.setAttribute('data-theme', t);
-    iconLight.style.display = t === 'dark' ? 'none' : '';
-    iconDark.style.display  = t === 'dark' ? ''     : 'none';
     localStorage.setItem('theme', t);
   }
   applyTheme(saved);
