@@ -356,6 +356,13 @@ _CV_HTML_SKELETON = """\
     </div>
   </section>
 
+  <section class="resume-template-renderer-section plain-list">
+    <h2 class="resume-template-renderer-section__title">Centres d'interet</h2>
+    <div class="plain-list__items">
+      <span class="plain-list__item">Interet 1</span>
+    </div>
+  </section>
+
 </div>"""
 
 _LETTRE_SKELETON = """\
@@ -417,9 +424,9 @@ _SYSTEM_CV_IMPORT = (
     "   • entry-list__item : un bloc par expérience professionnelle, un bloc par diplôme\n"
     "     → Pour chaque diplôme : inclus la description (matières, spécialités, programme) dans entry-list__description si présente dans le CV.\n"
     "     → Pour chaque expérience : inclus TOUTES les réalisations/puces dans entry-list__description.\n"
-    "   • plain-list__item : un <span> par compétence\n"
+    "   • plain-list__item : un <span> par compétence, un <span> par centre d'intérêt\n"
     "   • languages__item : un bloc par langue\n"
-    "4. Si une section est absente du CV (pas de résumé, pas de langues…), omets la section entière.\n"
+    "4. Si une section est absente du CV (pas de résumé, pas de langues, pas de centres d'intérêt…), omets la section entière.\n"
     "5. Sous-éléments optionnels — si un sous-élément du squelette (entry-list__description, entry-list__company-row…)\n"
     "   n'a pas de contenu correspondant dans le CV, supprime entièrement cette balise.\n"
     "   Ne laisse jamais de balise vide ni de texte placeholder.\n"
