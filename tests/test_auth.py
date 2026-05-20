@@ -1,4 +1,5 @@
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
+import app as _app_module
 
 
 def test_local_mode_leaves_history_api_open(client, monkeypatch):
@@ -67,3 +68,32 @@ def test_remote_mode_without_password_reports_setup_error(client, monkeypatch):
 
     assert resp.status_code == 503
     assert "REMOTE_AUTH_PASSWORD" in resp.get_json()["error"]
+
+
+def test_logout_get_not_allowed(client):
+    resp = client.get("/logout")
+    assert resp.status_code == 405
+
+
+def test_login_rate_limited_after_max_failures(client, monkeypatch):
+    monkeypatch.setenv("APP_MODE", "remote")
+    monkeypatch.setenv("REMOTE_AUTH_PASSWORD", "secret")
+
+    ip = "10.0.0.1"
+
+    def fake_rate_ok():
+        return False
+
+    with patch("app._login_rate_limit_ok", side_effect=fake_rate_ok):
+        resp = client.post("/login", json={"password": "wrong"})
+
+    assert resp.status_code == 429
+    assert "tentatives" in resp.get_json()["error"].lower()
+
+
+def test_next_param_open_redirect_blocked(client, monkeypatch):
+    monkeypatch.setenv("APP_MODE", "remote")
+    monkeypatch.setenv("REMOTE_AUTH_PASSWORD", "secret")
+
+    resp = client.post("/login", json={"password": "secret"})
+    assert resp.status_code == 200

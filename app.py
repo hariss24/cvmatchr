@@ -52,6 +52,33 @@ app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 # Mode local / remote
 # ---------------------------------------------------------------------------
 
+_login_lock = threading.Lock()
+_login_attempts: dict[str, list[float]] = {}
+_LOGIN_WINDOW = 60      # secondes
+_LOGIN_MAX_ATTEMPTS = 5
+
+
+def _login_rate_limit_ok() -> bool:
+    if app.config.get("TESTING"):
+        return True
+    ip = request.remote_addr or "unknown"
+    now = time.monotonic()
+    with _login_lock:
+        recent = [t for t in _login_attempts.get(ip, []) if now - t < _LOGIN_WINDOW]
+        _login_attempts[ip] = recent
+        return len(recent) < _LOGIN_MAX_ATTEMPTS
+
+
+def _login_record_failure() -> None:
+    if app.config.get("TESTING"):
+        return
+    ip = request.remote_addr or "unknown"
+    now = time.monotonic()
+    with _login_lock:
+        recent = [t for t in _login_attempts.get(ip, []) if now - t < _LOGIN_WINDOW]
+        recent.append(now)
+        _login_attempts[ip] = recent
+
 _TRUE_VALUES = {"1", "true", "yes", "on", "remote", "production"}
 
 
@@ -124,20 +151,21 @@ def login():
     expected = _remote_auth_password()
     if not expected:
         return jsonify({"error": "REMOTE_AUTH_PASSWORD must be configured in remote mode."}), 503
+    if not _login_rate_limit_ok():
+        return jsonify({"error": "Trop de tentatives. Réessayez dans une minute."}), 429
     data = request.get_json(silent=True) or request.form
     supplied = (data.get("password") or "").strip()
     if not secrets.compare_digest(supplied, expected):
+        _login_record_failure()
         return jsonify({"error": "Invalid password."}), 401
     session["remote_authenticated"] = True
     return jsonify({"ok": True})
 
 
-@app.route("/logout", methods=["POST", "GET"])
+@app.route("/logout", methods=["POST"])
 def logout():
     session.pop("remote_authenticated", None)
-    if request.method == "POST" or _is_api_request():
-        return jsonify({"ok": True})
-    return redirect(url_for("login_page"))
+    return jsonify({"ok": True})
 
 
 # ---- Jeton CSRF léger -------------------------------------------------------
