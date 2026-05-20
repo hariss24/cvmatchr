@@ -346,6 +346,40 @@ _CV_HTML_SKELETON = """\
     </div>
   </section>
 
+  <section class="resume-template-renderer-section entry-list">
+    <h2 class="resume-template-renderer-section__title">Projets</h2>
+    <div class="entry-list__item">
+      <span class="entry-list__title">Nom du projet</span>
+      <span class="entry-list__date">2024</span>
+      <div class="entry-list__description">
+        <p>Description du projet.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="resume-template-renderer-section plain-list">
+    <h2 class="resume-template-renderer-section__title">Certifications</h2>
+    <div class="plain-list__items">
+      <span class="plain-list__item">Certification 1</span>
+    </div>
+  </section>
+
+  <section class="resume-template-renderer-section entry-list">
+    <h2 class="resume-template-renderer-section__title">Benevolat</h2>
+    <div class="entry-list__item">
+      <span class="entry-list__title">Role</span>
+      <span class="entry-list__date">2023 - 2024</span>
+      <div class="entry-list__company-row">
+        <span class="entry-list__subtitle">Organisation</span><span class="entry-list__location">Ville</span>
+      </div>
+      <div class="entry-list__description">
+        <ul>
+          <li>Activite.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
   <section class="resume-template-renderer-section languages">
     <h2 class="resume-template-renderer-section__title">Langues</h2>
     <div class="languages__items">
@@ -421,12 +455,13 @@ _SYSTEM_CV_IMPORT = (
     "1. Conserve EXACTEMENT la structure HTML et toutes les classes CSS du squelette. Ne les modifie jamais.\n"
     "2. Remplace uniquement le contenu textuel par les données réelles du CV.\n"
     "3. Blocs répétables — inclus TOUS les éléments du CV, sans en omettre aucun :\n"
-    "   • entry-list__item : un bloc par expérience professionnelle, un bloc par diplôme\n"
-    "     → Pour chaque diplôme : inclus la description (matières, spécialités, programme) dans entry-list__description si présente dans le CV.\n"
-    "     → Pour chaque expérience : inclus TOUTES les réalisations/puces dans entry-list__description.\n"
-    "   • plain-list__item : un <span> par compétence, un <span> par centre d'intérêt\n"
+    "   • entry-list__item : un bloc par expérience, par diplôme, par projet, par activité bénévole\n"
+    "     → Pour chaque diplôme/projet : inclus la description dans entry-list__description si présente dans le CV.\n"
+    "     → Pour chaque expérience/bénévolat : inclus TOUTES les réalisations dans entry-list__description.\n"
+    "   • plain-list__item : un <span> par compétence, par certification, par centre d'intérêt\n"
     "   • languages__item : un bloc par langue\n"
-    "4. Si une section est absente du CV (pas de résumé, pas de langues, pas de centres d'intérêt…), omets la section entière.\n"
+    "4. Si une section est absente du CV (pas de projets, pas de certifications, pas de bénévolat,\n"
+    "   pas de centres d'intérêt, pas de résumé, pas de langues…), omets la section entière.\n"
     "5. Sous-éléments optionnels — si un sous-élément du squelette (entry-list__description, entry-list__company-row…)\n"
     "   n'a pas de contenu correspondant dans le CV, supprime entièrement cette balise.\n"
     "   Ne laisse jamais de balise vide ni de texte placeholder.\n"
