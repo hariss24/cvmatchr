@@ -3,8 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HTML -> PDF</title>
+<title>CV Forge — HTML→PDF</title>
 <meta name="csrf-token" content="{{ csrf_token() }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 <script>var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);</script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.css" />
@@ -12,7 +15,13 @@
 <body>
 <div class="wrap">
   <div class="topbar">
-    <h1>HTML/CSS -> PDF</h1>
+    <div class="logo-badge">
+      <div class="logo-icon"><div class="logo-icon-inner">F</div></div>
+      <div class="logo-text">
+        <span class="logo-title">CV Forge</span>
+        <span class="logo-sub">HTML → PDF</span>
+      </div>
+    </div>
     <div style="display: flex; align-items: center; gap: 12px;">
       <button id="btn-new-cv" type="button" class="btn-nav">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
