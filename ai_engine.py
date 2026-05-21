@@ -10,7 +10,7 @@ from typing import Generator
 
 # gemini-2.0-flash : meilleur rapport qualité/quota sur le free tier.
 # gemini-2.0-flash-lite : plus rapide mais quota journalier plus faible.
-GEMINI_MODEL: str = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+GEMINI_MODEL: str = os.environ.get("GEMINI_MODEL", "gemini-3.1-flash-lite-preview")
 
 
 def stream_completion(
