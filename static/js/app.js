@@ -769,9 +769,29 @@ require(['vs/editor/editor.main'], function () {
         htmlModel.setValue(stored.html || '');
         if (cssModel) cssModel.setValue(stored.css || '');
         switchTab('html');
-      } else if (!localEntry) {
-        setStatus('Document introuvable dans ce navigateur.', 'err');
+        return;
       }
+      // Fallback : essayer le fichier HTML archivé sur disque (entrées pré-migration IDB)
+      fetch(`/api/history/${encodeURIComponent(loadId)}/html`)
+        .then(r => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          return r.text();
+        })
+        .then(h => {
+          htmlModel.setValue(h);
+          if (cssModel) cssModel.setValue('');
+          switchTab('html');
+          // Migrer vers IDB pour les rechargements futurs
+          saveHtmlToIDB(loadId, h, '');
+        })
+        .catch(() => {
+          setStatus(
+            localEntry
+              ? 'Contenu HTML introuvable : ce document a été créé avant la sauvegarde automatique du contenu.'
+              : 'Document introuvable dans ce navigateur.',
+            'err'
+          );
+        });
     });
   }
 });

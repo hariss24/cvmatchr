@@ -284,6 +284,29 @@ def convert():
 
 
 # ---------------------------------------------------------------------------
+# Historique — fallback fichiers locaux (anciens CVs pré-migration IDB)
+# ---------------------------------------------------------------------------
+
+@app.route("/api/history/<doc_id>/html", methods=["GET"])
+def history_html(doc_id: str):
+    """Sert le fichier HTML d'un document archivé sur disque.
+
+    Utilisé comme fallback quand le navigateur n'a pas le contenu dans IndexedDB
+    (entrées créées avant la migration vers le stockage 100 % navigateur).
+    """
+    doc = archive.get_document(doc_id)
+    if not doc:
+        return jsonify({"error": "Document introuvable."}), 404
+    html_path_str = doc.get("html_path", "")
+    if not html_path_str:
+        return jsonify({"error": "Chemin HTML absent de l'entrée."}), 404
+    html_path = Path(html_path_str)
+    if not html_path.exists():
+        return jsonify({"error": "Fichier HTML introuvable sur le disque."}), 404
+    return send_file(str(html_path), mimetype="text/html; charset=utf-8")
+
+
+# ---------------------------------------------------------------------------
 # API IA
 # ---------------------------------------------------------------------------
 
