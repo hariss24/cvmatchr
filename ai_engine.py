@@ -120,3 +120,152 @@ def _stream_anthropic(
     ) as stream:
         for text in stream.text_stream:
             yield text
+
+
+# ---------------------------------------------------------------------------
+# Chat IA éditeur — réponse JSON non-streaming
+# ---------------------------------------------------------------------------
+
+_SYSTEM_EDITOR_CHAT = (
+    "Tu es un assistant expert en rédaction de CV et lettres de motivation.\n"
+    "Tu reçois le HTML et CSS actuels du document, ainsi qu'une demande de l'utilisateur.\n\n"
+    "RÈGLES ABSOLUES — NE JAMAIS ENFREINDRE :\n"
+    "1. Ne FABRIQUE JAMAIS d'informations absentes du document : pas d'expérience inventée,\n"
+    "   pas de diplôme fictif, pas de date approximée, pas de métrique inventée.\n"
+    "2. PRÉSERVE tous les faits existants : noms, dates, diplômes, compétences, langues.\n"
+    "3. Tu peux : réécrire, reformuler, réorganiser, améliorer le style, corriger l'orthographe.\n\n"
+    "FORMAT DE RÉPONSE OBLIGATOIRE — JSON PUR, RIEN D'AUTRE :\n"
+    '{"reply":"Message court (1-3 phrases)","proposals":[{"id":"p1","title":"Titre court",'
+    '"summary":"Ce qui change (1-2 phrases)","html":"HTML COMPLET","css":"CSS COMPLET ou \'\'"}]}\n\n'
+    "CONTRAINTES :\n"
+    "- Maximum 2 propositions (sauf demande explicite).\n"
+    "- Si aucun changement utile n'est possible sans inventer du contenu, proposals=[] et explique dans reply.\n"
+    "- 'html' = document HTML COMPLET (pas un extrait).\n"
+    "- 'css' = CSS COMPLET si modifié, ou chaîne vide '' si inchangé.\n"
+    "- JSON PUR : aucune balise markdown, aucun ```json, aucun texte avant ou après le JSON."
+)
+
+
+def _complete_gemini(messages: list[dict], system: str, api_key: str) -> str:
+    from google import genai
+    from google.genai import types
+
+    client = genai.Client(api_key=api_key)
+
+    contents = []
+    for msg in messages:
+        role = "user" if msg["role"] == "user" else "model"
+        contents.append(types.Content(
+            role=role,
+            parts=[types.Part.from_text(text=str(msg["content"]))],
+        ))
+
+    config = types.GenerateContentConfig(system_instruction=system)
+
+    try:
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=contents,
+            config=config,
+        )
+        return response.text or ""
+    except Exception as exc:
+        exc_str = str(exc)
+        if "429" in exc_str or "RESOURCE_EXHAUSTED" in exc_str or "quota" in exc_str.lower():
+            delay = _parse_retry_delay(exc_str)
+            retry_hint = f" Réessayez dans {delay}." if delay else " Réessayez dans quelques minutes."
+            raise RuntimeError(
+                f"Quota Gemini épuisé ({GEMINI_MODEL}).{retry_hint} "
+                "Pour ne plus avoir cette limite, ajoutez votre propre clé dans ⚙️ Paramètres."
+            ) from None
+        raise
+
+
+def _complete_anthropic(messages: list[dict], system: str, api_key: str) -> str:
+    import anthropic
+    client = anthropic.Anthropic(api_key=api_key)
+    response = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=8192,
+        system=system,
+        messages=messages,
+    )
+    return response.content[0].text if response.content else ""
+
+
+def complete_chat(
+    messages: list[dict],
+    html: str,
+    css: str,
+    doc_type: str = "CV",
+    job_desc: str = "",
+    active_tab: str = "html",
+    api_key: str | None = None,
+) -> dict:
+    """Appelle l'IA en mode non-streaming et retourne {"reply": str, "proposals": list}.
+
+    Raises:
+        ValueError: clé manquante, JSON invalide, ou structure incorrecte.
+        RuntimeError: quota épuisé.
+    """
+    import json as _json
+
+    key = api_key or os.environ.get("GEMINI_API_KEY", "")
+    if not key:
+        raise ValueError(
+            "Aucune clé API configurée. "
+            "Ajoutez GEMINI_API_KEY dans les variables d'environnement "
+            "ou une clé personnelle dans ⚙️ Paramètres."
+        )
+
+    context = f"Document actuel ({doc_type}) :\n\nHTML :\n{html}"
+    if css:
+        context += f"\n\nCSS :\n{css}"
+    if job_desc:
+        context += f"\n\nOffre d'emploi cible :\n{job_desc}"
+
+    # Contexte injecté en tête comme premier échange user/assistant
+    augmented = [
+        {"role": "user",      "content": context},
+        {"role": "assistant", "content": "Contexte reçu. Que souhaitez-vous modifier ?"},
+    ] + list(messages)
+
+    if _is_anthropic_key(key):
+        raw = _complete_anthropic(augmented, _SYSTEM_EDITOR_CHAT, key)
+    else:
+        raw = _complete_gemini(augmented, _SYSTEM_EDITOR_CHAT, key)
+
+    raw = raw.strip()
+    if raw.startswith("```"):
+        raw = re.sub(r"^```(?:json)?\s*", "", raw)
+        raw = re.sub(r"\s*```\s*$", "", raw.strip())
+        raw = raw.strip()
+
+    try:
+        result = _json.loads(raw)
+    except _json.JSONDecodeError as exc:
+        raise ValueError(f"Réponse IA invalide (JSON malformé) : {exc}") from None
+
+    if not isinstance(result, dict) or "reply" not in result or "proposals" not in result:
+        raise ValueError("Réponse IA invalide : champs 'reply' et 'proposals' attendus.")
+
+    proposals = []
+    for p in result.get("proposals", []):
+        if not isinstance(p, dict):
+            continue
+        p_html = str(p.get("html", "")).strip()
+        p_css  = str(p.get("css",  "")).strip()
+        if p_html == html.strip() and p_css == css.strip():
+            continue
+        proposals.append({
+            "id":      str(p.get("id", f"p{len(proposals) + 1}")),
+            "title":   str(p.get("title",   "Proposition"))[:100],
+            "summary": str(p.get("summary", ""))[:500],
+            "html":    p_html,
+            "css":     p_css,
+        })
+
+    return {
+        "reply":     str(result.get("reply", ""))[:1000],
+        "proposals": proposals,
+    }

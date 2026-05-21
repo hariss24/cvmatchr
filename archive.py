@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS documents (
 """
 
 
+
 def _get_db() -> sqlite3.Connection:
     """Ouvre une connexion SQLite en mode WAL (lecture concurrente sans lock)."""
     conn = sqlite3.connect(str(_DB_PATH), check_same_thread=False, timeout=10)

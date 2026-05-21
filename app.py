@@ -582,6 +582,54 @@ def api_tailor():
     return _stream_ai(generate)
 
 
+_MAX_CHAT_PAYLOAD = 1_000_000  # 1 Mo
+
+
+@app.route("/api/editor-chat", methods=["POST"])
+def api_editor_chat():
+    if request.content_length and request.content_length > _MAX_CHAT_PAYLOAD:
+        return jsonify({"error": "Payload trop grand (max 1 Mo)."}), 413
+
+    data       = request.get_json(silent=True) or {}
+    html       = (data.get("html")       or "").strip()
+    css        = (data.get("css")        or "").strip()
+    messages   = data.get("messages")   or []
+    doc_type   = (data.get("doc_type")   or "CV").strip()
+    job_desc   = (data.get("job_desc")   or "").strip()
+    active_tab = (data.get("active_tab") or "html").strip()
+
+    if not html:
+        return jsonify({"error": "Le HTML du document est requis."}), 400
+    if not messages or not isinstance(messages, list):
+        return jsonify({"error": "Le champ 'messages' (liste non vide) est requis."}), 400
+    if len(html.encode()) + len(css.encode()) > _MAX_CHAT_PAYLOAD:
+        return jsonify({"error": "Document trop grand pour le chat IA (max 1 Mo)."}), 413
+
+    user_key = (request.headers.get("X-Api-Key") or "").strip() or None
+    err = _check_quota(user_key)
+    if err:
+        return err
+
+    try:
+        result = ai_engine.complete_chat(
+            messages=messages,
+            html=html,
+            css=css,
+            doc_type=doc_type,
+            job_desc=job_desc,
+            active_tab=active_tab,
+            api_key=user_key,
+        )
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    except RuntimeError as exc:
+        return jsonify({"error": str(exc)}), 429
+    except Exception as exc:
+        return jsonify({"error": f"Erreur IA : {exc}"}), 500
+
+    return jsonify(result)
+
+
 # ---------------------------------------------------------------------------
 # Lanceur local (desktop)
 # ---------------------------------------------------------------------------

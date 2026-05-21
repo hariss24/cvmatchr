@@ -138,7 +138,7 @@ button.ghost:active { box-shadow: var(--neu-inset); transform: translateY(1px); 
   border-radius: 16px;
   padding: 18px 22px;
   display: grid;
-  grid-template-columns: 130px 100px 1fr 1fr 1.2fr 180px;
+  grid-template-columns: 130px 100px 1fr 1fr 1.2fr 260px;
   gap: 20px;
   align-items: center;
   border: none;
@@ -149,8 +149,17 @@ button.ghost:active { box-shadow: var(--neu-inset); transform: translateY(1px); 
 .card-date-time { font-size: 10px; color: var(--faint); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
 .card-label { font-size: 10px; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; margin-bottom: 2px; }
 .card-val { font-size: 14px; font-weight: 700; color: var(--text); }
-.card-filename { font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.card-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.card-filename { font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text); font-weight: 500; overflow: hidden; display: flex; flex-direction: column; gap: 4px; }
+.card-filename > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-stats { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px; }
+.stat-chip {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 10px; font-weight: 700; font-family: 'Inter', sans-serif;
+  color: var(--muted); background: var(--bg);
+  box-shadow: var(--neu-inset); border-radius: 6px;
+  padding: 2px 7px; cursor: default;
+}
+.card-actions { display: flex; gap: 8px; justify-content: flex-end; align-items: center; }
 
 .type-badge {
   display: inline-block; padding: 6px 12px; border-radius: 999px;
@@ -174,6 +183,9 @@ button.ghost:active { box-shadow: var(--neu-inset); transform: translateY(1px); 
 .neu-btn-sm:active { box-shadow: var(--neu-inset); transform: translateY(0); }
 .neu-btn-sm.danger { color: var(--error); }
 .neu-btn-sm.danger:hover { box-shadow: var(--neu-raised); }
+.neu-btn-sm.view-pdf { color: var(--orange); }
+.stat-chip-recruiter { color: #2e7d32 !important; }
+[data-theme="dark"] .stat-chip-recruiter { color: #66bb6a !important; }
 
 /* ---- Responsive Mobile ---- */
 @media (max-width: 768px) {

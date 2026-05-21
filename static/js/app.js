@@ -879,7 +879,7 @@ $('go').onclick = async () => {
         company:    $('company').value.trim(),
         role:       $('role').value.trim(),
         notes:      $('notes').value.trim(),
-        job_desc:   $('ia-job-desc').value.trim(),
+        job_desc:   $('job-desc-input').value.trim(),
         format:     $('format').value,
         margin:     $('margin').value,
         background: $('bg').checked,
@@ -917,7 +917,7 @@ $('go').onclick = async () => {
         company:    $('company').value.trim(),
         role:       $('role').value.trim(),
         notes:      $('notes').value.trim(),
-        job_desc:   $('ia-job-desc').value.trim(),
+        job_desc:   $('job-desc-input').value.trim(),
       });
       localStorage.setItem(HISTORY_KEY, JSON.stringify(hist.slice(0, 100)));
     } catch (_) {}
@@ -972,16 +972,9 @@ $('go').onclick = async () => {
 })();
 
 // ============================================================
-// Assistant IA
+// Chat IA
 // ============================================================
-const modalIa = $('modal-ia');
-$('btn-ia').onclick = () => { modalIa.style.display = 'flex'; updatePrompt(); };
-$('close-modal').onclick = () => { modalIa.style.display = 'none'; };
-window.addEventListener('click', e => { if (e.target === modalIa) modalIa.style.display = 'none'; });
-
-// ---- Sélecteurs de niveau ----------------------------------------
 let _tailorLevel = 'adapte';
-let _iaLevel = 'adapte';
 
 function _initLevelSelector(selectorId, onChange) {
   const el = $(selectorId);
@@ -996,9 +989,171 @@ function _initLevelSelector(selectorId, onChange) {
 }
 
 _initLevelSelector('tailor-level-selector', (lvl) => { _tailorLevel = lvl; });
-_initLevelSelector('ia-level-selector', (lvl) => { _iaLevel = lvl; updatePrompt(); });
 
-// ---- Prompts par niveau pour l'assistant IA ----------------------
+// ---- Chat panel -------------------------------------------------------
+const chatPanel   = $('chat-ia-panel');
+const chatOverlay = $('chat-overlay');
+const chatMsgs    = $('chat-messages');
+const chatInput   = $('chat-input');
+
+let _chatHistory    = [];
+let _chatPreviewing = false;
+
+function openChatPanel() {
+  chatPanel.classList.add('open');
+  chatOverlay.classList.add('open');
+  chatInput.focus();
+}
+
+function closeChatPanel() {
+  chatPanel.classList.remove('open');
+  chatOverlay.classList.remove('open');
+  if (_chatPreviewing) { _chatPreviewing = false; schedulePreview(); }
+}
+
+$('btn-ia').onclick = openChatPanel;
+$('chat-panel-close').onclick = closeChatPanel;
+chatOverlay.addEventListener('click', closeChatPanel);
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && chatPanel.classList.contains('open')) closeChatPanel();
+});
+
+function _buildPreviewHtml(html, css) {
+  if (!css || !css.trim()) return html;
+  const safeCss = css.replace(/<\/style\s*>/gi, '<\\/style>');
+  if (/<\/head>/i.test(html)) return html.replace(/<\/head>/i, '<style>\n' + safeCss + '\n</style>\n</head>');
+  if (/<html[\s>]/i.test(html)) return html.replace(/<html([^>]*)>/i, '<html$1>\n<head><meta charset="utf-8"><style>\n' + safeCss + '\n</style></head>');
+  return '<!DOCTYPE html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n<style>\n' + safeCss + '\n</style>\n</head>\n<body>\n' + html + '\n</body>\n</html>';
+}
+
+function _appendMsg(role, text) {
+  const wrap   = document.createElement('div');
+  wrap.className = 'chat-message chat-message--' + role;
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble';
+  bubble.textContent = text;
+  wrap.appendChild(bubble);
+  chatMsgs.appendChild(wrap);
+  chatMsgs.scrollTop = chatMsgs.scrollHeight;
+  return wrap;
+}
+
+function _appendProposals(proposals) {
+  proposals.forEach(function(p) {
+    var card = document.createElement('div');
+    card.className = 'chat-proposal';
+
+    var titleEl = document.createElement('span');
+    titleEl.className = 'proposal-title';
+    titleEl.textContent = p.title;
+
+    var summaryEl = document.createElement('span');
+    summaryEl.className = 'proposal-summary';
+    summaryEl.textContent = p.summary;
+
+    var actions = document.createElement('div');
+    actions.className = 'proposal-actions';
+
+    var btnPreview = document.createElement('button');
+    btnPreview.className = 'proposal-btn proposal-preview';
+    btnPreview.textContent = 'Prévisualiser';
+
+    var btnApply = document.createElement('button');
+    btnApply.className = 'proposal-btn proposal-apply';
+    btnApply.textContent = 'Appliquer';
+
+    var btnReject = document.createElement('button');
+    btnReject.className = 'proposal-btn proposal-reject';
+    btnReject.textContent = 'Rejeter';
+
+    actions.appendChild(btnPreview);
+    actions.appendChild(btnApply);
+    actions.appendChild(btnReject);
+    card.appendChild(titleEl);
+    card.appendChild(summaryEl);
+    card.appendChild(actions);
+    chatMsgs.appendChild(card);
+    chatMsgs.scrollTop = chatMsgs.scrollHeight;
+
+    btnPreview.onclick = function() {
+      _chatPreviewing = true;
+      $('preview').srcdoc = _buildPreviewHtml(p.html, p.css);
+    };
+
+    btnApply.onclick = async function() {
+      await saveSnapshot('Avant chat IA');
+      htmlModel.setValue(p.html);
+      if (cssModel && p.css) cssModel.setValue(p.css);
+      _chatPreviewing = false;
+      schedulePreview();
+      btnPreview.disabled = true;
+      btnApply.disabled   = true;
+      btnReject.disabled  = true;
+      card.classList.add('proposal--applied');
+    };
+
+    btnReject.onclick = function() {
+      if (_chatPreviewing) { _chatPreviewing = false; schedulePreview(); }
+      btnPreview.disabled = true;
+      btnApply.disabled   = true;
+      btnReject.disabled  = true;
+      card.classList.add('proposal--rejected');
+    };
+  });
+}
+
+async function _sendChat() {
+  var text = chatInput.value.trim();
+  if (!text) return;
+  chatInput.value = '';
+  chatInput.disabled = true;
+  $('chat-send-btn').disabled = true;
+
+  _appendMsg('user', text);
+  _chatHistory.push({ role: 'user', content: text });
+  var loading = _appendMsg('assistant', '…');
+  loading.classList.add('chat-loading');
+
+  try {
+    var resp = await fetch('/api/editor-chat', {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, getApiHeaders()),
+      body: JSON.stringify({
+        messages:   _chatHistory,
+        html:       htmlModel.getValue(),
+        css:        cssModel ? cssModel.getValue() : '',
+        doc_type:   ($('doc_type') || {}).value || 'CV',
+        job_desc:   (($('job-desc-input') || {}).value || '').trim(),
+        active_tab: activeTab || 'html',
+      }),
+    });
+    loading.remove();
+    var data = await resp.json();
+    if (!resp.ok) {
+      _appendMsg('assistant', data.error || 'Erreur inconnue.');
+      _chatHistory.pop();
+      return;
+    }
+    _appendMsg('assistant', data.reply);
+    _chatHistory.push({ role: 'assistant', content: data.reply });
+    if (data.proposals && data.proposals.length) _appendProposals(data.proposals);
+  } catch (e) {
+    loading.remove();
+    _appendMsg('assistant', 'Erreur réseau : ' + e.message);
+    _chatHistory.pop();
+  } finally {
+    chatInput.disabled = false;
+    $('chat-send-btn').disabled = false;
+    chatInput.focus();
+  }
+}
+
+$('chat-send-btn').onclick = _sendChat;
+chatInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); _sendChat(); }
+});
+
+// ---- Prompts par niveau (utilisé par le tailoring panel) ---
 const LEVEL_PROMPT_RULES = {
   peu: `Règles d'adaptation (niveau SUBTIL) :
 - Ajuste le titre/tagline sous le nom pour refléter le type de poste visé, de façon générique.
@@ -1018,84 +1173,6 @@ const LEVEL_PROMPT_RULES = {
 - Réécris entièrement les puces d'expériences (4 puces max par expérience, sans inventer de contenu absent du CV).
 - ANTI-DÉTECTION : n'écris jamais le nom de l'entreprise ciblée dans le résumé ou le titre.
 - ABSOLUMENT INTERDIT : supprimer des langues, supprimer les centres d'intérêt, inventer des compétences, modifier les dates/entreprises du parcours/diplômes.`,
-};
-
-function updatePrompt() {
-  const jobDesc    = $('ia-job-desc').value.trim();
-  const tplName    = $('ia-template').value;
-  const wantLetter = $('ia-cover-letter').checked;
-  const tpl        = TEMPLATES[tplName] || TEMPLATES['sobre'];
-  const levelRules = LEVEL_PROMPT_RULES[_iaLevel] || LEVEL_PROMPT_RULES['adapte'];
-
-  let prompt = `Agis en tant qu'expert en recrutement. Je te fournis en pièce jointe mon CV actuel en .pdf ou html.
-
-Voici l'offre d'emploi à laquelle je postule :
----
-${jobDesc || "[Collez votre offre d'emploi ici ou décrivez le poste visé]"}
----
-
-Ton objectif est de rédiger mon nouveau CV${wantLetter ? ' ET MA LETTRE DE MOTIVATION' : ''} optimisé(s) pour ce poste, en utilisant STRICTEMENT la structure HTML fournie ci-dessous.
-
-${levelRules}
-
-Règles générales (non négociables) :
-1. Fais d'abord une brève analyse des mots-clés de l'offre et de mon profil.
-2. Remplis les balises HTML avec mes informations. Le CV doit tenir sur 1 page A4.
-3. Ne modifie AUCUNE classe CSS, ne touche pas à la structure HTML.
-4. Pour la photo de profil, laisse exactement le tag suivant sans le modifier : src="URL_DE_VOTRE_PHOTO_ICI".
-5. Rends UNIQUEMENT le(s) bloc(s) de code HTML final, prêt(s) à être copié(s).
-6. QUANTITÉS — RÈGLE CRITIQUE : le squelette est un modèle de structure, pas un modèle de quantité. Le nombre d'éléments dans chaque section (compétences, langues, expériences, formations) est indicatif. Tu dois reproduire le pattern HTML autant de fois que nécessaire pour inclure TOUS les éléments du CV fourni. Exemples : si le CV a 10 compétences, crée 10 balises. Si le CV a 4 langues, crée 4 entrées. Si le CV a 5 expériences, crée 5 blocs. Ne jamais limiter à ce que le squelette montre.
-7. Pour chaque expérience professionnelle, liste 3 à 4 tâches maximum.
-8. Pour les dates d'expériences, utilise le format : MM/AAAA - MM/AAAA ou MM/AAAA - Présent.
-
-Voici le squelette du CV à remplir :
-\`\`\`html
-${tpl.html}
-\`\`\`
-`;
-
-  if (wantLetter) {
-    prompt += `
-Voici le squelette de la lettre de motivation à remplir :
-\`\`\`html
-<div style="padding: 40px; font-family: sans-serif; font-size: 11pt; line-height: 1.5; color: #333;">
-  <p><strong>Prénom Nom</strong><br>
-  email@example.com &middot; +33 6 00 00 00 00<br>
-  Ville</p>
-  <br><br>
-  <p><strong>À l'attention du responsable du recrutement</strong><br>
-  [Nom de l'entreprise]</p>
-  <br><br>
-  <p><strong>Objet : Candidature au poste de [Titre du poste]</strong></p>
-  <br>
-  <p>Madame, Monsieur,</p>
-  <p>[Paragraphe 1 : Accroche contextuelle (Vous)]</p>
-  <p>[Paragraphe 2 : Compétences et valeur ajoutée (Moi)]</p>
-  <p>[Paragraphe 3 : Projection future (Nous)]</p>
-  <p>[Appel à l'action pour un entretien]</p>
-  <br>
-  <p>Cordialement,</p>
-  <p>Prénom Nom</p>
-</div>
-\`\`\`
-`;
-  }
-
-  $('ia-prompt').value = prompt;
-}
-
-$('ia-job-desc').addEventListener('input', updatePrompt);
-$('ia-template').addEventListener('change', updatePrompt);
-$('ia-cover-letter').addEventListener('change', updatePrompt);
-
-$('ia-copy-btn').onclick = () => {
-  navigator.clipboard.writeText($('ia-prompt').value).then(() => {
-    const btn = $('ia-copy-btn');
-    const oldText = btn.innerHTML;
-    btn.textContent = 'Copié ! Collez-le dans ChatGPT ou Claude';
-    btn.style.background = '#5dd39e';
-    setTimeout(() => { btn.innerHTML = oldText; btn.style.background = ''; }, 3000);
-  });
 };
 
 // ============================================================
@@ -1395,23 +1472,19 @@ function _saveCurrentOffer() {
 
 function _syncJobDesc(value) {
   const tailor = $('job-desc-input');
-  const modal  = $('ia-job-desc');
   if (tailor && tailor.value !== value) tailor.value = value;
-  if (modal  && modal.value  !== value) modal.value  = value;
   try { localStorage.setItem(STORAGE_KEY_JOB_DRAFT, value); } catch (_) {}
-  if (typeof updatePrompt === 'function') updatePrompt();
 }
 
 // Restore draft job desc on load
 (function() {
   const draft = localStorage.getItem(STORAGE_KEY_JOB_DRAFT) || '';
-  if (draft) { const t = $('job-desc-input'); const m = $('ia-job-desc'); if (t) t.value = draft; if (m) m.value = draft; }
+  if (draft) { const t = $('job-desc-input'); if (t) t.value = draft; }
   _refreshOffersSelect();
 })();
 
 // Auto-save draft + sync on input
 $('job-desc-input').addEventListener('input', (e) => { _syncJobDesc(e.target.value); });
-$('ia-job-desc').addEventListener('input', (e) => { _syncJobDesc(e.target.value); });
 
 // Save button
 $('btn-save-offer').addEventListener('click', _saveCurrentOffer);

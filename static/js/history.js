@@ -81,16 +81,78 @@ async function _getAllHtmlFromIDB() {
   } catch (_) { return []; }
 }
 
+// ---- Statistiques ---------------------------------------------------------
+
+function trackStat(id, field) {
+  try {
+    const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    const idx  = hist.findIndex(e => e.id === id);
+    if (idx !== -1) {
+      hist[idx][field] = (hist[idx][field] || 0) + 1;
+      if (field === 'pdf_views') {
+        hist[idx]['last_viewed_at'] = new Date().toISOString();
+      }
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+    }
+  } catch (_) {}
+}
+
+async function viewPdf(id) {
+  const record = await _loadHtmlFromIDB(id);
+  if (!record || !record.html) {
+    alert("HTML introuvable. Chargez ce document dans l'éditeur et générez le PDF au moins une fois.");
+    return;
+  }
+  try {
+    const resp = await fetch('/convert', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ html: record.html, format: 'A4', margin: '0', background: true }),
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      alert('Erreur lors de la génération du PDF : ' + (err.error || resp.statusText));
+      return;
+    }
+    const blob = await resp.blob();
+    const url  = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    trackStat(id, 'pdf_views');
+    await load(); // rafraîchit les compteurs affichés
+  } catch (err) {
+    alert('Erreur réseau : ' + err.message);
+  }
+}
+
 // ---- Rendu ----------------------------------------------------------------
 
 function buildRow(e) {
   const id         = e.id;
   const reloadHref = '/?load=' + encodeURIComponent(id);
 
-  const dateStr        = fmtDate(e.created_at);
-  const [day, time]    = dateStr.split(', ');
-  const docType        = e.doc_type || '';
-  const typeClass      = 'type-badge type-' + docType.toLowerCase();
+  const dateStr     = fmtDate(e.created_at);
+  const [day, time] = dateStr.split(', ');
+  const docType     = e.doc_type || '';
+  const typeClass   = 'type-badge type-' + docType.toLowerCase();
+
+  const pdfViews      = e.pdf_views      || 0;
+  const editorReloads = e.editor_reloads || 0;
+
+  const statChips = [];
+  if (pdfViews > 0) {
+    const label = e.last_viewed_at
+      ? `Vu ${pdfViews} fois · dernier : ${fmtDate(e.last_viewed_at)}`
+      : `Vu ${pdfViews} fois`;
+    statChips.push(el('span', { class: 'stat-chip', title: label },
+      ['👁 ' + pdfViews]
+    ));
+  }
+  if (editorReloads > 0) {
+    statChips.push(el('span', { class: 'stat-chip', title: 'Chargements dans l\'éditeur' },
+      ['↩ ' + editorReloads]
+    ));
+  }
 
   return el('div', { class: 'history-card', 'data-id': id }, [
     el('div', { class: 'card-date' }, [
@@ -108,9 +170,14 @@ function buildRow(e) {
       el('div', { class: 'card-label', text: 'Poste' }),
       el('div', { class: 'card-val', title: e.job_desc || '', text: e.role || '-' }),
     ]),
-    el('div', { class: 'card-filename', title: e.filename || '', text: e.filename || '' }),
+    el('div', { class: 'card-filename' }, [
+      el('span', { title: e.filename || '', text: e.filename || '' }),
+      statChips.length ? el('div', { class: 'card-stats' }, statChips) : null,
+    ]),
     el('div', { class: 'card-actions' }, [
-      el('a',      { class: 'neu-btn-sm',        href: reloadHref, text: 'Recharger' }),
+      el('button', { class: 'neu-btn-sm view-pdf', onclick: () => viewPdf(id), text: 'Voir PDF' }),
+      el('a',      { class: 'neu-btn-sm', href: reloadHref,
+                     onclick: () => trackStat(id, 'editor_reloads'), text: 'Recharger' }),
       el('button', { class: 'neu-btn-sm danger', onclick: () => del(id), text: 'Supprimer' }),
     ]),
   ]);
