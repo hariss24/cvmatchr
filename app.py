@@ -466,8 +466,15 @@ _COMMON_HTML_RULES = (
     "Chaque section présente dans le CV original doit exister dans ta réponse.\n"
     "5. ATTRIBUTS HTML : Conserve tous les attributs data-*, aria-* et autres attributs "
     "personnalisés exactement tels qu'ils sont dans le HTML reçu.\n"
-    "6. FORMAT DE SORTIE : Retourne UNIQUEMENT le code HTML complet, du <!DOCTYPE html> "
-    "jusqu'à </html>. Zéro bloc markdown (```html), zéro commentaire, zéro texte avant ou après."
+    "6. RÉSUMÉ/ACCROCHE : Le texte de la section résumé ou accroche ('À propos', 'Profil', etc.) "
+    "ne doit JAMAIS dépasser 400 mots. Si ta version dépasse cette limite, condense sans perdre "
+    "les informations clés.\n"
+    "7. COMMENTAIRES DE NAVIGATION : Si le HTML original ne contient pas déjà de commentaires "
+    "de section, insère un commentaire HTML avant chaque <section> principale, "
+    "au format <!-- ===== NOM DE LA SECTION ===== --> (nom en majuscules, en français). "
+    "Si des commentaires existent déjà, conserve-les tels quels sans les modifier.\n"
+    "8. FORMAT DE SORTIE : Retourne UNIQUEMENT le code HTML complet, du <!DOCTYPE html> "
+    "jusqu'à </html>. Zéro bloc markdown (```html), zéro commentaire global, zéro texte avant ou après."
 )
 
 

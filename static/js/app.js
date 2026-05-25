@@ -531,6 +531,7 @@ function restoreSnapshot(snap) {
   htmlModel.setValue(snap.html || '');
   if (cssModel) cssModel.setValue(snap.css || '');
   _resetTailorDiff();
+  setTimeout(_foldStyleBlocks, 300);
   if (snap.doc_type && $('doc_type')) $('doc_type').value = snap.doc_type;
   if (snap.company  && $('company'))  $('company').value  = snap.company;
   if (snap.role     && $('role'))     $('role').value     = snap.role;
@@ -626,12 +627,13 @@ require(['vs/editor/editor.main'], function () {
     scrollBeyondLastLine: false,
   });
 
-  // Auto-replier la région Photo_Base64 si déjà présente au chargement
-  if (htmlModel.getValue().includes('<!-- #region Photo_Base64 -->')) {
-    setTimeout(function() {
-      if (editor) editor.trigger('fold', 'editor.foldAllMarkerRegions');
-    }, 400);
-  }
+  // Auto-replier les <style> et la région Photo_Base64 au chargement
+  setTimeout(function() {
+    if (htmlModel.getValue().includes('<!-- #region Photo_Base64 -->')) {
+      editor.trigger('fold', 'editor.foldAllMarkerRegions');
+    }
+    _foldStyleBlocks();
+  }, 400);
 
   htmlModel.onDidChangeContent(() => {
     try { localStorage.setItem(STORAGE_KEY_HTML, htmlModel.getValue()); flashAutosave(); } catch (_) {}
@@ -830,6 +832,7 @@ document.querySelectorAll('.template-card').forEach(card => {
     if (htmlModel) htmlModel.setValue(tpl.html);
     if (cssModel)  cssModel.setValue(tpl.css);
     _resetTailorDiff();
+    setTimeout(_foldStyleBlocks, 300);
 
     ['company', 'role', 'filename', 'notes'].forEach(id => { const el = $(id); if (el) el.value = ''; });
     _syncJobDesc('');
@@ -851,6 +854,7 @@ $('clear').onclick = () => {
   if (htmlModel) htmlModel.setValue('');
   if (cssModel)  cssModel.setValue('');
   _resetTailorDiff();
+  setTimeout(_foldStyleBlocks, 300);
   ['company', 'role', 'filename', 'notes'].forEach(id => $(id).value = '');
   refreshFilenamePreview();
   try {
@@ -1016,6 +1020,29 @@ function _restoreBase64InTailor(html) {
   return out;
 }
 
+// Fold tous les blocs <style> dans l'éditeur HTML (réduit le bruit visuel).
+function _foldStyleBlocks() {
+  if (!editor || !htmlModel) return;
+  const count = htmlModel.getLineCount();
+  const lines = [];
+  for (let i = 1; i <= count; i++) {
+    if (/<style[\s>]/i.test(htmlModel.getLineContent(i))) lines.push(i);
+  }
+  if (lines.length) editor.trigger('api', 'editor.fold', { selectionLines: lines });
+}
+
+// Construit le HTML complet à envoyer à Gemini en y intégrant le CSS de l'éditeur.
+// Si le HTML est un fragment sans <head>, le wrapper dans un document minimal.
+function _buildTailorPayload(html, css) {
+  if (!css || !css.trim()) return html;
+  const safeCss = css.replace(/<\/style\s*>/gi, '<\\/style>');
+  if (/<\/head>/i.test(html)) {
+    return html.replace(/<\/head>/i, '<style>\n' + safeCss + '\n</style>\n</head>');
+  }
+  return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>\n'
+    + safeCss + '\n</style></head><body>\n' + html + '\n</body></html>';
+}
+
 function _initLevelSelector(selectorId, onChange) {
   const el = $(selectorId);
   if (!el) return;
@@ -1125,6 +1152,7 @@ function _appendProposals(proposals) {
       await saveSnapshot('Avant chat IA');
       htmlModel.setValue(p.html);
       if (cssModel && p.css) cssModel.setValue(p.css);
+      setTimeout(_foldStyleBlocks, 300);
       _chatPreviewing = false;
       schedulePreview();
       btnPreview.disabled = true;
@@ -1182,8 +1210,8 @@ async function _sendChat() {
       headers: Object.assign({ 'Content-Type': 'application/json' }, getApiHeaders()),
       body: JSON.stringify({
         messages:   _chatHistory,
-        html:       _stripBase64ForChat(htmlModel.getValue()),
-        css:        cssModel ? cssModel.getValue() : '',
+        html:       _buildTailorPayload(_stripBase64ForChat(htmlModel.getValue()), cssModel ? cssModel.getValue() : ''),
+        css:        '',
         doc_type:   ($('doc_type') || {}).value || 'CV',
         job_desc:   (($('job-desc-input') || {}).value || '').trim(),
         active_tab: activeTab || 'html',
@@ -1612,9 +1640,10 @@ $('btn-tailor').addEventListener('click', async () => {
 
   try {
     const strippedHtml = _stripBase64ForTailor(htmlModel.getValue());
+    const payloadHtml  = _buildTailorPayload(strippedHtml, cssModel ? cssModel.getValue() : '');
     const adapted = await streamToMonaco(
       '/api/tailor',
-      { html: strippedHtml, job_desc: jobDesc, level: _tailorLevel },
+      { html: payloadHtml, job_desc: jobDesc, level: _tailorLevel },
       getApiHeaders(),
       (partial) => {
         if (htmlModel) htmlModel.setValue(partial);
@@ -1624,6 +1653,7 @@ $('btn-tailor').addEventListener('click', async () => {
     );
     const restoredAdapted = _restoreBase64InTailor(adapted);
     if (htmlModel) htmlModel.setValue(restoredAdapted);
+    setTimeout(_foldStyleBlocks, 300);
     showToast('CV adapté avec succès.', 'ok');
     status.textContent = '';
     status.className   = 'tailor-status';
