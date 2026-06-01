@@ -506,7 +506,8 @@ _RESUME_SCHEMA_DESC = (
     '"date": "...", "bullets": ["...", "..."]}],\n'
     '  "education": [{"title": "...", "school": "...", "location": "...", "date": "..."}],\n'
     '  "skills": ["...", "..."],\n'
-    '  "languages": [{"name": "...", "level": "..."}]\n'
+    '  "languages": [{"name": "...", "level": "..."}],\n'
+    '  "interests": ["...", "..."]\n'
     '}'
 )
 
@@ -559,6 +560,12 @@ def _normalize_resume(d: dict) -> dict:
         skills = [s for s in re.split(r"[\n,;]", skills)]
     if not isinstance(skills, list):
         skills = []
+    
+    interests = d.get("interests")
+    if isinstance(interests, str):
+        interests = [i for i in re.split(r"[\n,;]", interests)]
+    if not isinstance(interests, list):
+        interests = []
 
     return {
         "name":       _s(d.get("name")),
@@ -572,6 +579,7 @@ def _normalize_resume(d: dict) -> dict:
         "education":  [education_item(e) for e in edu][:20],
         "skills":     [_s(s) for s in skills if _s(s)][:60],
         "languages":  [language_item(l) for l in langs if _s(l.get("name") if isinstance(l, dict) else l)][:20],
+        "interests":  [_s(i) for i in interests if _s(i)][:20],
     }
 
 

@@ -480,13 +480,23 @@ ${interests.map(s => `      <span class="plain-list__item">${esc(s)}</span>`).jo
     },
     // Charge un CV (IA / import PDF) dans le formulaire et l'applique à l'éditeur.
     // La photo existante est conservée si le CV entrant n'en fournit pas.
-    loadData(obj) {
+    loadData(obj, skipApply = false) {
       if (!resumeData) resumeData = loadStoredData();
       const incoming = normalizeIncoming(obj);
       if (!incoming.photo && resumeData && resumeData.photo) incoming.photo = resumeData.photo;
       resumeData = incoming;
       buildForm();
-      applyToEditor();
+      if (!skipApply) {
+        applyToEditor();
+      } else {
+        persist();
+      }
+    },
+    // Vide le formulaire (utile lors d'un switch vers un document sans JSON)
+    clearData() {
+      resumeData = normalizeIncoming(null);
+      buildForm();
+      persist();
     },
     // true si l'éditeur affiche actuellement un CV généré par le formulaire.
     matchesEditor() {

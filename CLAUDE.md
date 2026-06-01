@@ -7,11 +7,13 @@ Ce fichier définit les règles de base pour intervenir sur le dépôt `html-to-
 
 ---
 
-## 🛠️ Règles de Développement
+## 🛠️ Règles de Développement (Mise à jour)
 
-1. **Avant de coder, vérifie l'architecture** : L'interface web (`app.js`) et le backend (`app.py`) ont des rôles très stricts. Le rendu HTML se fait côté frontend, le backend ne fait que convertir en PDF.
-2. **Ne casse pas la synchro JSON** : Le projet migre vers une source de vérité JSON. Toute nouvelle fonctionnalité IA doit supporter les payloads JSON.
-3. **Fichiers lourds** : Gère les optimisations côté frontend (ex: `<canvas>` pour les images) pour soulager les requêtes API Gemini/Anthropic et la base SQLite.
+1. **Avant de coder, vérifie l'architecture** : L'interface web (`static/js/app.js`, `resume-form.js`) et le backend (`app.py`) ont des rôles très stricts. Le rendu HTML se fait côté frontend, le backend ne fait que convertir en PDF.
+2. **Ne casse pas la synchro JSON** : Le projet a migré vers une source de vérité JSON. Toute nouvelle fonctionnalité IA doit prioriser les endpoints JSON (ex: `/api/tailor-resume`) plutôt que les anciens endpoints HTML (`/api/tailor`).
+3. **Préserver l'intégrité des données JSON** : Lors des adaptations de CV via l'IA, assure-toi de **ne jamais perdre des champs** existants (ex: `interests`, `languages`, `certifications`). Le flux de données doit préserver l'intégralité du modèle de données (Schema JSON).
+4. **Fichiers lourds (Images Base64)** : Il est CRITIQUE de toujours **stripper la clé `photoBase64`** des objets JSON avant de les envoyer aux moteurs d'IA (Gemini/Anthropic) pour éviter d'exploser les limites de tokens, puis de les restaurer à la réception.
+5. **Esthétique de l'UI** : Le design s'oriente vers un style soigné, avec des touches de skeuomorphisme (effets de relief, mode expert interactif, transitions douces). Ne livre pas d'UI "basique".
 
 ## 🚀 Commandes Essentielles
 

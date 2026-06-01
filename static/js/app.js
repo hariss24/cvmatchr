@@ -850,8 +850,9 @@ require(['vs/editor/editor.main'], function () {
     _foldStyleBlocks();
   }, 400);
 
+  let _isSwitchingDoc = false;
   function _saveCurrentState() {
-    if (!htmlModel) return;
+    if (_isSwitchingDoc || !htmlModel) return;
     try {
       // Si le CV affiché provient du formulaire, on persiste aussi son JSON
       // structuré pour pouvoir reconstruire le formulaire au rechargement,
@@ -886,7 +887,7 @@ require(['vs/editor/editor.main'], function () {
   // Restaurer le formulaire depuis le brouillon (CV non encore exporté en PDF).
   // loadData() reconstruit les champs ET réécrit htmlModel + l'aperçu.
   if (initialFormJson && window.ResumeForm && window.ResumeForm.loadData) {
-    window.ResumeForm.loadData(initialFormJson);
+    window.ResumeForm.loadData(initialFormJson, true);
   }
   switchTab(wantTab);
 
@@ -941,8 +942,14 @@ require(['vs/editor/editor.main'], function () {
       if ($('doc_type')) $('doc_type').value = 'CV';
       try { localStorage.setItem(STORAGE_KEY_LAST_TYPE, 'CV'); } catch (_) { }
     }
+    
+    _isSwitchingDoc = true;
     htmlModel.setValue(tpl.html);
     cssModel.setValue(tpl.css);
+    if (window.ResumeForm && window.ResumeForm.clearData) {
+      window.ResumeForm.clearData();
+    }
+    setTimeout(() => { _isSwitchingDoc = false; }, 50);
   };
 
   // ---- Sélecteur de type de document (CV / Lettre) -------------------------
@@ -950,6 +957,9 @@ require(['vs/editor/editor.main'], function () {
     const newType = this.value;
     if (newType === _activeDocType) return;
 
+    _saveCurrentState(); // Sauvegarder le document actuel avant de le quitter
+
+    _isSwitchingDoc = true; // Empêcher l'autosave de polluer le nouveau document
     _activeDocType = newType;
     try { localStorage.setItem(STORAGE_KEY_LAST_TYPE, _activeDocType); } catch (_) { }
 
@@ -959,6 +969,11 @@ require(['vs/editor/editor.main'], function () {
         const saved = JSON.parse(raw);
         htmlModel.setValue(saved.html || '');
         if (cssModel) cssModel.setValue(saved.css || '');
+        if (saved.json && window.ResumeForm && window.ResumeForm.loadData) {
+          window.ResumeForm.loadData(saved.json, true); // Ne pas réécraser le HTML qu'on vient de set
+        } else if (!saved.json && window.ResumeForm && window.ResumeForm.clearData) {
+          window.ResumeForm.clearData(); // Document Expert pur, vider le formulaire
+        }
       } catch (_) { }
     } else {
       if (newType === 'Lettre') {
@@ -971,7 +986,17 @@ require(['vs/editor/editor.main'], function () {
         htmlModel.setValue('');
         if (cssModel) cssModel.setValue('');
       }
+      if (window.ResumeForm && window.ResumeForm.clearData) {
+        window.ResumeForm.clearData();
+      }
     }
+    
+    // Rétablir l'autosave et forcer la sauvegarde du nouvel état
+    setTimeout(() => { 
+      _isSwitchingDoc = false; 
+      _saveCurrentState(); 
+    }, 50);
+
     refreshFilenamePreview();
   });
 
@@ -1000,15 +1025,21 @@ require(['vs/editor/editor.main'], function () {
     loadHtmlFromIDB(loadId).then(stored => {
       if (stored && stored.json && window.ResumeForm && window.ResumeForm.loadData) {
         // CV issu du formulaire : on le rouvre en mode Formulaire.
-        // loadData() reconstruit le formulaire ET réécrit htmlModel + l'aperçu.
-        window.ResumeForm.loadData(stored.json);
+        _isSwitchingDoc = true;
+        htmlModel.setValue(stored.html || '');
+        if (cssModel) cssModel.setValue(stored.css || '');
+        window.ResumeForm.loadData(stored.json, true); // true = skipApply
+        setTimeout(() => { _isSwitchingDoc = false; }, 50);
         switchTab('form');
         return;
       }
       if (stored) {
         // HTML custom / éjecté / ancien : mode Expert (édition du code).
+        _isSwitchingDoc = true;
         htmlModel.setValue(stored.html || '');
         if (cssModel) cssModel.setValue(stored.css || '');
+        if (window.ResumeForm && window.ResumeForm.clearData) window.ResumeForm.clearData();
+        setTimeout(() => { _isSwitchingDoc = false; }, 50);
         setExpertMode(true);
         switchTab('html');
         return;
@@ -1020,8 +1051,11 @@ require(['vs/editor/editor.main'], function () {
           return r.text();
         })
         .then(h => {
+          _isSwitchingDoc = true;
           htmlModel.setValue(h);
           if (cssModel) cssModel.setValue('');
+          if (window.ResumeForm && window.ResumeForm.clearData) window.ResumeForm.clearData();
+          setTimeout(() => { _isSwitchingDoc = false; }, 50);
           setExpertMode(true);
           switchTab('html');
           // Migrer vers IDB pour les rechargements futurs
@@ -1063,6 +1097,7 @@ document.querySelectorAll('.template-card').forEach(card => {
 
     saveSnapshot('Avant nouveau CV');
 
+    _isSwitchingDoc = true;
     _activeDocType = 'CV';
     if ($('doc_type')) $('doc_type').value = 'CV';
     try { localStorage.setItem(STORAGE_KEY_LAST_TYPE, 'CV'); } catch (_) { }
@@ -1076,8 +1111,17 @@ document.querySelectorAll('.template-card').forEach(card => {
     _syncJobDesc('');
     refreshFilenamePreview();
 
+    if (window.ResumeForm && window.ResumeForm.clearData) {
+      window.ResumeForm.clearData();
+    }
+
+    setTimeout(() => { 
+      _isSwitchingDoc = false; 
+      _saveCurrentState(); 
+    }, 50);
+
     modalNewCv.style.display = 'none';
-    switchTab('html');
+    switchTab('form'); // On ouvre le formulaire par défaut
     showToast(`Template "${key}" chargé.`, 'ok');
   });
 });
@@ -1089,6 +1133,12 @@ $('clear').onclick = () => {
   const hasContent = (htmlModel && htmlModel.getValue().trim()) || (cssModel && cssModel.getValue().trim());
   if (hasContent && !confirm('Effacer tout le contenu ? Un snapshot automatique sera créé avant.')) return;
   saveSnapshot('Avant effacement');
+  
+  // Vider le formulaire s'il existe
+  if (window.ResumeForm && window.ResumeForm.clearData) {
+    window.ResumeForm.clearData();
+  }
+
   if (htmlModel) htmlModel.setValue('');
   if (cssModel) cssModel.setValue('');
   _resetTailorDiff();
@@ -1970,9 +2020,15 @@ $('close-modal-tailor').addEventListener('click', closeTailorModal);
 _modalTailor.addEventListener('click', (e) => { if (e.target === _modalTailor) closeTailorModal(); });
 
 // Tailoring sur les champs structurés (CV généré par le formulaire).
-async function _tailorResumeFields(jobDesc) {
-  const resume = window.ResumeForm.getData();
+async function _tailorResumeFields(jobDesc, overrideResume = null) {
+  const resume = overrideResume || window.ResumeForm.getData();
   if (!resume) { showToast("Aucune donnée de formulaire à adapter.", 'err'); return; }
+
+  // Retire la photo pour alléger la requête IA
+  const originalPhoto = resume.photo;
+  if (resume.photo) {
+    resume.photo = '';
+  }
 
   const btn = $('btn-tailor');
   const status = $('tailor-status');
@@ -2001,6 +2057,12 @@ async function _tailorResumeFields(jobDesc) {
       throw new Error(msg);
     }
     const adapted = await resp.json();
+    
+    // Restaure la photo
+    if (originalPhoto) {
+      adapted.photo = originalPhoto;
+    }
+
     window.ResumeForm.loadData(adapted); // reconstruit le formulaire + écrit dans htmlModel + aperçu
     showToast('CV adapté avec succès.', 'ok');
     status.textContent = '';
@@ -2022,8 +2084,22 @@ $('btn-tailor').addEventListener('click', async () => {
 
   const useMaster = $('tailor-use-master') && $('tailor-use-master').checked;
 
-  // CV structuré (formulaire) + sans CV Maître HTML → adaptation sur les champs.
-  if (!useMaster && window.ResumeForm && window.ResumeForm.matchesEditor()) {
+  if (useMaster) {
+    const rawMaster = localStorage.getItem(_docTypeKey('Maître'));
+    if (!rawMaster) { showToast("Aucun CV Maître trouvé.", 'err'); return; }
+    try {
+      const parsed = JSON.parse(rawMaster);
+      if (parsed.json && Object.keys(parsed.json).length > 0) {
+        // Le CV Maître contient les données JSON, on utilise l'adaptation JSON directe
+        await _tailorResumeFields(jobDesc, parsed.json);
+        return;
+      }
+    } catch (_) {
+      showToast("Erreur de lecture du CV Maître.", 'err');
+      return;
+    }
+  } else if (window.ResumeForm && window.ResumeForm.matchesEditor()) {
+    // CV structuré (formulaire) + sans CV Maître HTML → adaptation sur les champs.
     await _tailorResumeFields(jobDesc);
     return;
   }
