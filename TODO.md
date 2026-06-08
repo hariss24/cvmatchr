@@ -68,8 +68,8 @@ Suivi des fonctionnalités : ce qui est fait, ce qui est prévu, ce qui est en r
 
 ## 🟡 Priorité moyenne — bonnes idées
 
-- [ ] **Multi-modèles de mise en page (template)**
-  Aujourd'hui `ResumeForm.getTemplateId()` renvoie toujours `'sobre'` en dur (`resume-form.js`). Le champ `templateId` est déjà stocké partout (IndexedDB, export/import) mais inutile tant qu'il n'existe qu'un seul modèle. À activer le jour où on ajoute d'autres mises en page (Moderne / Classique / Minimal).
+- [x] **Multi-modèles de mise en page (template)**
+  Ajout d'un 2ᵉ modèle « Moderne » (`TEMPLATES.moderne` = sobre + overrides CSS accent bleu, mêmes classes donc zéro risque structurel) et d'un sélecteur dans le mode Formulaire. `getTemplateId()` lit désormais le choix (persisté dans localStorage), `ensureCss()`/`setTemplate()` appliquent le CSS du modèle sélectionné. Base prête pour ajouter Classique / Minimal (une entrée `TEMPLATES.*` + une `<option>`).
 
 - [ ] **Découper `static/js/app.js` (2378 lignes)**
   Fichier devenu un mastodonte qui mélange éditeur Monaco, chat IA, ATS, IndexedDB, tailoring… Chaque modif est plus risquée. Extraire des modules (ex: `idb.js`, `tailor.js`, `ats.js`). Refacto à faire prudemment, avec tests à l'appui — pas en aveugle.

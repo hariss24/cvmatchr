@@ -13,6 +13,7 @@
   'use strict';
 
   const STORAGE_KEY_DATA = 'html-to-pdf:resume-data';
+  const STORAGE_KEY_TEMPLATE = 'html-to-pdf:resume-template';
   const RENDER_MARKER = 'resume-template-renderer';
 
   // ----- Données par défaut (alignées sur le template « sobre ») -----
@@ -197,11 +198,31 @@ ${interests.map(s => `      <span class="plain-list__item">${esc(s)}</span>`).jo
     return JSON.parse(JSON.stringify(DEFAULT_RESUME));
   }
 
+  // ----- Modèle de mise en page (templateId) -----
+  function currentTemplateId() {
+    try {
+      const id = localStorage.getItem(STORAGE_KEY_TEMPLATE);
+      if (id && typeof TEMPLATES !== 'undefined' && TEMPLATES[id]) return id;
+    } catch (_) {}
+    return 'sobre';
+  }
+
+  // Change de modèle : remplace le CSS du document puis régénère le rendu.
+  function setTemplate(id) {
+    if (typeof TEMPLATES === 'undefined' || !TEMPLATES[id]) id = 'sobre';
+    try { localStorage.setItem(STORAGE_KEY_TEMPLATE, id); } catch (_) {}
+    if (typeof cssModel !== 'undefined' && cssModel && TEMPLATES[id]) {
+      cssModel.setValue(TEMPLATES[id].css);
+    }
+    applyToEditor();
+  }
+
   // ----- Application au CV (écrit dans htmlModel) -----
   function ensureCss() {
     if (typeof cssModel === 'undefined' || !cssModel) return;
-    if (!cssModel.getValue().includes(RENDER_MARKER) && TEMPLATES && TEMPLATES.sobre) {
-      cssModel.setValue(TEMPLATES.sobre.css);
+    const tpl = (typeof TEMPLATES !== 'undefined' && TEMPLATES) ? TEMPLATES[currentTemplateId()] : null;
+    if (!cssModel.getValue().includes(RENDER_MARKER) && tpl) {
+      cssModel.setValue(tpl.css);
     }
   }
 
@@ -266,6 +287,20 @@ ${interests.map(s => `      <span class="plain-list__item">${esc(s)}</span>`).jo
         </div>
       </div>
     `);
+
+    // Modèle de mise en page
+    const _tplId = currentTemplateId();
+    html.push(`<section class="rf-group">
+      <div class="rf-group-head"><span>Modèle de mise en page</span></div>
+      <div class="rf-grid">
+        <label class="rf-field"><span>Modèle</span>
+          <select id="rf-template-select">
+            <option value="sobre"${_tplId === 'sobre' ? ' selected' : ''}>Sobre</option>
+            <option value="moderne"${_tplId === 'moderne' ? ' selected' : ''}>Moderne</option>
+          </select>
+        </label>
+      </div>
+    </section>`);
 
     // Informations personnelles
     html.push(`<section class="rf-group">
@@ -423,6 +458,7 @@ ${interests.map(s => `      <span class="plain-list__item">${esc(s)}</span>`).jo
     });
 
     pane.addEventListener('change', (e) => {
+      if (e.target.id === 'rf-template-select') { setTemplate(e.target.value); return; }
       if (e.target.id !== 'rf-photo-input') return;
       const file = e.target.files[0];
       if (!file) return;
@@ -503,10 +539,9 @@ ${interests.map(s => `      <span class="plain-list__item">${esc(s)}</span>`).jo
       return typeof htmlModel !== 'undefined' && !!htmlModel &&
         htmlModel.getValue().includes(RENDER_MARKER);
     },
-    // Identifiant du modèle de mise en page produit par le formulaire.
-    // Un seul modèle aujourd'hui ; champ prévu pour le futur multi-modèles.
+    // Identifiant du modèle de mise en page sélectionné (sobre / moderne).
     getTemplateId() {
-      return 'sobre';
+      return currentTemplateId();
     },
   };
 })();

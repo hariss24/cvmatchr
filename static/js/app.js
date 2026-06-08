@@ -290,6 +290,20 @@ strong { font-weight: 600; }`,
   },
 };
 
+// Modèle « Moderne » : même structure que « sobre » (donc mêmes données rendues),
+// avec une variante visuelle (accent bleu, titres colorés). Réutilise le CSS sobre
+// + un bloc d'overrides ciblant les mêmes classes, pour zéro risque structurel.
+TEMPLATES.moderne = {
+  html: TEMPLATES.sobre.html,
+  css: TEMPLATES.sobre.css + `
+
+/* === Modele Moderne (overrides) === */
+:root { --resume-template-customization-color: #2563eb; }
+.resume-template-1.resume-template-renderer .resume-template-renderer-section .resume-template-renderer-section__title { color: #2563eb; font-weight: 700; }
+.resume-template-1.resume-template-renderer .personal-data .personal-data__name { color: #1e3a8a; }
+.resume-template-1.resume-template-renderer .personal-data .personal-data__desired-job-title { color: #2563eb; }`,
+};
+
 const _TYPE_STORE_PREFIX = 'html-to-pdf:type:';
 function _docTypeKey(type) { return _TYPE_STORE_PREFIX + type.toLowerCase(); }
 const STORAGE_KEY_LAST_TYPE = 'html-to-pdf:last-doc-type';
