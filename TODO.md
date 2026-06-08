@@ -74,8 +74,8 @@ Suivi des fonctionnalités : ce qui est fait, ce qui est prévu, ce qui est en r
 - [ ] **Découper `static/js/app.js` (2378 lignes)**
   Fichier devenu un mastodonte qui mélange éditeur Monaco, chat IA, ATS, IndexedDB, tailoring… Chaque modif est plus risquée. Extraire des modules (ex: `idb.js`, `tailor.js`, `ats.js`). Refacto à faire prudemment, avec tests à l'appui — pas en aveugle.
 
-- [ ] **Raccourcis clavier**
-  `Ctrl+Enter` = convertir PDF, `Ctrl+S` = sauvegarder brouillon, `Ctrl+Shift+A` = lancer ATS.
+- [x] **Raccourcis clavier**
+  `Ctrl+Enter` = convertir PDF (déjà présent), `Ctrl+S` = sauvegarder brouillon (snapshot manuel), `Ctrl+Shift+A` = lancer l'analyse ATS sur le CV + l'offre courants.
 
 - [ ] **Modèle IA upgradeable**
   Permettre de choisir le modèle Gemini (Flash Lite / Flash / Pro) selon le besoin. Pro pour l'adaptation hyper, Lite pour le chat rapide.

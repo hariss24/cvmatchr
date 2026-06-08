@@ -1160,6 +1160,15 @@ document.addEventListener('keydown', (e) => {
   if (e.ctrlKey && e.shiftKey && e.key === 'H') { e.preventDefault(); window.location.href = '/history'; }
   if (e.ctrlKey && e.shiftKey && e.key === 'I') { e.preventDefault(); $('btn-ia').click(); }
   if (e.ctrlKey && e.shiftKey && e.key === 'S') { e.preventDefault(); openSnapshotsModal(); }
+  if (e.ctrlKey && !e.shiftKey && e.key === 's') {
+    e.preventDefault();
+    saveSnapshot('Manuel · ' + new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }));
+    showToast('Brouillon sauvegardé.', 'ok');
+  }
+  if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+    e.preventDefault();
+    _renderAts(htmlModel ? htmlModel.getValue() : '', $('job-desc-input').value.trim());
+  }
 });
 
 // ============================================================
