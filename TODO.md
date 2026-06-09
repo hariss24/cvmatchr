@@ -77,7 +77,7 @@ Suivi des fonctionnalités : ce qui est fait, ce qui est prévu, ce qui est en r
 - [x] **Raccourcis clavier**
   `Ctrl+Enter` = convertir PDF (déjà présent), `Ctrl+S` = sauvegarder brouillon (snapshot manuel), `Ctrl+Shift+A` = lancer l'analyse ATS sur le CV + l'offre courants.
 
-- [ ] **Modèle IA upgradeable** — ⏸️ _en attente : touche `ai_engine.py` + `app.py` + `index.html`, actuellement modifiés non committés (travail en cours hors boucle). La boucle ne peut pas committer sélectivement sans embarquer ce travail. À débloquer une fois ces fichiers committés/stashés._
+- [ ] **Modèle IA upgradeable** — ⛔ _écarté (décision chef de projet : pas prioritaire pour l'instant, la boucle ne la prend pas)._
   Permettre de choisir le modèle Gemini (Flash Lite / Flash / Pro) selon le besoin. Pro pour l'adaptation hyper, Lite pour le chat rapide.
 
 - [ ] **Preview page-break** — ⏸️ _différé : effet purement visuel dont l'alignement des repères à 297 mm dépend du rendu navigateur, invérifiable en autonomie. À implémenter + valider visuellement ensemble._
@@ -87,10 +87,10 @@ Suivi des fonctionnalités : ce qui est fait, ce qui est prévu, ce qui est en r
 
 ## 🟢 Idées en réflexion (backlog)
 
-- [ ] Export `.docx` — certains recruteurs exigent encore Word — ⏸️ _en attente : nécessite `app.py` (modifié hors boucle) + lib backend (python-docx) + nouvel endpoint/UI. À débloquer quand app.py sera committé._
+- [ ] Export `.docx` — certains recruteurs exigent encore Word — ⛔ _mis de côté (décision chef de projet : pas pour l'instant, la boucle ne la prend pas)._
 - [x] Présets de thème CSS (Moderne / Classique / Minimal) en un clic — ajout des modèles `classique` (serif, accent brun) et `minimal` (épuré, sans bordures) dans `TEMPLATES`, sélectionnables dans le mode Formulaire (Sobre / Moderne / Classique / Minimal).
 - [x] Drag & drop d'un fichier `.html` ou `.md` dans l'éditeur — dépôt sur la zone éditeur (`#editor`) ; `.html`/`.htm` chargé tel quel, `.md`/`.markdown` converti via un mini-parser (titres, gras, italique, liens, listes). Snapshot auto avant import. Guard `Files` pour ne pas casser le drag de texte natif de Monaco. ⚠️ _déclenchement du drop à confirmer visuellement dans le navigateur._
-- [ ] Sidebar "Récents" dans l'éditeur (5 derniers CVs) — ⏸️ _en attente : conteneur dans `index.html` + styles dans `main.css` (modifiés hors boucle) ; UI invérifiable en autonomie._
+- [ ] Sidebar "Récents" dans l'éditeur (5 derniers CVs) — _réalisable (repo propre) ; UI : soigner le rendu, à confirmer visuellement après coup._
 - [ ] Import depuis LinkedIn (très complexe, dépend de l'API) — ⏸️ _différé : dépend d'une API externe, hors scope d'un tour autonome._
 
 ---
@@ -101,7 +101,7 @@ Suivi des fonctionnalités : ce qui est fait, ce qui est prévu, ce qui est en r
   *Problème :* Le texte déborde légèrement sur une deuxième page, obligeant l'utilisateur à ajuster manuellement les marges et la police pendant de longues minutes.
   *Solution :* Un algorithme qui calcule la hauteur réelle du contenu et ajuste dynamiquement des variables CSS globales (ex: `--base-font-size`) pour que le CV tienne parfaitement et automatiquement sur une seule page A4.
 
-- [ ] **🧲 Le "White-Fonting" Intelligent (Hack ATS)** — ⏸️ _en attente : injection à l'export PDF (touche `app.py`, modifié hors boucle)._
+- [ ] **🧲 Le "White-Fonting" Intelligent (Hack ATS)**
   *Problème :* L'ATS signale des mots-clés manquants, mais l'utilisateur ne veut pas les forcer artificiellement dans le texte visible au risque d'alerter le recruteur.
   *Solution :* Une option "Booster ATS invisible" qui injecte automatiquement les mots-clés manquants en police 1px, blanche sur fond blanc, à la fin du document lors de l'export PDF. L'ATS les lit, l'humain ne voit rien.
 
@@ -109,7 +109,7 @@ Suivi des fonctionnalités : ce qui est fait, ce qui est prévu, ce qui est en r
   *Problème :* Le CV est beau, mais la lettre de motivation envoyée en parallèle est souvent un vieux document Word basique, cassant la cohérence visuelle.
   *Solution :* Bouton « Créer le Pack candidature » dans le panneau d'adaptation. Génère via `POST /api/generate-pack` (`ai_engine.generate_pack`) une lettre de motivation reprenant la police/couleur d'accent/header du CV adapté + un brouillon d'email d'accroche. Modale d'aperçu : prévisualisation de la lettre, email copiable, et chargement de la lettre dans l'éditeur (type « Lettre »).
 
-- [ ] **🕵️ "Roast my CV" & Prépa Entretien** — ⏸️ _en attente : IA (`ai_engine.py`) + nouvel onglet UI (`index.html`), tous deux modifiés hors boucle._
+- [ ] **🕵️ "Roast my CV" & Prépa Entretien**
   *Problème :* Le candidat a passé le filtre RH grâce au CV, mais ne sait pas quelles questions pièges le recruteur prépare en voyant son profil.
   *Solution :* Un onglet "Prépa Entretien" où l'IA croise le profil avec l'offre pour identifier les faiblesses perçues et générer des questions d'entretien probables avec des suggestions de défense.
 
