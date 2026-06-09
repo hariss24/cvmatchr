@@ -304,6 +304,31 @@ TEMPLATES.moderne = {
 .resume-template-1.resume-template-renderer .personal-data .personal-data__desired-job-title { color: #2563eb; }`,
 };
 
+// Modèle « Classique » : serif élégant, accent brun sobre. Même structure que sobre.
+TEMPLATES.classique = {
+  html: TEMPLATES.sobre.html,
+  css: TEMPLATES.sobre.css + `
+
+/* === Modele Classique (overrides) === */
+:root { --resume-template-customization-color: #7a5c3e; }
+.resume-template-1.resume-template-renderer { font-family: Georgia, "Times New Roman", serif; }
+.resume-template-1.resume-template-renderer .resume-template-renderer-section .resume-template-renderer-section__title { color: #5a3e28; letter-spacing: 1px; }
+.resume-template-1.resume-template-renderer .personal-data .personal-data__name { color: #2a2a2a; }
+.resume-template-1.resume-template-renderer .personal-data .personal-data__desired-job-title { color: #5a3e28; }`,
+};
+
+// Modèle « Minimal » : épuré, sans bordures de section, titres discrets. Même structure que sobre.
+TEMPLATES.minimal = {
+  html: TEMPLATES.sobre.html,
+  css: TEMPLATES.sobre.css + `
+
+/* === Modele Minimal (overrides) === */
+.resume-template-1.resume-template-renderer .resume-template-renderer-section { border-top: none; padding-top: 14px; }
+.resume-template-1.resume-template-renderer .resume-template-renderer-section .resume-template-renderer-section__title { color: #999; letter-spacing: 2px; font-weight: 400; }
+.resume-template-1.resume-template-renderer .personal-data .personal-data__name { color: #111; }
+.resume-template-1.resume-template-renderer .personal-data .personal-data__desired-job-title { color: #666; }`,
+};
+
 const _TYPE_STORE_PREFIX = 'html-to-pdf:type:';
 function _docTypeKey(type) { return _TYPE_STORE_PREFIX + type.toLowerCase(); }
 const STORAGE_KEY_LAST_TYPE = 'html-to-pdf:last-doc-type';

@@ -80,15 +80,15 @@ Suivi des fonctionnalités : ce qui est fait, ce qui est prévu, ce qui est en r
 - [ ] **Modèle IA upgradeable** — ⏸️ _en attente : touche `ai_engine.py` + `app.py` + `index.html`, actuellement modifiés non committés (travail en cours hors boucle). La boucle ne peut pas committer sélectivement sans embarquer ce travail. À débloquer une fois ces fichiers committés/stashés._
   Permettre de choisir le modèle Gemini (Flash Lite / Flash / Pro) selon le besoin. Pro pour l'adaptation hyper, Lite pour le chat rapide.
 
-- [ ] **Preview page-break**
+- [ ] **Preview page-break** — ⏸️ _différé : effet purement visuel dont l'alignement des repères à 297 mm dépend du rendu navigateur, invérifiable en autonomie. À implémenter + valider visuellement ensemble._
   Afficher des lignes pointillées sur la preview HTML à chaque saut de page A4 estimé.
 
 ---
 
 ## 🟢 Idées en réflexion (backlog)
 
-- [ ] Export `.docx` — certains recruteurs exigent encore Word
-- [ ] Présets de thème CSS (Moderne / Classique / Minimal) en un clic
+- [ ] Export `.docx` — certains recruteurs exigent encore Word — ⏸️ _en attente : nécessite `app.py` (modifié hors boucle) + lib backend (python-docx) + nouvel endpoint/UI. À débloquer quand app.py sera committé._
+- [x] Présets de thème CSS (Moderne / Classique / Minimal) en un clic — ajout des modèles `classique` (serif, accent brun) et `minimal` (épuré, sans bordures) dans `TEMPLATES`, sélectionnables dans le mode Formulaire (Sobre / Moderne / Classique / Minimal).
 - [ ] Drag & drop d'un fichier `.html` ou `.md` dans l'éditeur
 - [ ] Sidebar "Récents" dans l'éditeur (5 derniers CVs)
 - [ ] Import depuis LinkedIn (très complexe, dépend de l'API)

@@ -297,6 +297,8 @@ ${interests.map(s => `      <span class="plain-list__item">${esc(s)}</span>`).jo
           <select id="rf-template-select">
             <option value="sobre"${_tplId === 'sobre' ? ' selected' : ''}>Sobre</option>
             <option value="moderne"${_tplId === 'moderne' ? ' selected' : ''}>Moderne</option>
+            <option value="classique"${_tplId === 'classique' ? ' selected' : ''}>Classique</option>
+            <option value="minimal"${_tplId === 'minimal' ? ' selected' : ''}>Minimal</option>
           </select>
         </label>
       </div>
