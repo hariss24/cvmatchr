@@ -296,6 +296,10 @@
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
             JSON
           </button>
+          <button type="button" id="btn-export-rr" title="Exporter le CV au format JSON Resume, à importer dans Reactive Resume" style="display:inline-flex; align-items:center; gap:4px; margin-right: 6px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Reactive Resume
+          </button>
           <span id="editor-tools" class="editor-tools">
             <select id="template-select" title="Charger un template">
               <option value="">Templates...</option>
@@ -419,9 +423,10 @@
             <div class="level-selector" id="tailor-level-selector">
               <span class="level-label">Niveau d'adaptation</span>
               <div class="level-segment">
-                <button type="button" class="level-btn" data-level="peu">Peu adapté</button>
-                <button type="button" class="level-btn active" data-level="adapte">Adapté</button>
-                <button type="button" class="level-btn" data-level="hyper">Hyper-adapté</button>
+                <button type="button" class="level-btn" data-level="peu" data-tooltip="Retouche légère : ajuste seulement le titre et l'accroche avec quelques mots-clés de l'offre. Ton CV reste fidèle à l'original à 95 %. Rien d'autre n'est modifié.">Peu adapté</button>
+                <button type="button" class="level-btn active" data-level="adapte" data-tooltip="Équilibré : réécrit l'accroche, réordonne tes compétences et reformule tes expériences pour coller à l'offre — sans rien inventer ni supprimer.">Adapté</button>
+                <button type="button" class="level-btn" data-level="hyper" data-tooltip="Poussé : réécrit entièrement l'accroche, les compétences et les expériences pour s'aligner au maximum sur l'offre — mais toujours sans inventer de faits.">Hyper-adapté</button>
+                <button type="button" class="level-btn" data-level="sur-mesure" data-tooltip="Sans filtre : l'IA peut inventer et exagérer compétences, réalisations et expériences pour coller au maximum à l'offre. ⚠️ Le contenu généré peut être faux — à utiliser à tes risques.">Sur-mesure 🔥</button>
               </div>
             </div>
             <label class="tailor-check">
@@ -692,6 +697,7 @@
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 <script src="{{ url_for('static', filename='js/resume-form.js') }}"></script>
+<script src="{{ url_for('static', filename='js/export-jsonresume.js') }}"></script>
 <script>
 (function(){
   var html = document.documentElement;

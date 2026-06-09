@@ -559,6 +559,26 @@ _TAILOR_SYSTEMS = {
         "inventer des compétences absentes du CV original, "
         "modifier les dates, entreprises du parcours, intitulés de poste, diplômes ou noms propres."
     ),
+    "sur-mesure": (
+        _PRESERVE_RULE +
+        "Tu reçois un CV en HTML et une offre d'emploi. "
+        "Niveau d'adaptation : SUR-MESURE (invention autorisée). "
+        "Ton objectif est de rendre le CV le PLUS pertinent possible pour cette offre, quitte à "
+        "embellir et inventer. Tu peux : "
+        "(1) ajuster le titre/tagline sous le nom pour refléter le poste visé ; "
+        "(2) réécrire complètement le résumé/accroche ; "
+        "(3) AJOUTER des compétences demandées par l'offre même si elles sont absentes du CV original, "
+        "et réorganiser le tout pour maximiser la pertinence ; "
+        "(4) réécrire et ENRICHIR les puces d'expériences en ajoutant des réalisations, "
+        "responsabilités et résultats chiffrés crédibles qui collent à l'offre, même s'ils ne "
+        "figurent pas dans le CV original (maximum 5 puces par expérience). "
+        "Reste crédible et cohérent avec le parcours (secteur, séniorité, dates). "
+        "RÈGLE ABSOLUE ANTI-DÉTECTION : N'écris JAMAIS le nom de l'entreprise ciblée, "
+        "ni 'chez [entreprise]', ni 'au sein de [entreprise]', ni aucune référence directe à l'employeur cible "
+        "dans le résumé, le titre, ou n'importe quelle autre section. "
+        "Le résumé doit rester générique : profil orienté vers ce type de poste, pas une candidature nominative. "
+        "INTERDIT : modifier les dates, les entreprises du parcours, les intitulés de poste ou les diplômes."
+    ),
 }
 
 _COMMON_HTML_RULES = (
@@ -588,7 +608,13 @@ _COMMON_HTML_RULES = (
     "de section, insère un commentaire HTML avant chaque <section> principale, "
     "au format <!-- ===== NOM DE LA SECTION ===== --> (nom en majuscules, en français). "
     "Si des commentaires existent déjà, conserve-les tels quels sans les modifier.\n"
-    "8. FORMAT DE SORTIE : Retourne UNIQUEMENT le code HTML complet, du <!DOCTYPE html> "
+    "8. ORDRE DES SECTIONS : Conserve les expériences et les formations DANS LE MÊME ORDRE que "
+    "le HTML original. Ne les réordonne JAMAIS, ne les trie pas par pertinence : l'ordre "
+    "chronologique d'origine doit être préservé à l'identique.\n"
+    "9. RÉSUMÉ GÉNÉRIQUE : Dans le résumé/accroche, ne recopie pas les phrases ou expressions "
+    "exactes de l'offre. Le résumé décrit le profil du candidat orienté vers ce TYPE de métier, "
+    "pas une candidature à une offre précise. Évite l'effet 'CV taillé sur mesure'.\n"
+    "10. FORMAT DE SORTIE : Retourne UNIQUEMENT le code HTML complet, du <!DOCTYPE html> "
     "jusqu'à </html>. Zéro bloc markdown (```html), zéro commentaire global, zéro texte avant ou après."
 )
 
@@ -856,7 +882,7 @@ def api_tailor_resume():
     resume   = data.get("resume")
     job_desc = (data.get("job_desc") or "").strip()
     level    = (data.get("level") or "adapte").strip()
-    if level not in ("peu", "adapte", "hyper"):
+    if level not in ("peu", "adapte", "hyper", "sur-mesure"):
         level = "adapte"
     if not isinstance(resume, dict) or not job_desc:
         return jsonify({"error": "Le CV structuré (resume) et l'offre d'emploi sont requis."}), 400

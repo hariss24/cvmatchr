@@ -767,6 +767,7 @@ button.ghost:active {
   box-shadow: var(--neu-inset);
 }
 .level-btn {
+  position: relative;
   flex: 1; padding: 7px 4px; font-size: 12px; border-radius: 9px;
   border: none; background: transparent;
   color: var(--muted); cursor: pointer;
@@ -774,6 +775,30 @@ button.ghost:active {
   transition: box-shadow 150ms, color 150ms, background 150ms; white-space: nowrap;
 }
 .level-btn:hover { color: var(--text); }
+
+/* Infobulle au survol décrivant chaque niveau d'adaptation */
+.level-btn[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 9px);
+  left: 50%;
+  transform: translateX(-50%) translateY(5px);
+  width: 230px; max-width: 230px;
+  padding: 10px 12px;
+  border-radius: 11px;
+  background: var(--bg);
+  box-shadow: var(--neu-raised-sm);
+  color: var(--text);
+  font-size: 11px; line-height: 1.5; font-weight: 400;
+  text-align: left; white-space: normal;
+  opacity: 0; pointer-events: none;
+  transition: opacity 160ms, transform 160ms;
+  z-index: 50;
+}
+.level-btn[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
 .level-btn.active {
   background: var(--bg);
   box-shadow: var(--neu-raised-sm);

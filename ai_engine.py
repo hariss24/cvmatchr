@@ -660,6 +660,17 @@ _RESUME_TAILOR_RULES = {
         "- INTERDIT : supprimer des langues, inventer des compétences, modifier les dates/"
         "entreprises du parcours ou les diplômes.\n"
     ),
+    "sur-mesure": (
+        "NIVEAU SUR-MESURE (invention autorisée) :\n"
+        "- Ajuste 'title' et réécris entièrement 'summary' pour coller parfaitement au poste.\n"
+        "- AJOUTE aux 'skills' les compétences demandées par l'offre même si elles sont absentes "
+        "du CV, et réorganise-les pour mettre les plus pertinentes en premier.\n"
+        "- Réécris et ENRICHIS les 'bullets' des expériences (max 5 par expérience) : tu peux "
+        "ajouter des réalisations, responsabilités et résultats chiffrés crédibles qui collent à "
+        "l'offre, même s'ils ne figurent pas dans le CV original.\n"
+        "- Reste crédible et cohérent avec le parcours (secteur, séniorité, dates).\n"
+        "- NE modifie PAS les 'company', les 'date' du parcours, ni les diplômes/établissements.\n"
+    ),
 }
 
 _SYSTEM_TAILOR_RESUME_BASE = (
@@ -669,8 +680,30 @@ _SYSTEM_TAILOR_RESUME_BASE = (
     "RÈGLES ABSOLUES :\n"
     "- Conserve EXACTEMENT la même structure JSON et toutes les clés.\n"
     "- Ne FABRIQUE jamais d'expérience, d'entreprise, de diplôme ou de date absents du CV.\n"
-    "- ANTI-DÉTECTION : n'écris JAMAIS le nom de l'entreprise ciblée dans 'title' ou 'summary'. "
-    "Le CV doit rester naturel, pas taillé pour une seule offre.\n\n"
+    "- ORDRE : conserve les éléments de 'experience' et 'education' DANS LE MÊME ORDRE qu'en "
+    "entrée. Ne les réordonne pas, ne les trie pas par pertinence : l'ordre chronologique "
+    "d'origine doit être préservé à l'identique.\n"
+    "- ANTI-DÉTECTION : n'écris JAMAIS le nom de l'entreprise ciblée dans 'title' ou 'summary', "
+    "et ne recopie pas les phrases ou expressions exactes de l'offre. Le 'summary' doit rester "
+    "GÉNÉRIQUE et sobre : il décrit le profil du candidat orienté vers ce TYPE de métier, pas une "
+    "candidature à une offre précise. Évite l'effet 'CV taillé sur mesure'.\n\n"
+)
+
+_SYSTEM_TAILOR_RESUME_BASE_INVENT = (
+    "Tu es un expert en optimisation de CV agressive. Tu reçois un CV au format JSON structuré et "
+    "une offre d'emploi. Tu renvoies le MÊME CV au format JSON, adapté au MAXIMUM à l'offre.\n\n"
+    "SCHÉMA JSON OBLIGATOIRE (identique en entrée et en sortie) :\n" + _RESUME_SCHEMA_DESC + "\n\n"
+    "RÈGLES :\n"
+    "- Conserve EXACTEMENT la même structure JSON et toutes les clés.\n"
+    "- Tu PEUX inventer et exagérer compétences, réalisations et responsabilités pour coller à "
+    "l'offre, du moment que cela reste crédible et cohérent avec le parcours du candidat.\n"
+    "- ORDRE : conserve les éléments de 'experience' et 'education' DANS LE MÊME ORDRE qu'en "
+    "entrée. Ne les réordonne pas, ne les trie pas par pertinence : l'ordre chronologique "
+    "d'origine doit être préservé à l'identique.\n"
+    "- ANTI-DÉTECTION : n'écris JAMAIS le nom de l'entreprise ciblée dans 'title' ou 'summary', "
+    "et ne recopie pas les phrases ou expressions exactes de l'offre. Le 'summary' doit rester "
+    "GÉNÉRIQUE et sobre : il décrit le profil du candidat orienté vers ce TYPE de métier, pas une "
+    "candidature à une offre précise. Évite l'effet 'CV taillé sur mesure'.\n\n"
 )
 
 _SYSTEM_TAILOR_RESUME_TAIL = (
@@ -702,7 +735,8 @@ def tailor_resume(
         )
 
     rules = _RESUME_TAILOR_RULES.get(level, _RESUME_TAILOR_RULES["adapte"])
-    system = _SYSTEM_TAILOR_RESUME_BASE + rules + _SYSTEM_TAILOR_RESUME_TAIL
+    base = _SYSTEM_TAILOR_RESUME_BASE_INVENT if level == "sur-mesure" else _SYSTEM_TAILOR_RESUME_BASE
+    system = base + rules + _SYSTEM_TAILOR_RESUME_TAIL
 
     # On retire la photo (base64) : inutile pour l'adaptation, coûteuse en tokens.
     clean = {k: v for k, v in _normalize_resume(resume).items()}

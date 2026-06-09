@@ -141,6 +141,24 @@ Each conversion is saved alongside its HTML source under
 `~/Documents/CV-Archive/`, with metadata kept in `history.json`. Filenames
 follow the pattern `{doc_type}_Hariss_{company}_{YYYY-MM-DD}.pdf`.
 
+## Export vers Reactive Resume
+
+Le bouton **« Reactive Resume »** (barre d'outils du mode Formulaire, à côté de
+« Coller JSON » / « JSON ») exporte le CV courant au format standard
+[JSON Resume](https://jsonresume.org/). Reactive Resume sait importer ce format
+quelle que soit sa version (il convertit lui-même à l'import).
+
+Flux conseillé : on adapte le CV à une offre dans cette app (tailoring IA, pack),
+on clique **Reactive Resume** pour télécharger le `.json`, puis dans Reactive
+Resume on fait **Créer un CV → Importer → JSON Resume** et on choisit le fichier.
+
+Champs non transférés (à compléter dans Reactive Resume) :
+- **la photo** (Reactive Resume gère mieux les photos directement) ;
+- **le type de contrat** d'une expérience (ex. « Stage ») — pas d'équivalent dans
+  le standard ;
+- les **dates** sont reprises telles quelles (texte) : vérifier qu'elles
+  s'affichent bien et les ajuster si besoin.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
