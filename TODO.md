@@ -90,18 +90,18 @@ Suivi des fonctionnalités : ce qui est fait, ce qui est prévu, ce qui est en r
 - [ ] Export `.docx` — certains recruteurs exigent encore Word — ⏸️ _en attente : nécessite `app.py` (modifié hors boucle) + lib backend (python-docx) + nouvel endpoint/UI. À débloquer quand app.py sera committé._
 - [x] Présets de thème CSS (Moderne / Classique / Minimal) en un clic — ajout des modèles `classique` (serif, accent brun) et `minimal` (épuré, sans bordures) dans `TEMPLATES`, sélectionnables dans le mode Formulaire (Sobre / Moderne / Classique / Minimal).
 - [x] Drag & drop d'un fichier `.html` ou `.md` dans l'éditeur — dépôt sur la zone éditeur (`#editor`) ; `.html`/`.htm` chargé tel quel, `.md`/`.markdown` converti via un mini-parser (titres, gras, italique, liens, listes). Snapshot auto avant import. Guard `Files` pour ne pas casser le drag de texte natif de Monaco. ⚠️ _déclenchement du drop à confirmer visuellement dans le navigateur._
-- [ ] Sidebar "Récents" dans l'éditeur (5 derniers CVs)
-- [ ] Import depuis LinkedIn (très complexe, dépend de l'API)
+- [ ] Sidebar "Récents" dans l'éditeur (5 derniers CVs) — ⏸️ _en attente : conteneur dans `index.html` + styles dans `main.css` (modifiés hors boucle) ; UI invérifiable en autonomie._
+- [ ] Import depuis LinkedIn (très complexe, dépend de l'API) — ⏸️ _différé : dépend d'une API externe, hors scope d'un tour autonome._
 
 ---
 
 ## 💡 Nouvelles features "Killer" (À évaluer)
 
-- [ ] **📏 L'Ajustement Magique (Auto-Fit Page)**
+- [ ] **📏 L'Ajustement Magique (Auto-Fit Page)** — ⏸️ _différé : l'algo mesure la hauteur réellement rendue et ajuste le CSS — invérifiable en autonomie et touche le rendu partagé avec l'export PDF. À faire en mode validé._
   *Problème :* Le texte déborde légèrement sur une deuxième page, obligeant l'utilisateur à ajuster manuellement les marges et la police pendant de longues minutes.
   *Solution :* Un algorithme qui calcule la hauteur réelle du contenu et ajuste dynamiquement des variables CSS globales (ex: `--base-font-size`) pour que le CV tienne parfaitement et automatiquement sur une seule page A4.
 
-- [ ] **🧲 Le "White-Fonting" Intelligent (Hack ATS)**
+- [ ] **🧲 Le "White-Fonting" Intelligent (Hack ATS)** — ⏸️ _en attente : injection à l'export PDF (touche `app.py`, modifié hors boucle)._
   *Problème :* L'ATS signale des mots-clés manquants, mais l'utilisateur ne veut pas les forcer artificiellement dans le texte visible au risque d'alerter le recruteur.
   *Solution :* Une option "Booster ATS invisible" qui injecte automatiquement les mots-clés manquants en police 1px, blanche sur fond blanc, à la fin du document lors de l'export PDF. L'ATS les lit, l'humain ne voit rien.
 
@@ -109,7 +109,7 @@ Suivi des fonctionnalités : ce qui est fait, ce qui est prévu, ce qui est en r
   *Problème :* Le CV est beau, mais la lettre de motivation envoyée en parallèle est souvent un vieux document Word basique, cassant la cohérence visuelle.
   *Solution :* Bouton « Créer le Pack candidature » dans le panneau d'adaptation. Génère via `POST /api/generate-pack` (`ai_engine.generate_pack`) une lettre de motivation reprenant la police/couleur d'accent/header du CV adapté + un brouillon d'email d'accroche. Modale d'aperçu : prévisualisation de la lettre, email copiable, et chargement de la lettre dans l'éditeur (type « Lettre »).
 
-- [ ] **🕵️ "Roast my CV" & Prépa Entretien**
+- [ ] **🕵️ "Roast my CV" & Prépa Entretien** — ⏸️ _en attente : IA (`ai_engine.py`) + nouvel onglet UI (`index.html`), tous deux modifiés hors boucle._
   *Problème :* Le candidat a passé le filtre RH grâce au CV, mais ne sait pas quelles questions pièges le recruteur prépare en voyant son profil.
   *Solution :* Un onglet "Prépa Entretien" où l'IA croise le profil avec l'offre pour identifier les faiblesses perçues et générer des questions d'entretien probables avec des suggestions de défense.
 
