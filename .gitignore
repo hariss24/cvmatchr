@@ -15,3 +15,8 @@ env/
 tmp_pytest/
 tmp_*/
 test_history.html
+
+# Tests frontend (Node/Playwright)
+node_modules/
+test-results/
+playwright-report/

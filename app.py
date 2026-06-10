@@ -9,11 +9,9 @@ Pour quitter :
 """
 
 import io
-import ipaddress
 import json as _json
 import logging as _logging
 import os
-import re as _re
 import secrets
 import socket
 import sys
@@ -23,7 +21,7 @@ import uuid
 import webbrowser
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import quote, urlparse, urlunparse
+from urllib.parse import quote, urlparse
 
 try:
     import tkinter as tk
@@ -36,11 +34,19 @@ from flask import (
     render_template, request, send_file, session, stream_with_context,
 )
 
+from prompts import (
+    _SYSTEM_CV_IMPORT, _SYSTEM_LETTRE_IMPORT,
+    _PRESERVE_RULE, _ELAGUE_RULE, _TAILOR_SYSTEMS, _COMMON_HTML_RULES
+)
+from scraper import _validate_url, _scrape_job_text
 import archive
 from pdf_engine import html_to_pdf_bytes, VALID_FORMATS, VALID_MARGINS
 import ai_engine
 import quota
 import json as _json_ai
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+_logger = _logging.getLogger(__name__)
 
 PORT = 5050
 URL  = f"http://127.0.0.1:{PORT}"
@@ -52,6 +58,9 @@ MAX_PDF_BYTES  = 20 * 1024 * 1024  # 20 Mo
 # ---------------------------------------------------------------------------
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+
+if os.environ.get("APP_MODE", "").lower() == "remote" or bool(os.environ.get("RENDER")):
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 
 
@@ -284,337 +293,6 @@ def history_html(doc_id: str):
 # API IA
 # ---------------------------------------------------------------------------
 
-_CV_HTML_SKELETON = """\
-<div class="resume-template-1 resume-template-renderer">
-
-  <section class="resume-template-renderer-section personal-data">
-    <h2 class="resume-template-renderer-section__title">Informations personnelles</h2>
-    <div class="personal-data__photo" style="background:#eee;">
-      <!-- URL_DE_VOTRE_PHOTO_ICI -->
-    </div>
-    <div class="personal-data__title-row">
-      <span class="personal-data__name">Prenom Nom</span><span class="personal-data__desired-job-title">Titre du poste</span>
-    </div>
-    <div class="personal-data__contact-row">
-      Ville, Pays &middot; email@example.com &middot; +33 6 00 00 00 00 &middot; linkedin.com/in/profil
-    </div></section>
-
-  <section class="resume-template-renderer-section summary-objective">
-    <h2 class="resume-template-renderer-section__title summary-objective__title">A propos</h2>
-    <div class="summary-objective__content">
-      Bref resume professionnel.
-    </div>
-  </section>
-
-  <section class="resume-template-renderer-section entry-list">
-    <h2 class="resume-template-renderer-section__title">Experience</h2>
-    <div class="entry-list__item">
-      <span class="entry-list__title">Poste occupe</span>
-      <span class="entry-list__date">Jan 2024 - Present</span>
-      <div class="entry-list__company-row">
-        <span class="entry-list__subtitle">Entreprise</span><span class="entry-list__location">Ville</span>
-      </div>
-      <div class="entry-list__description">
-        <ul>
-          <li>Realisation.</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <section class="resume-template-renderer-section entry-list">
-    <h2 class="resume-template-renderer-section__title">Formation</h2>
-    <div class="entry-list__item">
-      <span class="entry-list__title">Diplome</span>
-      <span class="entry-list__date">2020 - 2022</span>
-      <div class="entry-list__company-row">
-        <span class="entry-list__subtitle">Etablissement</span><span class="entry-list__location">Ville</span>
-      </div>
-      <div class="entry-list__description">
-        <p>Description, specialites ou matieres principales.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="resume-template-renderer-section plain-list">
-    <h2 class="resume-template-renderer-section__title">Competences</h2>
-    <div class="plain-list__items">
-      <span class="plain-list__item">Competence 1</span>
-    </div>
-  </section>
-
-  <section class="resume-template-renderer-section entry-list">
-    <h2 class="resume-template-renderer-section__title">Projets</h2>
-    <div class="entry-list__item">
-      <span class="entry-list__title">Nom du projet</span>
-      <span class="entry-list__date">2024</span>
-      <div class="entry-list__description">
-        <p>Description du projet.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="resume-template-renderer-section plain-list">
-    <h2 class="resume-template-renderer-section__title">Certifications</h2>
-    <div class="plain-list__items">
-      <span class="plain-list__item">Certification 1</span>
-    </div>
-  </section>
-
-  <section class="resume-template-renderer-section entry-list">
-    <h2 class="resume-template-renderer-section__title">Benevolat</h2>
-    <div class="entry-list__item">
-      <span class="entry-list__title">Role</span>
-      <span class="entry-list__date">2023 - 2024</span>
-      <div class="entry-list__company-row">
-        <span class="entry-list__subtitle">Organisation</span><span class="entry-list__location">Ville</span>
-      </div>
-      <div class="entry-list__description">
-        <ul>
-          <li>Activite.</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <section class="resume-template-renderer-section languages">
-    <h2 class="resume-template-renderer-section__title">Langues</h2>
-    <div class="languages__items">
-      <div class="languages__item">
-        <span class="languages__name">Francais</span>
-        <span class="languages__description">Natif</span>
-      </div>
-    </div>
-  </section>
-
-  <section class="resume-template-renderer-section plain-list">
-    <h2 class="resume-template-renderer-section__title">Centres d'interet</h2>
-    <div class="plain-list__items">
-      <span class="plain-list__item">Interet 1</span>
-    </div>
-  </section>
-
-</div>"""
-
-_LETTRE_SKELETON = """\
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>Lettre de Motivation</title>
-  <style>
-    @page { size: A4; margin: 0; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: "Helvetica", "Arial", sans-serif; font-size: 9.5pt; line-height: 1.6; color: #333; padding: 48px 58px 40px; }
-    .header { display: flex; justify-content: space-between; margin-bottom: 36px; }
-    .sender strong, .recipient strong { font-size: 10.5pt; color: #000; }
-    .sender p, .recipient p { margin-top: 2px; color: #555; font-size: 9pt; }
-    .recipient { text-align: right; }
-    .subject { font-weight: 600; font-size: 9.5pt; color: #000; margin-bottom: 24px; border-bottom: 2px solid #c9c6c1; padding-bottom: 8px; }
-    .salutation { margin-bottom: 16px; }
-    .body p { margin-bottom: 16px; text-align: justify; }
-    .closing { margin-top: 32px; }
-    .closing p { margin-bottom: 6px; }
-    .signature { margin-top: 24px; font-weight: 600; font-size: 10pt; color: #000; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div class="sender">
-      <strong>Prenom Nom</strong>
-      <p>Titre du poste</p>
-      <p>Ville, Pays</p>
-      <p>+33 6 00 00 00 00</p>
-      <p>email@example.com</p>
-    </div>
-    <div class="recipient">
-      <strong>A l'attention du responsable de recrutement</strong>
-      <p>Ville, le JJ mois AAAA</p>
-    </div>
-  </div>
-  <div class="subject">Objet : Candidature au poste de [Poste]</div>
-  <div class="salutation">Madame, Monsieur,</div>
-  <div class="body">
-    <p>Paragraphe d'introduction.</p>
-    <p>Paragraphe sur les competences et experiences.</p>
-    <p>Paragraphe de conclusion.</p>
-  </div>
-  <div class="closing">
-    <p>Je vous adresse mes sinceres salutations,</p>
-  </div>
-  <div class="signature">Prenom Nom</div>
-</body>
-</html>"""
-
-_SYSTEM_CV_IMPORT = (
-    "Tu reçois le contenu d'un CV (texte ou image). Remplis ce squelette HTML avec les données du CV fourni.\n\n"
-    "RÈGLES — RESPECTE-LES À LA LETTRE :\n"
-    "1. Conserve EXACTEMENT la structure HTML et toutes les classes CSS du squelette. Ne les modifie jamais.\n"
-    "2. Remplace uniquement le contenu textuel par les données réelles du CV.\n"
-    "3. Blocs répétables — inclus TOUS les éléments du CV, sans en omettre aucun :\n"
-    "   • entry-list__item : un bloc par expérience, par diplôme, par projet, par activité bénévole\n"
-    "     → Pour chaque diplôme/projet : inclus la description dans entry-list__description si présente dans le CV.\n"
-    "     → Pour chaque expérience/bénévolat : inclus TOUTES les réalisations dans entry-list__description.\n"
-    "   • plain-list__item : un <span> par compétence, par certification, par centre d'intérêt\n"
-    "   • languages__item : un bloc par langue\n"
-    "4. Si une section est absente du CV (pas de projets, pas de certifications, pas de bénévolat,\n"
-    "   pas de centres d'intérêt, pas de résumé, pas de langues…), omets la section entière.\n"
-    "5. Sous-éléments optionnels — si un sous-élément du squelette (entry-list__description, entry-list__company-row…)\n"
-    "   n'a pas de contenu correspondant dans le CV, supprime entièrement cette balise.\n"
-    "   Ne laisse jamais de balise vide ni de texte placeholder.\n"
-    "6. N'ajoute AUCUNE balise <style>, AUCUN attribut style inline (sauf style=\"background:#eee;\" déjà présent).\n"
-    "7. Laisse <!-- URL_DE_VOTRE_PHOTO_ICI --> exactement tel quel, sans le modifier.\n"
-    "8. Retourne UNIQUEMENT le HTML rempli, sans balise markdown, sans commentaire, sans explication.\n\n"
-    "Squelette à remplir :\n" + _CV_HTML_SKELETON
-)
-
-_SYSTEM_LETTRE_IMPORT = (
-    "Tu reçois le contenu d'une lettre de motivation (texte ou image). Remplis ce squelette HTML.\n\n"
-    "RÈGLES — RESPECTE-LES À LA LETTRE :\n"
-    "1. Conserve EXACTEMENT la structure HTML, toutes les classes CSS, et la balise <style> du squelette.\n"
-    "2. Remplace uniquement le contenu textuel par les données réelles de la lettre.\n"
-    "3. Ne modifie PAS les styles CSS.\n"
-    "4. Retourne le document HTML COMPLET (DOCTYPE inclus), sans markdown, sans commentaire.\n\n"
-    "Squelette à remplir :\n" + _LETTRE_SKELETON
-)
-
-_PRESERVE_RULE = (
-    "RÈGLE PRIMORDIALE — PRÉSERVATION INTÉGRALE : "
-    "Tu dois retourner la TOTALITÉ du CV sans exception. "
-    "Il est ABSOLUMENT INTERDIT de supprimer, omettre ou masquer une seule section, "
-    "expérience, compétence, langue, formation ou centre d'intérêt présent dans le CV original. "
-    "Chaque section du CV original doit être présente dans ta réponse. "
-    "Tu adaptes le contenu — tu ne supprimes JAMAIS. "
-)
-
-_ELAGUE_RULE = (
-    "RÈGLE DE SÉLECTION (CV MAÎTRE) : "
-    "Tu reçois un CV 'Maître' exhaustif qui contient tout l'historique du candidat. "
-    "Ton rôle est d'ÉLAGUER et de SÉLECTIONNER uniquement ce qui est pertinent pour l'offre d'emploi. "
-    "Tu DOIS SUPPRIMER les expériences, compétences, ou projets qui n'ont aucun rapport avec le poste visé "
-    "pour que le CV final soit concis, percutant et tienne sur 1 à 2 pages maximum. "
-    "Conserve et mets en valeur ce qui est utile, retire le reste. "
-)
-
-_TAILOR_SYSTEMS = {
-    "peu": (
-        _PRESERVE_RULE +
-        "Tu reçois un CV en HTML et une offre d'emploi. "
-        "Niveau d'adaptation : SUBTIL (peu adapté). "
-        "Tu peux UNIQUEMENT modifier : "
-        "(1) le titre/tagline sous le nom (pour refléter le poste visé de façon générique) ; "
-        "(2) la section résumé/accroche pour l'orienter vers ce type de poste avec 2-3 mots-clés naturels. "
-        "Le résumé doit rester générique : il reflète le profil du candidat orienté vers ce type de poste, "
-        "PAS une candidature spécifique à une entreprise. "
-        "RÈGLE ABSOLUE ANTI-DÉTECTION : N'écris JAMAIS le nom de l'entreprise ciblée, "
-        "ni 'chez [entreprise]', ni 'au sein de [entreprise]', ni aucune référence directe à l'employeur cible "
-        "dans le résumé, le titre, ou n'importe quelle autre section. "
-        "INTERDIT : toucher aux compétences (ni en ajouter, ni en retirer, ni les réordonner), "
-        "modifier les descriptions de postes ou les listes à puces des expériences, "
-        "supprimer ou modifier les langues, les centres d'intérêt, la formation, "
-        "les dates, les entreprises du parcours, les intitulés de poste. "
-        "Le CV doit rester à 95% identique à l'original."
-    ),
-    "adapte": (
-        _PRESERVE_RULE +
-        "Tu reçois un CV en HTML et une offre d'emploi. "
-        "Niveau d'adaptation : MODÉRÉ (adapté). "
-        "Tu peux : "
-        "(1) ajuster le titre/tagline sous le nom pour refléter le poste visé de façon générique ; "
-        "(2) réécrire le résumé/accroche pour ce type de poste ; "
-        "(3) réordonner les compétences existantes pour mettre les plus pertinentes en premier "
-        "(SANS EN AJOUTER NI EN SUPPRIMER) ; "
-        "(4) enrichir et reformuler les puces des expériences existantes (maximum 4 puces par expérience). "
-        "Pour les puces : développe et enrichis ce qui est déjà écrit (ajoute contexte, métriques si disponibles "
-        "dans le reste du CV), mais ne fabrique pas de contenu absent du CV original. "
-        "RÈGLE ABSOLUE ANTI-DÉTECTION : N'écris JAMAIS le nom de l'entreprise ciblée, "
-        "ni 'chez [entreprise]', ni 'au sein de [entreprise]', ni aucune référence directe à l'employeur cible "
-        "dans le résumé, le titre, ou n'importe quelle autre section. "
-        "Le résumé doit rester générique : profil orienté vers ce type de poste, pas une candidature nominative. "
-        "INTERDIT : inventer ou supprimer des compétences, "
-        "toucher à la section langues (doit rester intacte avec TOUTES les langues listées), "
-        "toucher à la section centres d'intérêt (doit rester intacte), "
-        "modifier les dates, entreprises du parcours, intitulés de poste ou diplômes."
-    ),
-    "hyper": (
-        _PRESERVE_RULE +
-        "Tu reçois un CV en HTML et une offre d'emploi. "
-        "Niveau d'adaptation : MAXIMUM (hyper-adapté). "
-        "Tu peux : "
-        "(1) ajuster le titre/tagline sous le nom pour refléter le poste visé de façon générique ; "
-        "(2) réécrire complètement le résumé/accroche ; "
-        "(3) réorganiser ET reformuler les compétences existantes pour maximiser la pertinence "
-        "(SANS en inventer de nouvelles, uniquement celles déjà présentes dans le CV original) ; "
-        "(4) réécrire entièrement les puces d'expériences pour aligner au maximum avec les mots-clés "
-        "du poste (maximum 4 puces par expérience, sans fabriquer de contenu absent du CV). "
-        "RÈGLE ABSOLUE ANTI-DÉTECTION : N'écris JAMAIS le nom de l'entreprise ciblée, "
-        "ni 'chez [entreprise]', ni 'au sein de [entreprise]', ni aucune référence directe à l'employeur cible "
-        "dans le résumé, le titre, ou n'importe quelle autre section. "
-        "Le résumé doit rester générique : profil orienté vers ce type de poste, pas une candidature nominative. "
-        "ABSOLUMENT INTERDIT : "
-        "supprimer la section langues ou retirer une seule langue (toutes doivent rester), "
-        "supprimer ou modifier la section centres d'intérêt, "
-        "inventer des compétences absentes du CV original, "
-        "modifier les dates, entreprises du parcours, intitulés de poste, diplômes ou noms propres."
-    ),
-    "sur-mesure": (
-        _PRESERVE_RULE +
-        "Tu reçois un CV en HTML et une offre d'emploi. "
-        "Niveau d'adaptation : SUR-MESURE (invention autorisée). "
-        "Ton objectif est de rendre le CV le PLUS pertinent possible pour cette offre, quitte à "
-        "embellir et inventer. Tu peux : "
-        "(1) ajuster le titre/tagline sous le nom pour refléter le poste visé ; "
-        "(2) réécrire complètement le résumé/accroche ; "
-        "(3) AJOUTER des compétences demandées par l'offre même si elles sont absentes du CV original, "
-        "et réorganiser le tout pour maximiser la pertinence ; "
-        "(4) réécrire et ENRICHIR les puces d'expériences en ajoutant des réalisations, "
-        "responsabilités et résultats chiffrés crédibles qui collent à l'offre, même s'ils ne "
-        "figurent pas dans le CV original (maximum 5 puces par expérience). "
-        "Reste crédible et cohérent avec le parcours (secteur, séniorité, dates). "
-        "RÈGLE ABSOLUE ANTI-DÉTECTION : N'écris JAMAIS le nom de l'entreprise ciblée, "
-        "ni 'chez [entreprise]', ni 'au sein de [entreprise]', ni aucune référence directe à l'employeur cible "
-        "dans le résumé, le titre, ou n'importe quelle autre section. "
-        "Le résumé doit rester générique : profil orienté vers ce type de poste, pas une candidature nominative. "
-        "INTERDIT : modifier les dates, les entreprises du parcours, les intitulés de poste ou les diplômes."
-    ),
-}
-
-_COMMON_HTML_RULES = (
-    "\n\nRÈGLES TECHNIQUES STRICTES (NON NÉGOCIABLES) :\n"
-    "1. BALISES FIGÉES : Ne change JAMAIS le type d'une balise existante (ne transforme pas "
-    "un <span> en <div>, un <td> en autre chose, etc.). N'ajoute JAMAIS de balise wrapper "
-    "autour du contenu existant. N'invente JAMAIS de nouvelles classes CSS absentes du HTML reçu. "
-    "Si tu dois ajouter un item (puce, compétence), utilise EXACTEMENT le même type de balise "
-    "et les mêmes classes que les autres items du même niveau dans le HTML original. "
-    "Conserve intégralement <html> (avec lang), <head>, toutes les balises <meta> et <link>.\n"
-    "2. CSS INTOUCHABLE : Conserve la balise <style> et son contenu pixel pour pixel. "
-    "Ne modifie AUCUNE classe CSS, AUCUN id, et aucun attribut style=\"...\". "
-    "Le rendu visuel doit être identique à l'original.\n"
-    "3. PHOTO DE PROFIL : Ne modifie jamais l'attribut src d'une balise <img>. "
-    "Les src des images ont été remplacés par des placeholders du type "
-    "[IMAGE_BASE64_0], [IMAGE_BASE64_1], etc. Recopie-les EXACTEMENT tels quels "
-    "(avec les crochets, sans guillemets internes, sans modification).\n"
-    "4. INTÉGRALITÉ DU CONTENU : Ne supprime AUCUNE expérience, compétence, langue, "
-    "formation ou centre d'intérêt. Si le CV est long, reformule — n'efface JAMAIS. "
-    "Chaque section présente dans le CV original doit exister dans ta réponse.\n"
-    "5. ATTRIBUTS HTML : Conserve tous les attributs data-*, aria-* et autres attributs "
-    "personnalisés exactement tels qu'ils sont dans le HTML reçu.\n"
-    "6. RÉSUMÉ/ACCROCHE : Le texte de la section résumé ou accroche ('À propos', 'Profil', etc.) "
-    "ne doit JAMAIS dépasser 400 mots. Si ta version dépasse cette limite, condense sans perdre "
-    "les informations clés.\n"
-    "7. COMMENTAIRES DE NAVIGATION : Si le HTML original ne contient pas déjà de commentaires "
-    "de section, insère un commentaire HTML avant chaque <section> principale, "
-    "au format <!-- ===== NOM DE LA SECTION ===== --> (nom en majuscules, en français). "
-    "Si des commentaires existent déjà, conserve-les tels quels sans les modifier.\n"
-    "8. ORDRE DES SECTIONS : Conserve les expériences et les formations DANS LE MÊME ORDRE que "
-    "le HTML original. Ne les réordonne JAMAIS, ne les trie pas par pertinence : l'ordre "
-    "chronologique d'origine doit être préservé à l'identique.\n"
-    "9. RÉSUMÉ GÉNÉRIQUE : Dans le résumé/accroche, ne recopie pas les phrases ou expressions "
-    "exactes de l'offre. Le résumé décrit le profil du candidat orienté vers ce TYPE de métier, "
-    "pas une candidature à une offre précise. Évite l'effet 'CV taillé sur mesure'.\n"
-    "10. FORMAT DE SORTIE : Retourne UNIQUEMENT le code HTML complet, du <!DOCTYPE html> "
-    "jusqu'à </html>. Zéro bloc markdown (```html), zéro commentaire global, zéro texte avant ou après."
-)
 
 
 def _stream_ai(generator_fn):
@@ -667,6 +345,8 @@ def api_text_to_html():
                 yield f"data: {_json_ai.dumps(chunk, ensure_ascii=False)}\n\n"
             yield "data: [DONE]\n\n"
         except Exception as exc:
+            if not user_key:
+                quota.decrement()
             yield f"data: [ERROR] {exc}\n\n"
 
     return _stream_ai(generate)
@@ -711,6 +391,8 @@ def api_pdf_to_html():
                 yield f"data: {_json_ai.dumps(chunk, ensure_ascii=False)}\n\n"
             yield "data: [DONE]\n\n"
         except Exception as exc:
+            if not user_key:
+                quota.decrement()
             yield f"data: [ERROR] {exc}\n\n"
         finally:
             if doc is not None:
@@ -754,6 +436,8 @@ def api_tailor():
                 yield f"data: {_json_ai.dumps(chunk, ensure_ascii=False)}\n\n"
             yield "data: [DONE]\n\n"
         except Exception as exc:
+            if not user_key:
+                quota.decrement()
             yield f"data: [ERROR] {exc}\n\n"
 
     return _stream_ai(generate)
@@ -798,10 +482,16 @@ def api_editor_chat():
             api_key=user_key,
         )
     except ValueError as exc:
+        if not user_key:
+            quota.decrement()
         return jsonify({"error": str(exc)}), 400
     except RuntimeError as exc:
+        if not user_key:
+            quota.decrement()
         return jsonify({"error": str(exc)}), 429
     except Exception as exc:
+        if not user_key:
+            quota.decrement()
         return jsonify({"error": f"Erreur IA : {exc}"}), 500
 
     return jsonify(result)
@@ -826,10 +516,16 @@ def api_ats_score():
     try:
         result = ai_engine.score_ats(cv_html=html, job_desc=job_desc, api_key=user_key)
     except ValueError as exc:
+        if not user_key:
+            quota.decrement()
         return jsonify({"error": str(exc)}), 400
     except RuntimeError as exc:
+        if not user_key:
+            quota.decrement()
         return jsonify({"error": str(exc)}), 429
     except Exception as exc:
+        if not user_key:
+            quota.decrement()
         return jsonify({"error": f"Erreur IA : {exc}"}), 500
 
     return jsonify(result)
@@ -862,10 +558,16 @@ def api_generate_pack():
             company=company, role=role, api_key=user_key,
         )
     except ValueError as exc:
+        if not user_key:
+            quota.decrement()
         return jsonify({"error": str(exc)}), 400
     except RuntimeError as exc:
+        if not user_key:
+            quota.decrement()
         return jsonify({"error": str(exc)}), 429
     except Exception as exc:
+        if not user_key:
+            quota.decrement()
         return jsonify({"error": f"Erreur IA : {exc}"}), 500
 
     return jsonify(result)
@@ -893,10 +595,16 @@ def api_tailor_resume():
     try:
         result = ai_engine.tailor_resume(resume, job_desc, level, api_key=user_key)
     except ValueError as exc:
+        if not user_key:
+            quota.decrement()
         return jsonify({"error": str(exc)}), 400
     except RuntimeError as exc:
+        if not user_key:
+            quota.decrement()
         return jsonify({"error": str(exc)}), 429
     except Exception as exc:
+        if not user_key:
+            quota.decrement()
         return jsonify({"error": f"Erreur IA : {exc}"}), 500
 
     return jsonify(result)
@@ -934,242 +642,20 @@ def api_pdf_to_resume():
     try:
         result = ai_engine.pdf_to_resume(images, api_key=user_key)
     except ValueError as exc:
+        if not user_key:
+            quota.decrement()
         return jsonify({"error": str(exc)}), 400
     except RuntimeError as exc:
+        if not user_key:
+            quota.decrement()
         return jsonify({"error": str(exc)}), 429
     except Exception as exc:
+        if not user_key:
+            quota.decrement()
         return jsonify({"error": f"Erreur IA : {exc}"}), 500
 
     return jsonify(result)
 
-
-# ---------------------------------------------------------------------------
-# Extracteur d'offre d'emploi (scraping URL)
-# ---------------------------------------------------------------------------
-
-_logger = _logging.getLogger(__name__)
-
-_EXTRACT_MAX_CHARS = 15_000
-_EXTRACT_TIMEOUT_MS = 20_000
-_SCRAPE_SEMAPHORE = threading.Semaphore(2)
-
-# Toutes les plages IP à bloquer (SSRF) — RFC 1918, 6598, 3927, 5737, etc.
-_BLOCKED_NETWORKS: list[ipaddress.IPv4Network | ipaddress.IPv6Network] = [
-    ipaddress.ip_network("0.0.0.0/8"),       # "This" network
-    ipaddress.ip_network("10.0.0.0/8"),
-    ipaddress.ip_network("100.64.0.0/10"),   # RFC 6598 CGN
-    ipaddress.ip_network("127.0.0.0/8"),
-    ipaddress.ip_network("169.254.0.0/16"),  # link-local
-    ipaddress.ip_network("172.16.0.0/12"),
-    ipaddress.ip_network("192.0.0.0/24"),    # IETF protocol
-    ipaddress.ip_network("192.168.0.0/16"),
-    ipaddress.ip_network("198.18.0.0/15"),   # benchmarking RFC 2544
-    ipaddress.ip_network("224.0.0.0/4"),     # multicast
-    ipaddress.ip_network("::1/128"),
-    ipaddress.ip_network("fc00::/7"),
-    ipaddress.ip_network("fe80::/10"),
-    ipaddress.ip_network("::ffff:0:0/96"),   # IPv4-mapped IPv6
-]
-
-
-def _is_blocked_ip(addr: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
-    # Normalise les adresses IPv4-mapped (::ffff:127.0.0.1 → 127.0.0.1)
-    # pour que le test d'appartenance aux réseaux IPv4 fonctionne correctement.
-    if isinstance(addr, ipaddress.IPv6Address) and addr.ipv4_mapped is not None:
-        addr = addr.ipv4_mapped
-    if addr.is_private or addr.is_loopback or addr.is_link_local or addr.is_multicast or addr.is_unspecified:
-        return True
-    return any(addr in net for net in _BLOCKED_NETWORKS if addr.version == net.version)
-
-
-def _validate_url(url: str) -> tuple[str, str | None]:
-    """Valide l'URL et retourne (url_nettoyée, erreur_ou_None).
-
-    Supprime les credentials embarqués, vérifie le schéma et toutes les adresses
-    résolues (IPv4 + IPv6) contre la liste de plages bloquées.
-    """
-    parsed = urlparse(url)
-    if parsed.scheme not in ("http", "https"):
-        return url, "URL invalide : seuls http et https sont autorisés."
-    hostname = parsed.hostname
-    if not hostname:
-        return url, "URL invalide : hôte manquant."
-
-    # Supprime les credentials (user:pass@host → host) avant de passer à Playwright
-    clean_netloc = hostname + (f":{parsed.port}" if parsed.port else "")
-    clean_url = urlunparse((parsed.scheme, clean_netloc, parsed.path, parsed.params, parsed.query, ""))
-
-    try:
-        # getaddrinfo couvre IPv4 et IPv6, contrairement à gethostbyname
-        results = socket.getaddrinfo(hostname, None)
-        for result in results:
-            addr = ipaddress.ip_address(result[4][0])
-            if _is_blocked_ip(addr):
-                return clean_url, "URL non autorisée."
-    except OSError:
-        return clean_url, "Impossible de résoudre l'hôte."
-
-    return clean_url, None
-
-
-def _make_route_guard():
-    """Retourne un handler Playwright qui re-valide l'IP au moment de chaque requête.
-
-    Défense en profondeur contre le DNS rebinding : la validation initiale peut
-    être contournée si le TTL DNS expire entre la vérification et la connexion.
-    """
-    def _guard(route, _request):
-        try:
-            req_host = urlparse(_request.url).hostname or ""
-            if req_host:
-                for result in socket.getaddrinfo(req_host, None):
-                    if _is_blocked_ip(ipaddress.ip_address(result[4][0])):
-                        route.abort("blockedbyclient")
-                        return
-        except Exception:
-            pass
-        route.continue_()
-    return _guard
-
-
-def _scrape_job_text(url: str) -> tuple[str, str]:
-    """Scrape une page d'offre d'emploi via Playwright. Retourne (texte, titre)."""
-    from playwright.sync_api import sync_playwright
-
-    if not _SCRAPE_SEMAPHORE.acquire(timeout=5):
-        raise RuntimeError("Trop de requêtes simultanées. Réessayez dans quelques secondes.")
-    try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch()
-            try:
-                page = browser.new_page(
-                    user_agent="Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Safari/537.36"
-                )
-                page.route("**/*", _make_route_guard())
-                page.goto(url, wait_until="domcontentloaded", timeout=_EXTRACT_TIMEOUT_MS)
-                page.wait_for_timeout(1500)
-                title = page.title() or ""
-
-                page.evaluate("""() => {
-                    const noise = ['nav','header','footer','aside','script','style',
-                        '[class*="cookie"]','[class*="Cookie"]','[id*="cookie"]',
-                        '[class*="banner"]','[class*="modal"]','[class*="popup"]',
-                        '[class*="sidebar"]','[class*="Sidebar"]',
-                        '[role="navigation"]','[role="banner"]','[role="complementary"]'];
-                    noise.forEach(s => {
-                        try { document.querySelectorAll(s).forEach(el => el.remove()); } catch(_) {}
-                    });
-                }""")
-
-                text = page.evaluate("""() => {
-                    const candidates = [
-                        document.querySelector('[class*="job-description"]'),
-                        document.querySelector('[class*="offer-description"]'),
-                        document.querySelector('[class*="jobDescription"]'),
-                        document.querySelector('[class*="posting-description"]'),
-                        document.querySelector('[data-qa="job-description"]'),
-                        document.querySelector('article'),
-                        document.querySelector('main'),
-                        document.body,
-                    ];
-                    for (const el of candidates) {
-                        const t = el && el.innerText && el.innerText.trim();
-                        if (t && t.length > 100) return t;
-                    }
-                    return '';
-                }""")
-
-                text = _re.sub(r"\n{3,}", "\n\n", text or "").strip()
-                
-                is_blocked = (
-                    len(text) < 200 or 
-                    "Sign Up" in title or 
-                    "Connexion" in title or 
-                    "S'inscrire" in title or
-                    "Security" in title or 
-                    "Cloudflare" in title
-                )
-
-                if is_blocked:
-                    import urllib.request
-                    try:
-                        req = urllib.request.Request(
-                            f"https://r.jina.ai/{url}",
-                            headers={"User-Agent": "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Safari/537.36"}
-                        )
-                        jina_resp = urllib.request.urlopen(req, timeout=15).read().decode('utf-8')
-                        if len(jina_resp) > 500 and "Sign Up | LinkedIn" not in jina_resp and "Connexion | LinkedIn" not in jina_resp and "S'inscrire" not in jina_resp and "Requête bloquée" not in jina_resp and "Vous avez été bloqué" not in jina_resp:
-                            # Nettoyage du Markdown pour réduire le bruit (menus, images, listes d'autres offres)
-                            jina_resp = _re.sub(r'!\[[^\]]*\]\([^)]+\)', '', jina_resp) # Supprime les images
-                            jina_resp = _re.sub(r'\[([^\]]*)\]\([^)]+\)', r'\1', jina_resp) # Garde le texte des liens (même vides)
-                            
-                            footer_markers = [
-                                "annonces similaires", "offres similaires", "ces offres peuvent",
-                                "plan du site", "gestion des cookies", "mentions légales",
-                                "inscription à la newsletter", "politique de confidentialité"
-                            ]
-                            nav_noise = [
-                                "espace candidat", "espace entreprise", "déposer son cv", "nouvelle recherche",
-                                "qui sommes-nous", "répondre en ligne", "connexion inscription", "mot de passe oublié",
-                                "entreprises qui recrutent", "faq des", "enregistrer vos annonces", "nos tarifs",
-                                "inscriptionconnexion", "taille du texte"
-                            ]
-                            exact_noise = {
-                                "×", "menu", "offres d'emploi", "statistiques", "contact", 
-                                "news les dernières news", "aa+aa-", "imprimer", "site internet",
-                                "actualité", "vidéos", "défilés", "galeries", "podcasts", "agenda", "partenaires"
-                            }
-                            
-                            lines = []
-                            for line in jina_resp.split('\n'):
-                                line_clean = line.strip()
-                                content = line_clean.lstrip('*>- ').strip()
-                                line_lower = content.lower()
-                                
-                                # Coupe la fin du document dès qu'on tombe sur le footer ou les suggestions
-                                if any(marker in line_lower for marker in footer_markers) and len(lines) > 10:
-                                    break
-                                    
-                                # Ignore les puces très courtes typiques de menus ou annonces annexes
-                                if line_clean.startswith('*'):
-                                    words = content.split()
-                                    if len(words) < 5: # Puce très courte (Menu)
-                                        continue
-                                    if 'il y a' in line_lower or 'news' in line_lower or 'offre' in line_lower or 'dans quelques' in line_lower:
-                                        continue
-                                
-                                # Ignore les lignes de navigation pures
-                                if len(content) < 40 and any(nav in line_lower for nav in nav_noise):
-                                    continue
-                                    
-                                # Retire les lignes inutiles isolées
-                                if line_lower in exact_noise:
-                                    continue
-                                    
-                                # Ignorer les lignes de fil d'Ariane
-                                if '›' in line_clean and 'accueil' in line_lower:
-                                    continue
-                                    
-                                lines.append(line_clean)
-                                
-                            text = '\n'.join(lines)
-                            text = _re.sub(r'\n{3,}', '\n\n', text).strip()
-                            for line in text.split('\n')[:10]:
-                                if line.startswith("Title: "):
-                                    title = line[7:].strip()
-                                    break
-                    except Exception as e:
-                        _logger.warning("Jina Reader fallback failed: %s", str(e))
-                
-                # Ultime vérification : si le texte final est un message de blocage Cloudflare/Datadome
-                if "Requête bloquée" in text or "Vous avez été bloqué" in text or "Just a moment" in text or "Cloudflare" in text:
-                    raise ValueError("BLOCKED")
-
-                return text[:_EXTRACT_MAX_CHARS], title
-            finally:
-                browser.close()
-    finally:
-        _SCRAPE_SEMAPHORE.release()
 
 
 @app.route("/api/extract-job", methods=["POST"])

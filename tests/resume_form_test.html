@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Test resume-form</title>
+</head>
+<body>
+  <div id="form-pane"></div>
+  <script>
+    // Mocks for app.js dependencies
+    window.$ = function(id) { return document.getElementById(id); };
+    window.htmlModel = {
+      val: "",
+      getValue: function() { return this.val; },
+      setValue: function(v) { this.val = v; }
+    };
+    window.cssModel = {
+      val: "",
+      getValue: function() { return this.val; },
+      setValue: function(v) { this.val = v; }
+    };
+    window.TEMPLATES = {
+      "sobre": { css: "body { background: white; } /* resume-template-renderer */" }
+    };
+  </script>
+  <!-- Load the script to test -->
+  <script src="../static/js/resume-form.js"></script>
+</body>
+</html>

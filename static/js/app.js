@@ -1294,8 +1294,6 @@ $('go').onclick = async () => {
         doc_type: $('doc_type').value,
         company: $('company').value.trim(),
         role: $('role').value.trim(),
-        notes: $('notes').value.trim(),
-        job_desc: $('job-desc-input').value.trim(),
         format: $('format').value,
         margin: $('margin').value,
         background: $('bg').checked,

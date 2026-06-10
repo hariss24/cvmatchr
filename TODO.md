@@ -40,7 +40,7 @@ Suivi des fonctionnalités : ce qui est fait, ce qui est prévu, ce qui est en r
 ### Infrastructure
 - [x] Déploiement Vercel (serverless)
 - [x] Système de quota / rate limiting
-- [x] Archive locale + Vercel Blob Storage
+- [x] Archive locale
 - [x] Historique des CVs avec job_desc associée
 
 ### Migration JSON (source de vérité)

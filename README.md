@@ -100,8 +100,10 @@ To make a desktop shortcut: right-click `app.pyw` → **Send to** → **Desktop*
 - The server spins up **Chromium** via Playwright, calls `page.set_content`
   with your HTML, then `page.pdf(...)` to produce the PDF.
 - The PDF bytes stream back to the browser as an attachment.
+- The app stores data locally in your browser's **IndexedDB**.
+- **Important**: The URL scraping feature uses an AI fallback via **Jina AI** if Playwright is blocked. By using the scraping feature, you consent to sending the URL to Jina's servers for extraction.
 
-Everything runs on `127.0.0.1` — your HTML never leaves your machine.
+Everything runs on `127.0.0.1` — your HTML never leaves your machine, except when explicitly using AI tools or the Jina scraper.
 
 ## MCP server (Claude desktop integration)
 

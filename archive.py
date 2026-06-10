@@ -5,6 +5,7 @@ Backend remote : MongoDB ou SQLite dans /tmp (Render, AWS Lambda).
 """
 
 import json
+import logging
 import os
 import re
 import sqlite3
@@ -13,6 +14,8 @@ import unicodedata
 import uuid
 from datetime import datetime
 from pathlib import Path
+
+_logger = logging.getLogger(__name__)
 
 OWNER = ""
 
@@ -27,7 +30,7 @@ if _MONGO_URI:
         _mongo_client = pymongo.MongoClient(_MONGO_URI, serverSelectionTimeoutMS=5000)
         _history_collection = _mongo_client.get_database("cv_generator").get_collection("history")
     except Exception as e:
-        print("Erreur d'initialisation MongoDB :", e)
+        _logger.warning("Erreur d'initialisation MongoDB : %s", e)
         _history_collection = None
 
 # ---- Détection de l'environnement sans disque persistant -------------------
@@ -114,9 +117,9 @@ def _migrate_from_json() -> None:
                     )
                 conn.commit()
         HISTORY_FILE.rename(HISTORY_FILE.with_suffix(".json.migrated"))
-        print(f"Migré {len(entries)} entrées de history.json → history.db")
+        _logger.info("Migré %d entrées de history.json → history.db", len(entries))
     except Exception as e:
-        print(f"Erreur migration JSON→SQLite : {e}")
+        _logger.error("Erreur migration JSON→SQLite : %s", e)
 
 
 def ensure_archive_dir() -> Path:
@@ -210,7 +213,7 @@ def _local_read_all() -> list[dict]:
             ).fetchall()
             return [dict(row) for row in rows]
     except Exception as e:
-        print(f"Erreur lecture SQLite : {e}")
+        _logger.error("Erreur lecture SQLite : %s", e)
         return []
 
 
@@ -239,7 +242,7 @@ def _local_delete(doc_id: str) -> dict | None:
             conn.commit()
             return dict(row)
     except Exception as e:
-        print(f"Erreur delete SQLite : {e}")
+        _logger.error("Erreur delete SQLite : %s", e)
         return None
 
 
@@ -250,7 +253,7 @@ def _read_history() -> list[dict]:
         try:
             return list(_history_collection.find({}, {"_id": 0}).sort("created_at", -1))
         except Exception as e:
-            print("Erreur lecture MongoDB :", e)
+            _logger.error("Erreur lecture MongoDB : %s", e)
             return []
     ensure_archive_dir()
     return _local_read_all()
@@ -303,7 +306,7 @@ def save_document(
             _history_collection.insert_one(entry.copy())
             return entry
         except Exception as e:
-            print("Erreur insertion MongoDB :", e)
+            _logger.error("Erreur insertion MongoDB : %s", e)
     else:
         _local_save(entry)
 
@@ -336,7 +339,7 @@ def delete_document(doc_id: str) -> bool:
             _history_collection.delete_one({"id": doc_id})
             return True
         except Exception as e:
-            print("Erreur delete MongoDB :", e)
+            _logger.error("Erreur delete MongoDB : %s", e)
             return False
 
     ensure_archive_dir()

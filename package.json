@@ -1,0 +1,28 @@
+{
+  "name": "html-to-pdf",
+  "version": "1.0.0",
+  "description": "A tiny local web app to convert HTML/CSS into a PDF.\r Paste your HTML, click a button, the PDF downloads automatically.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hariss24/html-to-pdf.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/hariss24/html-to-pdf/issues"
+  },
+  "homepage": "https://github.com/hariss24/html-to-pdf#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
+}

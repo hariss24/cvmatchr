@@ -218,7 +218,6 @@ def complete_chat(
         ValueError: clé manquante, JSON invalide, ou structure incorrecte.
         RuntimeError: quota épuisé.
     """
-    import json as _json
 
     key = api_key or os.environ.get("GEMINI_API_KEY", "")
     if not key:
@@ -245,16 +244,7 @@ def complete_chat(
     else:
         raw = _complete_gemini(augmented, _SYSTEM_EDITOR_CHAT, key)
 
-    raw = raw.strip()
-    if raw.startswith("```"):
-        raw = re.sub(r"^```(?:json)?\s*", "", raw)
-        raw = re.sub(r"\s*```\s*$", "", raw.strip())
-        raw = raw.strip()
-
-    try:
-        result = _json.loads(raw)
-    except _json.JSONDecodeError as exc:
-        raise ValueError(f"Réponse IA invalide (JSON malformé) : {exc}") from None
+    result = _loads_ai_json(raw)
 
     if not isinstance(result, dict) or "reply" not in result or "proposals" not in result:
         raise ValueError("Réponse IA invalide : champs 'reply' et 'proposals' attendus.")
@@ -340,7 +330,6 @@ def score_ats(
         ValueError: clé manquante, JSON invalide, ou structure incorrecte.
         RuntimeError: quota épuisé.
     """
-    import json as _json
 
     key = api_key or os.environ.get("GEMINI_API_KEY", "")
     if not key:
@@ -360,15 +349,7 @@ def score_ats(
     else:
         raw = _complete_gemini(messages, _SYSTEM_ATS_SCORE, key)
 
-    raw = raw.strip()
-    if raw.startswith("```"):
-        raw = re.sub(r"^```(?:json)?\s*", "", raw)
-        raw = re.sub(r"\s*```\s*$", "", raw.strip()).strip()
-
-    try:
-        result = _json.loads(raw)
-    except _json.JSONDecodeError as exc:
-        raise ValueError(f"Réponse IA invalide (JSON malformé) : {exc}") from None
+    result = _loads_ai_json(raw)
 
     if not isinstance(result, dict) or "score" not in result:
         raise ValueError("Réponse IA invalide : champ 'score' attendu.")
@@ -446,7 +427,6 @@ def generate_pack(
         ValueError: clé manquante, JSON invalide, ou structure incorrecte.
         RuntimeError: quota épuisé.
     """
-    import json as _json
 
     key = api_key or os.environ.get("GEMINI_API_KEY", "")
     if not key:
@@ -472,15 +452,7 @@ def generate_pack(
     else:
         raw = _complete_gemini(messages, _SYSTEM_PACK, key)
 
-    raw = raw.strip()
-    if raw.startswith("```"):
-        raw = re.sub(r"^```(?:json)?\s*", "", raw)
-        raw = re.sub(r"\s*```\s*$", "", raw.strip()).strip()
-
-    try:
-        result = _json.loads(raw)
-    except _json.JSONDecodeError as exc:
-        raise ValueError(f"Réponse IA invalide (JSON malformé) : {exc}") from None
+    result = _loads_ai_json(raw)
 
     if not isinstance(result, dict) or "letter_html" not in result or "email" not in result:
         raise ValueError("Réponse IA invalide : champs 'letter_html' et 'email' attendus.")

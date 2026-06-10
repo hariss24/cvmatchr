@@ -26,6 +26,14 @@ def check_and_increment() -> bool:
         return True
 
 
+def decrement() -> None:
+    """Décrémente le quota en cas d'erreur (remboursement)."""
+    with _lock:
+        today = str(_date.today())
+        if _state["date"] == today and _state["count"] > 0:
+            _state["count"] -= 1
+
+
 def remaining() -> int:
     """Retourne le nombre de requêtes restantes aujourd'hui."""
     with _lock:
