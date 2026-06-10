@@ -1,0 +1,12 @@
+# Configuration ruff minimale — filet de sécurité M0 (audit 2026-06-10).
+# On démarre volontairement petit : erreurs (E) et bugs probables (F).
+# E501 (longueur de ligne) est ignoré : le code existant aligne ses dict/prompts
+# sur des lignes longues, le reformatage massif n'apporte rien et serait risqué.
+line-length = 100
+target-version = "py311"
+
+exclude = ["tmp_pytest", "api", ".vercel"]
+
+[lint]
+select = ["E", "F"]
+ignore = ["E501"]
