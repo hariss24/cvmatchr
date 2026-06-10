@@ -216,8 +216,6 @@ def convert():
     doc_type        = data.get("doc_type", "CV")
     company         = (data.get("company") or "").strip()
     role            = (data.get("role") or "").strip()
-    notes           = (data.get("notes") or "").strip()
-    job_desc        = (data.get("job_desc") or "").strip()
     custom_filename = (data.get("filename") or "").strip()
 
     try:

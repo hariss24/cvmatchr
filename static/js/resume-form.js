@@ -45,6 +45,9 @@
       { name: 'Français', level: 'Natif' },
       { name: 'Anglais', level: 'Courant' },
     ],
+    projects: [],
+    certifications: [],
+    volunteer: [],
   };
 
   let resumeData = null;
@@ -152,6 +155,68 @@ ${items}
     <div class="plain-list__items">
 ${skills.map(s => `      <span class="plain-list__item">${esc(s)}</span>`).join('\n')}
     </div>
+  </section>`);
+    }
+
+    // Projets
+    const projects = (d.projects || []).filter(p => p && (p.title || p.description));
+    if (projects.length) {
+      const items = projects.map(p => {
+        const descTxt = (p.description || '').trim();
+        const desc = descTxt ? `
+      <div class="entry-list__description">
+        <p>${esc(descTxt)}</p>
+      </div>` : '';
+        return `    <div class="entry-list__item">
+      <span class="entry-list__title">${esc(p.title)}</span>
+      <span class="entry-list__date">${esc(p.date)}</span>${desc}
+    </div>`;
+      }).join('\n');
+      out.push(`
+  <section class="resume-template-renderer-section entry-list">
+    <h2 class="resume-template-renderer-section__title">Projets</h2>
+${items}
+  </section>`);
+    }
+
+    // Certifications
+    const certs = (d.certifications || []).filter(s => s && s.trim());
+    if (certs.length) {
+      out.push(`
+  <section class="resume-template-renderer-section plain-list">
+    <h2 class="resume-template-renderer-section__title">Certifications</h2>
+    <div class="plain-list__items">
+${certs.map(s => `      <span class="plain-list__item">${esc(s)}</span>`).join('\n')}
+    </div>
+  </section>`);
+    }
+
+    // Bénévolat
+    const volunteer = (d.volunteer || []).filter(v => v && (v.title || v.organization || (v.bullets || []).length));
+    if (volunteer.length) {
+      const items = volunteer.map(v => {
+        const bullets = (v.bullets || []).filter(b => b && b.trim());
+        const desc = bullets.length ? `
+      <div class="entry-list__description">
+        <ul>
+${bullets.map(b => `          <li>${esc(b)}</li>`).join('\n')}
+        </ul>
+      </div>` : '';
+        const orgRow = (v.organization || '').trim()
+          ? `        <span class="entry-list__subtitle">${esc(v.organization)}</span>${(v.location || '').trim() ? `<span class="entry-list__location">${esc(v.location)}</span>` : ''}`
+          : '';
+        return `    <div class="entry-list__item">
+      <span class="entry-list__title">${esc(v.title)}</span>
+      <span class="entry-list__date">${esc(v.date)}</span>
+      <div class="entry-list__company-row">
+${orgRow}
+      </div>${desc}
+    </div>`;
+      }).join('\n');
+      out.push(`
+  <section class="resume-template-renderer-section entry-list">
+    <h2 class="resume-template-renderer-section__title">Benevolat</h2>
+${items}
   </section>`);
     }
 
@@ -366,6 +431,42 @@ ${interests.map(s => `      <span class="plain-list__item">${esc(s)}</span>`).jo
       ${textarea('skills', null, 'skills', 'Une compétence par ligne', (d.skills || []).join('\n'), 5)}
     </section>`);
 
+    // Projets
+    html.push(`<section class="rf-group">
+      <div class="rf-group-head"><span>Projets</span>
+        <button type="button" class="rf-add-btn" data-action="add" data-section="projects">+ Ajouter</button></div>
+      ${(d.projects || []).map((p, i) => `<div class="rf-item">
+        <div class="rf-item-head"><span>Projet ${i + 1}</span>${itemActions('projects', i)}</div>
+        <div class="rf-grid">
+          ${field('projects', i, 'title', 'Nom du projet', p.title)}
+          ${field('projects', i, 'date', 'Date', p.date)}
+        </div>
+        ${textarea('projects', i, 'description', 'Description', p.description, 2)}
+      </div>`).join('')}
+    </section>`);
+
+    // Certifications
+    html.push(`<section class="rf-group">
+      <div class="rf-group-head"><span>Certifications</span></div>
+      ${textarea('certifications', null, 'certifications', 'Une certification par ligne', (d.certifications || []).join('\n'), 3)}
+    </section>`);
+
+    // Bénévolat
+    html.push(`<section class="rf-group">
+      <div class="rf-group-head"><span>Bénévolat</span>
+        <button type="button" class="rf-add-btn" data-action="add" data-section="volunteer">+ Ajouter</button></div>
+      ${(d.volunteer || []).map((v, i) => `<div class="rf-item">
+        <div class="rf-item-head"><span>Bénévolat ${i + 1}</span>${itemActions('volunteer', i)}</div>
+        <div class="rf-grid">
+          ${field('volunteer', i, 'title', 'Rôle', v.title)}
+          ${field('volunteer', i, 'organization', 'Organisation', v.organization)}
+          ${field('volunteer', i, 'location', 'Ville', v.location)}
+          ${field('volunteer', i, 'date', 'Période', v.date)}
+        </div>
+        ${textarea('volunteer', i, 'bullets', 'Activités (une par ligne)', (v.bullets || []).join('\n'), 3)}
+      </div>`).join('')}
+    </section>`);
+
     // Langues
     html.push(`<section class="rf-group">
       <div class="rf-group-head"><span>Langues</span>
@@ -397,6 +498,8 @@ ${interests.map(s => `      <span class="plain-list__item">${esc(s)}</span>`).jo
       resumeData.skills = value.split('\n');
     } else if (section === 'interests') {
       resumeData.interests = value.split('\n');
+    } else if (section === 'certifications') {
+      resumeData.certifications = value.split('\n');
     } else if (section === 'experience') {
       if (key === 'bullets') resumeData.experience[index].bullets = value.split('\n');
       else resumeData.experience[index][key] = value;
@@ -404,6 +507,11 @@ ${interests.map(s => `      <span class="plain-list__item">${esc(s)}</span>`).jo
       resumeData.education[index][key] = value;
     } else if (section === 'languages') {
       resumeData.languages[index][key] = value;
+    } else if (section === 'projects') {
+      resumeData.projects[index][key] = value;
+    } else if (section === 'volunteer') {
+      if (key === 'bullets') resumeData.volunteer[index].bullets = value.split('\n');
+      else resumeData.volunteer[index][key] = value;
     }
   }
 
@@ -411,6 +519,8 @@ ${interests.map(s => `      <span class="plain-list__item">${esc(s)}</span>`).jo
     experience: () => ({ title: '', company: '', contract: '', location: '', date: '', bullets: [] }),
     education: () => ({ title: '', school: '', location: '', date: '' }),
     languages: () => ({ name: '', level: '' }),
+    projects: () => ({ title: '', date: '', description: '' }),
+    volunteer: () => ({ title: '', organization: '', location: '', date: '', bullets: [] }),
   };
 
   function handleAction(action, section, index) {
@@ -497,6 +607,16 @@ ${interests.map(s => `      <span class="plain-list__item">${esc(s)}</span>`).jo
       skills: arr(obj.skills),
       interests: arr(obj.interests),
       languages: arr(obj.languages).map(l => ({ name: (l && l.name) || '', level: (l && l.level) || '' })),
+      projects: arr(obj.projects).map(p => ({
+        title: (p && p.title) || '', date: (p && p.date) || '',
+        description: (p && p.description) || '',
+      })),
+      certifications: arr(obj.certifications),
+      volunteer: arr(obj.volunteer).map(v => ({
+        title: (v && v.title) || '', organization: (v && v.organization) || '',
+        location: (v && v.location) || '', date: (v && v.date) || '',
+        bullets: Array.isArray(v && v.bullets) ? v.bullets : [],
+      })),
     };
   }
 

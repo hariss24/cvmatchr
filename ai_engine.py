@@ -507,7 +507,11 @@ _RESUME_SCHEMA_DESC = (
     '  "education": [{"title": "...", "school": "...", "location": "...", "date": "..."}],\n'
     '  "skills": ["...", "..."],\n'
     '  "languages": [{"name": "...", "level": "..."}],\n'
-    '  "interests": ["...", "..."]\n'
+    '  "interests": ["...", "..."],\n'
+    '  "projects": [{"title": "...", "date": "...", "description": "..."}],\n'
+    '  "certifications": ["...", "..."],\n'
+    '  "volunteer": [{"title": "...", "organization": "...", "location": "...", '
+    '"date": "...", "bullets": ["...", "..."]}]\n'
     '}'
 )
 
@@ -548,10 +552,35 @@ def _normalize_resume(d: dict) -> dict:
             "date":     _s(e.get("date")),
         }
 
-    def language_item(l):
-        if not isinstance(l, dict):
-            l = {}
-        return {"name": _s(l.get("name")), "level": _s(l.get("level"))}
+    def language_item(lang):
+        if not isinstance(lang, dict):
+            lang = {}
+        return {"name": _s(lang.get("name")), "level": _s(lang.get("level"))}
+
+    def project_item(p):
+        if not isinstance(p, dict):
+            p = {}
+        return {
+            "title":       _s(p.get("title")),
+            "date":        _s(p.get("date")),
+            "description": _s(p.get("description")),
+        }
+
+    def volunteer_item(v):
+        if not isinstance(v, dict):
+            v = {}
+        bullets = v.get("bullets")
+        if isinstance(bullets, str):
+            bullets = [bullets]
+        if not isinstance(bullets, list):
+            bullets = []
+        return {
+            "title":        _s(v.get("title")),
+            "organization": _s(v.get("organization")),
+            "location":     _s(v.get("location")),
+            "date":         _s(v.get("date")),
+            "bullets":      [_s(b) for b in bullets if _s(b)][:8],
+        }
 
     exp = d.get("experience") if isinstance(d.get("experience"), list) else []
     edu = d.get("education") if isinstance(d.get("education"), list) else []
@@ -568,6 +597,14 @@ def _normalize_resume(d: dict) -> dict:
     if not isinstance(interests, list):
         interests = []
 
+    projects = d.get("projects") if isinstance(d.get("projects"), list) else []
+    volunteer = d.get("volunteer") if isinstance(d.get("volunteer"), list) else []
+    certifications = d.get("certifications")
+    if isinstance(certifications, str):
+        certifications = [c for c in re.split(r"[\n,;]", certifications)]
+    if not isinstance(certifications, list):
+        certifications = []
+
     return {
         "name":       _s(d.get("name")),
         "title":      _s(d.get("title")),
@@ -579,8 +616,11 @@ def _normalize_resume(d: dict) -> dict:
         "experience": [experience_item(e) for e in exp][:20],
         "education":  [education_item(e) for e in edu][:20],
         "skills":     [_s(s) for s in skills if _s(s)][:60],
-        "languages":  [language_item(l) for l in langs if _s(l.get("name") if isinstance(l, dict) else l)][:20],
+        "languages":  [language_item(lang) for lang in langs if _s(lang.get("name") if isinstance(lang, dict) else lang)][:20],
         "interests":  [_s(i) for i in interests if _s(i)][:20],
+        "projects":   [project_item(p) for p in projects][:20],
+        "certifications": [_s(c) for c in certifications if _s(c)][:40],
+        "volunteer":  [volunteer_item(v) for v in volunteer][:20],
     }
 
 

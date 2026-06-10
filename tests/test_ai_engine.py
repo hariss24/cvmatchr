@@ -113,3 +113,47 @@ def test_stream_anthropic():
     call_kwargs = mock_client.messages.stream.call_args[1]
     assert call_kwargs["model"] == "claude-haiku-4-5-20251001"
     assert call_kwargs["system"] == "system"
+
+
+# ---- Parité du schéma JSON (M1.1) ------------------------------------------
+# _normalize_resume ne doit PAS perdre les sections projects / certifications /
+# volunteer, supportées par le pipeline HTML. (Règle n°3 du CLAUDE.md.)
+
+def test_normalize_resume_preserves_projects_certifications_volunteer():
+    import ai_engine
+    src = {
+        "name": "Jean Test",
+        "projects": [
+            {"title": "Projet A", "date": "2024", "description": "Une description."},
+        ],
+        "certifications": ["AWS Certified", "Scrum Master"],
+        "volunteer": [
+            {"title": "Bénévole", "organization": "Croix-Rouge",
+             "location": "Paris", "date": "2023", "bullets": ["Aide alimentaire."]},
+        ],
+    }
+    out = ai_engine._normalize_resume(src)
+
+    assert out["projects"] == [
+        {"title": "Projet A", "date": "2024", "description": "Une description."}
+    ]
+    assert out["certifications"] == ["AWS Certified", "Scrum Master"]
+    assert out["volunteer"] == [
+        {"title": "Bénévole", "organization": "Croix-Rouge",
+         "location": "Paris", "date": "2023", "bullets": ["Aide alimentaire."]}
+    ]
+
+
+def test_normalize_resume_new_sections_default_empty():
+    import ai_engine
+    out = ai_engine._normalize_resume({"name": "Vide"})
+    assert out["projects"] == []
+    assert out["certifications"] == []
+    assert out["volunteer"] == []
+
+
+def test_resume_schema_desc_mentions_new_sections():
+    import ai_engine
+    assert "projects" in ai_engine._RESUME_SCHEMA_DESC
+    assert "certifications" in ai_engine._RESUME_SCHEMA_DESC
+    assert "volunteer" in ai_engine._RESUME_SCHEMA_DESC
