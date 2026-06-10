@@ -21,3 +21,11 @@ new-folder/
 .vscode/
 .idea/
 *.pdf
+
+# Tests frontend / artefacts Node (inutiles dans l image)
+node_modules/
+test-results/
+playwright-report/
+package.json
+package-lock.json
+.github/

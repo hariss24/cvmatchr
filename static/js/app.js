@@ -1,4 +1,22 @@
 // ============================================================
+// app.js — orchestrateur principal de l'interface (page index)
+// ------------------------------------------------------------
+// Tout le rendu HTML du CV se fait ici côté navigateur ; le
+// backend Flask ne fait que convertir en PDF et appeler l'IA.
+//
+// Grandes zones (chercher les bannières « ===== » ci-dessous) :
+//   - Éditeur Monaco + templates HTML/CSS intégrés + aperçu live
+//   - Persistance : localStorage (brouillons) + IndexedDB (snapshots)
+//   - Conversion PDF (POST /convert) et compteur de pages A4
+//   - Chat IA, imports texte/PDF, streaming SSE -> Monaco
+//   - Tailoring (adaptation à une offre), pack candidature, score ATS
+//   - Extracteur d'offre par URL, photo Base64, clé API utilisateur
+//
+// Le mode formulaire structuré vit dans resume-form.js (source de
+// vérité JSON) ; l'export JSON Resume dans export-jsonresume.js.
+// ============================================================
+
+// ============================================================
 // Utilitaires de base
 // ============================================================
 const $ = (id) => document.getElementById(id);

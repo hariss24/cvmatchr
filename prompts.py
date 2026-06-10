@@ -1,3 +1,18 @@
+"""Prompts système et squelettes HTML pour les fonctions IA (consommés par app.py).
+
+Contenu (constantes uniquement, aucune logique) :
+- _CV_HTML_SKELETON / _LETTRE_SKELETON : gabarits HTML que l'IA doit remplir
+  (classes CSS du template « sobre », cf. static/js/resume-form.js).
+- _SYSTEM_CV_IMPORT / _SYSTEM_LETTRE_IMPORT : prompts d'import texte/PDF -> HTML.
+- _PRESERVE_RULE / _ELAGUE_RULE : règles de préservation ou d'élagage du contenu.
+- _TAILOR_SYSTEMS : prompts d'adaptation du CV à une offre, par niveau
+  d'intensité (« peu », « adapte », « hyper »).
+- _COMMON_HTML_RULES : règles HTML communes injectées dans tous les prompts.
+
+Toute modification des classes CSS dans les squelettes doit rester synchrone
+avec static/css/main.css et resume-form.js.
+"""
+
 _CV_HTML_SKELETON = """\
 <div class="resume-template-1 resume-template-renderer">
 

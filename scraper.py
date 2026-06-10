@@ -1,3 +1,19 @@
+"""Extracteur d'offres d'emploi (scraping URL) avec protection SSRF.
+
+Flux : _validate_url() vérifie le schéma + résout le DNS contre les plages IP
+bloquées (RFC 1918, link-local, multicast…), puis _scrape_job_text() lance
+Playwright avec un route guard qui re-valide chaque requête (défense contre
+le DNS rebinding). Si la page est bloquée (Cloudflare, mur de connexion
+LinkedIn…), fallback sur Jina Reader (r.jina.ai) avec nettoyage du Markdown.
+
+Invariants :
+- Semaphore(2) : max 2 scrapes simultanés (un Chromium par scrape).
+- Texte tronqué à _EXTRACT_MAX_CHARS (15 000 caractères).
+- Lève ValueError("BLOCKED") si même le fallback renvoie une page de blocage.
+
+API publique : _validate_url(url) -> (url_propre, erreur|None)
+               _scrape_job_text(url) -> (texte, titre)
+"""
 import urllib.request
 from urllib.parse import urlparse, urlunparse
 import ipaddress
@@ -5,10 +21,6 @@ import socket
 import threading
 import re as _re
 import logging as _logging
-
-# ---------------------------------------------------------------------------
-# Extracteur d'offre d'emploi (scraping URL)
-# ---------------------------------------------------------------------------
 
 _logger = _logging.getLogger(__name__)
 

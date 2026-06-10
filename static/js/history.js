@@ -1,3 +1,11 @@
+// ============================================================
+// history.js — page Historique (templates/history.html)
+// ------------------------------------------------------------
+// Liste les CV générés : métadonnées dans localStorage (cv-history),
+// sources HTML dans IndexedDB (avec fallback serveur via
+// /api/history/<id>/html). Permet de recharger un document dans
+// l'éditeur ou de regénérer le PDF via POST /convert.
+// ============================================================
 const HISTORY_KEY = 'cv-history';
 const IDB_DB      = 'html-to-pdf-snapshots';
 const IDB_HTML    = 'cv-html-store';

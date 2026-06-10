@@ -1,11 +1,29 @@
 """
-Convertisseur HTML/CSS -> PDF (interface web locale).
+Convertisseur HTML/CSS -> PDF (serveur Flask, interface web).
 
-Utilisation :
+Utilisation locale :
     Double-cliquez sur ce fichier. Le navigateur s'ouvre sur http://127.0.0.1:5050
+Mode remote (Render) : REMOTE_MODE=1 + Gunicorn, cf. render.yaml / Dockerfile.
 
-Pour quitter :
-    Cliquez sur le bouton "Quitter" dans la petite fenetre de controle.
+Carte des routes :
+    Pages       : /  /history  /login  /logout
+    Conversion  : POST /convert                 HTML -> PDF (pdf_engine)
+    Historique  : GET  /api/history/<id>/html   source HTML d'un document archivé
+    Statut      : GET  /api/status              quota restant + mode
+    Import IA   : POST /api/text-to-html        texte brut -> CV HTML (SSE)
+                  POST /api/pdf-to-html         PDF -> CV HTML via images (SSE)
+                  POST /api/pdf-to-resume       PDF -> JSON structuré (formulaire)
+    Adaptation  : POST /api/tailor              HTML -> HTML adapté (mode expert, SSE)
+                  POST /api/tailor-resume       JSON -> JSON adapté (mode formulaire)
+                  POST /api/editor-chat         chat IA sur le HTML courant (SSE)
+    Candidature : POST /api/ats-score           score ATS CV vs offre
+                  POST /api/generate-pack       lettre + email cohérents
+    Scraping    : POST /api/extract-job         URL offre -> texte (scraper.py)
+
+Conventions : les endpoints IA passent par quota.check_and_increment() (clé
+serveur uniquement) avec remboursement via quota.decrement() en cas d'échec ;
+les prompts vivent dans prompts.py ; le rendu HTML du CV se fait côté
+frontend (static/js), le backend ne fait que convertir et orchestrer l'IA.
 """
 
 import io
@@ -61,6 +79,17 @@ app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 
 if os.environ.get("APP_MODE", "").lower() == "remote" or bool(os.environ.get("RENDER")):
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+    # Derrière le proxy HTTPS de Render : cookies de session durcis.
+    app.config.update(
+        SESSION_COOKIE_SECURE=True,
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE="Lax",
+    )
+    if not os.environ.get("SECRET_KEY"):
+        _logger.warning(
+            "SECRET_KEY non défini en mode remote : sessions et jetons CSRF "
+            "seront invalidés à chaque redémarrage du serveur."
+        )
 
 
 

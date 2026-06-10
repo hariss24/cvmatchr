@@ -2,10 +2,20 @@
 
 Ce fichier définit les règles de base pour intervenir sur le dépôt `html-to-pdf`.
 
+> **🗺️ NAVIGATION RAPIDE : commence par `FILE_MAP.md`**
+> C'est la carte du dépôt : rôle de chaque fichier + table « quel fichier pour quelle tâche ». Lis-la AVANT d'explorer le code — elle évite de balayer des fichiers inutiles. La carte des routes API est dans la docstring de `app.py`.
+
 > **⚠️ IMPORTANT : TOUT EST DOCUMENTÉ DANS `PROJECT_INDEX.md`**  
 > Pour comprendre l'architecture complète, la liste des fichiers, la migration HTML -> JSON en cours, et les **"Angles Morts" critiques** à ne pas casser, tu dois **impérativement lire le fichier `PROJECT_INDEX.md`**. Ne commence aucune modification sans avoir pris connaissance des règles métier (notamment la gestion des photos Base64 et du Chat IA) décrites dans ce fichier.
 
 ---
+
+## 🧠 Guidelines Karpathy (obligatoires pour tout travail de code)
+
+1. **Think Before Coding** — pose tes hypothèses explicitement. Si c'est ambigu, demande avant d'agir.
+2. **Simplicity First** — minimum de code. Aucune abstraction, flexibilité ou gestion d'erreur non demandée.
+3. **Surgical Changes** — ne touche que ce qui est nécessaire. Ne "nettoie" pas le code adjacent.
+4. **Goal-Driven Execution** — définis des critères de succès vérifiables avant d'implémenter (ex : `ruff check .` + `pytest` verts).
 
 ## 🛠️ Règles de Développement (Mise à jour)
 
