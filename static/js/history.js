@@ -108,7 +108,7 @@ function trackStat(id, field) {
 async function viewPdf(id) {
   const record = await _loadHtmlFromIDB(id);
   if (!record || !record.html) {
-    alert("HTML introuvable. Chargez ce document dans l'éditeur et générez le PDF au moins une fois.");
+    await uiAlert("HTML introuvable. Chargez ce document dans l'éditeur et générez le PDF au moins une fois.", { title: 'PDF indisponible' });
     return;
   }
   try {
@@ -119,7 +119,7 @@ async function viewPdf(id) {
     });
     if (!resp.ok) {
       const err = await resp.json().catch(() => ({}));
-      alert('Erreur lors de la génération du PDF : ' + (err.error || resp.statusText));
+      await uiAlert('Erreur lors de la génération du PDF : ' + (err.error || resp.statusText), { title: 'Erreur' });
       return;
     }
     const blob = await resp.blob();
@@ -129,7 +129,7 @@ async function viewPdf(id) {
     trackStat(id, 'pdf_views');
     await load(); // rafraîchit les compteurs affichés
   } catch (err) {
-    alert('Erreur réseau : ' + err.message);
+    await uiAlert('Erreur réseau : ' + err.message, { title: 'Erreur' });
   }
 }
 
@@ -234,7 +234,12 @@ async function load() {
 // ---- Suppression ----------------------------------------------------------
 
 async function del(id) {
-  if (!confirm('Supprimer cette entrée ?')) return;
+  let label = 'cette entrée';
+  try {
+    const e = (JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]')).find(x => x.id === id);
+    if (e) label = `« ${[e.company, e.role].filter(Boolean).join(' — ') || e.filename || id} »`;
+  } catch (_) {}
+  if (!(await uiConfirm(`Supprimer ${label} ?\nCette action est irréversible.`, { title: 'Supprimer', confirmLabel: 'Supprimer', danger: true }))) return;
   try {
     const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]').filter(e => e.id !== id);
     localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
@@ -290,11 +295,11 @@ async function importData(file) {
   try {
     payload = JSON.parse(await file.text());
   } catch (_) {
-    alert("Fichier invalide : JSON mal formé.");
+    await uiAlert("Fichier invalide : JSON mal formé.", { title: 'Import impossible' });
     return;
   }
   if (!Array.isArray(payload.entries)) {
-    alert("Fichier invalide : clé « entries » manquante.");
+    await uiAlert("Fichier invalide : clé « entries » manquante.", { title: 'Import impossible' });
     return;
   }
 
@@ -322,7 +327,7 @@ async function importData(file) {
   try { localStorage.setItem(HISTORY_KEY, JSON.stringify(existing.slice(0, 100))); } catch (_) {}
 
   await load();
-  alert(`Import terminé : ${imported} nouvelle(s) entrée(s) ajoutée(s).`);
+  await uiAlert(`Import terminé : ${imported} nouvelle(s) entrée(s) ajoutée(s).`, { title: 'Import réussi' });
 }
 
 async function _saveHtmlToIDB(id, html, css, json, templateId) {

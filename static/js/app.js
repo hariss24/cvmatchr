@@ -700,9 +700,9 @@ async function deleteSnapshot(ts) {
   });
 }
 
-function restoreSnapshot(snap) {
+async function restoreSnapshot(snap) {
   if (!htmlModel) return;
-  if (!confirm(`Restaurer le snapshot "${snap.label}" ? Le contenu actuel sera remplacé.`)) return;
+  if (!(await uiConfirm(`Restaurer le snapshot "${snap.label}" ? Le contenu actuel sera remplacé.`, { title: 'Restaurer le snapshot', confirmLabel: 'Restaurer' }))) return;
   // Mettre à jour le type AVANT setValue : l'autosave (onDidChangeContent) sauve
   // sous _activeDocType, sinon le contenu restauré écrase le brouillon de l'ancien type.
   if (snap.doc_type) {
@@ -811,9 +811,17 @@ $('btn-import-json').onclick = async () => {
     } catch(e) {}
   }
   
-  // Si on n'a pas de JSON valide dans le presse-papier, on utilise le prompt
+  // Si on n'a pas de JSON valide dans le presse-papier, on demande un collage manuel
   if (!isValidJson) {
-    text = prompt("Collez les données JSON de votre CV ici :");
+    text = await uiPrompt('Collez les données JSON de votre CV ici :', {
+      title: 'Importer un JSON',
+      multiline: true,
+      placeholder: '{ "fullName": "…", … }',
+      validate: (v) => {
+        if (!v.trim()) return 'Le champ est vide.';
+        try { JSON.parse(v); return null; } catch (_) { return 'JSON invalide — vérifie la syntaxe.'; }
+      },
+    });
     if (!text) return; // Annulé par l'utilisateur
   }
   
@@ -973,12 +981,12 @@ require(['vs/editor/editor.main'], function () {
     expertCheckbox.checked = isExpert;
     applyExpertMode(isExpert);
 
-    expertCheckbox.addEventListener('change', (e) => {
+    expertCheckbox.addEventListener('change', async (e) => {
       // Avertissement « Eject » : passer en Expert sur un CV issu du formulaire
       // rompt la synchronisation avec celui-ci.
       if (e.target.checked && window.ResumeForm && window.ResumeForm.matchesEditor
           && window.ResumeForm.matchesEditor()) {
-        if (!confirm('⚠️ Si tu modifies le code HTML, tu perds la synchronisation avec le formulaire. Continuer ?')) {
+        if (!(await uiConfirm('⚠️ Si tu modifies le code HTML, tu perds la synchronisation avec le formulaire. Continuer ?', { title: 'Mode Expert', confirmLabel: 'Continuer', danger: true }))) {
           e.target.checked = false;
           return;
         }
@@ -987,14 +995,14 @@ require(['vs/editor/editor.main'], function () {
     });
   }
 
-  $('template-select').onchange = (e) => {
+  $('template-select').onchange = async (e) => {
     const key = e.target.value;
     e.target.value = '';
     if (!key) return;
     const tpl = TEMPLATES[key];
     if (!tpl) return;
     const dirty = htmlModel.getValue().trim() || cssModel.getValue().trim();
-    if (dirty && !confirm(`Charger le template "${key}" et ecraser le contenu actuel ?`)) return;
+    if (dirty && !(await uiConfirm(`Charger le template "${key}" et écraser le contenu actuel ?`, { title: 'Charger un template', confirmLabel: 'Charger' }))) return;
     // Les templates sont des mises en page de CV. Aligner le type AVANT setValue
     // pour ne pas écraser le brouillon d'un autre type (ex. Lettre) via l'autosave.
     if (_activeDocType !== 'CV' && _activeDocType !== 'Maître') {
@@ -1196,9 +1204,9 @@ document.querySelectorAll('.template-card').forEach(card => {
 // ============================================================
 // Effacer
 // ============================================================
-$('clear').onclick = () => {
+$('clear').onclick = async () => {
   const hasContent = (htmlModel && htmlModel.getValue().trim()) || (cssModel && cssModel.getValue().trim());
-  if (hasContent && !confirm('Effacer tout le contenu ? Un snapshot automatique sera créé avant.')) return;
+  if (hasContent && !(await uiConfirm('Effacer tout le contenu ? Un snapshot automatique sera créé avant.', { title: 'Tout effacer', confirmLabel: 'Effacer', danger: true }))) return;
   saveSnapshot('Avant effacement');
   
   // Vider le formulaire s'il existe
@@ -1727,9 +1735,9 @@ const LEVEL_PROMPT_RULES = {
 // ============================================================
 // Insertion Photo Base64
 // ============================================================
-$('btn-photo').onclick = () => {
+$('btn-photo').onclick = async () => {
   if (htmlModel && !htmlModel.getValue().includes('URL_DE_VOTRE_PHOTO_ICI')) {
-    alert("Aucun emplacement automatique de photo détecté.\n\nVotre photo sera insérée exactement là où se trouve actuellement votre curseur clignotant dans le code HTML.\n\nAssurez-vous d'avoir cliqué au bon endroit dans l'éditeur avant de choisir votre image !");
+    await uiAlert("Aucun emplacement automatique de photo détecté.\n\nVotre photo sera insérée exactement là où se trouve actuellement votre curseur clignotant dans le code HTML.\n\nAssurez-vous d'avoir cliqué au bon endroit dans l'éditeur avant de choisir votre image !", { title: 'Insertion de photo' });
   }
   $('photo-upload').click();
 };
