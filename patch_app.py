@@ -1,4 +1,3 @@
-import re
 
 with open("static/js/app.js", "r", encoding="utf-8") as f:
     code = f.read()

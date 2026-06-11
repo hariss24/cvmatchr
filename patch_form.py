@@ -1,4 +1,3 @@
-import re
 
 with open("static/js/resume-form.js", "r", encoding="utf-8") as f:
     code = f.read()
