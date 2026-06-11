@@ -49,6 +49,12 @@
 
 /* ---- Base ---- */
 * { box-sizing: border-box; }
+
+/* Scrollbars fines et thémées pour tout le chrome UI (l'iframe d'aperçu est isolée) */
+* { scrollbar-width: thin; scrollbar-color: var(--faint) transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 4px; }
 html, body {
   margin: 0; padding: 0; height: 100%;
   font-family: 'Inter', -apple-system, Segoe UI, sans-serif;
@@ -576,7 +582,8 @@ button.ghost:active {
   margin: 0 2px;
 }
 
-#job-desc-input { width: 100%; flex: 1; min-height: 150px; resize: vertical; font-size: 13px; line-height: 1.5; }
+/* Hauteur ~13 lignes : l'offre collée reste lisible sans déclencher un double scroll au repos */
+#job-desc-input { width: 100%; flex: 1; min-height: 260px; resize: vertical; font-size: 13px; line-height: 1.5; }
 .tailor-btn {
   background: linear-gradient(145deg, var(--orange), var(--orange-hover));
   color: white; border: none; border-radius: 11px;
@@ -762,17 +769,17 @@ button.ghost:active {
   text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600;
 }
 .level-segment {
-  display: flex; gap: 4px;
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;
   padding: 4px; border-radius: 12px;
   box-shadow: var(--neu-inset);
 }
 .level-btn {
   position: relative;
-  flex: 1; padding: 7px 4px; font-size: 12px; border-radius: 9px;
+  padding: 7px 4px; font-size: 12px; border-radius: 9px;
   border: none; background: transparent;
-  color: var(--muted); cursor: pointer;
+  color: var(--muted); cursor: pointer; text-align: center;
   font-family: 'Inter', sans-serif;
-  transition: box-shadow 150ms, color 150ms, background 150ms; white-space: nowrap;
+  transition: box-shadow 150ms, color 150ms, background 150ms;
 }
 .level-btn:hover { color: var(--text); }
 

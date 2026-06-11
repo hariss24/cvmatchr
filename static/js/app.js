@@ -897,6 +897,8 @@ require(['vs/editor/editor.main'], function () {
     fontSize: 13,
     tabSize: 2,
     scrollBeyondLastLine: false,
+    scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 },
+    overviewRulerLanes: 0,
   });
 
   // Auto-replier les <style> et la région Photo_Base64 au chargement
