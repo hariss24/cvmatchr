@@ -56,6 +56,10 @@ AI endpoints, and history endpoints behind `/login`. If `APP_MODE=remote`
 is set without `REMOTE_AUTH_PASSWORD`, protected routes return a setup error
 instead of exposing private documents.
 
+`SECRET_KEY` must be set explicitly in remote deployments: without it, a new
+random key is generated at startup and every server restart invalidates all
+active sessions (users get logged out).
+
 Render deployments are treated as remote automatically. For persistent remote
 history, configure `MONGODB_URI`. Without it, archives fall back to temporary
 storage and may disappear between container restarts.

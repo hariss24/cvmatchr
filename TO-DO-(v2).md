@@ -1,7 +1,9 @@
 # TO-DO (v2) — Roadmap d'optimisations `html-to-pdf`
 
 > **Document autoportant destiné à une IA exécutante (Gemini, Claude, etc.).**
-> État des lieux vérifié le 2026-06-12 : 104 tests pytest verts (~2,6 s), CI GitHub Actions (`ruff` + `pytest`), Tailwind CSS v4 intégré, migration HTML→JSON à ~70 %.
+> État des lieux vérifié le 2026-06-12 : 106 tests pytest verts (~2,4 s), CI GitHub Actions (`ruff` + `pytest`), Tailwind CSS v4 intégré, migration HTML→JSON à ~70 %.
+>
+> **Avancement (2026-06-12)** : ✅ T0.1, T0.2, T1.2, T2.1, T2.2, T5.4 faits. T5.3 : README déjà exact, reste le `uiConfirm()` avant le fallback Jina. **Restant : T1.1, Phase 3, Phase 4, T5.1-T5.3 (partiel), Phase 6.**
 
 ## ⚠️ À lire AVANT toute modification
 
