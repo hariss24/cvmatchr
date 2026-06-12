@@ -33,13 +33,7 @@ def stream_completion(
     Raises:
         ValueError: si aucune clé API n'est disponible, ou si Anthropic reçoit des images.
     """
-    key = api_key or os.environ.get("GEMINI_API_KEY", "")
-    if not key:
-        raise ValueError(
-            "Aucune clé API configurée. "
-            "Ajoutez GEMINI_API_KEY dans les variables d'environnement "
-            "ou une clé personnelle dans ⚙️ Paramètres."
-        )
+    key = _require_key(api_key)
 
     if _is_anthropic_key(key):
         if images:
@@ -54,6 +48,30 @@ def stream_completion(
 
 def _is_anthropic_key(key: str) -> bool:
     return key.startswith("sk-ant-")
+
+
+def _require_key(api_key: str | None) -> str:
+    """Retourne la clé API à utiliser, ou lève ValueError si aucune n'est disponible."""
+    key = api_key or os.environ.get("GEMINI_API_KEY", "")
+    if not key:
+        raise ValueError(
+            "Aucune clé API configurée. "
+            "Ajoutez GEMINI_API_KEY dans les variables d'environnement "
+            "ou une clé personnelle dans ⚙️ Paramètres."
+        )
+    return key
+
+
+def _raise_for_gemini_quota(exc: Exception) -> None:
+    """Convertit une erreur de quota Gemini en RuntimeError lisible ; sinon ne fait rien."""
+    exc_str = str(exc)
+    if "429" in exc_str or "RESOURCE_EXHAUSTED" in exc_str or "quota" in exc_str.lower():
+        delay = _parse_retry_delay(exc_str)
+        retry_hint = f" Réessayez dans {delay}." if delay else " Réessayez dans quelques minutes."
+        raise RuntimeError(
+            f"Quota Gemini épuisé ({GEMINI_MODEL}).{retry_hint} "
+            "Pour ne plus avoir cette limite, ajoutez votre propre clé dans ⚙️ Paramètres."
+        ) from None
 
 
 def _parse_retry_delay(exc_str: str) -> str | None:
@@ -94,14 +112,7 @@ def _stream_gemini(
             if chunk.text:
                 yield chunk.text
     except Exception as exc:
-        exc_str = str(exc)
-        if "429" in exc_str or "RESOURCE_EXHAUSTED" in exc_str or "quota" in exc_str.lower():
-            delay = _parse_retry_delay(exc_str)
-            retry_hint = f" Réessayez dans {delay}." if delay else " Réessayez dans quelques minutes."
-            raise RuntimeError(
-                f"Quota Gemini épuisé ({GEMINI_MODEL}).{retry_hint} "
-                "Pour ne plus avoir cette limite, ajoutez votre propre clé dans ⚙️ Paramètres."
-            ) from None
+        _raise_for_gemini_quota(exc)
         raise
 
 
@@ -180,14 +191,7 @@ def _complete_gemini(messages: list[dict], system: str, api_key: str) -> str:
         )
         return response.text or ""
     except Exception as exc:
-        exc_str = str(exc)
-        if "429" in exc_str or "RESOURCE_EXHAUSTED" in exc_str or "quota" in exc_str.lower():
-            delay = _parse_retry_delay(exc_str)
-            retry_hint = f" Réessayez dans {delay}." if delay else " Réessayez dans quelques minutes."
-            raise RuntimeError(
-                f"Quota Gemini épuisé ({GEMINI_MODEL}).{retry_hint} "
-                "Pour ne plus avoir cette limite, ajoutez votre propre clé dans ⚙️ Paramètres."
-            ) from None
+        _raise_for_gemini_quota(exc)
         raise
 
 
@@ -219,13 +223,7 @@ def complete_chat(
         RuntimeError: quota épuisé.
     """
 
-    key = api_key or os.environ.get("GEMINI_API_KEY", "")
-    if not key:
-        raise ValueError(
-            "Aucune clé API configurée. "
-            "Ajoutez GEMINI_API_KEY dans les variables d'environnement "
-            "ou une clé personnelle dans ⚙️ Paramètres."
-        )
+    key = _require_key(api_key)
 
     context = f"Document actuel ({doc_type}) :\n\nHTML :\n{html}"
     if css:
@@ -331,13 +329,7 @@ def score_ats(
         RuntimeError: quota épuisé.
     """
 
-    key = api_key or os.environ.get("GEMINI_API_KEY", "")
-    if not key:
-        raise ValueError(
-            "Aucune clé API configurée. "
-            "Ajoutez GEMINI_API_KEY dans les variables d'environnement "
-            "ou une clé personnelle dans ⚙️ Paramètres."
-        )
+    key = _require_key(api_key)
 
     messages = [{
         "role": "user",
@@ -428,13 +420,7 @@ def generate_pack(
         RuntimeError: quota épuisé.
     """
 
-    key = api_key or os.environ.get("GEMINI_API_KEY", "")
-    if not key:
-        raise ValueError(
-            "Aucune clé API configurée. "
-            "Ajoutez GEMINI_API_KEY dans les variables d'environnement "
-            "ou une clé personnelle dans ⚙️ Paramètres."
-        )
+    key = _require_key(api_key)
 
     content = f"CV (HTML) :\n{cv_html}"
     if cv_css:
@@ -633,13 +619,7 @@ def pdf_to_resume(images: list[bytes], api_key: str | None = None) -> dict:
         ValueError: clé manquante, clé Anthropic (images non supportées), ou JSON invalide.
         RuntimeError: quota épuisé.
     """
-    key = api_key or os.environ.get("GEMINI_API_KEY", "")
-    if not key:
-        raise ValueError(
-            "Aucune clé API configurée. "
-            "Ajoutez GEMINI_API_KEY dans les variables d'environnement "
-            "ou une clé personnelle dans ⚙️ Paramètres."
-        )
+    key = _require_key(api_key)
     n = len(images)
     prompt = (
         f"Voici le CV en {n} page{'s' if n > 1 else ''}. "
@@ -740,13 +720,7 @@ def tailor_resume(
     """
     import json as _json
 
-    key = api_key or os.environ.get("GEMINI_API_KEY", "")
-    if not key:
-        raise ValueError(
-            "Aucune clé API configurée. "
-            "Ajoutez GEMINI_API_KEY dans les variables d'environnement "
-            "ou une clé personnelle dans ⚙️ Paramètres."
-        )
+    key = _require_key(api_key)
 
     rules = _RESUME_TAILOR_RULES.get(level, _RESUME_TAILOR_RULES["adapte"])
     base = _SYSTEM_TAILOR_RESUME_BASE_INVENT if level == "sur-mesure" else _SYSTEM_TAILOR_RESUME_BASE
