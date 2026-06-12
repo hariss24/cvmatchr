@@ -803,4 +803,5 @@ pane.innerHTML = html.join('');
       return currentTemplateId();
     },
   };
+  if (window.__bootResumeFormIfReady) window.__bootResumeFormIfReady();
 })();

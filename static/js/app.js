@@ -463,6 +463,7 @@ let _atsBoostEnabled = false;
 let _isSwitchingDoc = false;
 let _monacoLoading = false;
 let _monacoLoadPromise = null;
+let _initialFormJsonForBoot = null;
 
 // Modèle stub (avant chargement Monaco) : même interface getValue/setValue/onDidChangeContent.
 function _makeModelStub(initialValue) {
@@ -562,6 +563,18 @@ function _ensureMonaco() {
 
   return _monacoLoadPromise;
 }
+
+function _bootResumeFormIfReady() {
+  if (!window.ResumeForm || !htmlModel) return;
+  if (window.ResumeForm.setDocType) window.ResumeForm.setDocType(_activeDocType);
+  if (window.ResumeForm.init) window.ResumeForm.init();
+  if (_initialFormJsonForBoot && window.ResumeForm.loadData) {
+    window.ResumeForm.loadData(_initialFormJsonForBoot, true);
+    _initialFormJsonForBoot = null;
+  }
+}
+
+window.__bootResumeFormIfReady = _bootResumeFormIfReady;
 
 // ============================================================
 // Fusion HTML + CSS avec échappement anti-injection de balise
@@ -1093,13 +1106,10 @@ $('btn-save-snapshot-now').onclick = async () => {
   document.querySelectorAll('.tab').forEach(btn => {
     btn.onclick = () => switchTab(btn.dataset.tab);
   });
-  if (window.ResumeForm && window.ResumeForm.setDocType) window.ResumeForm.setDocType(_activeDocType);
-  if (window.ResumeForm && window.ResumeForm.init) window.ResumeForm.init();
+  _initialFormJsonForBoot = initialFormJson;
   // Restaurer le formulaire depuis le brouillon (CV non encore exporté en PDF).
   // loadData() reconstruit les champs ET réécrit htmlModel + l'aperçu.
-  if (initialFormJson && window.ResumeForm && window.ResumeForm.loadData) {
-    window.ResumeForm.loadData(initialFormJson, true);
-  }
+  _bootResumeFormIfReady();
   switchTab(wantTab);
 
   $('preview').srcdoc = mergedHtml();
