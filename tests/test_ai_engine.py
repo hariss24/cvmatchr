@@ -157,3 +157,75 @@ def test_resume_schema_desc_mentions_new_sections():
     assert "projects" in ai_engine._RESUME_SCHEMA_DESC
     assert "certifications" in ai_engine._RESUME_SCHEMA_DESC
     assert "volunteer" in ai_engine._RESUME_SCHEMA_DESC
+
+
+# ---- Round-trip tailor_resume : champs non mentionnés par l'IA survivent ----
+
+def test_tailor_resume_preserves_extra_sections_when_ai_drops_them():
+    """Si l'IA omet projects/certifications/volunteer, les données d'entrée sont préservées."""
+    import json
+    import ai_engine
+    importlib.reload(ai_engine)
+
+    input_resume = {
+        "name": "Jean Test",
+        "title": "Dev",
+        "projects": [{"title": "Projet X", "date": "2024", "description": "Desc"}],
+        "certifications": ["AWS", "Scrum"],
+        "volunteer": [{"title": "Bénévole", "organization": "ONG",
+                       "location": "Paris", "date": "2023", "bullets": []}],
+    }
+
+    # L'IA renvoie un JSON qui oublie projects/certifications/volunteer
+    ai_response = json.dumps({
+        "name": "Jean Test",
+        "title": "Dev Senior",
+        "summary": "Profil adapté.",
+        "experience": [], "education": [], "skills": [],
+        "languages": [], "interests": [],
+    })
+
+    mock_complete = MagicMock(return_value=ai_response)
+    with patch("ai_engine._complete_gemini", mock_complete), \
+         patch("ai_engine._require_key", return_value="fake-gemini-key"):
+        result = ai_engine.tailor_resume(input_resume, "Offre dev senior", level="adapte")
+
+    # Les données d'entrée sont préservées (fallback) quand l'IA les omet
+    assert result["projects"] == [{"title": "Projet X", "date": "2024", "description": "Desc"}]
+    assert result["certifications"] == ["AWS", "Scrum"]
+    assert len(result["volunteer"]) == 1
+    assert result["volunteer"][0]["title"] == "Bénévole"
+    # Les champs IA présents sont bien là
+    assert result["title"] == "Dev Senior"
+
+
+def test_tailor_resume_preserves_extra_sections_when_ai_returns_them():
+    """Quand l'IA renvoie correctement tous les champs, ils survivent."""
+    import json
+    import ai_engine
+    importlib.reload(ai_engine)
+
+    input_resume = {
+        "name": "Jean Test",
+        "projects": [{"title": "Projet X", "date": "2024", "description": "Desc"}],
+        "certifications": ["AWS"],
+        "volunteer": [],
+    }
+
+    ai_response = json.dumps({
+        "name": "Jean Test",
+        "title": "Dev",
+        "summary": "Profil.",
+        "experience": [], "education": [], "skills": [],
+        "languages": [], "interests": [],
+        "projects": [{"title": "Projet X adapté", "date": "2024", "description": "Desc IA"}],
+        "certifications": ["AWS", "GCP"],
+        "volunteer": [],
+    })
+
+    with patch("ai_engine._complete_gemini", return_value=ai_response), \
+         patch("ai_engine._require_key", return_value="fake-gemini-key"):
+        result = ai_engine.tailor_resume(input_resume, "Offre dev", level="adapte")
+
+    assert result["projects"][0]["title"] == "Projet X adapté"
+    assert result["certifications"] == ["AWS", "GCP"]

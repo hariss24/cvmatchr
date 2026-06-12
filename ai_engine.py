@@ -705,4 +705,8 @@ def tailor_resume(
     else:
         raw = _complete_gemini(messages, system, key)
 
-    return _normalize_resume(_loads_ai_json(raw))
+    result = _normalize_resume(_loads_ai_json(raw))
+    for field in ("projects", "certifications", "volunteer"):
+        if not result[field] and clean.get(field):
+            result[field] = clean[field]
+    return result
