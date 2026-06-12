@@ -698,7 +698,8 @@ _SYSTEM_TAILOR_RESUME_BASE = (
     "- ANTI-DÉTECTION : n'écris JAMAIS le nom de l'entreprise ciblée dans 'title' ou 'summary', "
     "et ne recopie pas les phrases ou expressions exactes de l'offre. Le 'summary' doit rester "
     "GÉNÉRIQUE et sobre : il décrit le profil du candidat orienté vers ce TYPE de métier, pas une "
-    "candidature à une offre précise. Évite l'effet 'CV taillé sur mesure'.\n\n"
+    "candidature à une offre précise. Évite l'effet 'CV taillé sur mesure'.\n"
+    "- LONGUEUR : le 'summary' (Résumé / A propos) ne doit JAMAIS dépasser 350 caractères.\n\n"
 )
 
 _SYSTEM_TAILOR_RESUME_BASE_INVENT = (
@@ -715,7 +716,8 @@ _SYSTEM_TAILOR_RESUME_BASE_INVENT = (
     "- ANTI-DÉTECTION : n'écris JAMAIS le nom de l'entreprise ciblée dans 'title' ou 'summary', "
     "et ne recopie pas les phrases ou expressions exactes de l'offre. Le 'summary' doit rester "
     "GÉNÉRIQUE et sobre : il décrit le profil du candidat orienté vers ce TYPE de métier, pas une "
-    "candidature à une offre précise. Évite l'effet 'CV taillé sur mesure'.\n\n"
+    "candidature à une offre précise. Évite l'effet 'CV taillé sur mesure'.\n"
+    "- LONGUEUR : le 'summary' (Résumé / A propos) ne doit JAMAIS dépasser 350 caractères.\n\n"
 )
 
 _SYSTEM_TAILOR_RESUME_TAIL = (
