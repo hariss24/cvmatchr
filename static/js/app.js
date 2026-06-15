@@ -362,10 +362,10 @@ TEMPLATES.graphique = {
 .resume-template-1.resume-template-renderer { font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
 .resume-template-1.resume-template-renderer .personal-data { display: flex !important; align-items: center; justify-content: space-between; min-height: auto; padding-left: 0 !important; margin-bottom: 10px; }
 .resume-template-1.resume-template-renderer .personal-data .personal-data__photo { position: static !important; width: 100px !important; height: 100px !important; border-radius: 4px; overflow: hidden; margin-right: 20px; }
-.resume-template-1.resume-template-renderer .personal-data .personal-data__title-row { flex: 1; display: flex; flex-direction: column; justify-content: center; margin-bottom: 0; }
-.resume-template-1.resume-template-renderer .personal-data .personal-data__name { font-size: 16pt; font-weight: 700; text-transform: uppercase; color: #111; line-height: 1.1; }
-.resume-template-1.resume-template-renderer .personal-data .personal-data__desired-job-title { color: #111; font-size: 16pt; font-weight: 600; margin-top: 4px; display: block; }
-.resume-template-1.resume-template-renderer .personal-data .personal-data__desired-job-title::before { content: ""; display: none; }
+.resume-template-1.resume-template-renderer .personal-data .personal-data__title-row { flex: 1; display: flex; flex-direction: row; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; margin-bottom: 0; }
+.resume-template-1.resume-template-renderer .personal-data .personal-data__name { font-size: 14pt; font-weight: 700; text-transform: uppercase; color: #111; line-height: 1.2; }
+.resume-template-1.resume-template-renderer .personal-data .personal-data__desired-job-title { color: #555; font-size: 12pt; font-weight: 600; margin-top: 0; display: inline; }
+.resume-template-1.resume-template-renderer .personal-data .personal-data__desired-job-title::before { content: "·"; display: inline; margin-right: 4px; color: #0078d4; }
 .resume-template-1.resume-template-renderer .personal-data .personal-data__contact-row { flex: 0 0 250px; text-align: right; font-size: 9.5pt; color: #444; line-height: 1.5; margin-left: 20px; }
 .resume-template-1.resume-template-renderer .resume-template-renderer-section .resume-template-renderer-section__title { color: #0078d4; font-size: 10pt; border-bottom: none; font-weight: 700; margin-bottom: 10px; margin-top: 10px; text-transform: uppercase; }
 .resume-template-1.resume-template-renderer .entry-list .entry-list__item { position: relative; padding-left: 20px; border-left: 2px solid #555; margin-left: 10px; margin-bottom: 0; padding-bottom: 12px; }
