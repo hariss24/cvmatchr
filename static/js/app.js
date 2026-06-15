@@ -84,14 +84,14 @@ const TEMPLATES = {
     </div></section>
 
   <section class="resume-template-renderer-section summary-objective">
-    <h2 class="resume-template-renderer-section__title summary-objective__title">A propos</h2>
+    <h2 class="resume-template-renderer-section__title summary-objective__title">À propos</h2>
     <div class="summary-objective__content">
       Bref resume professionnel : 2 a 3 phrases qui presentent votre profil, votre experience et ce que vous recherchez.
     </div>
   </section>
 
   <section class="resume-template-renderer-section entry-list">
-    <h2 class="resume-template-renderer-section__title">Experience</h2>
+    <h2 class="resume-template-renderer-section__title">Expérience</h2>
     <div class="entry-list__item">
       <span class="entry-list__title">Poste occupe</span>
       <span class="entry-list__date">Jan 2024 - Present</span>
@@ -131,7 +131,7 @@ const TEMPLATES = {
   </section>
 
   <section class="resume-template-renderer-section plain-list">
-    <h2 class="resume-template-renderer-section__title">Competences</h2>
+    <h2 class="resume-template-renderer-section__title">Compétences</h2>
     <div class="plain-list__items">
       <span class="plain-list__item">Competence 1</span>
       <span class="plain-list__item">Competence 2</span>
@@ -361,10 +361,10 @@ TEMPLATES.graphique = {
 :root { --resume-template-customization-color: #0078d4; }
 .resume-template-1.resume-template-renderer { font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
 .resume-template-1.resume-template-renderer .personal-data { display: flex !important; align-items: center; justify-content: space-between; min-height: auto; padding-left: 0 !important; margin-bottom: 10px; }
-.resume-template-1.resume-template-renderer .personal-data .personal-data__photo { position: static !important; width: 100px !important; height: 100px !important; border-radius: 4px; overflow: hidden; margin-right: 20px; }
+.resume-template-1.resume-template-renderer .personal-data .personal-data__photo { position: static !important; width: 75px !important; height: 75px !important; border-radius: 4px; overflow: hidden; margin-right: 16px; }
 .resume-template-1.resume-template-renderer .personal-data .personal-data__title-row { flex: 1; display: flex; flex-direction: row; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; margin-bottom: 0; }
 .resume-template-1.resume-template-renderer .personal-data .personal-data__name { font-size: 14pt; font-weight: 700; text-transform: uppercase; color: #111; line-height: 1.2; }
-.resume-template-1.resume-template-renderer .personal-data .personal-data__desired-job-title { color: #555; font-size: 12pt; font-weight: 600; margin-top: 0; display: inline; }
+.resume-template-1.resume-template-renderer .personal-data .personal-data__desired-job-title { color: #0078d4; font-size: 12pt; font-weight: 700; margin-top: 0; display: inline; }
 .resume-template-1.resume-template-renderer .personal-data .personal-data__desired-job-title::before { content: "·"; display: inline; margin-right: 4px; color: #0078d4; }
 .resume-template-1.resume-template-renderer .personal-data .personal-data__contact-row { flex: 0 0 250px; text-align: right; font-size: 9.5pt; color: #444; line-height: 1.5; margin-left: 20px; }
 .resume-template-1.resume-template-renderer .resume-template-renderer-section .resume-template-renderer-section__title { color: #0078d4; font-size: 10pt; border-bottom: none; font-weight: 700; margin-bottom: 10px; margin-top: 10px; text-transform: uppercase; }

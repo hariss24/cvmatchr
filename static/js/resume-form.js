@@ -109,7 +109,7 @@
     if ((d.summary || '').trim()) {
       out.push(`
   <section class="resume-template-renderer-section summary-objective">
-    <h2 class="resume-template-renderer-section__title summary-objective__title">A propos</h2>
+    <h2 class="resume-template-renderer-section__title summary-objective__title">À propos</h2>
     <div class="summary-objective__content">
       ${esc(d.summary)}
     </div>
@@ -142,7 +142,7 @@ ${bullets.map(b => `          <li>${esc(b)}</li>`).join('\n')}
       }).join('\n');
       out.push(`
   <section class="resume-template-renderer-section entry-list">
-    <h2 class="resume-template-renderer-section__title">Experience</h2>
+    <h2 class="resume-template-renderer-section__title">Expérience</h2>
 ${items}
   </section>`);
     }
@@ -177,7 +177,7 @@ ${items}
       }).join('\n');
       out.push(`
   <section class="resume-template-renderer-section plain-list section-skills">
-    <h2 class="resume-template-renderer-section__title">Competences</h2>
+    <h2 class="resume-template-renderer-section__title">Compétences</h2>
     <ul class="plain-list__items">
 ${items}
     </ul>
@@ -241,7 +241,7 @@ ${orgRow}
       }).join('\n');
       out.push(`
   <section class="resume-template-renderer-section entry-list">
-    <h2 class="resume-template-renderer-section__title">Benevolat</h2>
+    <h2 class="resume-template-renderer-section__title">Bénévolat</h2>
 ${items}
   </section>`);
     }
@@ -265,7 +265,7 @@ ${langs.map(l => `      <li class="languages__item">
     if (interests.length) {
       out.push(`
   <section class="resume-template-renderer-section plain-list section-interests">
-    <h2 class="resume-template-renderer-section__title">Centres d'interet</h2>
+    <h2 class="resume-template-renderer-section__title">Centres d'intérêt</h2>
     <ul class="plain-list__items">
 ${interests.map(s => `      <li class="plain-list__item">${esc(s)}</li>`).join('\n')}
     </ul>
