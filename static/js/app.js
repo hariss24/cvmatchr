@@ -91,7 +91,7 @@ const TEMPLATES = {
   </section>
 
   <section class="resume-template-renderer-section entry-list">
-    <h2 class="resume-template-renderer-section__title">Expérience</h2>
+    <h2 class="resume-template-renderer-section__title">Expériences</h2>
     <div class="entry-list__item">
       <span class="entry-list__title">Poste occupe</span>
       <span class="entry-list__date">Jan 2024 - Present</span>
@@ -120,7 +120,7 @@ const TEMPLATES = {
   </section>
 
   <section class="resume-template-renderer-section entry-list">
-    <h2 class="resume-template-renderer-section__title">Formation</h2>
+    <h2 class="resume-template-renderer-section__title">Formations</h2>
     <div class="entry-list__item">
       <span class="entry-list__title">Diplome</span>
       <span class="entry-list__date">2020 - 2022</span>
