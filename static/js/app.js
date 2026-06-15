@@ -166,16 +166,16 @@ const TEMPLATES = {
 html, body {
   font-family: "Helvetica", "Arial", sans-serif;
   color: #555;
-  font-size: 10pt;
-  line-height: 1.35;
+  font-size: 9.5pt;
+  line-height: 1.25;
 }
 
 ul { list-style: none; }
 a { color: inherit; text-decoration: underline; }
 
-.resume-template-1.resume-template-renderer { padding: 24px 50px 20px; }
-.resume-template-1.resume-template-renderer .resume-template-renderer-section { border-top: 2px solid var(--resume-template-customization-color); padding-top: 7px; }
-.resume-template-1.resume-template-renderer .resume-template-renderer-section .resume-template-renderer-section__title { margin-bottom: 8px; text-transform: uppercase; font-size: 8.5pt; letter-spacing: 0.5px; color: #555; font-weight: 500; }
+.resume-template-1.resume-template-renderer { padding: 16px 36px 12px; }
+.resume-template-1.resume-template-renderer .resume-template-renderer-section { border-top: 2px solid var(--resume-template-customization-color); padding-top: 5px; }
+.resume-template-1.resume-template-renderer .resume-template-renderer-section .resume-template-renderer-section__title { margin-bottom: 6px; text-transform: uppercase; font-size: 8pt; letter-spacing: 0.5px; color: #555; font-weight: 500; }
 .resume-template-1.resume-template-renderer .resume-template-renderer-section.personal-data { border-top: none; padding-top: 0; }
 .resume-template-1.resume-template-renderer .resume-template-renderer-section.personal-data .resume-template-renderer-section__title { display: none; }
 .resume-template-1.resume-template-renderer .personal-data { display: block; margin-bottom: 10px; min-height: 80px; padding-left: calc(25% + 0px); position: relative; }
@@ -200,8 +200,9 @@ a { color: inherit; text-decoration: underline; }
 .resume-template-1.resume-template-renderer .entry-list .entry-list__item .entry-list__description li { margin-bottom: 1px; }
 .resume-template-1.resume-template-renderer .plain-list { display: flex; margin-bottom: 6px; }
 .resume-template-1.resume-template-renderer .plain-list .resume-template-renderer-section__title { flex-shrink: 0; width: 25%; margin-bottom: 0; }
-.resume-template-1.resume-template-renderer .plain-list .plain-list__items { display: flex; flex-wrap: wrap; gap: 3px 0; flex: 1; }
-.resume-template-1.resume-template-renderer .plain-list .plain-list__items .plain-list__item { color: #000; font-weight: 500; padding-right: 12px; width: 33.33%; }
+.resume-template-1.resume-template-renderer .plain-list .plain-list__items { display: flex; flex-direction: column; gap: 4px 0; flex: 1; }
+.resume-template-1.resume-template-renderer .plain-list .plain-list__items .plain-list__item { color: #555; font-weight: 400; padding-right: 12px; width: 100%; }
+.resume-template-1.resume-template-renderer .plain-list .plain-list__items .plain-list__item strong { color: #000; font-weight: 600; }
 .resume-template-1.resume-template-renderer .section-skills { display: block; margin-bottom: 20px; }
 .resume-template-1.resume-template-renderer .section-skills .resume-template-renderer-section__title { width: 100%; margin-bottom: 10px; }
 .resume-template-1.resume-template-renderer .section-skills .plain-list__items { display: block; padding-left: 15px; margin-top: 10px; }
@@ -269,21 +270,21 @@ a { color: inherit; text-decoration: underline; }
 </section>`,
     css: `@page { size: A4; margin: 0; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; color: #1e293b; line-height: 1.55; font-size: 10.5pt; padding: 18mm 16mm; }
-h1 { color: #2563eb; font-size: 22pt; font-weight: 700; margin-bottom: 4px; }
-.role { color: #475569; font-size: 11.5pt; margin-bottom: 6px; }
-.contact { color: #64748b; font-size: 9.5pt; }
-.cv-head { padding-bottom: 12px; border-bottom: 2px solid #2563eb; margin-bottom: 14px; }
-.cv-section { margin-bottom: 14px; }
-.cv-section h2 { color: #2563eb; font-size: 12pt; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.6px; }
-.cv-section p { margin-bottom: 6px; }
-.job { margin-bottom: 10px; }
-.job-head { display: flex; justify-content: space-between; margin-bottom: 4px; }
-.date { color: #94a3b8; font-weight: 400; font-size: 9.5pt; }
-.job ul { list-style: disc; padding-left: 18px; }
+body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; color: #1e293b; line-height: 1.4; font-size: 9.5pt; padding: 12mm 14mm; }
+h1 { color: #2563eb; font-size: 18pt; font-weight: 700; margin-bottom: 2px; }
+.role { color: #475569; font-size: 10.5pt; margin-bottom: 4px; }
+.contact { color: #64748b; font-size: 9pt; }
+.cv-head { padding-bottom: 8px; border-bottom: 2px solid #2563eb; margin-bottom: 10px; }
+.cv-section { margin-bottom: 10px; }
+.cv-section h2 { color: #2563eb; font-size: 11pt; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.6px; }
+.cv-section p { margin-bottom: 4px; }
+.job { margin-bottom: 8px; }
+.job-head { display: flex; justify-content: space-between; margin-bottom: 2px; }
+.date { color: #94a3b8; font-weight: 400; font-size: 9pt; }
+.job ul { list-style: disc; padding-left: 16px; }
 .job ul li { margin-bottom: 2px; }
-ul.skills { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
-ul.skills li { background: #eff6ff; color: #2563eb; padding: 2px 10px; border-radius: 12px; font-size: 9.5pt; font-weight: 500; }`,
+ul.skills { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+ul.skills li { background: #eff6ff; color: #2563eb; padding: 2px 8px; border-radius: 12px; font-size: 9pt; font-weight: 500; }`,
   },
   minimal: {
     html: `<!-- URL_DE_VOTRE_PHOTO_ICI -->
@@ -303,11 +304,11 @@ ul.skills li { background: #eff6ff; color: #2563eb; padding: 2px 10px; border-ra
 <h2>Competences</h2>
 <p>Competence 1, Competence 2, Competence 3, Competence 4, Competence 5.</p>`,
     css: `@page { size: A4; margin: 0; }
-body { font: 11pt/1.6 Georgia, "Times New Roman", serif; color: #222; padding: 22mm; }
-h1 { font-size: 22pt; font-weight: normal; margin: 0 0 4px; }
-h2 { font-size: 13pt; font-weight: normal; margin: 18px 0 6px; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
-p { margin: 0 0 6px; }
-.meta { color: #666; margin-bottom: 18px; }
+body { font: 10pt/1.4 Georgia, "Times New Roman", serif; color: #222; padding: 16mm; }
+h1 { font-size: 18pt; font-weight: normal; margin: 0 0 2px; }
+h2 { font-size: 12pt; font-weight: normal; margin: 12px 0 4px; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+p { margin: 0 0 4px; }
+.meta { color: #666; margin-bottom: 12px; }
 strong { font-weight: 600; }`,
   },
 };
@@ -362,17 +363,17 @@ TEMPLATES.graphique = {
 .resume-template-1.resume-template-renderer .personal-data { display: flex !important; align-items: center; justify-content: space-between; min-height: auto; padding-left: 0 !important; margin-bottom: 10px; }
 .resume-template-1.resume-template-renderer .personal-data .personal-data__photo { position: static !important; width: 100px !important; height: 100px !important; border-radius: 4px; overflow: hidden; margin-right: 20px; }
 .resume-template-1.resume-template-renderer .personal-data .personal-data__title-row { flex: 1; display: flex; flex-direction: column; justify-content: center; margin-bottom: 0; }
-.resume-template-1.resume-template-renderer .personal-data .personal-data__name { font-size: 24pt; font-weight: 700; text-transform: uppercase; color: #111; line-height: 1.1; }
+.resume-template-1.resume-template-renderer .personal-data .personal-data__name { font-size: 16pt; font-weight: 700; text-transform: uppercase; color: #111; line-height: 1.1; }
 .resume-template-1.resume-template-renderer .personal-data .personal-data__desired-job-title { color: #111; font-size: 16pt; font-weight: 600; margin-top: 4px; display: block; }
 .resume-template-1.resume-template-renderer .personal-data .personal-data__desired-job-title::before { content: ""; display: none; }
 .resume-template-1.resume-template-renderer .personal-data .personal-data__contact-row { flex: 0 0 250px; text-align: right; font-size: 9.5pt; color: #444; line-height: 1.5; margin-left: 20px; }
-.resume-template-1.resume-template-renderer .resume-template-renderer-section .resume-template-renderer-section__title { color: #0078d4; font-size: 14pt; border-bottom: none; font-weight: 700; margin-bottom: 10px; margin-top: 10px; text-transform: uppercase; }
+.resume-template-1.resume-template-renderer .resume-template-renderer-section .resume-template-renderer-section__title { color: #0078d4; font-size: 10pt; border-bottom: none; font-weight: 700; margin-bottom: 10px; margin-top: 10px; text-transform: uppercase; }
 .resume-template-1.resume-template-renderer .entry-list .entry-list__item { position: relative; padding-left: 20px; border-left: 2px solid #555; margin-left: 10px; margin-bottom: 0; padding-bottom: 12px; }
 .resume-template-1.resume-template-renderer .entry-list .entry-list__item:last-child { border-left-color: transparent; }
 .resume-template-1.resume-template-renderer .entry-list .entry-list__item::before { content: ""; position: absolute; left: -6px; top: 0px; width: 10px; height: 10px; border-radius: 50%; background-color: #555; }
 .resume-template-1.resume-template-renderer .entry-list .entry-list__item .entry-list__date { float: right; color: #888; font-size: 10pt; font-weight: normal; }
-.resume-template-1.resume-template-renderer .entry-list .entry-list__item .entry-list__title { font-weight: 700; font-size: 11pt; color: #111; }
-.resume-template-1.resume-template-renderer .entry-list .entry-list__item .entry-list__subtitle { font-weight: 700; color: #111; }
+.resume-template-1.resume-template-renderer .entry-list .entry-list__item .entry-list__title { font-weight: 700; font-size: 10pt; color: #111; }
+.resume-template-1.resume-template-renderer .entry-list .entry-list__item .entry-list__subtitle { font-weight: 700; color: #111; font-size:9pt}
 .resume-template-1.resume-template-renderer .summary-objective { display: block; }
 .resume-template-1.resume-template-renderer .summary-objective .summary-objective__title { display: none; }
 .resume-template-1.resume-template-renderer .summary-objective .summary-objective__content { font-size: 10pt; text-align: justify; margin-bottom: 10px; }
@@ -473,7 +474,7 @@ function _makeModelStub(initialValue) {
     _stub: true,
     getValue() { return _v; },
     setValue(v) { _v = String(v); _listeners.forEach(fn => fn()); },
-    onDidChangeContent(fn) { _listeners.push(fn); return { dispose() {} }; },
+    onDidChangeContent(fn) { _listeners.push(fn); return { dispose() { } }; },
   };
 }
 
@@ -635,7 +636,7 @@ function switchTab(tab) {
     if (window.ResumeForm && window.ResumeForm.onShow) window.ResumeForm.onShow();
   } else {
     if (editorDiv) editorDiv.style.display = '';
-    _ensureMonaco().catch(() => {});
+    _ensureMonaco().catch(() => { });
     if (editor) editor.setModel(tab === 'css' ? cssModel : htmlModel);
   }
   try { localStorage.setItem(STORAGE_KEY_TAB, tab); } catch (_) { }
@@ -842,11 +843,20 @@ async function saveSnapshot(label) {
   if (!htmlModel) return;
   try {
     const db = await _openIDB();
+    // Sauver aussi les données du formulaire : sans elles, restaurer un snapshot
+    // de CV-formulaire ne réhydrate pas les champs (l'éditeur et le formulaire
+    // se désynchronisent).
+    let formJson = null;
+    if (window.ResumeForm && window.ResumeForm.matchesEditor
+      && window.ResumeForm.matchesEditor() && window.ResumeForm.getData) {
+      formJson = window.ResumeForm.getData();
+    }
     const snap = {
       ts: Date.now(),
       label: label || new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }),
       html: htmlModel.getValue(),
       css: cssModel ? cssModel.getValue() : '',
+      json: formJson,
       doc_type: $('doc_type')?.value || 'CV',
       company: $('company')?.value || '',
       role: $('role')?.value || '',
@@ -901,21 +911,34 @@ async function deleteSnapshot(ts) {
 async function restoreSnapshot(snap) {
   if (!htmlModel) return;
   if (!(await uiConfirm(`Restaurer le snapshot "${snap.label}" ? Le contenu actuel sera remplacé.`, { title: 'Restaurer le snapshot', confirmLabel: 'Restaurer' }))) return;
+  // Garde l'autosave silencieux pendant qu'on remet les 3 états en cohérence.
+  _isSwitchingDoc = true;
   // Mettre à jour le type AVANT setValue : l'autosave (onDidChangeContent) sauve
   // sous _activeDocType, sinon le contenu restauré écrase le brouillon de l'ancien type.
   if (snap.doc_type) {
     _activeDocType = snap.doc_type;
     if ($('doc_type')) $('doc_type').value = _activeDocType;
     try { localStorage.setItem(STORAGE_KEY_LAST_TYPE, _activeDocType); } catch (_) { }
+    if (window.ResumeForm && window.ResumeForm.setDocType) window.ResumeForm.setDocType(_activeDocType);
   }
   htmlModel.setValue(snap.html || '');
   if (cssModel) cssModel.setValue(snap.css || '');
+  // Réhydrater le formulaire : indispensable pour les CV-formulaire, sinon les
+  // champs restent périmés/vides face à l'éditeur restauré.
+  if (window.ResumeForm) {
+    if (snap.json && window.ResumeForm.loadData) {
+      window.ResumeForm.loadData(snap.json, true); // skipApply : le HTML est déjà posé
+    } else if (window.ResumeForm.clearData) {
+      window.ResumeForm.clearData(); // snapshot HTML pur (ou ancien, sans json)
+    }
+  }
   _resetTailorDiff();
   _foldStyleBlocks();
   if (snap.company && $('company')) $('company').value = snap.company;
   if (snap.role && $('role')) $('role').value = snap.role;
   refreshFilenamePreview();
   closeSnapshotsModal();
+  setTimeout(() => { _isSwitchingDoc = false; _saveCurrentState(); }, 50);
   showToast('Snapshot restauré.', 'ok');
 }
 
@@ -989,7 +1012,7 @@ $('btn-import-json').onclick = async () => {
     showToast('Mode formulaire non disponible', 'err');
     return;
   }
-  
+
   let text = '';
   // Tente de lire le presse-papier
   try {
@@ -999,16 +1022,16 @@ $('btn-import-json').onclick = async () => {
   } catch (err) {
     console.warn("Lecture presse-papier impossible", err);
   }
-  
+
   // Vérifie si le texte est du JSON valide
   let isValidJson = false;
   if (text) {
     try {
       JSON.parse(text);
       isValidJson = true;
-    } catch(e) {}
+    } catch (e) { }
   }
-  
+
   // Si on n'a pas de JSON valide dans le presse-papier, on demande un collage manuel
   if (!isValidJson) {
     text = await uiPrompt('Collez les données JSON de votre CV ici :', {
@@ -1022,10 +1045,13 @@ $('btn-import-json').onclick = async () => {
     });
     if (!text) return; // Annulé par l'utilisateur
   }
-  
+
   try {
     const data = JSON.parse(text);
-    window.ResumeForm.loadData(data);
+    if (!window.ResumeForm.loadData(data, false, true)) {
+      showToast('JSON sans données de CV reconnaissables — import ignoré.', 'err');
+      return;
+    }
     showToast('JSON importé avec succès !', 'ok');
     switchTab('form');
   } catch (e) {
@@ -1115,7 +1141,7 @@ $('btn-save-snapshot-now').onclick = async () => {
   $('preview').srcdoc = mergedHtml();
 
   $('format-btn').onclick = () => {
-    if (!editor) { _ensureMonaco().then(() => $('format-btn').click()).catch(() => {}); return; }
+    if (!editor) { _ensureMonaco().then(() => $('format-btn').click()).catch(() => { }); return; }
     const action = editor.getAction('editor.action.formatDocument');
     if (action) action.run();
   };
@@ -1139,7 +1165,7 @@ $('btn-save-snapshot-now').onclick = async () => {
       // Avertissement « Eject » : passer en Expert sur un CV issu du formulaire
       // rompt la synchronisation avec celui-ci.
       if (e.target.checked && window.ResumeForm && window.ResumeForm.matchesEditor
-          && window.ResumeForm.matchesEditor()) {
+        && window.ResumeForm.matchesEditor()) {
         if (!(await uiConfirm('⚠️ Si tu modifies le code HTML, tu perds la synchronisation avec le formulaire. Continuer ?', { title: 'Mode Expert', confirmLabel: 'Continuer', danger: true }))) {
           e.target.checked = false;
           return;
@@ -1164,7 +1190,7 @@ $('btn-save-snapshot-now').onclick = async () => {
       if ($('doc_type')) $('doc_type').value = 'CV';
       try { localStorage.setItem(STORAGE_KEY_LAST_TYPE, 'CV'); } catch (_) { }
     }
-    
+
     _isSwitchingDoc = true;
     htmlModel.setValue(tpl.html);
     cssModel.setValue(tpl.css);
@@ -1216,11 +1242,11 @@ $('btn-save-snapshot-now').onclick = async () => {
         window.ResumeForm.clearData();
       }
     }
-    
+
     // Rétablir l'autosave et forcer la sauvegarde du nouvel état
-    setTimeout(() => { 
-      _isSwitchingDoc = false; 
-      _saveCurrentState(); 
+    setTimeout(() => {
+      _isSwitchingDoc = false;
+      _saveCurrentState();
     }, 50);
 
     refreshFilenamePreview();
@@ -1303,7 +1329,7 @@ $('btn-save-snapshot-now').onclick = async () => {
 })();
 
 function insertSnippet(text) {
-  if (!editor) { _ensureMonaco().then(() => insertSnippet(text)).catch(() => {}); return; }
+  if (!editor) { _ensureMonaco().then(() => insertSnippet(text)).catch(() => { }); return; }
   const sel = editor.getSelection();
   editor.executeEdits('snippet', [{ range: sel, text, forceMoveMarkers: true }]);
   editor.focus();
@@ -1344,9 +1370,9 @@ document.querySelectorAll('.template-card').forEach(card => {
       window.ResumeForm.clearData();
     }
 
-    setTimeout(() => { 
-      _isSwitchingDoc = false; 
-      _saveCurrentState(); 
+    setTimeout(() => {
+      _isSwitchingDoc = false;
+      _saveCurrentState();
     }, 50);
 
     modalNewCv.style.display = 'none';
@@ -1362,7 +1388,7 @@ $('clear').onclick = async () => {
   const hasContent = (htmlModel && htmlModel.getValue().trim()) || (cssModel && cssModel.getValue().trim());
   if (hasContent && !(await uiConfirm('Effacer tout le contenu ? Un snapshot automatique sera créé avant.', { title: 'Tout effacer', confirmLabel: 'Effacer', danger: true }))) return;
   saveSnapshot('Avant effacement');
-  
+
   // Vider le formulaire s'il existe
   if (window.ResumeForm && window.ResumeForm.clearData) {
     window.ResumeForm.clearData();
@@ -2127,7 +2153,9 @@ async function _pdfToResumeFields() {
     }
     const resume = await resp.json();
     await saveSnapshot('Avant import PDF');
-    window.ResumeForm.loadData(resume);
+    if (!window.ResumeForm.loadData(resume, false, true)) {
+      throw new Error("Extraction vide : aucune donnée de CV exploitable dans ce PDF.");
+    }
     switchTab('form');
     showToast('CV importé dans le formulaire.', 'ok');
     status.textContent = '';
@@ -2366,13 +2394,16 @@ async function _tailorResumeFields(jobDesc, overrideResume = null) {
       throw new Error(msg);
     }
     const adapted = await resp.json();
-    
+
     // Restaure la photo
     if (originalPhoto) {
       adapted.photo = originalPhoto;
     }
 
-    window.ResumeForm.loadData(adapted); // reconstruit le formulaire + écrit dans htmlModel + aperçu
+    // Garde anti-vidage : une réponse vide ne doit jamais écraser le formulaire.
+    if (!window.ResumeForm.loadData(adapted, false, true)) {
+      throw new Error('Le CV adapté reçu est vide — formulaire conservé.');
+    }
     showToast('CV adapté avec succès.', 'ok');
     status.textContent = '';
     status.className = 'tailor-status';
@@ -2589,12 +2620,12 @@ const _ATS_STOP_WORDS = new Set([
   'son', 'ses', 'mon', 'ton', 'notre', 'nos', 'votre', 'vos', 'leur', 'leurs', 'mes', 'tes', 'ces',
   'celui', 'celle', 'ceux', 'celles', 'moi', 'toi', 'soi', 'eux', 'lui',
   'quel', 'quelle', 'quels', 'quelles', 'quelque', 'quelques', 'plusieurs', 'aucun', 'aucune',
-  
+
   // Verbes communs (être, avoir, faire, etc.)
   'est', 'sont', 'etre', 'avoir', 'faire', 'fait', 'faits', 'faite', 'faites', 'fais', 'faisons', 'font',
   'pouvoir', 'peut', 'peuvent', 'vouloir', 'veut', 'veulent', 'devoir', 'doit', 'doivent',
   'aller', 'va', 'vont', 'vas', 'venir', 'vient', 'viennent', 'dire', 'dit', 'disent',
-  
+
   // Adverbes et prépositions
   'plus', 'tres', 'bien', 'tout', 'tous', 'toute', 'toutes', 'aussi', 'meme', 'memes',
   'mais', 'donc', 'car', 'cela', 'ceci', 'cette', 'cet', 'comme', 'afin', 'ainsi',
@@ -2607,7 +2638,7 @@ const _ATS_STOP_WORDS = new Set([
   'presque', 'surtout', 'environ', 'pres', 'loin', 'rien', 'personne', 'chacun', 'chacune',
   'tel', 'telle', 'tels', 'telles', 'certain', 'certains', 'certaine', 'certaines',
   'divers', 'diverses', 'differents', 'differentes', 'quelconque', 'chaque', 'maint', 'maints',
-  
+
   // Mots courants / Vocabulaire entreprise non spécifique
   'poste', 'profil', 'candidat', 'candidate', 'equipe', 'rejoindre', 'mission', 'missions', 'contrat',
   'recherche', 'entreprise', 'societe', 'contexte', 'offre', 'emploi',
@@ -2625,18 +2656,18 @@ const _ATS_STOP_WORDS = new Set([
   'oeuvre', 'œuvres', 'œuvre', 'uvre', 'uvres', 'concoit', 'concevoir', 'anime', 'diffuse', 'diffuser',
   'contribue', 'garant', 'garante', 'garant.e', 'garants', 'garantes',
   'engageant', 'engageants', 'engageante', 'engageantes', 'confie', 'confies', 'confiee', 'confiees',
-  
+
   // Verbes conjugués fréquents dans les offres
   'cherchons', 'recherchons', 'attendons', 'souhaitons', 'proposons',
   'rejoindrez', 'rejoindront', 'rejoindra', 'rejoindrons',
   'travaillerez', 'travaillerons', 'travaillez', 'travaillerait',
-  
+
   // Adjectifs fréquents
   'passionne', 'passionnee', 'passionnes', 'passionnees', 'requis', 'requise',
   'bienveillant', 'bienveillante', 'bienveillants', 'bienveillantes',
   'dynamiques', 'motivees', 'motivee', 'motive', 'motives', 'nouveau', 'nouvelle',
   'nouveaux', 'nouvelles', 'vrai', 'vraie', 'vrais', 'vraies', 'faux', 'fausse',
-  
+
   // English stop words
   'the', 'of', 'and', 'or', 'to', 'a', 'an', 'in', 'on', 'for', 'with', 'be', 'is',
   'are', 'was', 'were', 'will', 'have', 'has', 'do', 'does', 'that', 'this', 'it',

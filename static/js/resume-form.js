@@ -716,6 +716,24 @@ pane.innerHTML = html.join('');
   }
 
   // ----- Normalisation d'un CV entrant (IA / import) vers le schéma -----
+  // Récupère le CV d'un objet mal emballé (liste, ou enveloppe {"cv": {...}}),
+  // sinon un import / une réponse IA légèrement déstructurée viderait le formulaire.
+  const _RESUME_KEYS = ['name', 'title', 'summary', 'experience', 'education',
+    'skills', 'languages', 'interests', 'projects', 'certifications', 'volunteer'];
+  function unwrapResume(obj) {
+    if (Array.isArray(obj)) obj = obj.find(x => x && typeof x === 'object') || {};
+    if (!obj || typeof obj !== 'object') return {};
+    if (_RESUME_KEYS.some(k => k in obj)) return obj;
+    for (const v of Object.values(obj)) {
+      if (v && typeof v === 'object' && !Array.isArray(v) && _RESUME_KEYS.some(k => k in v)) return v;
+      if (Array.isArray(v)) {
+        const inner = v.find(x => x && typeof x === 'object' && _RESUME_KEYS.some(k => k in x));
+        if (inner) return inner;
+      }
+    }
+    return obj;
+  }
+
   function normalizeIncoming(obj) {
     obj = obj || {};
     if (_currentDocType === 'Lettre') {
@@ -734,6 +752,7 @@ pane.innerHTML = html.join('');
         signature: obj.signature || DEFAULT_LETTER.signature
       };
     }
+    obj = unwrapResume(obj);
     const arr = (v) => Array.isArray(v) ? v : [];
     return {
       name: obj.name || '', title: obj.title || '', location: obj.location || '',
@@ -788,9 +807,18 @@ pane.innerHTML = html.join('');
     },
     // Charge un CV (IA / import PDF) dans le formulaire et l'applique à l'éditeur.
     // La photo existante est conservée si le CV entrant n'en fournit pas.
-    loadData(obj, skipApply = false) {
+    // rejectEmpty : refuse (sans rien écraser) un CV sans contenu reconnaissable.
+    // Utilisé par les actions explicites (import JSON, tailoring) pour ne jamais
+    // vider le formulaire suite à une réponse IA / un JSON déstructuré.
+    // Retourne true si les données ont été chargées, false si refusées.
+    loadData(obj, skipApply = false, rejectEmpty = false) {
       if (!resumeData) resumeData = loadStoredData();
       const incoming = normalizeIncoming(obj);
+      if (rejectEmpty && _currentDocType !== 'Lettre'
+        && !incoming.name && !incoming.experience.length
+        && !incoming.skills.length && !incoming.education.length) {
+        return false;
+      }
       if (!incoming.photo && resumeData && resumeData.photo) incoming.photo = resumeData.photo;
       resumeData = incoming;
       buildForm();
@@ -799,6 +827,7 @@ pane.innerHTML = html.join('');
       } else {
         persist();
       }
+      return true;
     },
     // Vide le formulaire (utile lors d'un switch vers un document sans JSON)
     clearData() {
