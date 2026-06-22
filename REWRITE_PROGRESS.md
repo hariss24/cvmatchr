@@ -32,16 +32,21 @@
 ---
 
 ## Prochaine action
-➡️ **Phase 0 (suite) — Thème** : porter le thème néomorphique depuis `static/css/main.css`
-(variables `--bg/--text/--orange/--muted/--faint`, ombres `--neu-raised*`/`--neu-inset*`, mode
-clair/sombre via `[data-theme]`, polices Inter + JetBrains Mono) vers `web/src/app/globals.css`,
-puis poser le layout de base (topbar + toolbar + split éditeur/aperçu, composants vides).
-Vérif : `cd web && npm run dev` affiche la page au bon thème.
+➡️ **Phase 1 — Domaine CV** : créer `web/src/lib/resume/`. Commencer par `schema.ts` (schéma **Zod**
+complet : name, title, …, experience[], education[], skills[], languages[], interests[], projects[],
+certifications[], volunteer[] + `DEFAULT_RESUME` et `DEFAULT_LETTER`), port fidèle de
+`ai_engine.py` (`_RESUME_SCHEMA_DESC`, l.460-476) et `resume-form.js` (`DEFAULT_RESUME`). Installer
+`zod` dans `web/`. Si trop long pour un tour : faire `schema.ts` d'abord, puis `normalize.ts`
+(anti-wipe), puis `render.ts`, puis `templates.ts` aux tours suivants.
+Vérif : Vitest (à mettre en place) — un JSON connu → HTML attendu ; sections vides filtrées ;
+XSS échappé ; anti-wipe (objet partiel → champs préservés).
 
 ## État des phases
 
-- [~] **Phase 0 — Scaffold & thème** : ✅ scaffold fait (Next 16.2.9 / React 19.2.4 / Tailwind v4,
-      `npm run build` vert). ⏳ reste : porter le thème néo + layout de base.
+- [x] **Phase 0 — Scaffold & thème** : ✅ scaffold (Next 16.2.9 / React 19.2.4 / Tailwind v4) +
+      thème néomorphique porté dans `globals.css` (variables + ombres + `[data-theme=dark]`),
+      polices Inter + JetBrains Mono via `next/font`, layout de base (topbar + toolbar + split
+      éditeur/aperçu placeholders), `turbopack.root` fixé. `npm run build` vert sans warning.
 - [ ] **Phase 1 — Domaine CV** : `lib/resume/` (schéma Zod, normalize+anti-wipe, renderResume/renderLetter,
       templates). Vérif : Vitest (JSON→HTML, sections vides, XSS, anti-wipe).
 - [ ] **Phase 2 — Éditeur & formulaire** : store zustand, formulaire par sections, Monaco
@@ -67,3 +72,4 @@ _(aucun pour l'instant)_
 
 ## Journal
 - 2026-06-22 — Setup loop + Phase 0 scaffold (`create-next-app web/`, build vert) — commit `web: phase 0 — scaffold Next.js`
+- 2026-06-23 — Phase 0 terminée : thème néo porté (`globals.css`), polices `next/font` (Inter + JetBrains Mono), layout de base (topbar/toolbar/split), `turbopack.root` fixé — build vert sans warning
