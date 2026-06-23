@@ -32,15 +32,15 @@
 ---
 
 ## Prochaine action
-➡️ **Phase 2 (suite) — Toolbar docType/template** (étape 4, sous-étape 2). Dans `page.tsx` (toolbar),
-ajouter : (a) un sélecteur **docType** CV/Lettre → `useDocStore.setDocType` ; (b) un sélecteur de
-**template** (les 5 ids via `TEMPLATE_IDS`) → `setTemplate`. La toolbar doit être un composant client
-(`Toolbar`) car elle lit/écrit le store. Garder le bouton « Convertir en PDF » (désactivé, branché en
-Phase 3). ⚠️ Au switch docType=Lettre, `FormEditor` affiche un placeholder → prévoir ensuite un
-`LetterForm` (champs de `DEFAULT_LETTER`) en sous-étape 3. Puis sous-étape 4 : dialogs/toasts React
-(port `ui-dialogs.js`, JAMAIS alert/confirm/prompt natifs). Vérif : `npm run build` + `npm run lint`
-verts ; `npm run dev` → changer de template change le CSS de l'aperçu, switch CV/Lettre change le doc.
-⚠️ Toujours `cd web` avant npm. Quand l'UI tourne : lancer la vérif Playwright de Phase 2.
+➡️ **Phase 2 (suite) — Formulaire Lettre** (étape 4.3). Créer `components/form/LetterForm.tsx` (client) :
+champs de `DEFAULT_LETTER` (sender_name/address/contact, date, recipient_name/service/address, subject,
+greeting, body [textarea], signoff [textarea], signature) liés au store via `setJson`. Dans `EditorPane`,
+quand `docType === "Lettre"`, afficher `LetterForm` à la place de `FormEditor` dans l'onglet Formulaire
+(les onglets HTML/CSS restent valides pour la lettre aussi). Réutiliser le pattern `Field`/`update`.
+Vérif : `npm run build` + `npm run lint` verts ; switch CV/Lettre édite la lettre et l'aperçu suit.
+Ensuite étape 4.4 (dernière de Phase 2) : dialogs/toasts React (port `ui-dialogs.js` :
+`uiAlert/uiConfirm/uiPrompt` + toasts, à base de promesses — JAMAIS alert/confirm/prompt natifs), puis
+vérif Playwright de Phase 2 (saisie→aperçu, CV↔Lettre, form↔expert, 0 erreur console). ⚠️ `cd web` avant npm.
 
 ## État des phases
 
@@ -62,8 +62,9 @@ verts ; `npm run dev` → changer de template change le CSS de l'aperçu, switch
       expérience+puces, formation, compétences, langues, projets, certifs, bénévolat+puces, intérêts ;
       add/remove partout), styles formulaire néo, branché panneau gauche. ✅ étape 4.1 : onglets
       Formulaire/HTML/CSS — `components/editor/EditorPane.tsx` (Monaco `@monaco-editor/react` pour
-      HTML/CSS liés au store, FormEditor en onglet Form), FormEditor allégé du pane-title. build/lint OK.
-      ⏳ toolbar docType/template, formulaire Lettre, dialogs/toasts.
+      HTML/CSS liés au store, FormEditor en onglet Form), FormEditor allégé du pane-title. ✅ étape 4.2 :
+      `components/editor/Toolbar.tsx` (sélecteurs docType CV/Lettre + template, bouton PDF désactivé)
+      branché dans page.tsx + styles toolbar. build/lint OK. ⏳ formulaire Lettre, dialogs/toasts.
       Vérif finale : Playwright (saisie→aperçu, CV↔Lettre, form↔expert, 0 erreur console).
 - [ ] **Phase 3 — Conversion PDF** : `lib/pdf/` (playwright-core + @sparticuz/chromium),
       `api/convert`, téléchargement, whitelist formats/marges, anti-SSRF. Vérif : PDF téléchargé correct.
@@ -95,3 +96,4 @@ _(aucun pour l'instant)_
 - 2026-06-23 — Phase 2 étape 3a : `components/form/FormEditor.tsx` (infos perso + photo base64, résumé, compétences) + styles formulaire néo, branché panneau gauche — build/lint/tests verts
 - 2026-06-23 — Phase 2 étape 3b : FormEditor complété (expérience+puces, formation, langues, projets, certifs, bénévolat+puces, intérêts ; sous-composants par section) — tsc/lint/build verts
 - 2026-06-23 — Phase 2 étape 4.1 : onglets Form/HTML/CSS — `components/editor/EditorPane.tsx` + Monaco (@monaco-editor/react) pour HTML/CSS liés au store — tsc/lint/build verts
+- 2026-06-23 — Phase 2 étape 4.2 : `components/editor/Toolbar.tsx` (sélecteurs docType + template branchés au store) + styles toolbar — tsc/lint/build verts

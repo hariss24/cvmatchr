@@ -1,5 +1,6 @@
 import PreviewPane from "@/components/editor/PreviewPane";
 import EditorPane from "@/components/editor/EditorPane";
+import Toolbar from "@/components/editor/Toolbar";
 
 export default function Home() {
   return (
@@ -19,11 +20,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="toolbar">
-        <button className="go" type="button" disabled>
-          Convertir en PDF
-        </button>
-      </div>
+      <Toolbar />
 
       <div className="split">
         <section className="pane editor-pane">
