@@ -1,5 +1,5 @@
 import PreviewPane from "@/components/editor/PreviewPane";
-import FormEditor from "@/components/form/FormEditor";
+import EditorPane from "@/components/editor/EditorPane";
 
 export default function Home() {
   return (
@@ -27,7 +27,7 @@ export default function Home() {
 
       <div className="split">
         <section className="pane editor-pane">
-          <FormEditor />
+          <EditorPane />
         </section>
 
         <section className="pane preview-pane">

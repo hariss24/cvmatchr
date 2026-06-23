@@ -32,18 +32,15 @@
 ---
 
 ## Prochaine action
-➡️ **Phase 2 (suite) — Onglets + Monaco + toolbar** (étape 4). Sous-étapes (une par tour si long) :
-1. Onglets dans le panneau éditeur : Formulaire / HTML / CSS. État d'onglet local (useState dans un
-   wrapper client `EditorPane`). HTML/CSS = éditeurs Monaco (`@monaco-editor/react`, à installer)
-   liés au store (`html`/`css` via `setHtml`/`setCss`). Le formulaire reste l'onglet par défaut.
-2. Toolbar : sélecteur de docType (CV/Lettre → `setDocType`), sélecteur de template (5 modèles →
-   `setTemplate`). ⚠️ Au switch docType=Lettre, le `FormEditor` affiche déjà un placeholder ; prévoir
-   un `LetterForm` simple (champs de `DEFAULT_LETTER`) — peut être un tour séparé.
-3. Dialogs/toasts React (port `ui-dialogs.js`) : `uiAlert/uiConfirm/uiPrompt` + toasts, basés sur des
-   promesses. JAMAIS alert/confirm/prompt natifs. (Tour séparé.)
-Vérif : `npm run build` + `npm run lint` verts ; `npm run dev` → bascule d'onglet édite html/css et
-l'aperçu suit. ⚠️ Toujours `cd web` avant npm. Quand l'UI principale tourne, lancer la vérif Playwright
-de Phase 2 (saisie→aperçu, CV↔Lettre, form↔expert, 0 erreur console).
+➡️ **Phase 2 (suite) — Toolbar docType/template** (étape 4, sous-étape 2). Dans `page.tsx` (toolbar),
+ajouter : (a) un sélecteur **docType** CV/Lettre → `useDocStore.setDocType` ; (b) un sélecteur de
+**template** (les 5 ids via `TEMPLATE_IDS`) → `setTemplate`. La toolbar doit être un composant client
+(`Toolbar`) car elle lit/écrit le store. Garder le bouton « Convertir en PDF » (désactivé, branché en
+Phase 3). ⚠️ Au switch docType=Lettre, `FormEditor` affiche un placeholder → prévoir ensuite un
+`LetterForm` (champs de `DEFAULT_LETTER`) en sous-étape 3. Puis sous-étape 4 : dialogs/toasts React
+(port `ui-dialogs.js`, JAMAIS alert/confirm/prompt natifs). Vérif : `npm run build` + `npm run lint`
+verts ; `npm run dev` → changer de template change le CSS de l'aperçu, switch CV/Lettre change le doc.
+⚠️ Toujours `cd web` avant npm. Quand l'UI tourne : lancer la vérif Playwright de Phase 2.
 
 ## État des phases
 
@@ -63,8 +60,10 @@ de Phase 2 (saisie→aperçu, CV↔Lettre, form↔expert, 0 erreur console).
       (iframe sandbox `srcDoc`, debounce, compteur pages A4), branché dans `page.tsx`. ✅ étape 3 :
       `components/form/FormEditor.tsx` complet (toutes les sections CV : perso + photo base64, résumé,
       expérience+puces, formation, compétences, langues, projets, certifs, bénévolat+puces, intérêts ;
-      add/remove partout), styles formulaire néo, branché panneau gauche. build/lint/tests verts.
-      ⏳ onglets Form/HTML/CSS + Monaco, toolbar docType/template, formulaire Lettre, dialogs/toasts.
+      add/remove partout), styles formulaire néo, branché panneau gauche. ✅ étape 4.1 : onglets
+      Formulaire/HTML/CSS — `components/editor/EditorPane.tsx` (Monaco `@monaco-editor/react` pour
+      HTML/CSS liés au store, FormEditor en onglet Form), FormEditor allégé du pane-title. build/lint OK.
+      ⏳ toolbar docType/template, formulaire Lettre, dialogs/toasts.
       Vérif finale : Playwright (saisie→aperçu, CV↔Lettre, form↔expert, 0 erreur console).
 - [ ] **Phase 3 — Conversion PDF** : `lib/pdf/` (playwright-core + @sparticuz/chromium),
       `api/convert`, téléchargement, whitelist formats/marges, anti-SSRF. Vérif : PDF téléchargé correct.
@@ -95,3 +94,4 @@ _(aucun pour l'instant)_
 - 2026-06-23 — Phase 2 étape 2 : aperçu live — `lib/resume/mergeHtml.ts` + `components/editor/PreviewPane.tsx` (iframe sandbox, debounce, compteur pages A4) branché dans page.tsx — 37 tests verts, build OK
 - 2026-06-23 — Phase 2 étape 3a : `components/form/FormEditor.tsx` (infos perso + photo base64, résumé, compétences) + styles formulaire néo, branché panneau gauche — build/lint/tests verts
 - 2026-06-23 — Phase 2 étape 3b : FormEditor complété (expérience+puces, formation, langues, projets, certifs, bénévolat+puces, intérêts ; sous-composants par section) — tsc/lint/build verts
+- 2026-06-23 — Phase 2 étape 4.1 : onglets Form/HTML/CSS — `components/editor/EditorPane.tsx` + Monaco (@monaco-editor/react) pour HTML/CSS liés au store — tsc/lint/build verts

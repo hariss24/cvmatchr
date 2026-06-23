@@ -42,11 +42,7 @@ export default function FormEditor() {
   };
 
   return (
-    <>
-      <div className="pane-title">
-        <span>Éditeur — Formulaire</span>
-      </div>
-      <div className="pane-body form-editor">
+    <div className="pane-body form-editor">
         <section className="form-section">
           <h3 className="form-section__title">Informations personnelles</h3>
           <div className="form-grid">
@@ -101,8 +97,7 @@ export default function FormEditor() {
           items={cv.interests}
           onChange={(v) => update({ interests: v })}
         />
-      </div>
-    </>
+    </div>
   );
 }
 
