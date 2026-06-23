@@ -1,3 +1,5 @@
+import PreviewPane from "@/components/editor/PreviewPane";
+
 export default function Home() {
   return (
     <div className="wrap">
@@ -35,12 +37,7 @@ export default function Home() {
         </section>
 
         <section className="pane preview-pane">
-          <div className="pane-title">
-            <span>Aperçu</span>
-          </div>
-          <div className="pane-body">
-            <div className="pane-placeholder">L’aperçu live arrivera en phase 2.</div>
-          </div>
+          <PreviewPane />
         </section>
       </div>
     </div>
