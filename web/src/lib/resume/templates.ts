@@ -1,6 +1,5 @@
 // Templates HTML/CSS intégrés — port fidèle de TEMPLATES (static/js/app.js, l.70-409).
 // 5 modèles : sobre, moderne, classique, minimal, graphique. Chaque modèle = { html, css }.
-/* eslint-disable */
 
 export type TemplateId = "sobre" | "moderne" | "classique" | "minimal" | "graphique";
 export type Template = { html: string; css: string };

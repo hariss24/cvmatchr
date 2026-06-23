@@ -32,16 +32,15 @@
 ---
 
 ## Prochaine action
-➡️ **Phase 2 (suite) — Formulaire structuré** (étape 3) : composant `FormEditor` (client) avec un
-sous-composant par section : infos perso (+ upload photo → base64), résumé, expérience, formation,
-compétences, langues, projets, certifications, bénévolat, intérêts. Ajout/suppression/déplacement
-d'items. Two-way binding : modif → `useDocStore.setJson(newResume)` → `renderResume` → aperçu se met
-à jour (déjà branché). Brancher `FormEditor` dans le panneau gauche de `page.tsx` (remplacer le
-placeholder « Éditeur »). Commencer petit si long : d'abord infos perso + résumé + compétences, puis
-les autres sections au tour suivant. Gérer le cas docType=Lettre (formulaire lettre) plus tard ou en
-parallèle. Vérif : `npm run build` vert + (idéalement) `npm run dev` → éditer un champ met à jour
-l'aperçu. ⚠️ Toujours `cd web` avant npm. Étape 4 ensuite : onglets Form/HTML/CSS + Monaco + switch
-docType + sélecteur template + dialogs/toasts React (JAMAIS alert/confirm/prompt natifs).
+➡️ **Phase 2 (suite) — Formulaire, sections restantes** (étape 3b) : ajouter à `FormEditor` les
+sections manquantes — expérience (title/company/contract/location/date + bullets[]), formation
+(title/school/location/date), langues (name/level), projets (title/date/description), certifications
+(string[]), bénévolat (title/organization/location/date + bullets[]), centres d'intérêt (string[]).
+Réutiliser les patterns existants (Field, add/remove de liste). Pour les listes d'objets, prévoir un
+petit composant d'item répétable avec add/remove (et idéalement monter/descendre). Vérif : `npm run
+build` + `npm run lint` verts. Ensuite étape 4 : onglets Form/HTML/CSS + Monaco (`@monaco-editor/react`)
++ switch docType CV/Lettre (formulaire Lettre) + sélecteur de template + dialogs/toasts React (JAMAIS
+alert/confirm/prompt natifs). ⚠️ Toujours `cd web` avant npm.
 
 ## État des phases
 
@@ -58,8 +57,10 @@ docType + sélecteur template + dialogs/toasts React (JAMAIS alert/confirm/promp
       (`@monaco-editor/react`), aperçu live, onglets form/HTML/CSS, switch docType, dialogs/toasts.
       ✅ étape 1 : store `state/docStore.ts` + config Vitest alias `@/`. ✅ étape 2 : aperçu live —
       `lib/resume/mergeHtml.ts` (fusion html+css, port mergedHtml) + `components/editor/PreviewPane.tsx`
-      (iframe sandbox `srcDoc`, debounce, compteur pages A4), branché dans `page.tsx`. 37 tests verts,
-      build OK. ⏳ formulaire par sections, onglets/Monaco, docType/template, dialogs.
+      (iframe sandbox `srcDoc`, debounce, compteur pages A4), branché dans `page.tsx`. ✅ étape 3a :
+      `components/form/FormEditor.tsx` (infos perso + photo base64, résumé, compétences add/remove) +
+      styles formulaire néo dans globals.css, branché panneau gauche. build/lint/tests verts.
+      ⏳ sections restantes du formulaire, onglets/Monaco, docType/template, dialogs.
       Vérif finale : Playwright (saisie→aperçu, CV↔Lettre, form↔expert, 0 erreur console).
 - [ ] **Phase 3 — Conversion PDF** : `lib/pdf/` (playwright-core + @sparticuz/chromium),
       `api/convert`, téléchargement, whitelist formats/marges, anti-SSRF. Vérif : PDF téléchargé correct.
@@ -88,3 +89,4 @@ _(aucun pour l'instant)_
 - 2026-06-23 — **Phase 1 terminée** : `lib/resume/templates.ts` (5 modèles portés de TEMPLATES app.js, typés) + `templates.test.ts` — 28 tests verts, tsc OK
 - 2026-06-23 — Phase 2 étape 1 : store `state/docStore.ts` (zustand 5) + `vitest.config.ts` (alias `@/`) + `docStore.test.ts` — 33 tests verts, tsc OK
 - 2026-06-23 — Phase 2 étape 2 : aperçu live — `lib/resume/mergeHtml.ts` + `components/editor/PreviewPane.tsx` (iframe sandbox, debounce, compteur pages A4) branché dans page.tsx — 37 tests verts, build OK
+- 2026-06-23 — Phase 2 étape 3a : `components/form/FormEditor.tsx` (infos perso + photo base64, résumé, compétences) + styles formulaire néo, branché panneau gauche — build/lint/tests verts

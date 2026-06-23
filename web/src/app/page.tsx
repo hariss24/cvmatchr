@@ -1,4 +1,5 @@
 import PreviewPane from "@/components/editor/PreviewPane";
+import FormEditor from "@/components/form/FormEditor";
 
 export default function Home() {
   return (
@@ -26,14 +27,7 @@ export default function Home() {
 
       <div className="split">
         <section className="pane editor-pane">
-          <div className="pane-title">
-            <span>Éditeur</span>
-          </div>
-          <div className="pane-body">
-            <div className="pane-placeholder">
-              Le formulaire et l’éditeur arriveront en phase 2.
-            </div>
-          </div>
+          <FormEditor />
         </section>
 
         <section className="pane preview-pane">
