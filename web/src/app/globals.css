@@ -178,6 +178,11 @@ a:hover { text-decoration: underline; }
 .ui-toast--error { border-left-color: var(--error); }
 .ui-toast--info { border-left-color: var(--blue); }
 
+/* ---- Modale d'adaptation IA ---- */
+.tailor-modal { max-width: 520px; }
+.tailor-levels { display: flex; gap: 6px; flex-wrap: wrap; }
+.tailor-level { flex: 1; min-width: 88px; text-align: center; }
+
 /* ---- Onglets éditeur ---- */
 .tabs { display: flex; gap: 4px; padding: 4px; background: var(--bg); border-radius: 12px; box-shadow: var(--neu-inset); }
 .tab {

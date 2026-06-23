@@ -5,6 +5,7 @@ import { useDocStore } from "@/state/docStore";
 import { TEMPLATE_IDS, type TemplateId } from "@/lib/resume/templates";
 import type { DocType, Resume } from "@/lib/resume/schema";
 import { toast, uiAlert } from "@/state/uiStore";
+import TailorModal from "@/components/modals/TailorModal";
 
 const TEMPLATE_LABELS: Record<TemplateId, string> = {
   sobre: "Sobre",
@@ -24,6 +25,7 @@ export default function Toolbar() {
   const setDocType = useDocStore((s) => s.setDocType);
   const setTemplate = useDocStore((s) => s.setTemplate);
   const [busy, setBusy] = useState(false);
+  const [tailorOpen, setTailorOpen] = useState(false);
 
   const onConvert = async () => {
     const { html, css, json } = useDocStore.getState();
@@ -84,6 +86,16 @@ export default function Toolbar() {
         </select>
       </label>
 
+      {docType === "CV" ? (
+        <button
+          className="form-btn-mini toolbar-tailor"
+          type="button"
+          onClick={() => setTailorOpen(true)}
+        >
+          Adapter à une offre
+        </button>
+      ) : null}
+
       <button
         className="go toolbar-cta"
         type="button"
@@ -92,6 +104,8 @@ export default function Toolbar() {
       >
         {busy ? "Conversion…" : "Convertir en PDF"}
       </button>
+
+      <TailorModal open={tailorOpen} onClose={() => setTailorOpen(false)} />
     </div>
   );
 }

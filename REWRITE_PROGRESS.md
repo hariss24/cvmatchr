@@ -32,15 +32,18 @@
 ---
 
 ## Prochaine action
-➡️ **Phase 5 (suite) — client IA frontend + 1re modale**. `base64.ts` est fait (étape 1). Étape suivante :
-créer une petite couche d'appel client `lib/ai/client.ts` (helpers `fetch` vers les routes serveur :
-en-têtes `X-Api-Key` depuis les prefs/localStorage, parsing JSON + erreurs, lecture du flux SSE pour
-`text-to-html`/`tailor`), PUIS la **modale Adaptation** (`components/modals/TailorModal.tsx` : 4 niveaux
-peu/adapte/hyper/sur-mesure + case CV Maître, appelle `/api/tailor-resume` en stripant la photo via le
-domaine JSON — rappel : `tailor-resume` strippe déjà la photo côté serveur, le strip base64 *HTML*
-(`base64.ts`) sert au flux **chat** et au **tailor HTML legacy** `/api/tailor`). Brancher au store + aperçu.
-Vérif : Playwright avec backend mocké (`page.route`), round-trip sans perte. **Rappel : `extract-job` →
-Phase 7.** ⚠️ `cd web` avant npm.
+➡️ **Phase 5 (suite) — chat éditeur + ATS**. `base64.ts`, `client.ts` et `TailorModal` sont faits
+(étapes 1-2). Étapes suivantes au choix :
+1. **Chat éditeur** (`components/modals/ChatPanel.tsx` ou panneau latéral) : appelle `/api/editor-chat`
+   avec `_buildTailorPayload(stripBase64ForChat(html), css)` → propositions Prévisualiser/Appliquer/Rejeter
+   (`restoreBase64InProposals`), applique via le store (HTML/CSS en mode expert). C'est ici que `base64.ts`
+   flux **chat** sert enfin.
+2. **Panneau ATS** (`/api/ats-score`) : score + mots-clés manquants ; éventuel booster mots-clés invisibles.
+3. **Pack candidature** (`/api/generate-pack`) : lettre + email.
+4. **Imports texte/PDF** : nécessite un lecteur **SSE** (à ajouter dans `client.ts`) pour `/api/text-to-html`,
+   et le rendu PDF→PNG (pdf.js) pour `/api/pdf-to-resume`.
+Suggestion d'ordre : chat (réutilise base64) → ATS → pack → imports. **Rappel : `extract-job` → Phase 7.**
+⚠️ `cd web` avant npm. Tests : Vitest (logique) + Playwright `page.route` (flux).
 
 ## Décisions de scoping (Phase 3)
 - **Historique Dexie** : le bouton PDF télécharge directement (`Blob` + `<a download>`). L'enregistrement
@@ -135,6 +138,15 @@ Phase 7.** ⚠️ `cd web` avant npm.
       + `stripBase64ForChat`/`restoreBase64InProposals` (placeholder unique `[IMAGE_BASE64]`, capture
       1re donnée, restore `.replace` non-globale). Fonctions **pures** (pas d'état global, comportement
       identique). `base64.test.ts` round-trip (8 tests). 104 tests verts, tsc/lint OK.
+      ✅ étape 2 : `lib/ai/client.ts` (couche d'appel client — `getUserApiKey`/`getApiHeaders` port de
+      app.js `userApiKey`+`X-Api-Key`, helper `postJson` factorisant fetch+erreur, SSR-safe via guard
+      `localStorage`) + `client.test.ts` (6 tests, fetch/localStorage mockés). **Modale Adaptation**
+      `components/modals/TailorModal.tsx` (4 niveaux peu/adapte/hyper/sur-mesure ; strip photo avant
+      l'appel + restauration locale ; réponse normalisée côté client comme `loadData` ; garde anti-vidage
+      `isEmptyResume` ; `setJson`→aperçu) branchée dans `Toolbar` (bouton « Adapter à une offre », CV only)
+      + CSS `.tailor-modal`/`.tailor-levels`. Test e2e `tests/e2e/tailor.spec.ts` (`/api/tailor-resume`
+      mocké : aperçu mis à jour, modale fermée, **photo jamais transmise au serveur**). CV Maître reporté
+      Phase 6 (storage). 110 tests verts + 5 e2e, tsc/lint/build OK.
 - [ ] **Phase 6 — Persistance navigateur** : `lib/storage/` (Dexie : snapshots max 20, brouillons,
       historique), page `/history`. Vérif : snapshot→restauration fidèle.
 - [ ] **Phase 7 — Sécurité** : scraper porté (anti-SSRF + Jina fallback), auth remote (middleware),
@@ -169,3 +181,4 @@ _(aucun pour l'instant)_
 - 2026-06-23 — Phase 4 étape 6 : streaming — `lib/ai/stream.ts` (`sseFromGenerator`, SSE port de `_stream_ai`) + routes `api/text-to-html` et `api/tailor` (HTML legacy + `tailorHtmlSystem`/is_master) ; échec tôt 400 sans clé. Tests stream + routes (streamCompletion mocké). 92 tests verts, lint/build OK.
 - 2026-06-23 — **Phase 4 terminée** : `api/pdf-to-resume` (port `pdf_to_resume` + `SYSTEM_PDF_TO_RESUME` fidèle à ai_engine.py : décodage base64→Uint8Array, `streamCompletion({images})` Gemini-only, parseAiJson→normalizeResume, max 10 pages, 400/413/502). Test du cas erreur corrigé (mock `async function*` fidèle au vrai générateur qui lève au 1er `next()`, pas à l'appel — évitait un rejet parasite vitest). 96 tests verts, tsc/lint/build OK, route enregistrée.
 - 2026-06-23 — Phase 5 étape 1 : `lib/ai/base64.ts` (port fidèle de `app.js` strip/restore base64 photo — flux tailor placeholder indexé + flux chat placeholder unique, fonctions pures sans état global) + `base64.test.ts` round-trip (8 tests). 104 tests verts, tsc/lint OK.
+- 2026-06-24 — Phase 5 étape 2 : `lib/ai/client.ts` (getApiHeaders/postJson, port de app.js userApiKey+X-Api-Key, SSR-safe) + `client.test.ts` (6 tests) ; modale `TailorModal` (4 niveaux, strip/restore photo client, normalisation + garde anti-vidage, setJson→aperçu) branchée dans Toolbar (bouton CV only) + CSS ; e2e `tailor.spec.ts` (backend mocké : aperçu MAJ, photo jamais transmise). CV Maître → Phase 6. 110 tests verts + 5 e2e, tsc/lint/build OK.
