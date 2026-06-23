@@ -32,15 +32,18 @@
 ---
 
 ## Prochaine action
-➡️ **Phase 2 (suite) — Formulaire, sections restantes** (étape 3b) : ajouter à `FormEditor` les
-sections manquantes — expérience (title/company/contract/location/date + bullets[]), formation
-(title/school/location/date), langues (name/level), projets (title/date/description), certifications
-(string[]), bénévolat (title/organization/location/date + bullets[]), centres d'intérêt (string[]).
-Réutiliser les patterns existants (Field, add/remove de liste). Pour les listes d'objets, prévoir un
-petit composant d'item répétable avec add/remove (et idéalement monter/descendre). Vérif : `npm run
-build` + `npm run lint` verts. Ensuite étape 4 : onglets Form/HTML/CSS + Monaco (`@monaco-editor/react`)
-+ switch docType CV/Lettre (formulaire Lettre) + sélecteur de template + dialogs/toasts React (JAMAIS
-alert/confirm/prompt natifs). ⚠️ Toujours `cd web` avant npm.
+➡️ **Phase 2 (suite) — Onglets + Monaco + toolbar** (étape 4). Sous-étapes (une par tour si long) :
+1. Onglets dans le panneau éditeur : Formulaire / HTML / CSS. État d'onglet local (useState dans un
+   wrapper client `EditorPane`). HTML/CSS = éditeurs Monaco (`@monaco-editor/react`, à installer)
+   liés au store (`html`/`css` via `setHtml`/`setCss`). Le formulaire reste l'onglet par défaut.
+2. Toolbar : sélecteur de docType (CV/Lettre → `setDocType`), sélecteur de template (5 modèles →
+   `setTemplate`). ⚠️ Au switch docType=Lettre, le `FormEditor` affiche déjà un placeholder ; prévoir
+   un `LetterForm` simple (champs de `DEFAULT_LETTER`) — peut être un tour séparé.
+3. Dialogs/toasts React (port `ui-dialogs.js`) : `uiAlert/uiConfirm/uiPrompt` + toasts, basés sur des
+   promesses. JAMAIS alert/confirm/prompt natifs. (Tour séparé.)
+Vérif : `npm run build` + `npm run lint` verts ; `npm run dev` → bascule d'onglet édite html/css et
+l'aperçu suit. ⚠️ Toujours `cd web` avant npm. Quand l'UI principale tourne, lancer la vérif Playwright
+de Phase 2 (saisie→aperçu, CV↔Lettre, form↔expert, 0 erreur console).
 
 ## État des phases
 
@@ -57,10 +60,11 @@ alert/confirm/prompt natifs). ⚠️ Toujours `cd web` avant npm.
       (`@monaco-editor/react`), aperçu live, onglets form/HTML/CSS, switch docType, dialogs/toasts.
       ✅ étape 1 : store `state/docStore.ts` + config Vitest alias `@/`. ✅ étape 2 : aperçu live —
       `lib/resume/mergeHtml.ts` (fusion html+css, port mergedHtml) + `components/editor/PreviewPane.tsx`
-      (iframe sandbox `srcDoc`, debounce, compteur pages A4), branché dans `page.tsx`. ✅ étape 3a :
-      `components/form/FormEditor.tsx` (infos perso + photo base64, résumé, compétences add/remove) +
-      styles formulaire néo dans globals.css, branché panneau gauche. build/lint/tests verts.
-      ⏳ sections restantes du formulaire, onglets/Monaco, docType/template, dialogs.
+      (iframe sandbox `srcDoc`, debounce, compteur pages A4), branché dans `page.tsx`. ✅ étape 3 :
+      `components/form/FormEditor.tsx` complet (toutes les sections CV : perso + photo base64, résumé,
+      expérience+puces, formation, compétences, langues, projets, certifs, bénévolat+puces, intérêts ;
+      add/remove partout), styles formulaire néo, branché panneau gauche. build/lint/tests verts.
+      ⏳ onglets Form/HTML/CSS + Monaco, toolbar docType/template, formulaire Lettre, dialogs/toasts.
       Vérif finale : Playwright (saisie→aperçu, CV↔Lettre, form↔expert, 0 erreur console).
 - [ ] **Phase 3 — Conversion PDF** : `lib/pdf/` (playwright-core + @sparticuz/chromium),
       `api/convert`, téléchargement, whitelist formats/marges, anti-SSRF. Vérif : PDF téléchargé correct.
@@ -90,3 +94,4 @@ _(aucun pour l'instant)_
 - 2026-06-23 — Phase 2 étape 1 : store `state/docStore.ts` (zustand 5) + `vitest.config.ts` (alias `@/`) + `docStore.test.ts` — 33 tests verts, tsc OK
 - 2026-06-23 — Phase 2 étape 2 : aperçu live — `lib/resume/mergeHtml.ts` + `components/editor/PreviewPane.tsx` (iframe sandbox, debounce, compteur pages A4) branché dans page.tsx — 37 tests verts, build OK
 - 2026-06-23 — Phase 2 étape 3a : `components/form/FormEditor.tsx` (infos perso + photo base64, résumé, compétences) + styles formulaire néo, branché panneau gauche — build/lint/tests verts
+- 2026-06-23 — Phase 2 étape 3b : FormEditor complété (expérience+puces, formation, langues, projets, certifs, bénévolat+puces, intérêts ; sous-composants par section) — tsc/lint/build verts
