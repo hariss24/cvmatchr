@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { complete } from "@/lib/ai/clients";
 import { tailorResumeSystem, type TailorLevel } from "@/lib/ai/prompts";
 import { parseAiJson } from "@/lib/ai/json";
+import { aiErrorResponse } from "@/lib/ai/http";
 import { normalizeResume, mergeTailored, preservePhoto } from "@/lib/resume/normalize";
 
 export const runtime = "nodejs";
@@ -61,10 +62,6 @@ export async function POST(req: Request): Promise<Response> {
     const result = preservePhoto(merged, base);
     return NextResponse.json({ resume: result });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Échec de l'adaptation.";
-    let status = 502; // réponse IA inexploitable par défaut
-    if (/Aucune clé API/i.test(message)) status = 400;
-    else if (/Quota/i.test(message)) status = 429;
-    return NextResponse.json({ error: message }, { status });
+    return aiErrorResponse(err);
   }
 }

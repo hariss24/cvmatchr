@@ -32,15 +32,15 @@
 ---
 
 ## Prochaine action
-➡️ **Phase 4 (suite) — routes IA restantes**. Reste à porter : `editor-chat` (port `complete_chat` +
-`_SYSTEM_EDITOR_CHAT` ; réponse JSON {reply, proposals} — penser au strip/restore base64 des images du
-HTML via placeholders `[IMAGE_BASE64_n]`, cf. `_COMMON_HTML_RULES`), `ats-score` + `generate-pack` (ports
-des systèmes correspondants dans `ai_engine.py` l.150-460, JSON), `tailor` (HTML legacy **conservé** :
-`TAILOR_SYSTEMS` + `COMMON_HTML_RULES`, streaming), `text-to-html` (streaming via `ReadableStream`,
-`SYSTEM_CV_IMPORT`/`SYSTEM_LETTRE_IMPORT`), `pdf-to-resume`/`extract-job`. Pour le streaming : route avec
-`ReadableStream` qui consomme `streamCompletion` (format SSE `data: …\n\n` + `[DONE]`, cf. `_stream_ai`
-dans app.py). ⚠️ Vérifier dans `ai_engine.py` les systèmes ATS/pack/chat encore non lus (l.150-460).
-Vérif : Vitest avec `complete`/`streamCompletion` mockés. ⚠️ `cd web` avant npm.
+➡️ **Phase 4 (suite) — routes IA en streaming**. Reste : `text-to-html` (streaming, `SYSTEM_CV_IMPORT`/
+`SYSTEM_LETTRE_IMPORT` selon doc_type), `tailor` (HTML legacy **conservé** : `TAILOR_SYSTEMS[level]` +
+`COMMON_HTML_RULES`, streaming ; ⚠️ strip/restore base64 des images via placeholders `[IMAGE_BASE64_n]` —
+voir `app.js` l.1617-1693/1816-1830, à porter en `lib/ai/base64.ts` côté serveur AUSSI), `pdf-to-resume`
+(images PNG → JSON, `_SYSTEM_PDF_TO_RESUME` ai_engine.py l.634+, clé Gemini obligatoire car images),
+`extract-job` (scraper — dépend de `scraper.py`, peut-être à décaler en Phase 7). Streaming : route avec
+`ReadableStream` consommant `streamCompletion`, format SSE `data: <json>\n\n` + `data: [DONE]\n\n` (port
+de `_stream_ai`/`generate` dans app.py). Vérif : Vitest avec `streamCompletion` mocké (assembler les
+chunks, vérifier le format SSE). ⚠️ `cd web` avant npm.
 
 ## Décisions de scoping (Phase 3)
 - **Historique Dexie** : le bouton PDF télécharge directement (`Blob` + `<a download>`). L'enregistrement
@@ -112,8 +112,14 @@ Vérif : Vitest avec `complete`/`streamCompletion` mockés. ⚠️ `cd web` avan
       `json.test.ts`. ✅ étape 4 : route `app/api/tailor-resume` (strip photo avant IA, `complete`,
       `parseAiJson`, `normalizeResume`+`mergeTailored`+`preservePhoto`, anti-détection via prompt) +
       `route.test.ts` (complete mocké : photo jamais envoyée, anti-wipe, restauration). 69 tests verts,
-      lint/build OK. ⏳ reste : routes editor-chat/ats-score/generate-pack/tailor/text-to-html/
-      pdf-to-resume/extract-job (dont streaming).
+      lint/build OK. ✅ étape 5 : routes JSON non-streaming — `api/editor-chat` (port `complete_chat` :
+      injection contexte HTML/CSS, {reply, proposals}, filtrage des propositions identiques, troncatures),
+      `api/ats-score` (port `score_ats` : score borné 0-100 + listes normalisées), `api/generate-pack`
+      (port `generate_pack` : lettre+email) ; systèmes `SYSTEM_EDITOR_CHAT`/`SYSTEM_ATS_SCORE`/`SYSTEM_PACK`
+      ajoutés à `prompts.ts` ; helper partagé `lib/ai/http.ts` (`aiErrorResponse` 400/429/502 +
+      `coerceSkillList`) réutilisé par tailor-resume. Tests routes (complete mocké) + http.test.ts.
+      80 tests verts, lint/build OK, routes enregistrées. ⏳ reste : routes streaming (text-to-html/tailor/
+      pdf-to-resume) + extract-job.
 - [ ] **Phase 5 — Flux IA frontend** : `lib/ai/base64.ts` (strip/restore fidèle), modals adaptation/
       chat/ATS/pack, imports texte/PDF, extraction URL, diff. Vérif : Playwright backend mocké.
 - [ ] **Phase 6 — Persistance navigateur** : `lib/storage/` (Dexie : snapshots max 20, brouillons,
@@ -146,3 +152,4 @@ _(aucun pour l'instant)_
 - 2026-06-23 — Phase 3 (sécu) : durcissement anti-SSRF suite à revue auto (DNS rebinding/TOCTOU) — blocage total des sous-ressources réseau, inline only (`data:`/`blob:`/`about:`), `isAllowedResourceUrl`. 48 tests verts, validé (image vers 169.254.169.254 bloquée, PDF OK).
 - 2026-06-23 — Phase 4 étape 1+2 : `lib/ai/clients.ts` (Gemini `@google/genai` 2.9 + Anthropic `@anthropic-ai/sdk` 0.105 ; streamCompletion/complete, requireKey, garde Anthropic+images, quota Gemini) + `clients.test.ts` + route `api/status`. 56 tests verts, lint/build OK, `/api/status` runtime 200.
 - 2026-06-23 — Phase 4 étape 3+4 : `lib/ai/prompts.ts` (port intégral prompts.py + systèmes tailor-resume JSON + `tailorResumeSystem`) + `lib/ai/json.ts` (`parseAiJson`) + route `api/tailor-resume` (strip photo, anti-wipe via mergeTailored, preservePhoto) + tests (prompts/json/route, complete mocké). 69 tests verts, lint/build OK, route enregistrée.
+- 2026-06-23 — Phase 4 étape 5 : routes JSON `api/editor-chat` + `api/ats-score` + `api/generate-pack` (ports complete_chat/score_ats/generate_pack) ; systèmes EDITOR_CHAT/ATS/PACK dans prompts.ts ; helper `lib/ai/http.ts` (aiErrorResponse + coerceSkillList) réutilisé par tailor-resume. Tests routes + http. 80 tests verts, lint/build OK.
