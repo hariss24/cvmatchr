@@ -5,6 +5,7 @@ import {
   RESUME_SCHEMA_DESC,
   SYSTEM_TAILOR_RESUME_BASE_INVENT,
   tailorResumeSystem,
+  tailorHtmlSystem,
   type TailorLevel,
 } from "./prompts";
 
@@ -37,5 +38,17 @@ describe("prompts — invariants métier", () => {
 
   it("un niveau inconnu retombe sur 'adapte'", () => {
     expect(tailorResumeSystem("n'importe quoi" as TailorLevel)).toBe(tailorResumeSystem("adapte"));
+  });
+
+  it("tailorHtmlSystem inclut les règles HTML communes", () => {
+    const sys = tailorHtmlSystem("adapte");
+    expect(sys).toContain("RÈGLES TECHNIQUES STRICTES");
+    expect(sys).toContain("PRÉSERVATION INTÉGRALE");
+  });
+
+  it("tailorHtmlSystem en mode Maître bascule en élagage", () => {
+    const sys = tailorHtmlSystem("hyper", true);
+    expect(sys).toContain("RÈGLE DE SÉLECTION (CV MAÎTRE)");
+    expect(sys).not.toContain("PRÉSERVATION INTÉGRALE");
   });
 });

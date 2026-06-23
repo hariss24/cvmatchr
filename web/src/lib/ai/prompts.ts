@@ -460,6 +460,36 @@ export const SYSTEM_TAILOR_RESUME_TAIL =
   "\nFORMAT DE RÉPONSE OBLIGATOIRE : JSON PUR uniquement, aucune balise markdown, " +
   "aucun ```json, aucun texte avant ou après le JSON.";
 
+/**
+ * Assemble le prompt système d'adaptation HTML (pipeline legacy `/api/tailor`).
+ * Port de `api_tailor` (app.py) : `TAILOR_SYSTEMS[level] + COMMON_HTML_RULES`, puis, en mode
+ * « CV Maître » (`isMaster`), bascule la règle de préservation en règle d'élagage et assouplit
+ * les interdictions strictes qui contredisent l'élagage.
+ */
+export function tailorHtmlSystem(level: TailorLevel, isMaster = false): string {
+  const safeLevel = level in TAILOR_SYSTEMS ? level : "adapte";
+  let system = TAILOR_SYSTEMS[safeLevel] + COMMON_HTML_RULES;
+  if (isMaster) {
+    system = system
+      .replace(PRESERVE_RULE, ELAGUE_RULE)
+      .replace(
+        "INTERDIT : inventer ou supprimer des compétences,",
+        "INTERDIT : inventer des compétences (mais tu peux en supprimer),",
+      )
+      .replace(
+        "supprimer la section langues ou retirer une seule langue (toutes doivent rester),",
+        "",
+      )
+      .replace("supprimer ou modifier la section centres d'intérêt,", "")
+      .replace(
+        "toucher à la section langues (doit rester intacte avec TOUTES les langues listées),",
+        "",
+      )
+      .replace("toucher à la section centres d'intérêt (doit rester intacte),", "");
+  }
+  return system;
+}
+
 /** Assemble le prompt système d'adaptation JSON selon le niveau (port de `tailor_resume`). */
 export function tailorResumeSystem(level: TailorLevel): string {
   const rules = RESUME_TAILOR_RULES[level] ?? RESUME_TAILOR_RULES.adapte;
