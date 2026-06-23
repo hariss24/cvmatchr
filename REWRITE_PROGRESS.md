@@ -32,12 +32,15 @@
 ---
 
 ## Prochaine action
-➡️ **Phase 5 — Flux IA frontend**. La couche IA serveur est complète (Phase 4 terminée). Démarrer le
-câblage front : `lib/ai/base64.ts` (strip/restore fidèle de `photoBase64` côté client, port de la logique
-JS d'origine), puis modals adaptation/chat/ATS/pack, imports texte/PDF (le rendu PDF→PNG via pdf.js
-alimente `/api/pdf-to-resume`), extraction URL, diff. Vérif : Playwright avec backend mocké.
-**Rappel : `extract-job` (scraping d'offre) est en Phase 7** (dépend de `scraper.py` + anti-SSRF).
-⚠️ `cd web` avant npm.
+➡️ **Phase 5 (suite) — client IA frontend + 1re modale**. `base64.ts` est fait (étape 1). Étape suivante :
+créer une petite couche d'appel client `lib/ai/client.ts` (helpers `fetch` vers les routes serveur :
+en-têtes `X-Api-Key` depuis les prefs/localStorage, parsing JSON + erreurs, lecture du flux SSE pour
+`text-to-html`/`tailor`), PUIS la **modale Adaptation** (`components/modals/TailorModal.tsx` : 4 niveaux
+peu/adapte/hyper/sur-mesure + case CV Maître, appelle `/api/tailor-resume` en stripant la photo via le
+domaine JSON — rappel : `tailor-resume` strippe déjà la photo côté serveur, le strip base64 *HTML*
+(`base64.ts`) sert au flux **chat** et au **tailor HTML legacy** `/api/tailor`). Brancher au store + aperçu.
+Vérif : Playwright avec backend mocké (`page.route`), round-trip sans perte. **Rappel : `extract-job` →
+Phase 7.** ⚠️ `cd web` avant npm.
 
 ## Décisions de scoping (Phase 3)
 - **Historique Dexie** : le bouton PDF télécharge directement (`Blob` + `<a download>`). L'enregistrement
@@ -125,8 +128,13 @@ alimente `/api/pdf-to-resume`), extraction URL, diff. Vérif : Playwright avec b
       assemblage chunks → `parseAiJson` → `normalizeResume`, max 10 pages, 400/413/502) + tests (mock
       async-generator fidèle). **96 tests verts, tsc/lint/build OK, route enregistrée.**
       **Phase 4 = TERMINÉE** (routes serveur IA complètes, hors `extract-job`/scraper → Phase 7).
-- [ ] **Phase 5 — Flux IA frontend** : `lib/ai/base64.ts` (strip/restore fidèle), modals adaptation/
+- [~] **Phase 5 — Flux IA frontend** : `lib/ai/base64.ts` (strip/restore fidèle), modals adaptation/
       chat/ATS/pack, imports texte/PDF, extraction URL, diff. Vérif : Playwright backend mocké.
+      ✅ étape 1 : `lib/ai/base64.ts` — port fidèle de `app.js` : `stripBase64ForTailor`/
+      `restoreBase64InTailor` (placeholder indexé `[IMAGE_BASE64_N]`, map = match complet, split/join)
+      + `stripBase64ForChat`/`restoreBase64InProposals` (placeholder unique `[IMAGE_BASE64]`, capture
+      1re donnée, restore `.replace` non-globale). Fonctions **pures** (pas d'état global, comportement
+      identique). `base64.test.ts` round-trip (8 tests). 104 tests verts, tsc/lint OK.
 - [ ] **Phase 6 — Persistance navigateur** : `lib/storage/` (Dexie : snapshots max 20, brouillons,
       historique), page `/history`. Vérif : snapshot→restauration fidèle.
 - [ ] **Phase 7 — Sécurité** : scraper porté (anti-SSRF + Jina fallback), auth remote (middleware),
@@ -160,3 +168,4 @@ _(aucun pour l'instant)_
 - 2026-06-23 — Phase 4 étape 5 : routes JSON `api/editor-chat` + `api/ats-score` + `api/generate-pack` (ports complete_chat/score_ats/generate_pack) ; systèmes EDITOR_CHAT/ATS/PACK dans prompts.ts ; helper `lib/ai/http.ts` (aiErrorResponse + coerceSkillList) réutilisé par tailor-resume. Tests routes + http. 80 tests verts, lint/build OK.
 - 2026-06-23 — Phase 4 étape 6 : streaming — `lib/ai/stream.ts` (`sseFromGenerator`, SSE port de `_stream_ai`) + routes `api/text-to-html` et `api/tailor` (HTML legacy + `tailorHtmlSystem`/is_master) ; échec tôt 400 sans clé. Tests stream + routes (streamCompletion mocké). 92 tests verts, lint/build OK.
 - 2026-06-23 — **Phase 4 terminée** : `api/pdf-to-resume` (port `pdf_to_resume` + `SYSTEM_PDF_TO_RESUME` fidèle à ai_engine.py : décodage base64→Uint8Array, `streamCompletion({images})` Gemini-only, parseAiJson→normalizeResume, max 10 pages, 400/413/502). Test du cas erreur corrigé (mock `async function*` fidèle au vrai générateur qui lève au 1er `next()`, pas à l'appel — évitait un rejet parasite vitest). 96 tests verts, tsc/lint/build OK, route enregistrée.
+- 2026-06-23 — Phase 5 étape 1 : `lib/ai/base64.ts` (port fidèle de `app.js` strip/restore base64 photo — flux tailor placeholder indexé + flux chat placeholder unique, fonctions pures sans état global) + `base64.test.ts` round-trip (8 tests). 104 tests verts, tsc/lint OK.
