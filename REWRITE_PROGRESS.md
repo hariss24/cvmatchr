@@ -32,16 +32,14 @@
 ---
 
 ## Prochaine action
-➡️ **Phase 2 (clôture) — Vérif Playwright**. Mettre en place Playwright dans `web/` : installer
-`@playwright/test` (+ `npx playwright install chromium`), `playwright.config.ts` (webServer `npm run
-dev` ou `build && start`, baseURL localhost). Écrire `web/tests/e2e/editor.spec.ts` (test fumée) :
-(1) la page charge sans erreur console ; (2) saisir un nom dans le formulaire met à jour l'aperçu
-(vérifier le contenu de l'iframe via `frameLocator`) ; (3) switch CV→Lettre via le sélecteur change le
-document (l'aperçu contient « Objet : ») ; (4) bascule onglet HTML montre Monaco. Ajouter un script
-`test:e2e`. ⚠️ Ne PAS toucher la config Playwright racine (Phase 3) — tout est dans `web/`. Si l'install
-des navigateurs échoue en environnement loop (sandbox/réseau), le noter dans « Blocages » et committer
-au moins la config + le test (exécutables plus tard). Vérif : `npm run test:e2e` (ou build) vert.
-**Après ça, Phase 2 = terminée → Phase 3 (conversion PDF, risque n°1).** ⚠️ `cd web` avant npm.
+➡️ **Phase 3 — Conversion PDF (risque n°1)**. Créer `web/src/lib/pdf/` : moteur de rendu PDF
+serverless (`playwright-core` + `@sparticuz/chromium` pour Vercel ; fallback Chromium local en dev).
+Porter la logique de `pdf_engine.py` (format A4, marges, `print_background`). Route API
+`web/src/app/api/convert/route.ts` (POST : reçoit le HTML fusionné, renvoie le PDF en download).
+Whitelist des formats/marges + anti-SSRF (pas d'URL externe arbitraire dans le HTML). Brancher le
+bouton « Convertir en PDF » de la Toolbar (actuellement `disabled`). ⚠️ **Valider tôt le Chromium
+serverless** : c'est le plus gros risque du chantier. Vérif : un PDF correct est téléchargé depuis
+l'aperçu courant (tester en local d'abord ; la prod Vercel se valide en Phase 8). ⚠️ `cd web` avant npm.
 
 ## État des phases
 
@@ -54,7 +52,7 @@ au moins la config + le test (exécutables plus tard). Vérif : `npm run test:e2
       ✅ `render.ts` (renderResume/renderLetter + escapeHtml). ✅ `templates.ts` (5 modèles sobre/moderne/
       classique/minimal/graphique portés de TEMPLATES, typés `Record<TemplateId, Template>`).
       **28 tests Vitest verts**, `tsc --noEmit` vert.
-- [~] **Phase 2 — Éditeur & formulaire** : store zustand, formulaire par sections, Monaco
+- [x] **Phase 2 — Éditeur & formulaire** : store zustand, formulaire par sections, Monaco
       (`@monaco-editor/react`), aperçu live, onglets form/HTML/CSS, switch docType, dialogs/toasts.
       ✅ étape 1 : store `state/docStore.ts` + config Vitest alias `@/`. ✅ étape 2 : aperçu live —
       `lib/resume/mergeHtml.ts` (fusion html+css, port mergedHtml) + `components/editor/PreviewPane.tsx`
@@ -70,7 +68,9 @@ au moins la config + le test (exécutables plus tard). Vérif : `npm run test:e2
       `state/uiStore.ts` (uiAlert/uiConfirm/uiPrompt à base de promesses + toasts, JAMAIS natifs) +
       `components/ui/UiHost.tsx` (modale accessible Échap/focus, toasts auto-dismiss) monté dans layout +
       `uiStore.test.ts`. 42 tests verts, build/lint OK. ⏳ vérif Playwright (clôture Phase 2).
-      Vérif finale : Playwright (saisie→aperçu, CV↔Lettre, form↔expert, 0 erreur console).
+      ✅ clôture : Playwright dans `web/` (`playwright.config.ts` webServer `next dev`,
+      `tests/e2e/editor.spec.ts` 4 tests fumée, script `test:e2e`) — **4 tests verts**.
+      **Phase 2 = TERMINÉE.**
 - [ ] **Phase 3 — Conversion PDF** : `lib/pdf/` (playwright-core + @sparticuz/chromium),
       `api/convert`, téléchargement, whitelist formats/marges, anti-SSRF. Vérif : PDF téléchargé correct.
       ⚠️ Risque n°1 : Chromium serverless Vercel — valider tôt.
@@ -104,3 +104,4 @@ _(aucun pour l'instant)_
 - 2026-06-23 — Phase 2 étape 4.2 : `components/editor/Toolbar.tsx` (sélecteurs docType + template branchés au store) + styles toolbar — tsc/lint/build verts
 - 2026-06-23 — Phase 2 étape 4.3 : `components/form/LetterForm.tsx` (formulaire Lettre lié au store), EditorPane route CV/Lettre — tsc/lint/build verts
 - 2026-06-23 — Phase 2 étape 4.4 : dialogs/toasts React — `state/uiStore.ts` (uiAlert/uiConfirm/uiPrompt promesses + toasts) + `components/ui/UiHost.tsx` monté dans layout + tests — 42 tests verts, lint/build OK
+- 2026-06-23 — **Phase 2 terminée** : Playwright dans `web/` (`playwright.config.ts`, `tests/e2e/editor.spec.ts` : chargement sans erreur console, saisie→aperçu, CV→Lettre, onglet HTML→Monaco) + script `test:e2e` + gitignore artefacts — **4 tests e2e verts**
