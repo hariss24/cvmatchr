@@ -1,4 +1,3 @@
-import { lookup } from "node:dns/promises";
 import { chromium, type Browser, type Route } from "playwright-core";
 
 /**
@@ -43,62 +42,35 @@ async function launchBrowser(): Promise<Browser> {
   return chromium.launch();
 }
 
-// ---- anti-SSRF (port de _resolves_to_blocked / _block_internal_resources) ----
+// ---- anti-SSRF : aucune sous-ressource réseau --------------------------------
+// Le HTML d'un CV/Lettre est entièrement inline : photo en base64 (`data:`), CSS
+// du template injecté dans le document. Aucune ressource externe légitime n'est
+// nécessaire au rendu. On bloque donc TOUT chargement réseau (http/https/file/
+// ftp…) et on n'autorise que le contenu inline (`data:`/`blob:`/`about:`).
+//
+// Conséquence sécurité : il n'y a plus AUCUNE résolution DNS pendant le rendu,
+// ce qui élimine entièrement le SSRF — y compris le DNS rebinding / TOCTOU
+// (impossible de faire diverger une vérification d'IP de la connexion réelle de
+// Chromium, puisqu'aucune connexion réseau n'est permise).
 
-/** True si l'IP (v4 ou v6) est interne/privée/réservée. Exporté pour les tests. */
-export function isBlockedIp(ip: string): boolean {
-  let addr = ip.toLowerCase();
-  // IPv4 mappée en IPv6 (::ffff:1.2.3.4) → on teste la partie IPv4.
-  const mapped = addr.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
-  if (mapped) addr = mapped[1];
+const ALLOWED_SCHEMES = new Set(["data:", "blob:", "about:"]);
 
-  if (addr.includes(".") && !addr.includes(":")) {
-    const o = addr.split(".").map(Number);
-    if (o.length !== 4 || o.some((n) => Number.isNaN(n) || n < 0 || n > 255)) return true;
-    const [a, b] = o;
-    if (a === 0) return true; // 0.0.0.0/8 (this network / unspecified)
-    if (a === 10) return true; // 10.0.0.0/8 privé
-    if (a === 127) return true; // 127.0.0.0/8 loopback
-    if (a === 169 && b === 254) return true; // 169.254.0.0/16 link-local
-    if (a === 172 && b >= 16 && b <= 31) return true; // 172.16.0.0/12 privé
-    if (a === 192 && b === 168) return true; // 192.168.0.0/16 privé
-    if (a === 100 && b >= 64 && b <= 127) return true; // 100.64.0.0/10 CGNAT
-    if (a >= 224) return true; // 224.0.0.0/4 multicast + 240.0.0.0/4 réservé
-    return false;
-  }
-
-  // IPv6
-  if (addr === "::1" || addr === "::") return true; // loopback / unspecified
-  if (addr.startsWith("fe8") || addr.startsWith("fe9") || addr.startsWith("fea") || addr.startsWith("feb"))
-    return true; // fe80::/10 link-local
-  if (addr.startsWith("fc") || addr.startsWith("fd")) return true; // fc00::/7 ULA (privé)
-  if (addr.startsWith("ff")) return true; // ff00::/8 multicast
-  return false;
-}
-
-/** True si l'hôte résout vers une IP bloquée (ou ne résout pas → bloqué par prudence). */
-async function resolvesToBlocked(hostname: string): Promise<boolean> {
-  if (!hostname) return false; // data:, about:, blob: — pas de réseau
+/** True si l'URL d'une sous-ressource est du contenu inline autorisé. Exporté pour les tests. */
+export function isAllowedResourceUrl(url: string): boolean {
   try {
-    const results = await lookup(hostname, { all: true });
-    return results.some((r) => isBlockedIp(r.address));
+    return ALLOWED_SCHEMES.has(new URL(url).protocol);
   } catch {
-    return true; // non résolvable → on bloque
+    return false; // URL non parsable → bloquée par prudence
   }
 }
 
-/** Handler de route : bloque les ressources internes (anti-SSRF). */
-async function blockInternalResources(route: Route): Promise<void> {
-  try {
-    const host = new URL(route.request().url()).hostname;
-    if (await resolvesToBlocked(host)) {
-      await route.abort();
-      return;
-    }
-  } catch {
-    // URL non parsable (data:, etc.) → on laisse passer
+/** Handler de route : n'autorise que le contenu inline, bloque tout le réseau (anti-SSRF). */
+async function blockExternalResources(route: Route): Promise<void> {
+  if (isAllowedResourceUrl(route.request().url())) {
+    await route.continue();
+  } else {
+    await route.abort();
   }
-  await route.continue();
 }
 
 // ---- API publique ------------------------------------------------------------
@@ -121,7 +93,7 @@ export async function htmlToPdf(html: string, options: PdfOptions = {}): Promise
   const browser = await launchBrowser();
   try {
     const page = await browser.newPage();
-    await page.route("**/*", blockInternalResources); // anti-SSRF
+    await page.route("**/*", blockExternalResources); // anti-SSRF : inline only
     await page.setContent(html, { waitUntil: "networkidle", timeout: 30_000 });
     return await page.pdf({
       format,

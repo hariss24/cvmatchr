@@ -51,6 +51,15 @@ anti-wipe, normalize appliqué). ⚠️ `cd web` avant npm.
 - **Dev local** : `chromium.launch()` par défaut utilise le Chromium installé par Playwright (déjà présent
   via les tests e2e). En serverless (`VERCEL`/`AWS_LAMBDA_FUNCTION_NAME`), bascule sur `@sparticuz/chromium`.
   ⚠️ Le chemin serverless n'est PAS encore validé sur un vrai déploiement Vercel → à confirmer en Phase 8.
+- **Anti-SSRF — changement de comportement vs Flask** : `pdf_engine.py` autorisait les ressources externes
+  en les filtrant par IP (DNS lookup puis `route.continue`). Une revue sécurité automatique a signalé que ce
+  motif est vulnérable au **DNS rebinding / TOCTOU** (Chromium re-résout le hostname après la vérif → l'IP
+  peut diverger). Le défaut existait déjà dans le code Python d'origine. Choix retenu (option validée par la
+  revue, alignée sur le modèle de données 100 % inline) : **bloquer toute sous-ressource réseau** dans le
+  rendu PDF (`isAllowedResourceUrl` : seuls `data:`/`blob:`/`about:`). Plus aucune résolution DNS → SSRF
+  éliminé. ⚠️ Si un utilisateur a besoin d'images externes (URL http) dans un CV, elles ne s'afficheront pas
+  dans le PDF (la photo passe par base64, donc OK pour le flux normal). À confirmer avec l'utilisateur si
+  ce cas d'usage compte.
 
 ## État des phases
 
@@ -83,13 +92,14 @@ anti-wipe, normalize appliqué). ⚠️ `cd web` avant npm.
       `tests/e2e/editor.spec.ts` 4 tests fumée, script `test:e2e`) — **4 tests verts**.
       **Phase 2 = TERMINÉE.**
 - [x] **Phase 3 — Conversion PDF** (cœur) : ✅ `lib/pdf/render.ts` (`htmlToPdf` via `playwright-core`,
-      split dev/serverless `@sparticuz/chromium`, whitelist formats/marges, anti-SSRF `isBlockedIp` v4/v6 +
-      route-guard) + `render.test.ts` (16 tests). ✅ `app/api/convert/route.ts` (POST, runtime nodejs,
-      maxDuration 60, merge serveur, limite 2 Mo, filename sûr, 400/413/500). ✅ bouton « Convertir en PDF »
-      branché (fetch → Blob → download + toast/uiAlert). ✅ `serverExternalPackages` (Chromium non bundlé).
-      **49 tests verts, lint/build OK. Risque n°1 validé EN LOCAL** : PDF réel généré via l'API (200,
-      application/pdf, %PDF-). ⏳ reste : valider le Chromium serverless sur Vercel (Phase 8) ; hook
-      historique Dexie (Phase 6).
+      split dev/serverless `@sparticuz/chromium`, whitelist formats/marges, **anti-SSRF durci : blocage
+      TOTAL des sous-ressources réseau, seul l'inline `data:`/`blob:`/`about:` passe** — voir note ci-dessous)
+      + `render.test.ts`. ✅ `app/api/convert/route.ts` (POST, runtime nodejs, maxDuration 60, merge serveur,
+      limite 2 Mo, filename sûr, 400/413/500). ✅ bouton « Convertir en PDF » branché (fetch → Blob →
+      download + toast/uiAlert). ✅ `serverExternalPackages` (Chromium non bundlé).
+      **48 tests verts, lint/build OK. Risque n°1 validé EN LOCAL** : PDF réel généré via l'API (200,
+      application/pdf, %PDF-) y compris avec une image vers `169.254.169.254` (bloquée, rendu OK). ⏳ reste :
+      valider le Chromium serverless sur Vercel (Phase 8) ; hook historique Dexie (Phase 6).
 - [ ] **Phase 4 — Couche IA serveur** : `lib/ai/` (clients Gemini/Anthropic, prompts portés de
       prompts.py), routes `tailor-resume`/`tailor`/`editor-chat`/`ats-score`/`generate-pack`/
       `text-to-html`/`pdf-to-resume`/`extract-job`/`status`, streaming. Vérif : Vitest IA mockée.
