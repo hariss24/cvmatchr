@@ -32,16 +32,15 @@
 ---
 
 ## Prochaine action
-➡️ **Phase 4 (suite) — `prompts.ts` puis `tailor-resume`**. (1) Porter `prompts.py` → `web/src/lib/ai/
-prompts.ts` : `_RESUME_SCHEMA_DESC`, squelettes CV/Lettre, `_TAILOR_SYSTEMS` (4 niveaux peu/adapte/
-hyper/sur-mesure), `_RESUME_TAILOR_RULES`, systèmes ATS/pack/import (`_SYSTEM_*_IMPORT`), anti-détection
-entreprise. Constantes pures, testables (présence des règles clés). (2) Route `app/api/tailor-resume/
-route.ts` (POST JSON, prioritaire) : strip `photo` avant l'appel IA (la photo n'est JAMAIS envoyée),
-`complete()` avec le bon système selon le niveau, parse JSON, `normalizeResume` + `mergeTailored`
-(anti-wipe) + `preservePhoto` au retour. ⚠️ anti-détection : ne jamais inclure le nom de l'entreprise
-ciblée dans le CV. Vérif : Vitest avec `complete` mocké (anti-wipe préservé, photo restaurée, normalize
-appliqué). Ensuite : `tailor` (HTML legacy), `editor-chat`, `ats-score`, `generate-pack`,
-`text-to-html`/`pdf-to-resume`/`extract-job` (streaming via `ReadableStream`). ⚠️ `cd web` avant npm.
+➡️ **Phase 4 (suite) — routes IA restantes**. Reste à porter : `editor-chat` (port `complete_chat` +
+`_SYSTEM_EDITOR_CHAT` ; réponse JSON {reply, proposals} — penser au strip/restore base64 des images du
+HTML via placeholders `[IMAGE_BASE64_n]`, cf. `_COMMON_HTML_RULES`), `ats-score` + `generate-pack` (ports
+des systèmes correspondants dans `ai_engine.py` l.150-460, JSON), `tailor` (HTML legacy **conservé** :
+`TAILOR_SYSTEMS` + `COMMON_HTML_RULES`, streaming), `text-to-html` (streaming via `ReadableStream`,
+`SYSTEM_CV_IMPORT`/`SYSTEM_LETTRE_IMPORT`), `pdf-to-resume`/`extract-job`. Pour le streaming : route avec
+`ReadableStream` qui consomme `streamCompletion` (format SSE `data: …\n\n` + `[DONE]`, cf. `_stream_ai`
+dans app.py). ⚠️ Vérifier dans `ai_engine.py` les systèmes ATS/pack/chat encore non lus (l.150-460).
+Vérif : Vitest avec `complete`/`streamCompletion` mockés. ⚠️ `cd web` avant npm.
 
 ## Décisions de scoping (Phase 3)
 - **Historique Dexie** : le bouton PDF télécharge directement (`Blob` + `<a download>`). L'enregistrement
@@ -106,7 +105,15 @@ appliqué). Ensuite : `tailor` (HTML legacy), `editor-chat`, `ats-score`, `gener
       utilisateur/serveur, `isAnthropicKey`, `streamCompletion` async generator + `complete` non-streaming,
       garde Anthropic+images, gestion quota Gemini) + `clients.test.ts` (8 tests). ✅ étape 2 : route
       `app/api/status` (server_key_configured/preview + model ; quota reporté). 56 tests verts, lint/build
-      OK, `/api/status` vérifié en runtime (200). ⏳ reste : `prompts.ts` + routes IA.
+      OK, `/api/status` vérifié en runtime (200). ✅ étape 3 : `lib/ai/prompts.ts` (port intégral de
+      `prompts.py` : squelettes CV/Lettre, `SYSTEM_*_IMPORT`, `PRESERVE/ELAGUE_RULE`, `TAILOR_SYSTEMS` 4
+      niveaux, `COMMON_HTML_RULES`, + `RESUME_SCHEMA_DESC` & systèmes `tailor-resume` JSON portés
+      d'ai_engine.py, `tailorResumeSystem`) + `lib/ai/json.ts` (`parseAiJson`) + `prompts.test.ts`/
+      `json.test.ts`. ✅ étape 4 : route `app/api/tailor-resume` (strip photo avant IA, `complete`,
+      `parseAiJson`, `normalizeResume`+`mergeTailored`+`preservePhoto`, anti-détection via prompt) +
+      `route.test.ts` (complete mocké : photo jamais envoyée, anti-wipe, restauration). 69 tests verts,
+      lint/build OK. ⏳ reste : routes editor-chat/ats-score/generate-pack/tailor/text-to-html/
+      pdf-to-resume/extract-job (dont streaming).
 - [ ] **Phase 5 — Flux IA frontend** : `lib/ai/base64.ts` (strip/restore fidèle), modals adaptation/
       chat/ATS/pack, imports texte/PDF, extraction URL, diff. Vérif : Playwright backend mocké.
 - [ ] **Phase 6 — Persistance navigateur** : `lib/storage/` (Dexie : snapshots max 20, brouillons,
@@ -138,3 +145,4 @@ _(aucun pour l'instant)_
 - 2026-06-23 — **Phase 3 (cœur) terminée** : `lib/pdf/render.ts` (htmlToPdf playwright-core + @sparticuz/chromium, whitelist, anti-SSRF v4/v6) + `render.test.ts` (16 tests) + `api/convert/route.ts` + bouton PDF branché + `serverExternalPackages` + Vitest `include` src uniquement (exclut e2e). 49 tests verts, lint/build OK. **Risque n°1 validé en local** : PDF réel via l'API (200, %PDF-, ~42 Ko) ; cas d'erreur 400 OK. Serverless Vercel à valider en Phase 8.
 - 2026-06-23 — Phase 3 (sécu) : durcissement anti-SSRF suite à revue auto (DNS rebinding/TOCTOU) — blocage total des sous-ressources réseau, inline only (`data:`/`blob:`/`about:`), `isAllowedResourceUrl`. 48 tests verts, validé (image vers 169.254.169.254 bloquée, PDF OK).
 - 2026-06-23 — Phase 4 étape 1+2 : `lib/ai/clients.ts` (Gemini `@google/genai` 2.9 + Anthropic `@anthropic-ai/sdk` 0.105 ; streamCompletion/complete, requireKey, garde Anthropic+images, quota Gemini) + `clients.test.ts` + route `api/status`. 56 tests verts, lint/build OK, `/api/status` runtime 200.
+- 2026-06-23 — Phase 4 étape 3+4 : `lib/ai/prompts.ts` (port intégral prompts.py + systèmes tailor-resume JSON + `tailorResumeSystem`) + `lib/ai/json.ts` (`parseAiJson`) + route `api/tailor-resume` (strip photo, anti-wipe via mergeTailored, preservePhoto) + tests (prompts/json/route, complete mocké). 69 tests verts, lint/build OK, route enregistrée.
