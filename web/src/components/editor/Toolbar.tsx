@@ -11,6 +11,9 @@ import AtsPanel from "@/components/modals/AtsPanel";
 import PackModal from "@/components/modals/PackModal";
 import ImportTextModal from "@/components/modals/ImportTextModal";
 import ImportPdfModal from "@/components/modals/ImportPdfModal";
+import SnapshotsModal from "@/components/modals/SnapshotsModal";
+import { takeSnapshot } from "@/lib/storage/snapshots";
+import { saveHistoryEntry } from "@/lib/storage/db";
 
 const TEMPLATE_LABELS: Record<TemplateId, string> = {
   sobre: "Sobre",
@@ -36,6 +39,18 @@ export default function Toolbar() {
   const [packOpen, setPackOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [pdfOpen, setPdfOpen] = useState(false);
+  const [snapshotsOpen, setSnapshotsOpen] = useState(false);
+
+  // Auto-snapshot toutes les 5 minutes
+  import("react").then(({ useEffect }) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+      const interval = setInterval(() => {
+        takeSnapshot("Auto-save");
+      }, 5 * 60 * 1000);
+      return () => clearInterval(interval);
+    }, []);
+  });
 
   const onConvert = async () => {
     const { html, css, json, atsBoost } = useDocStore.getState();
@@ -61,6 +76,26 @@ export default function Toolbar() {
       a.click();
       URL.revokeObjectURL(url);
       toast("PDF téléchargé.", "success");
+
+      // Sauvegarde dans l'historique (Phase 6)
+      await saveHistoryEntry({
+        id: crypto.randomUUID(),
+        created_at: new Date().toISOString(),
+        doc_type: docType,
+        company: "",
+        role: "",
+        job_desc: "",
+        filename: `${name} - ${docType}.pdf`,
+        notes: "",
+        pdf_views: 1,
+        editor_reloads: 0,
+        last_viewed_at: new Date().toISOString(),
+        html,
+        css,
+        json: structuredClone(json),
+        templateId,
+      });
+
     } catch {
       await uiAlert("Impossible de joindre le serveur de conversion.", "Conversion PDF");
     } finally {
@@ -101,7 +136,7 @@ export default function Toolbar() {
         <button
           className="form-btn-mini toolbar-tailor"
           type="button"
-          onClick={() => setTailorOpen(true)}
+          onClick={() => { takeSnapshot("Avant adaptation"); setTailorOpen(true); }}
         >
           Adapter à une offre
         </button>
@@ -121,7 +156,7 @@ export default function Toolbar() {
         <button
           className="form-btn-mini toolbar-pack"
           type="button"
-          onClick={() => setPackOpen(true)}
+          onClick={() => { takeSnapshot("Avant pack"); setPackOpen(true); }}
         >
           Pack candidature
         </button>
@@ -133,6 +168,14 @@ export default function Toolbar() {
         onClick={() => setImportOpen(true)}
       >
         Importer un texte
+      </button>
+
+      <button
+        className="form-btn-mini toolbar-snapshots"
+        type="button"
+        onClick={() => setSnapshotsOpen(true)}
+      >
+        Brouillons
       </button>
 
       {docType === "CV" ? (
@@ -148,7 +191,7 @@ export default function Toolbar() {
       <button
         className="form-btn-mini toolbar-chat"
         type="button"
-        onClick={() => setChatOpen(true)}
+        onClick={() => { takeSnapshot("Avant chat IA"); setChatOpen(true); }}
       >
         Assistant IA
       </button>
@@ -168,6 +211,7 @@ export default function Toolbar() {
       <ImportTextModal open={importOpen} onClose={() => setImportOpen(false)} />
       <ImportPdfModal open={pdfOpen} onClose={() => setPdfOpen(false)} />
       <ChatPanel open={chatOpen} onClose={() => setChatOpen(false)} />
+      <SnapshotsModal open={snapshotsOpen} onClose={() => setSnapshotsOpen(false)} />
     </div>
   );
 }

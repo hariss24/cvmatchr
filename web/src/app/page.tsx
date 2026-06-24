@@ -1,6 +1,7 @@
 import PreviewPane from "@/components/editor/PreviewPane";
 import EditorPane from "@/components/editor/EditorPane";
 import Toolbar from "@/components/editor/Toolbar";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -16,7 +17,10 @@ export default function Home() {
           </div>
         </div>
         <div className="topbar-actions">
-          <span className="topbar-pill">Réécriture Next.js — phase 0</span>
+          <Link href="/history" className="neu-btn-sm" style={{ textDecoration: 'none' }}>
+            Historique
+          </Link>
+          <span className="topbar-pill">Réécriture Next.js — Phase 6</span>
         </div>
       </header>
 

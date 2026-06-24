@@ -32,11 +32,11 @@
 ---
 
 ## Prochaine action
-➡️ **Phase 6 — Persistance navigateur (suite)**. Câbler la base Dexie (`lib/storage/db.ts`) dans les composants React.
-1. **Snapshots Auto & Bouton de restauration** : Implémenter l'auto-save (toutes les 5 minutes) et le hook avant Adaptation/Pack, ainsi qu'une modale/bouton pour relire et restaurer un snapshot dans l'éditeur.
-2. **Historique des exports PDF** : Brancher la création d'entrée d'historique lors d'un export PDF réussi (`Toolbar.onConvert`), et préparer la page `/history` (port de `history.js`).
+➡️ **Phase 6 — Persistance navigateur (fin)**. Gérer les brouillons (auto-save en temps réel) et réintégrer la modale Diff.
+1. **Brouillons (Drafts)** : Créer un hook `useAutoDraft` pour sauvegarder l'état courant (`docStore`) à chaque modification (debounce) et le recharger au démarrage de l'app, afin de ne pas perdre son travail au rafraîchissement.
+2. **Modale Diff** : Implémenter `DiffModal.tsx` (reportée de la Phase 5) en s'appuyant sur les snapshots ou un état temporaire `beforeTailorSnapshot` avant de valider l'adaptation.
 **Rappel : `extract-job` → Phase 7.**
-⚠️ `cd web` avant npm. Tests : Vitest (logique) + Playwright (flux de restauration).
+⚠️ `cd web` avant npm. Tests : Vitest (logique) + Playwright.
 
 ## Décisions de scoping (Phase 3)
 - **Historique Dexie** : le bouton PDF télécharge directement (`Blob` + `<a download>`). L'enregistrement
@@ -236,3 +236,4 @@ _(aucun pour l'instant)_
 - 2026-06-24 — Phase 5 étape 3 : chat éditeur `components/modals/ChatPanel.tsx` (panneau latéral, port de `_sendChat`/`_appendProposals` : historique, strip/restore base64 flux chat, `/api/editor-chat` avec `mergeHtml(strippedHtml, css)`, propositions Prévisualiser/Appliquer/Rejeter) ; `previewOverride` ajouté au store + honoré par PreviewPane ; `extractCss` (inverse de mergeHtml) pour l'application en mode expert ; bouton « Assistant IA » Toolbar + CSS. Tests `extractCss` (3) + e2e `chat.spec.ts` (réponse+proposition, application→aperçu, html sans data:image/). 113 tests verts + 6 e2e, tsc/lint/build OK. Snapshot avant-chat → Phase 6.
 - 2026-06-24 — Phase 5 terminée : La modale diff (avant/après) de la Phase 5 (port de `_openDiffModal`) s'appuyant trop sur le flux `_tailorBeforeHtml` et les snapshots non implémentés (qui incombent à la couche Storage), elle a été délibérément reportée à la Phase 6 (persistance) conformément aux instructions initiales de la "Prochaine action". Tous les tests (unitaires et e2e) sont verts.
 - 2026-06-24 — Phase 6 étape 1 : initialisation Dexie (`npm install dexie`) + création de `lib/storage/db.ts` (port de la logique de `app.js` et `history.js` : tables `snapshots`, `drafts`, `history`). Le build et les tests existants passent.
+- 2026-06-24 — Phase 6 étape 2 : Câblage Dexie — auto-save `takeSnapshot` toutes les 5min et avant adaptation/pack/chat branché dans `Toolbar.tsx`. Ajout de `SnapshotsModal.tsx` (bouton "Brouillons") pour lister/restaurer/supprimer. Page `/history` et `HistoryList.tsx` créées (vue, PDF regénération, restauration). `Toolbar.onConvert` injecte maintenant dans `history` après l'export PDF. 128 tests verts, build OK.
