@@ -117,7 +117,7 @@ export default function HistoryList() {
       />
 
       {filtered.length === 0 ? (
-        <div style={{ opacity: 0.6, padding: "20px 0" }}>Aucun document dans l'historique.</div>
+        <div style={{ opacity: 0.6, padding: "20px 0" }}>Aucun document dans l&apos;historique.</div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           {filtered.map((e) => {

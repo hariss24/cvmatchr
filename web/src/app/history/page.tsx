@@ -20,7 +20,7 @@ export default function HistoryPage() {
         </div>
         <div className="topbar-actions">
           <Link href="/" className="neu-btn-sm" style={{ textDecoration: 'none' }}>
-            Retour à l'éditeur
+            Retour à l&apos;éditeur
           </Link>
         </div>
       </header>
@@ -29,7 +29,7 @@ export default function HistoryPage() {
         <div className="section-card" style={{ maxWidth: "800px", margin: "0 auto" }}>
           <h2>Historique</h2>
           <p style={{ opacity: 0.8, fontSize: "0.9rem", marginBottom: "20px" }}>
-            Vos derniers exports PDF sont conservés ici. Vous pouvez les regénérer ou les recharger dans l'éditeur.
+            Vos derniers exports PDF sont conservés ici. Vous pouvez les regénérer ou les recharger dans l&apos;éditeur.
           </p>
           <HistoryList />
         </div>

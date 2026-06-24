@@ -15,6 +15,13 @@ const eslintConfig = defineConfig([
     // Assets vendorés (worker pdf.js copié depuis node_modules) : pas notre code.
     "public/**",
   ]),
+  // Les mocks de test (fetch, dns.lookup) utilisent légitimement `any`.
+  {
+    files: ["**/*.test.ts", "**/*.test.tsx"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

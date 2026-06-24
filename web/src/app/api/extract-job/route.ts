@@ -11,15 +11,16 @@ export async function POST(req: Request) {
     const { text, title } = await scrapeJobText(body.url);
     
     return NextResponse.json({ text, title });
-  } catch (err: any) {
-    console.error("Erreur scrapeJobText:", err.message);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("Erreur scrapeJobText:", message);
     // On masque les erreurs SSRF internes ("URL non autorisée.") par sécurité,
     // mais on laisse le fallback/blocage explicite pour l'utilisateur.
-    if (err.message === "URL non autorisée.") {
+    if (message === "URL non autorisée.") {
       return NextResponse.json({ error: "L'accès à cette URL est interdit par mesure de sécurité." }, { status: 403 });
     }
     return NextResponse.json(
-      { error: err.message || "Erreur interne lors de l'extraction." },
+      { error: message || "Erreur interne lors de l'extraction." },
       { status: 500 }
     );
   }

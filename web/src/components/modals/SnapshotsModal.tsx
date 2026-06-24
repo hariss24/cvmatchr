@@ -20,14 +20,10 @@ export default function SnapshotsModal({ open, onClose }: SnapshotsModalProps) {
 
   useEffect(() => {
     if (open) {
-      loadSnapshots();
+      // setState passé en callback (async) : conforme à react-hooks/set-state-in-effect.
+      listSnapshots().then(setSnapshots);
     }
   }, [open]);
-
-  const loadSnapshots = async () => {
-    const snaps = await listSnapshots();
-    setSnapshots(snaps);
-  };
 
   const handleRestore = async (snap: Snapshot) => {
     if (
@@ -51,7 +47,7 @@ export default function SnapshotsModal({ open, onClose }: SnapshotsModalProps) {
   const handleDelete = async (ts: number) => {
     if (!(await uiConfirm("Supprimer définitivement ce snapshot ?", "Supprimer"))) return;
     await deleteSnapshot(ts);
-    await loadSnapshots();
+    setSnapshots(await listSnapshots());
   };
 
   if (!open) return null;
