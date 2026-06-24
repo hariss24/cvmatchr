@@ -32,18 +32,21 @@
 ---
 
 ## Prochaine action
-➡️ **Phase 5 (suite) — Imports texte/PDF**. `base64.ts`, `client.ts`, `TailorModal`, chat éditeur,
-panneau ATS (local + IA) + booster invisible, **pack candidature** sont faits (étapes 1-6).
-Étape suivante :
-1. **Import texte→HTML** (`/api/text-to-html`, **streaming SSE**) : nécessite un lecteur SSE à ajouter
-   dans `client.ts` (port de `_streamToModel`/lecture `data:`/`[DONE]`/`[ERROR]` d'app.js). Modale :
-   zone de texte → flux affiché en direct dans l'éditeur HTML. Système CV/Lettre selon `doc_type`.
-2. **Import PDF→CV JSON** (`/api/pdf-to-resume`) : rendu PDF→PNG côté client via **pdf.js**
-   (package à installer : `pdfjs-dist`), envoi des images base64 → CV JSON normalisé. Photo jamais à l'IA.
-Suggestion d'ordre : SSE texte d'abord (débloque le lecteur), puis PDF. **Rappel : `extract-job` → Phase 7.**
-⚠️ `cd web` avant npm (le répertoire courant peut déjà être `web/` : vérifier). Tests : Vitest (logique)
-+ Playwright `page.route` (flux). Note : `editor.spec.ts` « basculer CV → Lettre » est **flaky** en run
-parallèle (timeout 5 s sur compilation à froid) — passe en isolé, ne pas confondre avec une régression.
+➡️ **Phase 5 (suite) — Import PDF→CV JSON**. `base64.ts`, `client.ts` (+ lecteur **SSE** `streamSse`),
+`TailorModal`, chat éditeur, panneau ATS + booster, pack candidature, **import texte→HTML** sont faits
+(étapes 1-7). Étape suivante :
+1. **Import PDF→CV JSON** (`/api/pdf-to-resume`) : rendu PDF→PNG côté client via **pdf.js**
+   (`pdfjs-dist` à installer ; worker à configurer pour Next/Turbopack), conversion de chaque page en
+   image base64 (`canvas.toDataURL`), envoi `{images: [...], doc_type}` → la route renvoie un CV JSON
+   normalisé (non-streaming : `parseAiJson`+`normalizeResume`). Modale : input fichier PDF → aperçu/spinner
+   → `setJson(resume)`. ⚠️ Photo jamais envoyée à l'IA (mais ici ce sont les **pages rendues** qui partent ;
+   le CV JSON retourné n'a pas de photo → OK). Max 10 pages (déjà borné côté route).
+   Voir flux d'origine : `app.js` (chercher `pdf-to-resume` / `pdfjsLib` / `getDocument`).
+**Rappel : `extract-job` → Phase 7.** Après PDF : diff modal (étape finale Phase 5) puis Phase 6.
+⚠️ `cd web` avant npm (le répertoire courant est souvent la **racine** après le `cd ..` du commit : vérifier
+le nom de paquet `web@0.1.0` dans la sortie npm). Tests : Vitest (logique) + Playwright `page.route` (flux).
+Note : `editor.spec.ts` « basculer CV → Lettre » est **flaky** en run parallèle (timeout 5 s, compilation
+à froid) — passe en isolé, ne pas confondre avec une régression.
 
 ## Décisions de scoping (Phase 3)
 - **Historique Dexie** : le bouton PDF télécharge directement (`Blob` + `<a download>`). L'enregistrement
@@ -182,6 +185,14 @@ parallèle (timeout 5 s sur compilation à froid) — passe en isolé, ne pas co
       (bascule type Lettre puis `setHtml`/`setCss`). Branché Toolbar (bouton CV only) + CSS `.pack-modal`.
       Snapshot « Avant pack » → Phase 6. Test e2e `pack.spec.ts` (backend mocké : lettre+email affichés,
       `cv_html` transmis, insertion → type Lettre + aperçu MAJ). 125 tests + 9 e2e, tsc/lint/build OK.
+      ✅ étape 7 : **Import texte→HTML (streaming SSE)** — lecteur `streamSse` ajouté à `lib/ai/client.ts`
+      (port fidèle de `_readSseStream`+`streamToMonaco` : parse `data: <chunk JSON>`/`[DONE]`/`[ERROR]`,
+      buffer inter-chunks, accumulation + callback) + `components/modals/ImportTextModal.tsx` (textarea →
+      `streamSse('/api/text-to-html', {text, doc_type})` → `setHtml` en direct au fil du flux, puis CSS
+      d'import sobre/vide selon le type — port de `_applyImportCss`). Bouton « Importer un texte » dans
+      Toolbar (CV + Lettre) + CSS `.import-modal`. Tests : 3 unit `streamSse` (accumulation, [ERROR], !ok)
+      + e2e `import-text.spec.ts` (flux SSE mocké : HTML affiché dans l'aperçu, texte+doc_type transmis).
+      128 tests + 10 e2e, tsc/lint/build OK.
 - [ ] **Phase 6 — Persistance navigateur** : `lib/storage/` (Dexie : snapshots max 20, brouillons,
       historique), page `/history`. Vérif : snapshot→restauration fidèle.
 - [ ] **Phase 7 — Sécurité** : scraper porté (anti-SSRF + Jina fallback), auth remote (middleware),
@@ -219,5 +230,6 @@ _(aucun pour l'instant)_
 - 2026-06-24 — Phase 5 étape 2 : `lib/ai/client.ts` (getApiHeaders/postJson, port de app.js userApiKey+X-Api-Key, SSR-safe) + `client.test.ts` (6 tests) ; modale `TailorModal` (4 niveaux, strip/restore photo client, normalisation + garde anti-vidage, setJson→aperçu) branchée dans Toolbar (bouton CV only) + CSS ; e2e `tailor.spec.ts` (backend mocké : aperçu MAJ, photo jamais transmise). CV Maître → Phase 6. 110 tests verts + 5 e2e, tsc/lint/build OK.
 - 2026-06-24 — Phase 5 étape 5 : booster ATS invisible — `applyAtsBoost` (port fidèle injection span 1px app.js l.606-614) + état store `atsBoost`. Appliqué aperçu (PreviewPane) ET export (api/convert via `boostKeywords[]`, Toolbar transmet). Toggle dans AtsPanel (port `_toggleAtsBoost`, mots-clés de l'analyse locale/IA). Tests : 4 unit + e2e (span 1px dans l'aperçu). 125 tests verts + 8 e2e, tsc/lint/build OK.
 - 2026-06-24 — Phase 5 étape 4 : panneau ATS — `lib/ats/score.ts` (port fidèle extractKeywords/detectSections/analyzeAts : stop-words FR+EN, composés, score ratio, pluriels >4, boostKeywords) + `score.test.ts` (8) ; `AtsPanel.tsx` (analyse locale instantanée + bouton IA `/api/ats-score`) branché Toolbar (CV only) + CSS ; e2e `ats.spec.ts` (score local + IA mockée 82). Booster invisible → étape suivante. 121 tests verts + 7 e2e, tsc/lint/build OK.
+- 2026-06-24 — Phase 5 étape 7 : import texte→HTML streaming — lecteur SSE `streamSse` dans `lib/ai/client.ts` (port fidèle `_readSseStream`/`streamToMonaco` : `data:`/`[DONE]`/`[ERROR]`, buffer inter-chunks, accumulation+callback) + `ImportTextModal.tsx` (textarea → `streamSse('/api/text-to-html')` → setHtml en direct, puis CSS sobre/vide selon doc_type) branché Toolbar (bouton « Importer un texte ») + CSS `.import-modal`. Tests : 3 unit `streamSse` + e2e `import-text.spec.ts` (flux SSE mocké). 128 tests + 10 e2e, tsc/lint/build OK.
 - 2026-06-24 — Phase 5 étape 6 : pack candidature — `PackModal.tsx` (CV-only, photo strippée `stripBase64ForChat`, POST `/api/generate-pack` cv_html/cv_css/job_desc/company/role, aperçu lettre iframe `mergeHtml` + email, copier presse-papier + insertion éditeur type Lettre via setDocType+setHtml/setCss) branché Toolbar + CSS `.pack-modal`. Snapshot → Phase 6. e2e `pack.spec.ts` (lettre+email, cv_html transmis, insertion→Lettre). 125 tests + 9 e2e, tsc/lint/build OK. (Note : `editor.spec.ts` « basculer » flaky en parallèle, passe en isolé.)
 - 2026-06-24 — Phase 5 étape 3 : chat éditeur `components/modals/ChatPanel.tsx` (panneau latéral, port de `_sendChat`/`_appendProposals` : historique, strip/restore base64 flux chat, `/api/editor-chat` avec `mergeHtml(strippedHtml, css)`, propositions Prévisualiser/Appliquer/Rejeter) ; `previewOverride` ajouté au store + honoré par PreviewPane ; `extractCss` (inverse de mergeHtml) pour l'application en mode expert ; bouton « Assistant IA » Toolbar + CSS. Tests `extractCss` (3) + e2e `chat.spec.ts` (réponse+proposition, application→aperçu, html sans data:image/). 113 tests verts + 6 e2e, tsc/lint/build OK. Snapshot avant-chat → Phase 6.

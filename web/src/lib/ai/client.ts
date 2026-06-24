@@ -46,3 +46,60 @@ export async function postJson<T>(
   }
   return resp.json() as Promise<T>;
 }
+
+/**
+ * POST vers une route IA en **streaming SSE**. Lit le flux `data: <chunk JSON>` / `[DONE]` /
+ * `[ERROR] <msg>` (format `sseFromGenerator`), accumule les morceaux et appelle `onChunk`
+ * avec le texte cumulé à chaque morceau. Renvoie le texte final. Port de `_readSseStream` +
+ * `streamToMonaco` (app.js l.1999-2037).
+ */
+export async function streamSse(
+  url: string,
+  body: unknown,
+  onChunk: (accumulated: string) => void,
+  signal?: AbortSignal,
+): Promise<string> {
+  const resp = await fetch(url, {
+    method: "POST",
+    signal,
+    headers: { "Content-Type": "application/json", ...getApiHeaders() },
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok || !resp.body) {
+    let msg = "Erreur serveur";
+    try {
+      msg = (await resp.json()).error || msg;
+    } catch {
+      /* corps non-JSON : on garde le message générique */
+    }
+    throw new Error(msg);
+  }
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = "";
+  let accumulated = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    const lines = buf.split("\n");
+    buf = lines.pop() ?? "";
+    for (const line of lines) {
+      if (!line.startsWith("data: ")) continue;
+      const data = line.slice(6);
+      if (data === "[DONE]") return accumulated;
+      if (data.startsWith("[ERROR]")) {
+        throw new Error(data.slice(8).trim() || "Erreur serveur");
+      }
+      try {
+        const chunk = JSON.parse(data) as string;
+        accumulated += chunk;
+        onChunk(accumulated);
+      } catch {
+        /* ligne partielle ou non-JSON : ignorée (fidèle à l'original) */
+      }
+    }
+  }
+  return accumulated;
+}

@@ -1,7 +1,26 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { getUserApiKey, getApiHeaders, postJson } from "./client";
+import { getUserApiKey, getApiHeaders, postJson, streamSse } from "./client";
 
 afterEach(() => vi.unstubAllGlobals());
+
+/** Construit un corps de réponse SSE lisible (ReadableStream) à partir de lignes brutes. */
+function sseBody(raw: string): ReadableStream<Uint8Array> {
+  const bytes = new TextEncoder().encode(raw);
+  let sent = false;
+  return new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (sent) {
+        controller.close();
+        return;
+      }
+      // Découpe en deux morceaux pour exercer le buffer inter-chunks.
+      const mid = Math.floor(bytes.length / 2);
+      controller.enqueue(bytes.slice(0, mid));
+      controller.enqueue(bytes.slice(mid));
+      sent = true;
+    },
+  });
+}
 
 describe("getUserApiKey / getApiHeaders", () => {
   it("renvoie vide sans localStorage (SSR)", () => {
@@ -61,5 +80,39 @@ describe("postJson", () => {
       },
     }));
     await expect(postJson("/api/x", {})).rejects.toThrow("Erreur serveur");
+  });
+});
+
+describe("streamSse", () => {
+  it("accumule les morceaux, appelle onChunk et renvoie le texte final", async () => {
+    const raw =
+      `data: ${JSON.stringify("<h1>")}\n\n` +
+      `data: ${JSON.stringify("Bonjour")}\n\n` +
+      `data: ${JSON.stringify("</h1>")}\n\n` +
+      "data: [DONE]\n\n";
+    vi.stubGlobal("fetch", async () => ({ ok: true, body: sseBody(raw) }));
+
+    const chunks: string[] = [];
+    const final = await streamSse("/api/text-to-html", { text: "x" }, (acc) =>
+      chunks.push(acc),
+    );
+
+    expect(final).toBe("<h1>Bonjour</h1>");
+    expect(chunks).toEqual(["<h1>", "<h1>Bonjour", "<h1>Bonjour</h1>"]);
+  });
+
+  it("lève sur [ERROR] avec le message du flux", async () => {
+    const raw = `data: ${JSON.stringify("partiel")}\n\n` + "data: [ERROR] Quota épuisé\n\n";
+    vi.stubGlobal("fetch", async () => ({ ok: true, body: sseBody(raw) }));
+    await expect(streamSse("/api/x", {}, () => {})).rejects.toThrow("Quota épuisé");
+  });
+
+  it("lève avec le message d'erreur serveur si la réponse n'est pas ok", async () => {
+    vi.stubGlobal("fetch", async () => ({
+      ok: false,
+      body: null,
+      json: async () => ({ error: "Texte vide." }),
+    }));
+    await expect(streamSse("/api/x", {}, () => {})).rejects.toThrow("Texte vide.");
   });
 });

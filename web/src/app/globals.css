@@ -183,6 +183,10 @@ a:hover { text-decoration: underline; }
 .tailor-levels { display: flex; gap: 6px; flex-wrap: wrap; }
 .tailor-level { flex: 1; min-width: 88px; text-align: center; }
 
+/* ---- Modale Import texte ---- */
+.import-modal { max-width: 600px; }
+.import-hint { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+
 /* ---- Modale Pack candidature ---- */
 .pack-modal { max-width: 620px; max-height: 90vh; overflow-y: auto; }
 .pack-meta { display: flex; gap: 8px; margin-top: 8px; }

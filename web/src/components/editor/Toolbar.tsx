@@ -9,6 +9,7 @@ import TailorModal from "@/components/modals/TailorModal";
 import ChatPanel from "@/components/modals/ChatPanel";
 import AtsPanel from "@/components/modals/AtsPanel";
 import PackModal from "@/components/modals/PackModal";
+import ImportTextModal from "@/components/modals/ImportTextModal";
 
 const TEMPLATE_LABELS: Record<TemplateId, string> = {
   sobre: "Sobre",
@@ -32,6 +33,7 @@ export default function Toolbar() {
   const [chatOpen, setChatOpen] = useState(false);
   const [atsOpen, setAtsOpen] = useState(false);
   const [packOpen, setPackOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   const onConvert = async () => {
     const { html, css, json, atsBoost } = useDocStore.getState();
@@ -124,6 +126,14 @@ export default function Toolbar() {
       ) : null}
 
       <button
+        className="form-btn-mini toolbar-import"
+        type="button"
+        onClick={() => setImportOpen(true)}
+      >
+        Importer un texte
+      </button>
+
+      <button
         className="form-btn-mini toolbar-chat"
         type="button"
         onClick={() => setChatOpen(true)}
@@ -143,6 +153,7 @@ export default function Toolbar() {
       <TailorModal open={tailorOpen} onClose={() => setTailorOpen(false)} />
       <AtsPanel open={atsOpen} onClose={() => setAtsOpen(false)} />
       <PackModal open={packOpen} onClose={() => setPackOpen(false)} />
+      <ImportTextModal open={importOpen} onClose={() => setImportOpen(false)} />
       <ChatPanel open={chatOpen} onClose={() => setChatOpen(false)} />
     </div>
   );
