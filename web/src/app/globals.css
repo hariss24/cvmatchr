@@ -183,6 +183,54 @@ a:hover { text-decoration: underline; }
 .tailor-levels { display: flex; gap: 6px; flex-wrap: wrap; }
 .tailor-level { flex: 1; min-width: 88px; text-align: center; }
 
+/* ---- Panneau chat IA ---- */
+.chat-overlay {
+  position: fixed; inset: 0; z-index: 105; background: rgba(0,0,0,0.35);
+  opacity: 0; visibility: hidden; transition: opacity 200ms, visibility 200ms;
+}
+.chat-overlay.open { opacity: 1; visibility: visible; }
+.chat-panel {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 106;
+  width: min(420px, 92vw); background: var(--bg); box-shadow: var(--neu-raised-lg);
+  display: flex; flex-direction: column; gap: 12px; padding: 16px;
+  transform: translateX(105%); transition: transform 220ms ease;
+}
+.chat-panel.open { transform: translateX(0); }
+.chat-panel__head { display: flex; align-items: center; justify-content: space-between; }
+.chat-panel__title { font-size: 15px; font-weight: 800; color: var(--text); }
+.chat-messages {
+  flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
+  padding: 4px; border-radius: 12px; box-shadow: var(--neu-inset);
+}
+.chat-empty { color: var(--muted); font-size: 13px; padding: 12px; margin: 0; }
+.chat-message { display: flex; }
+.chat-message--user { justify-content: flex-end; }
+.chat-message--assistant { justify-content: flex-start; }
+.chat-bubble {
+  max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 13px;
+  background: var(--bg); color: var(--text); box-shadow: var(--neu-raised-sm); white-space: pre-wrap;
+}
+.chat-message--user .chat-bubble { box-shadow: var(--neu-inset); }
+.chat-loading { color: var(--muted); font-size: 12px; font-style: italic; padding: 4px 8px; }
+.chat-proposal {
+  display: flex; flex-direction: column; gap: 6px; padding: 10px;
+  border-radius: 12px; background: var(--bg); box-shadow: var(--neu-raised-sm);
+}
+.proposal-title { font-size: 13px; font-weight: 700; color: var(--orange); }
+.proposal-summary { font-size: 12px; color: var(--text); }
+.proposal-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.proposal-btn {
+  background: var(--bg); color: var(--text); border: none; border-radius: 8px;
+  padding: 5px 10px; font-size: 12px; cursor: pointer; box-shadow: var(--neu-raised-sm);
+}
+.proposal-btn:hover:not(:disabled) { box-shadow: var(--neu-raised); }
+.proposal-btn:disabled { opacity: 0.5; cursor: default; }
+.proposal-apply { color: var(--orange); }
+.proposal--applied { box-shadow: var(--neu-inset); opacity: 0.7; }
+.proposal--rejected { opacity: 0.5; }
+.chat-input-row { display: flex; gap: 8px; align-items: flex-end; }
+.chat-input { flex: 1; }
+
 /* ---- Onglets éditeur ---- */
 .tabs { display: flex; gap: 4px; padding: 4px; background: var(--bg); border-radius: 12px; box-shadow: var(--neu-inset); }
 .tab {

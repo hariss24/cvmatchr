@@ -17,16 +17,20 @@ const A4_H = 1122;
 export default function PreviewPane() {
   const html = useDocStore((s) => s.html);
   const css = useDocStore((s) => s.css);
+  const previewOverride = useDocStore((s) => s.previewOverride);
 
   const [srcDoc, setSrcDoc] = useState("");
   const [pages, setPages] = useState(1);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Debounce de la fusion HTML/CSS (port de schedulePreview).
+  // Une proposition du chat IA (previewOverride) court-circuite l'aperçu live, sans debounce.
   useEffect(() => {
-    const id = setTimeout(() => setSrcDoc(mergeHtml(html, css)), 150);
+    const value = previewOverride !== null ? previewOverride : mergeHtml(html, css);
+    const delay = previewOverride !== null ? 0 : 150;
+    const id = setTimeout(() => setSrcDoc(value), delay);
     return () => clearTimeout(id);
-  }, [html, css]);
+  }, [html, css, previewOverride]);
 
   const measurePages = () => {
     try {

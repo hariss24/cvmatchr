@@ -1,0 +1,240 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useDocStore } from "@/state/docStore";
+import { postJson } from "@/lib/ai/client";
+import { mergeHtml, extractCss } from "@/lib/resume/mergeHtml";
+import { stripBase64ForChat, restoreBase64InProposals } from "@/lib/ai/base64";
+
+/**
+ * Panneau latéral « Assistant IA » : chat éditeur. Port de `_sendChat`/`_appendProposals` (app.js).
+ *
+ * Flux métier :
+ * - la photo base64 est retirée du HTML avant l'appel (`stripBase64ForChat`) et restaurée dans les
+ *   propositions au retour (`restoreBase64InProposals`) — jamais envoyée à l'IA ;
+ * - chaque proposition se prévisualise (override transitoire de l'aperçu), s'applique (HTML/CSS du
+ *   store, mode expert) ou se rejette.
+ *
+ * Le snapshot « Avant chat IA » avant application est reporté en Phase 6 (storage).
+ */
+
+type Proposal = { id: string; title: string; summary: string; html: string; css: string };
+type Item =
+  | { kind: "msg"; role: "user" | "assistant"; text: string }
+  | { kind: "proposal"; data: Proposal; status: "open" | "applied" | "rejected" };
+type ChatMessage = { role: "user" | "assistant"; content: string };
+
+export default function ChatPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [items, setItems] = useState<Item[]>([]);
+  const [input, setInput] = useState("");
+  const [busy, setBusy] = useState(false);
+  const historyRef = useRef<ChatMessage[]>([]);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  // Échap ferme le panneau et annule un éventuel aperçu transitoire.
+  useEffect(() => {
+    if (!open) return;
+    inputRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // Auto-scroll en bas à chaque nouvel item.
+  useEffect(() => {
+    if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
+  }, [items]);
+
+  function handleClose() {
+    useDocStore.getState().setPreviewOverride(null);
+    onClose();
+  }
+
+  async function send() {
+    const text = input.trim();
+    if (!text || busy) return;
+    setInput("");
+
+    const { html, css, docType } = useDocStore.getState();
+
+    setItems((prev) => [...prev, { kind: "msg", role: "user", text }]);
+    historyRef.current.push({ role: "user", content: text });
+
+    // Photo retirée avant l'appel ; mémorisée pour restauration dans les propositions.
+    const { html: strippedHtml, data: photoData } = stripBase64ForChat(html);
+    const payload = mergeHtml(strippedHtml, css);
+
+    setBusy(true);
+    try {
+      const res = await postJson<{ reply: string; proposals?: Proposal[] }>("/api/editor-chat", {
+        messages: historyRef.current,
+        html: payload,
+        css: "",
+        doc_type: docType,
+      });
+      setItems((prev) => [...prev, { kind: "msg", role: "assistant", text: res.reply }]);
+      historyRef.current.push({ role: "assistant", content: res.reply });
+
+      const restored = restoreBase64InProposals(res.proposals ?? [], photoData);
+      if (restored.length) {
+        setItems((prev) => [
+          ...prev,
+          ...restored.map(
+            (data): Item => ({ kind: "proposal", data, status: "open" }),
+          ),
+        ]);
+      }
+    } catch (err) {
+      // Échec : on retire le tour utilisateur de l'historique envoyé (fidèle à l'original).
+      historyRef.current.pop();
+      setItems((prev) => [
+        ...prev,
+        {
+          kind: "msg",
+          role: "assistant",
+          text: err instanceof Error ? err.message : "Erreur inconnue.",
+        },
+      ]);
+    } finally {
+      setBusy(false);
+      inputRef.current?.focus();
+    }
+  }
+
+  function previewProposal(p: Proposal) {
+    useDocStore.getState().setPreviewOverride(mergeHtml(p.html, p.css));
+  }
+
+  function applyProposal(idx: number, p: Proposal) {
+    const { setHtml, setCss, setPreviewOverride } = useDocStore.getState();
+    const { html: applyHtml, css: applyCss } = extractCss(p.html || "");
+    setHtml(applyHtml);
+    setCss(applyCss !== null ? applyCss : p.css || "");
+    setPreviewOverride(null);
+    setItems((prev) =>
+      prev.map((it, i) =>
+        i === idx && it.kind === "proposal" ? { ...it, status: "applied" } : it,
+      ),
+    );
+  }
+
+  function rejectProposal(idx: number) {
+    useDocStore.getState().setPreviewOverride(null);
+    setItems((prev) =>
+      prev.map((it, i) =>
+        i === idx && it.kind === "proposal" ? { ...it, status: "rejected" } : it,
+      ),
+    );
+  }
+
+  return (
+    <>
+      <div
+        className={`chat-overlay${open ? " open" : ""}`}
+        role="presentation"
+        onClick={handleClose}
+      />
+      <aside
+        className={`chat-panel${open ? " open" : ""}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Assistant IA"
+        aria-hidden={!open}
+      >
+        <div className="chat-panel__head">
+          <span className="chat-panel__title">Assistant IA</span>
+          <button
+            type="button"
+            className="form-btn-mini"
+            onClick={handleClose}
+            aria-label="Fermer l'assistant"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="chat-messages" ref={listRef}>
+          {items.length === 0 ? (
+            <p className="chat-empty">
+              Décris la modification souhaitée (mise en page, ton, contenu…). L&apos;IA propose des
+              variantes à prévisualiser avant de les appliquer.
+            </p>
+          ) : null}
+          {items.map((it, i) =>
+            it.kind === "msg" ? (
+              <div key={i} className={`chat-message chat-message--${it.role}`}>
+                <div className="chat-bubble">{it.text}</div>
+              </div>
+            ) : (
+              <div
+                key={i}
+                className={`chat-proposal${
+                  it.status === "applied"
+                    ? " proposal--applied"
+                    : it.status === "rejected"
+                      ? " proposal--rejected"
+                      : ""
+                }`}
+              >
+                <span className="proposal-title">{it.data.title}</span>
+                <span className="proposal-summary">{it.data.summary}</span>
+                <div className="proposal-actions">
+                  <button
+                    type="button"
+                    className="proposal-btn"
+                    disabled={it.status !== "open"}
+                    onClick={() => previewProposal(it.data)}
+                  >
+                    Prévisualiser
+                  </button>
+                  <button
+                    type="button"
+                    className="proposal-btn proposal-apply"
+                    disabled={it.status !== "open"}
+                    onClick={() => applyProposal(i, it.data)}
+                  >
+                    Appliquer
+                  </button>
+                  <button
+                    type="button"
+                    className="proposal-btn"
+                    disabled={it.status !== "open"}
+                    onClick={() => rejectProposal(i)}
+                  >
+                    Rejeter
+                  </button>
+                </div>
+              </div>
+            ),
+          )}
+          {busy ? <div className="chat-message chat-message--assistant chat-loading">L&apos;IA génère une proposition…</div> : null}
+        </div>
+
+        <div className="chat-input-row">
+          <textarea
+            ref={inputRef}
+            className="form-textarea chat-input"
+            rows={2}
+            placeholder="Votre demande…"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                send();
+              }
+            }}
+            disabled={busy}
+          />
+          <button type="button" className="go" onClick={send} disabled={busy}>
+            {busy ? "…" : "Envoyer"}
+          </button>
+        </div>
+      </aside>
+    </>
+  );
+}

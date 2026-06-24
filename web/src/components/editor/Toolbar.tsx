@@ -6,6 +6,7 @@ import { TEMPLATE_IDS, type TemplateId } from "@/lib/resume/templates";
 import type { DocType, Resume } from "@/lib/resume/schema";
 import { toast, uiAlert } from "@/state/uiStore";
 import TailorModal from "@/components/modals/TailorModal";
+import ChatPanel from "@/components/modals/ChatPanel";
 
 const TEMPLATE_LABELS: Record<TemplateId, string> = {
   sobre: "Sobre",
@@ -26,6 +27,7 @@ export default function Toolbar() {
   const setTemplate = useDocStore((s) => s.setTemplate);
   const [busy, setBusy] = useState(false);
   const [tailorOpen, setTailorOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
 
   const onConvert = async () => {
     const { html, css, json } = useDocStore.getState();
@@ -97,6 +99,14 @@ export default function Toolbar() {
       ) : null}
 
       <button
+        className="form-btn-mini toolbar-chat"
+        type="button"
+        onClick={() => setChatOpen(true)}
+      >
+        Assistant IA
+      </button>
+
+      <button
         className="go toolbar-cta"
         type="button"
         onClick={onConvert}
@@ -106,6 +116,7 @@ export default function Toolbar() {
       </button>
 
       <TailorModal open={tailorOpen} onClose={() => setTailorOpen(false)} />
+      <ChatPanel open={chatOpen} onClose={() => setChatOpen(false)} />
     </div>
   );
 }

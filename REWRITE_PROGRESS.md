@@ -32,17 +32,13 @@
 ---
 
 ## Prochaine action
-➡️ **Phase 5 (suite) — chat éditeur + ATS**. `base64.ts`, `client.ts` et `TailorModal` sont faits
-(étapes 1-2). Étapes suivantes au choix :
-1. **Chat éditeur** (`components/modals/ChatPanel.tsx` ou panneau latéral) : appelle `/api/editor-chat`
-   avec `_buildTailorPayload(stripBase64ForChat(html), css)` → propositions Prévisualiser/Appliquer/Rejeter
-   (`restoreBase64InProposals`), applique via le store (HTML/CSS en mode expert). C'est ici que `base64.ts`
-   flux **chat** sert enfin.
-2. **Panneau ATS** (`/api/ats-score`) : score + mots-clés manquants ; éventuel booster mots-clés invisibles.
-3. **Pack candidature** (`/api/generate-pack`) : lettre + email.
-4. **Imports texte/PDF** : nécessite un lecteur **SSE** (à ajouter dans `client.ts`) pour `/api/text-to-html`,
+➡️ **Phase 5 (suite) — Panneau ATS**. `base64.ts`, `client.ts`, `TailorModal` et **chat éditeur** sont
+faits (étapes 1-3). Étapes suivantes au choix :
+1. **Panneau ATS** (`/api/ats-score`) : score + mots-clés manquants ; éventuel booster mots-clés invisibles.
+2. **Pack candidature** (`/api/generate-pack`) : lettre + email.
+3. **Imports texte/PDF** : nécessite un lecteur **SSE** (à ajouter dans `client.ts`) pour `/api/text-to-html`,
    et le rendu PDF→PNG (pdf.js) pour `/api/pdf-to-resume`.
-Suggestion d'ordre : chat (réutilise base64) → ATS → pack → imports. **Rappel : `extract-job` → Phase 7.**
+Suggestion d'ordre : ATS → pack → imports. **Rappel : `extract-job` → Phase 7.**
 ⚠️ `cd web` avant npm. Tests : Vitest (logique) + Playwright `page.route` (flux).
 
 ## Décisions de scoping (Phase 3)
@@ -147,6 +143,17 @@ Suggestion d'ordre : chat (réutilise base64) → ATS → pack → imports. **Ra
       + CSS `.tailor-modal`/`.tailor-levels`. Test e2e `tests/e2e/tailor.spec.ts` (`/api/tailor-resume`
       mocké : aperçu mis à jour, modale fermée, **photo jamais transmise au serveur**). CV Maître reporté
       Phase 6 (storage). 110 tests verts + 5 e2e, tsc/lint/build OK.
+      ✅ étape 3 : **Chat éditeur** `components/modals/ChatPanel.tsx` (panneau latéral) — port de
+      `_sendChat`/`_appendProposals` : historique de conversation, strip photo avant l'appel
+      (`stripBase64ForChat`) + restauration dans les propositions (`restoreBase64InProposals`, flux
+      chat enfin utilisé), appel `/api/editor-chat` avec payload `mergeHtml(strippedHtml, css)`,
+      propositions Prévisualiser/Appliquer/Rejeter. Prévisualisation transitoire via nouveau
+      `previewOverride` du store (PreviewPane l'affiche sans debounce, retour à l'aperçu live au
+      reject/close). Application = `extractCss` (inverse de `mergeHtml`, ajouté à `mergeHtml.ts`) →
+      `setHtml`/`setCss` (mode expert). Bouton « Assistant IA » dans Toolbar + CSS panneau néo.
+      Snapshot « Avant chat IA » reporté Phase 6 (storage). Tests : `extractCss` (3 unit) + e2e
+      `chat.spec.ts` (backend mocké : réponse+proposition affichées, application→aperçu, **html
+      envoyé sans `data:image/`**). 113 tests verts + 6 e2e, tsc/lint/build OK.
 - [ ] **Phase 6 — Persistance navigateur** : `lib/storage/` (Dexie : snapshots max 20, brouillons,
       historique), page `/history`. Vérif : snapshot→restauration fidèle.
 - [ ] **Phase 7 — Sécurité** : scraper porté (anti-SSRF + Jina fallback), auth remote (middleware),
@@ -182,3 +189,4 @@ _(aucun pour l'instant)_
 - 2026-06-23 — **Phase 4 terminée** : `api/pdf-to-resume` (port `pdf_to_resume` + `SYSTEM_PDF_TO_RESUME` fidèle à ai_engine.py : décodage base64→Uint8Array, `streamCompletion({images})` Gemini-only, parseAiJson→normalizeResume, max 10 pages, 400/413/502). Test du cas erreur corrigé (mock `async function*` fidèle au vrai générateur qui lève au 1er `next()`, pas à l'appel — évitait un rejet parasite vitest). 96 tests verts, tsc/lint/build OK, route enregistrée.
 - 2026-06-23 — Phase 5 étape 1 : `lib/ai/base64.ts` (port fidèle de `app.js` strip/restore base64 photo — flux tailor placeholder indexé + flux chat placeholder unique, fonctions pures sans état global) + `base64.test.ts` round-trip (8 tests). 104 tests verts, tsc/lint OK.
 - 2026-06-24 — Phase 5 étape 2 : `lib/ai/client.ts` (getApiHeaders/postJson, port de app.js userApiKey+X-Api-Key, SSR-safe) + `client.test.ts` (6 tests) ; modale `TailorModal` (4 niveaux, strip/restore photo client, normalisation + garde anti-vidage, setJson→aperçu) branchée dans Toolbar (bouton CV only) + CSS ; e2e `tailor.spec.ts` (backend mocké : aperçu MAJ, photo jamais transmise). CV Maître → Phase 6. 110 tests verts + 5 e2e, tsc/lint/build OK.
+- 2026-06-24 — Phase 5 étape 3 : chat éditeur `components/modals/ChatPanel.tsx` (panneau latéral, port de `_sendChat`/`_appendProposals` : historique, strip/restore base64 flux chat, `/api/editor-chat` avec `mergeHtml(strippedHtml, css)`, propositions Prévisualiser/Appliquer/Rejeter) ; `previewOverride` ajouté au store + honoré par PreviewPane ; `extractCss` (inverse de mergeHtml) pour l'application en mode expert ; bouton « Assistant IA » Toolbar + CSS. Tests `extractCss` (3) + e2e `chat.spec.ts` (réponse+proposition, application→aperçu, html sans data:image/). 113 tests verts + 6 e2e, tsc/lint/build OK. Snapshot avant-chat → Phase 6.

@@ -26,6 +26,8 @@ export type Doc = {
   json: DocData;
   html: string;
   css: string;
+  /** Aperçu transitoire (proposition du chat IA) : si non null, l'aperçu l'affiche au lieu du document. */
+  previewOverride: string | null;
 };
 
 /** Rend le HTML d'un document selon son type. */
@@ -47,6 +49,7 @@ export type DocStore = Doc & {
   setCss: (css: string) => void;
   setDocType: (docType: DocType) => void;
   setTemplate: (templateId: TemplateId) => void;
+  setPreviewOverride: (html: string | null) => void;
 };
 
 const INITIAL_TEMPLATE: TemplateId = "sobre";
@@ -57,10 +60,12 @@ export const useDocStore = create<DocStore>((set, get) => ({
   json: structuredClone(DEFAULT_RESUME),
   html: renderResume(DEFAULT_RESUME),
   css: TEMPLATES[INITIAL_TEMPLATE].css,
+  previewOverride: null,
 
   setJson: (json) => set({ json, html: renderDoc(get().docType, json) }),
   setHtml: (html) => set({ html }),
   setCss: (css) => set({ css }),
+  setPreviewOverride: (previewOverride) => set({ previewOverride }),
 
   setDocType: (docType) => {
     const json = defaultJson(docType);
