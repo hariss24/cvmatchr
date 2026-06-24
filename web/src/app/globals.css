@@ -183,9 +183,13 @@ a:hover { text-decoration: underline; }
 .tailor-levels { display: flex; gap: 6px; flex-wrap: wrap; }
 .tailor-level { flex: 1; min-width: 88px; text-align: center; }
 
-/* ---- Modale Import texte ---- */
+/* ---- Modale Import texte / PDF ---- */
 .import-modal { max-width: 600px; }
 .import-hint { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.import-file { width: 100%; margin: 6px 0; font-size: 13px; color: var(--text); }
+.import-status { font-size: 13px; margin-top: 6px; }
+.import-status.status-busy { color: var(--orange); }
+.import-status.status-err { color: var(--error); }
 
 /* ---- Modale Pack candidature ---- */
 .pack-modal { max-width: 620px; max-height: 90vh; overflow-y: auto; }

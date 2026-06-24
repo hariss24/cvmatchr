@@ -10,6 +10,7 @@ import ChatPanel from "@/components/modals/ChatPanel";
 import AtsPanel from "@/components/modals/AtsPanel";
 import PackModal from "@/components/modals/PackModal";
 import ImportTextModal from "@/components/modals/ImportTextModal";
+import ImportPdfModal from "@/components/modals/ImportPdfModal";
 
 const TEMPLATE_LABELS: Record<TemplateId, string> = {
   sobre: "Sobre",
@@ -34,6 +35,7 @@ export default function Toolbar() {
   const [atsOpen, setAtsOpen] = useState(false);
   const [packOpen, setPackOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [pdfOpen, setPdfOpen] = useState(false);
 
   const onConvert = async () => {
     const { html, css, json, atsBoost } = useDocStore.getState();
@@ -133,6 +135,16 @@ export default function Toolbar() {
         Importer un texte
       </button>
 
+      {docType === "CV" ? (
+        <button
+          className="form-btn-mini toolbar-import-pdf"
+          type="button"
+          onClick={() => setPdfOpen(true)}
+        >
+          Importer un PDF
+        </button>
+      ) : null}
+
       <button
         className="form-btn-mini toolbar-chat"
         type="button"
@@ -154,6 +166,7 @@ export default function Toolbar() {
       <AtsPanel open={atsOpen} onClose={() => setAtsOpen(false)} />
       <PackModal open={packOpen} onClose={() => setPackOpen(false)} />
       <ImportTextModal open={importOpen} onClose={() => setImportOpen(false)} />
+      <ImportPdfModal open={pdfOpen} onClose={() => setPdfOpen(false)} />
       <ChatPanel open={chatOpen} onClose={() => setChatOpen(false)} />
     </div>
   );

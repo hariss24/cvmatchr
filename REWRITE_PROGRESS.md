@@ -32,21 +32,16 @@
 ---
 
 ## Prochaine action
-➡️ **Phase 5 (suite) — Import PDF→CV JSON**. `base64.ts`, `client.ts` (+ lecteur **SSE** `streamSse`),
-`TailorModal`, chat éditeur, panneau ATS + booster, pack candidature, **import texte→HTML** sont faits
-(étapes 1-7). Étape suivante :
-1. **Import PDF→CV JSON** (`/api/pdf-to-resume`) : rendu PDF→PNG côté client via **pdf.js**
-   (`pdfjs-dist` à installer ; worker à configurer pour Next/Turbopack), conversion de chaque page en
-   image base64 (`canvas.toDataURL`), envoi `{images: [...], doc_type}` → la route renvoie un CV JSON
-   normalisé (non-streaming : `parseAiJson`+`normalizeResume`). Modale : input fichier PDF → aperçu/spinner
-   → `setJson(resume)`. ⚠️ Photo jamais envoyée à l'IA (mais ici ce sont les **pages rendues** qui partent ;
-   le CV JSON retourné n'a pas de photo → OK). Max 10 pages (déjà borné côté route).
-   Voir flux d'origine : `app.js` (chercher `pdf-to-resume` / `pdfjsLib` / `getDocument`).
-**Rappel : `extract-job` → Phase 7.** Après PDF : diff modal (étape finale Phase 5) puis Phase 6.
+➡️ **Phase 5 (fin) — Modale diff**. Tous les imports/flux IA sont faits (étapes 1-8 : base64, client+SSE,
+TailorModal, chat, ATS+booster, pack, import texte, import PDF). Dernière étape de la phase :
+1. **Modale diff** (avant/après) : comparaison visuelle des modifications IA avant application. Voir le
+   plan `kind-prancing-wand.md` (Phase 5, « diff modal ») et le flux d'origine dans `app.js` (chercher
+   `diff` / `_renderDiff` / modale de comparaison). Si la fonctionnalité n'existe pas clairement dans
+   l'app d'origine ou est trop couplée au storage → la **reporter** et clôturer la Phase 5, passer à la
+   **Phase 6** (persistance Dexie : snapshots, brouillons, CV Maître, page `/history`).
+**Rappel : `extract-job` → Phase 7.**
 ⚠️ `cd web` avant npm (le répertoire courant est souvent la **racine** après le `cd ..` du commit : vérifier
 le nom de paquet `web@0.1.0` dans la sortie npm). Tests : Vitest (logique) + Playwright `page.route` (flux).
-Note : `editor.spec.ts` « basculer CV → Lettre » est **flaky** en run parallèle (timeout 5 s, compilation
-à froid) — passe en isolé, ne pas confondre avec une régression.
 
 ## Décisions de scoping (Phase 3)
 - **Historique Dexie** : le bouton PDF télécharge directement (`Blob` + `<a download>`). L'enregistrement
@@ -193,6 +188,16 @@ Note : `editor.spec.ts` « basculer CV → Lettre » est **flaky** en run parall
       Toolbar (CV + Lettre) + CSS `.import-modal`. Tests : 3 unit `streamSse` (accumulation, [ERROR], !ok)
       + e2e `import-text.spec.ts` (flux SSE mocké : HTML affiché dans l'aperçu, texte+doc_type transmis).
       128 tests + 10 e2e, tsc/lint/build OK.
+      ✅ étape 8 : **Import PDF→CV JSON** — `pdfjs-dist` 6.0 installé, worker copié dans `public/`
+      (`pdf.worker.min.mjs`, référencé en URL absolue `/pdf.worker.min.mjs` — pas de magie de bundler).
+      `lib/pdf/pdfToImages.ts` (rendu **navigateur** : `import('pdfjs-dist')` **dynamique** car pdf.js
+      touche `DOMMatrix` dès l'éval du module → casserait le prerender serveur ; chaque page → canvas
+      `toDataURL('image/png')`, max 10 pages). `components/modals/ImportPdfModal.tsx` (input fichier →
+      `pdfToImages` → POST `/api/pdf-to-resume` {images} → `normalizeResume` + garde `isEmptyResume` →
+      `setJson`). Bouton « Importer un PDF » (CV only) + CSS. `public/**` exclu d'ESLint (asset vendoré).
+      e2e `import-pdf.spec.ts` (fixture PDF réel `tests/e2e/fixtures/sample.pdf` généré, pdf.js rend dans
+      le navigateur : images PNG base64 transmises, CV mocké peuple l'aperçu). **Phase 5 = quasi-terminée**
+      (reste diff modal/éval). 128 tests + 11 e2e, tsc/lint/build OK.
 - [ ] **Phase 6 — Persistance navigateur** : `lib/storage/` (Dexie : snapshots max 20, brouillons,
       historique), page `/history`. Vérif : snapshot→restauration fidèle.
 - [ ] **Phase 7 — Sécurité** : scraper porté (anti-SSRF + Jina fallback), auth remote (middleware),
@@ -230,6 +235,7 @@ _(aucun pour l'instant)_
 - 2026-06-24 — Phase 5 étape 2 : `lib/ai/client.ts` (getApiHeaders/postJson, port de app.js userApiKey+X-Api-Key, SSR-safe) + `client.test.ts` (6 tests) ; modale `TailorModal` (4 niveaux, strip/restore photo client, normalisation + garde anti-vidage, setJson→aperçu) branchée dans Toolbar (bouton CV only) + CSS ; e2e `tailor.spec.ts` (backend mocké : aperçu MAJ, photo jamais transmise). CV Maître → Phase 6. 110 tests verts + 5 e2e, tsc/lint/build OK.
 - 2026-06-24 — Phase 5 étape 5 : booster ATS invisible — `applyAtsBoost` (port fidèle injection span 1px app.js l.606-614) + état store `atsBoost`. Appliqué aperçu (PreviewPane) ET export (api/convert via `boostKeywords[]`, Toolbar transmet). Toggle dans AtsPanel (port `_toggleAtsBoost`, mots-clés de l'analyse locale/IA). Tests : 4 unit + e2e (span 1px dans l'aperçu). 125 tests verts + 8 e2e, tsc/lint/build OK.
 - 2026-06-24 — Phase 5 étape 4 : panneau ATS — `lib/ats/score.ts` (port fidèle extractKeywords/detectSections/analyzeAts : stop-words FR+EN, composés, score ratio, pluriels >4, boostKeywords) + `score.test.ts` (8) ; `AtsPanel.tsx` (analyse locale instantanée + bouton IA `/api/ats-score`) branché Toolbar (CV only) + CSS ; e2e `ats.spec.ts` (score local + IA mockée 82). Booster invisible → étape suivante. 121 tests verts + 7 e2e, tsc/lint/build OK.
+- 2026-06-24 — Phase 5 étape 8 : import PDF→CV JSON — `pdfjs-dist` 6.0, worker dans `public/` (URL absolue `/pdf.worker.min.mjs`), `lib/pdf/pdfToImages.ts` (rendu navigateur, `import('pdfjs-dist')` dynamique pour éviter `DOMMatrix` au prerender, pages→canvas→PNG base64, max 10), `ImportPdfModal.tsx` (POST `/api/pdf-to-resume` → `normalizeResume`+garde `isEmptyResume`→`setJson`) branché Toolbar (CV only) + CSS ; `public/**` exclu ESLint. e2e `import-pdf.spec.ts` avec fixture PDF réel (pdf.js rend dans le navigateur, PNG transmis, CV peuple l'aperçu). 128 tests + 11 e2e, tsc/lint/build OK.
 - 2026-06-24 — Phase 5 étape 7 : import texte→HTML streaming — lecteur SSE `streamSse` dans `lib/ai/client.ts` (port fidèle `_readSseStream`/`streamToMonaco` : `data:`/`[DONE]`/`[ERROR]`, buffer inter-chunks, accumulation+callback) + `ImportTextModal.tsx` (textarea → `streamSse('/api/text-to-html')` → setHtml en direct, puis CSS sobre/vide selon doc_type) branché Toolbar (bouton « Importer un texte ») + CSS `.import-modal`. Tests : 3 unit `streamSse` + e2e `import-text.spec.ts` (flux SSE mocké). 128 tests + 10 e2e, tsc/lint/build OK.
 - 2026-06-24 — Phase 5 étape 6 : pack candidature — `PackModal.tsx` (CV-only, photo strippée `stripBase64ForChat`, POST `/api/generate-pack` cv_html/cv_css/job_desc/company/role, aperçu lettre iframe `mergeHtml` + email, copier presse-papier + insertion éditeur type Lettre via setDocType+setHtml/setCss) branché Toolbar + CSS `.pack-modal`. Snapshot → Phase 6. e2e `pack.spec.ts` (lettre+email, cv_html transmis, insertion→Lettre). 125 tests + 9 e2e, tsc/lint/build OK. (Note : `editor.spec.ts` « basculer » flaky en parallèle, passe en isolé.)
 - 2026-06-24 — Phase 5 étape 3 : chat éditeur `components/modals/ChatPanel.tsx` (panneau latéral, port de `_sendChat`/`_appendProposals` : historique, strip/restore base64 flux chat, `/api/editor-chat` avec `mergeHtml(strippedHtml, css)`, propositions Prévisualiser/Appliquer/Rejeter) ; `previewOverride` ajouté au store + honoré par PreviewPane ; `extractCss` (inverse de mergeHtml) pour l'application en mode expert ; bouton « Assistant IA » Toolbar + CSS. Tests `extractCss` (3) + e2e `chat.spec.ts` (réponse+proposition, application→aperçu, html sans data:image/). 113 tests verts + 6 e2e, tsc/lint/build OK. Snapshot avant-chat → Phase 6.

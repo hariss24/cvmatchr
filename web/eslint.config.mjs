@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Assets vendorés (worker pdf.js copié depuis node_modules) : pas notre code.
+    "public/**",
   ]),
 ]);
 
