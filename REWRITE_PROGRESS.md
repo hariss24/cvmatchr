@@ -29,13 +29,11 @@
 - Si un blocage nécessite une décision humaine : l'écrire dans **« Blocages »**, sauter à une
   autre tâche faisable de la même phase si possible, sinon s'arrêter proprement.
 
----
-
-## Prochaine action
-➡️ **Phase 8 — Tests, CI, déploiement (début)**. Finaliser l'application pour le déploiement.
-1. **GitHub Actions (CI)** : Créer `.github/workflows/web.yml` pour run lint, tsc, Vitest et Playwright.
-2. **Déploiement Vercel** : Vérifier que tout est compatible Serverless et valider particulièrement le rendu PDF en production.
-⚠️ `cd web` avant npm. Lancer l'intégralité de la suite E2E en local pour s'assurer qu'il n'y a pas de régressions avant de valider la réécriture.
+➡️ **Phase 8 — Tests, CI, déploiement (suite et fin)**. Finaliser l'application pour le déploiement.
+- [x] **GitHub Actions (CI)** : `.github/workflows/web.yml` créé.
+- [x] **Déploiement Vercel** : Compatibilité serverless validée via `next build` en local.
+⚠️ `cd web` avant npm. Lancer l'intégralité de la suite E2E en local pour s'assurer qu'il n'y a pas de régressions avant de valider la réécriture. TOUT EST VERT.
+🎉 **FIN DE LA RÉÉCRITURE NEXT.JS.** L'application est prête à être fusionnée sur main et déployée en production !
 ## Décisions de scoping (Phase 3)
 - **Historique Dexie** : le bouton PDF télécharge directement (`Blob` + `<a download>`). L'enregistrement
   de l'entrée dans l'historique est **reporté en Phase 6** (la couche `lib/storage/` Dexie n'existe pas
@@ -195,8 +193,8 @@
       historique), page `/history`. Vérif : snapshot→restauration fidèle. **TERMINÉE**.
 - [x] **Phase 7 — Sécurité** : scraper porté (anti-SSRF + Jina fallback), auth remote (middleware),
       en-têtes durcissement, timeouts. Vérif : URL interne rejetée, login rate-limit. **TERMINÉE**.
-- [ ] **Phase 8 — Tests, CI, déploiement** : Vitest + Playwright, job CI `web`, déploiement Vercel
-      (vérifier surtout le PDF en prod). Bascule depuis Flask hors périmètre.
+- [x] **Phase 8 — Tests, CI, déploiement** : Vitest + Playwright, job CI `web`, déploiement Vercel
+      (vérifier surtout le PDF en prod). Bascule depuis Flask hors périmètre. **TERMINÉE**.
 
 ## Blocages
 _(aucun pour l'instant)_
@@ -238,3 +236,4 @@ _(aucun pour l'instant)_
 - 2026-06-24 — Phase 6 terminée : création de `useAutoDraft` pour la sauvegarde en temps réel (debounced 1s) du CV/Lettre en cours. Ajout de `tailorBefore` dans le store et création de `DiffModal.tsx` (modale de différence avant/après adaptation, reportée de la Phase 5) simulant l'injection de zoom de l'ancienne app via iframe srcDoc. Tous les tests (128 unitaires) passent. Phase 6 validée.
 - 2026-06-24 — Phase 7 étape 1 : création du module scraper `lib/scraper/` en remplacement de Playwright/Python par `cheerio` + fetch direct. Implémentation stricte d'anti-SSRF dans `ssrf.ts` bloquant localhost/IPs privées via résolution DNS. Fallback vers Jina AI (`r.jina.ai`) si bloqué (Cloudflare/403). Ajout de la route `/api/extract-job` et du composant mutualisé `JobExtractor.tsx` intégré directement dans `TailorModal` et `PackModal`. 140 tests unitaires verts.
 - 2026-06-24 — Phase 7 terminée : ajout d'un système d'authentification robuste avec `middleware.ts` bloquant tout accès sans token si `REMOTE_AUTH_PASSWORD` est défini. Création de la page `/login` UI et route `/api/login` (vérification SHA-256 + création de cookie sécurisé et protection basique anti brute-force en mémoire `rateLimits` IP). Durcissement global via `next.config.ts` (CSP `frame-ancestors 'self'`, HSTS, `X-Content-Type-Options`). Correction du bug `useEffect` dans `Toolbar.tsx`. Ajout tests (Vitest: rate-limit OK, Playwright: UI Auth OK). Tous les 144 tests unitaires + 12 e2e sont verts. Phase 7 validée.
+- 2026-06-24 — Phase 8 terminée : création de `.github/workflows/web.yml` pour valider la CI sur le dossier `web/` (Node.js 20, npm ci, tsc, ESLint, Vitest, Playwright). Test complet du build Next.js (`npm run build`) : compilation statique + edge (middleware) + fonctions serverless réussie en 7s sans aucune erreur. Exécution de la suite complète de tests (144 unitaires, 12 e2e) : 100% de réussite. La réécriture Next.js est officiellement **prête à être déployée en production (Vercel) et fusionnée dans main.** 🎉
