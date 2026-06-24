@@ -41,6 +41,9 @@ export default function AtsPanel({ open, onClose }: { open: boolean; onClose: ()
   const [local, setLocal] = useState<AtsAnalysis | null>(null);
   const [ai, setAi] = useState<AiResult | null>(null);
   const [busy, setBusy] = useState(false);
+  // Mots-clés absents de la dernière analyse, candidats au booster invisible.
+  const [missingKeywords, setMissingKeywords] = useState<string[]>([]);
+  const atsBoost = useDocStore((s) => s.atsBoost);
 
   if (!open) return null;
 
@@ -51,7 +54,9 @@ export default function AtsPanel({ open, onClose }: { open: boolean; onClose: ()
       return;
     }
     setAi(null);
-    setLocal(analyzeAts(useDocStore.getState().html, desc));
+    const result = analyzeAts(useDocStore.getState().html, desc);
+    setLocal(result);
+    setMissingKeywords(result.boostKeywords);
   };
 
   const runAi = async () => {
@@ -67,11 +72,25 @@ export default function AtsPanel({ open, onClose }: { open: boolean; onClose: ()
         job_desc: desc,
       });
       setAi(res);
+      setMissingKeywords([...res.missing_hard_skills, ...res.missing_nice_to_have]);
     } catch (err) {
       toast(err instanceof Error ? err.message : "Échec de l'analyse IA.", "error");
     } finally {
       setBusy(false);
     }
+  };
+
+  // Active/désactive l'injection invisible des mots-clés absents (port de `_toggleAtsBoost`).
+  const toggleBoost = () => {
+    const { setAtsBoost } = useDocStore.getState();
+    const next = !atsBoost.enabled;
+    setAtsBoost({ enabled: next, keywords: next ? missingKeywords : [] });
+    toast(
+      next
+        ? "🧲 Booster actif — mots-clés injectés invisiblement dans le CV."
+        : "Booster désactivé.",
+      next ? "success" : "info",
+    );
   };
 
   return (
@@ -149,6 +168,17 @@ export default function AtsPanel({ open, onClose }: { open: boolean; onClose: ()
             ) : null}
             <Pills items={ai.matched_skills} kind="match" />
           </div>
+        ) : null}
+
+        {missingKeywords.length ? (
+          <button
+            type="button"
+            className={`ats-ai-btn ats-boost-btn${atsBoost.enabled ? " active" : ""}`}
+            onClick={toggleBoost}
+            disabled={busy}
+          >
+            🧲 Booster ATS invisible{atsBoost.enabled ? " ✓" : ""}
+          </button>
         ) : null}
 
         <div className="ui-dialog__actions">

@@ -28,6 +28,8 @@ export type Doc = {
   css: string;
   /** Aperçu transitoire (proposition du chat IA) : si non null, l'aperçu l'affiche au lieu du document. */
   previewOverride: string | null;
+  /** Booster ATS invisible : mots-clés absents injectés en texte 1px à l'aperçu et à l'export. */
+  atsBoost: { enabled: boolean; keywords: string[] };
 };
 
 /** Rend le HTML d'un document selon son type. */
@@ -50,6 +52,7 @@ export type DocStore = Doc & {
   setDocType: (docType: DocType) => void;
   setTemplate: (templateId: TemplateId) => void;
   setPreviewOverride: (html: string | null) => void;
+  setAtsBoost: (atsBoost: { enabled: boolean; keywords: string[] }) => void;
 };
 
 const INITIAL_TEMPLATE: TemplateId = "sobre";
@@ -61,11 +64,13 @@ export const useDocStore = create<DocStore>((set, get) => ({
   html: renderResume(DEFAULT_RESUME),
   css: TEMPLATES[INITIAL_TEMPLATE].css,
   previewOverride: null,
+  atsBoost: { enabled: false, keywords: [] },
 
   setJson: (json) => set({ json, html: renderDoc(get().docType, json) }),
   setHtml: (html) => set({ html }),
   setCss: (css) => set({ css }),
   setPreviewOverride: (previewOverride) => set({ previewOverride }),
+  setAtsBoost: (atsBoost) => set({ atsBoost }),
 
   setDocType: (docType) => {
     const json = defaultJson(docType);

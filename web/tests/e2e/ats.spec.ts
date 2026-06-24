@@ -33,3 +33,22 @@ test("l'ATS affiche un score local puis un score IA", async ({ page }) => {
   await expect(page.getByText("✨ Analyse IA")).toBeVisible();
   await expect(page.locator(".ats-score-circle")).toHaveText("82");
 });
+
+test("le booster ATS injecte des mots-clés invisibles dans l'aperçu", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Score ATS" }).click();
+  await page
+    .locator(".ats-modal .form-textarea")
+    .fill("Kubernetes Docker Terraform Golang Rust");
+  await page.locator(".ats-modal").getByRole("button", { name: "Analyser", exact: true }).click();
+
+  // Aucun span de boost au départ.
+  const boostSpan = page
+    .frameLocator(".preview-frame")
+    .locator('span[style*="font-size:1px"]');
+  await expect(boostSpan).toHaveCount(0);
+
+  // Activation du booster → le span invisible apparaît dans l'aperçu.
+  await page.getByRole("button", { name: /Booster ATS invisible/ }).click();
+  await expect(boostSpan).toHaveCount(1);
+});

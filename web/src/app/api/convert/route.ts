@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { mergeHtml } from "@/lib/resume/mergeHtml";
+import { applyAtsBoost } from "@/lib/ats/score";
 import { htmlToPdf, type PageFormat, type Margin } from "@/lib/pdf/render";
 
 // Chromium a besoin du runtime Node.js (pas Edge).
@@ -16,6 +17,7 @@ type ConvertBody = {
   margin?: Margin;
   background?: boolean;
   filename?: string;
+  boostKeywords?: string[];
 };
 
 /** Nettoie un nom de fichier pour l'en-tête Content-Disposition. */
@@ -37,7 +39,8 @@ export async function POST(req: Request): Promise<Response> {
     return NextResponse.json({ error: "HTML manquant." }, { status: 400 });
   }
 
-  const merged = mergeHtml(html, body.css ?? "");
+  const boostKeywords = Array.isArray(body.boostKeywords) ? body.boostKeywords : [];
+  const merged = applyAtsBoost(mergeHtml(html, body.css ?? ""), boostKeywords);
   if (Buffer.byteLength(merged, "utf8") > MAX_HTML_BYTES) {
     return NextResponse.json({ error: "Document trop volumineux." }, { status: 413 });
   }

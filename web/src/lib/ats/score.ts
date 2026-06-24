@@ -178,3 +178,21 @@ export function analyzeAts(cvHtml: string, jobDesc: string): AtsAnalysis {
     sections: detectSections(cvHtml),
   };
 }
+
+/**
+ * Injecte les mots-clés absents en texte **invisible** (1px, blanc) juste avant `</body>`
+ * (sinon en fin de document). Port **fidèle** de l'injection `mergedHtml` (app.js l.606-614).
+ * Sans mots-clés, renvoie le HTML inchangé.
+ */
+export function applyAtsBoost(html: string, keywords: string[]): string {
+  if (!keywords.length) return html;
+  const boostText = keywords
+    .join(" ")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+  const boostSpan = `<span style="font-size:1px;color:#ffffff;line-height:0;">${boostText}</span>`;
+  return /<\/body>/i.test(html)
+    ? html.replace(/<\/body>/i, boostSpan + "</body>")
+    : html + boostSpan;
+}

@@ -32,14 +32,15 @@ export default function Toolbar() {
   const [atsOpen, setAtsOpen] = useState(false);
 
   const onConvert = async () => {
-    const { html, css, json } = useDocStore.getState();
+    const { html, css, json, atsBoost } = useDocStore.getState();
     const name = (json as Resume).name?.trim() || docType;
+    const boostKeywords = atsBoost.enabled ? atsBoost.keywords : [];
     setBusy(true);
     try {
       const res = await fetch("/api/convert", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ html, css, filename: `${name} - ${docType}` }),
+        body: JSON.stringify({ html, css, filename: `${name} - ${docType}`, boostKeywords }),
       });
       if (!res.ok) {
         const { error } = await res.json().catch(() => ({ error: "Échec de la conversion." }));

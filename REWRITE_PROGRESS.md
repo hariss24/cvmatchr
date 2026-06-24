@@ -32,17 +32,14 @@
 ---
 
 ## Prochaine action
-➡️ **Phase 5 (suite) — Booster ATS invisible, puis Pack**. `base64.ts`, `client.ts`, `TailorModal`,
-chat éditeur et **panneau ATS** (local + IA) sont faits (étapes 1-4). Étapes suivantes au choix :
-1. **Booster ATS invisible** : reporté à l'étape 4 (touche le chemin d'export). Port de l'injection
-   `mergedHtml` (app.js l.606-614 : `<span style="font-size:1px;color:#fff">mots-clés absents</span>`
-   avant `</body>`). Nécessite un état partagé (store : `atsBoost {enabled, keywords}`) consommé par
-   le merge **à l'export PDF** (et idéalement pas l'aperçu, ou via toggle). `analyzeAts().boostKeywords`
-   est déjà prêt. ⚠️ décider : boost dans l'aperçu aussi (fidèle à l'original) ou export seulement.
-2. **Pack candidature** (`/api/generate-pack`) : lettre + email.
-3. **Imports texte/PDF** : nécessite un lecteur **SSE** (à ajouter dans `client.ts`) pour `/api/text-to-html`,
-   et le rendu PDF→PNG (pdf.js) pour `/api/pdf-to-resume`.
-Suggestion d'ordre : booster ATS → pack → imports. **Rappel : `extract-job` → Phase 7.**
+➡️ **Phase 5 (suite) — Pack candidature**. `base64.ts`, `client.ts`, `TailorModal`, chat éditeur,
+panneau ATS (local + IA) **et booster invisible** sont faits (étapes 1-5). Étapes suivantes au choix :
+1. **Pack candidature** (`/api/generate-pack`) : modale qui envoie `{resume/html, job_desc}` → affiche
+   lettre + email générés (boutons copier / insérer dans l'éditeur Lettre ?). Photo strippée si CV JSON.
+   Voir le flux d'origine dans `app.js` (chercher `generate-pack` / `pack`).
+2. **Imports texte/PDF** : nécessite un lecteur **SSE** (à ajouter dans `client.ts`) pour `/api/text-to-html`
+   (import texte→HTML streaming), et le rendu PDF→PNG (pdf.js, package à installer) pour `/api/pdf-to-resume`.
+Suggestion d'ordre : pack → imports. **Rappel : `extract-job` → Phase 7.**
 ⚠️ `cd web` avant npm. Tests : Vitest (logique) + Playwright `page.route` (flux).
 
 ## Décisions de scoping (Phase 3)
@@ -166,6 +163,15 @@ Suggestion d'ordre : booster ATS → pack → imports. **Rappel : `extract-job` 
       `/api/ats-score`, affichage hard/nice-to-have) branché Toolbar + CSS ats. e2e `ats.spec.ts`
       (local rend un score ; IA mockée affiche score 82). Booster invisible reporté étape suivante
       (touche l'export). 121 tests verts + 7 e2e, tsc/lint/build OK.
+      ✅ étape 5 : **Booster ATS invisible** — `applyAtsBoost(html, keywords)` ajouté à `lib/ats/score.ts`
+      (port fidèle de l'injection `mergedHtml` app.js l.606-614 : span 1px blanc avant `</body>`, échappement
+      HTML). État `atsBoost {enabled, keywords}` + `setAtsBoost` dans le store. **Fidèle à l'original :
+      appliqué à l'aperçu ET à l'export** — `PreviewPane` injecte après le merge (après `previewOverride`),
+      `api/convert` accepte `boostKeywords[]` et injecte après son merge serveur, `Toolbar.onConvert`
+      transmet les mots-clés quand actif. Toggle « 🧲 Booster ATS invisible » dans `AtsPanel` (port de
+      `_toggleAtsBoost` : visible s'il y a des mots-clés absents, alimenté par l'analyse locale OU IA).
+      Tests : 4 unit `applyAtsBoost` + e2e (le span 1px apparaît dans l'aperçu à l'activation).
+      125 tests verts + 8 e2e, tsc/lint/build OK.
 - [ ] **Phase 6 — Persistance navigateur** : `lib/storage/` (Dexie : snapshots max 20, brouillons,
       historique), page `/history`. Vérif : snapshot→restauration fidèle.
 - [ ] **Phase 7 — Sécurité** : scraper porté (anti-SSRF + Jina fallback), auth remote (middleware),
@@ -201,5 +207,6 @@ _(aucun pour l'instant)_
 - 2026-06-23 — **Phase 4 terminée** : `api/pdf-to-resume` (port `pdf_to_resume` + `SYSTEM_PDF_TO_RESUME` fidèle à ai_engine.py : décodage base64→Uint8Array, `streamCompletion({images})` Gemini-only, parseAiJson→normalizeResume, max 10 pages, 400/413/502). Test du cas erreur corrigé (mock `async function*` fidèle au vrai générateur qui lève au 1er `next()`, pas à l'appel — évitait un rejet parasite vitest). 96 tests verts, tsc/lint/build OK, route enregistrée.
 - 2026-06-23 — Phase 5 étape 1 : `lib/ai/base64.ts` (port fidèle de `app.js` strip/restore base64 photo — flux tailor placeholder indexé + flux chat placeholder unique, fonctions pures sans état global) + `base64.test.ts` round-trip (8 tests). 104 tests verts, tsc/lint OK.
 - 2026-06-24 — Phase 5 étape 2 : `lib/ai/client.ts` (getApiHeaders/postJson, port de app.js userApiKey+X-Api-Key, SSR-safe) + `client.test.ts` (6 tests) ; modale `TailorModal` (4 niveaux, strip/restore photo client, normalisation + garde anti-vidage, setJson→aperçu) branchée dans Toolbar (bouton CV only) + CSS ; e2e `tailor.spec.ts` (backend mocké : aperçu MAJ, photo jamais transmise). CV Maître → Phase 6. 110 tests verts + 5 e2e, tsc/lint/build OK.
+- 2026-06-24 — Phase 5 étape 5 : booster ATS invisible — `applyAtsBoost` (port fidèle injection span 1px app.js l.606-614) + état store `atsBoost`. Appliqué aperçu (PreviewPane) ET export (api/convert via `boostKeywords[]`, Toolbar transmet). Toggle dans AtsPanel (port `_toggleAtsBoost`, mots-clés de l'analyse locale/IA). Tests : 4 unit + e2e (span 1px dans l'aperçu). 125 tests verts + 8 e2e, tsc/lint/build OK.
 - 2026-06-24 — Phase 5 étape 4 : panneau ATS — `lib/ats/score.ts` (port fidèle extractKeywords/detectSections/analyzeAts : stop-words FR+EN, composés, score ratio, pluriels >4, boostKeywords) + `score.test.ts` (8) ; `AtsPanel.tsx` (analyse locale instantanée + bouton IA `/api/ats-score`) branché Toolbar (CV only) + CSS ; e2e `ats.spec.ts` (score local + IA mockée 82). Booster invisible → étape suivante. 121 tests verts + 7 e2e, tsc/lint/build OK.
 - 2026-06-24 — Phase 5 étape 3 : chat éditeur `components/modals/ChatPanel.tsx` (panneau latéral, port de `_sendChat`/`_appendProposals` : historique, strip/restore base64 flux chat, `/api/editor-chat` avec `mergeHtml(strippedHtml, css)`, propositions Prévisualiser/Appliquer/Rejeter) ; `previewOverride` ajouté au store + honoré par PreviewPane ; `extractCss` (inverse de mergeHtml) pour l'application en mode expert ; bouton « Assistant IA » Toolbar + CSS. Tests `extractCss` (3) + e2e `chat.spec.ts` (réponse+proposition, application→aperçu, html sans data:image/). 113 tests verts + 6 e2e, tsc/lint/build OK. Snapshot avant-chat → Phase 6.

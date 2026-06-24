@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { extractKeywords, detectSections, analyzeAts } from "./score";
+import { extractKeywords, detectSections, analyzeAts, applyAtsBoost } from "./score";
 
 describe("extractKeywords", () => {
   it("ignore les stop-words, les balises et les mots < 3 caractères", () => {
@@ -59,5 +59,28 @@ describe("analyzeAts", () => {
 
   it("score 0 si l'offre n'a aucun mot-clé", () => {
     expect(analyzeAts("<p>x</p>", "le la les de").score).toBe(0);
+  });
+});
+
+describe("applyAtsBoost", () => {
+  it("renvoie le HTML inchangé sans mots-clés", () => {
+    expect(applyAtsBoost("<body>x</body>", [])).toBe("<body>x</body>");
+  });
+
+  it("injecte un span invisible juste avant </body>", () => {
+    const out = applyAtsBoost("<html><body><p>cv</p></body></html>", ["docker", "kubernetes"]);
+    expect(out).toContain('font-size:1px;color:#ffffff');
+    expect(out).toContain("docker kubernetes");
+    expect(out).toMatch(/docker kubernetes<\/span><\/body>/);
+  });
+
+  it("ajoute en fin de document si pas de </body>", () => {
+    const out = applyAtsBoost("<p>cv</p>", ["react"]);
+    expect(out.endsWith("</span>")).toBe(true);
+  });
+
+  it("échappe les caractères HTML des mots-clés", () => {
+    const out = applyAtsBoost("<body></body>", ["c++ & <go>"]);
+    expect(out).toContain("c++ &amp; &lt;go&gt;");
   });
 });

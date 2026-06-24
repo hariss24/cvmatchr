@@ -216,6 +216,14 @@ a:hover { text-decoration: underline; }
 }
 .ats-section-badge.found { color: var(--success); }
 .ats-section-badge.missing { color: var(--muted); }
+.ats-ai-btn {
+  align-self: flex-start; background: var(--bg); color: var(--text); border: none;
+  border-radius: 10px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
+  box-shadow: var(--neu-raised-sm); transition: box-shadow 120ms; margin-top: 4px;
+}
+.ats-ai-btn:hover:not(:disabled) { box-shadow: var(--neu-raised); }
+.ats-ai-btn:disabled { opacity: 0.5; cursor: default; }
+.ats-boost-btn.active { color: var(--orange); box-shadow: var(--neu-inset); }
 
 /* ---- Panneau chat IA ---- */
 .chat-overlay {

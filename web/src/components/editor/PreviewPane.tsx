@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useDocStore } from "@/state/docStore";
 import { mergeHtml } from "@/lib/resume/mergeHtml";
+import { applyAtsBoost } from "@/lib/ats/score";
 
 // A4 à 96 dpi ≈ 1122px (297mm × 96 / 25.4). Port de updatePageCount (app.js, l.712).
 const A4_H = 1122;
@@ -18,6 +19,7 @@ export default function PreviewPane() {
   const html = useDocStore((s) => s.html);
   const css = useDocStore((s) => s.css);
   const previewOverride = useDocStore((s) => s.previewOverride);
+  const atsBoost = useDocStore((s) => s.atsBoost);
 
   const [srcDoc, setSrcDoc] = useState("");
   const [pages, setPages] = useState(1);
@@ -26,11 +28,15 @@ export default function PreviewPane() {
   // Debounce de la fusion HTML/CSS (port de schedulePreview).
   // Une proposition du chat IA (previewOverride) court-circuite l'aperçu live, sans debounce.
   useEffect(() => {
-    const value = previewOverride !== null ? previewOverride : mergeHtml(html, css);
+    const boostKw = atsBoost.enabled ? atsBoost.keywords : [];
+    const value =
+      previewOverride !== null
+        ? previewOverride
+        : applyAtsBoost(mergeHtml(html, css), boostKw);
     const delay = previewOverride !== null ? 0 : 150;
     const id = setTimeout(() => setSrcDoc(value), delay);
     return () => clearTimeout(id);
-  }, [html, css, previewOverride]);
+  }, [html, css, previewOverride, atsBoost]);
 
   const measurePages = () => {
     try {
