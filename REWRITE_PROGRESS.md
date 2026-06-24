@@ -32,12 +32,11 @@
 ---
 
 ## Prochaine action
-➡️ **Phase 6 — Persistance navigateur**. Initialiser `lib/storage/db.ts` (Dexie) pour gérer les snapshots (max 20, pruning), brouillons et historique.
-1. **Setup Dexie** : Installer `dexie` dans `web/`.
-2. **Créer la DB** : Porter la logique de l'app d'origine (`app.js` l.789-948) dans `lib/storage/db.ts`. Définir le schéma : id, date, type (snapshot, brouillon), nom, json, docType, etc.
+➡️ **Phase 6 — Persistance navigateur (suite)**. Câbler la base Dexie (`lib/storage/db.ts`) dans les composants React.
+1. **Snapshots Auto & Bouton de restauration** : Implémenter l'auto-save (toutes les 5 minutes) et le hook avant Adaptation/Pack, ainsi qu'une modale/bouton pour relire et restaurer un snapshot dans l'éditeur.
+2. **Historique des exports PDF** : Brancher la création d'entrée d'historique lors d'un export PDF réussi (`Toolbar.onConvert`), et préparer la page `/history` (port de `history.js`).
 **Rappel : `extract-job` → Phase 7.**
-⚠️ `cd web` avant npm (le répertoire courant est souvent la **racine** après le `cd ..` du commit : vérifier
-le nom de paquet `web@0.1.0` dans la sortie npm). Tests : Vitest (logique) + Playwright (flux de restauration).
+⚠️ `cd web` avant npm. Tests : Vitest (logique) + Playwright (flux de restauration).
 
 ## Décisions de scoping (Phase 3)
 - **Historique Dexie** : le bouton PDF télécharge directement (`Blob` + `<a download>`). L'enregistrement
@@ -236,3 +235,4 @@ _(aucun pour l'instant)_
 - 2026-06-24 — Phase 5 étape 6 : pack candidature — `PackModal.tsx` (CV-only, photo strippée `stripBase64ForChat`, POST `/api/generate-pack` cv_html/cv_css/job_desc/company/role, aperçu lettre iframe `mergeHtml` + email, copier presse-papier + insertion éditeur type Lettre via setDocType+setHtml/setCss) branché Toolbar + CSS `.pack-modal`. Snapshot → Phase 6. e2e `pack.spec.ts` (lettre+email, cv_html transmis, insertion→Lettre). 125 tests + 9 e2e, tsc/lint/build OK. (Note : `editor.spec.ts` « basculer » flaky en parallèle, passe en isolé.)
 - 2026-06-24 — Phase 5 étape 3 : chat éditeur `components/modals/ChatPanel.tsx` (panneau latéral, port de `_sendChat`/`_appendProposals` : historique, strip/restore base64 flux chat, `/api/editor-chat` avec `mergeHtml(strippedHtml, css)`, propositions Prévisualiser/Appliquer/Rejeter) ; `previewOverride` ajouté au store + honoré par PreviewPane ; `extractCss` (inverse de mergeHtml) pour l'application en mode expert ; bouton « Assistant IA » Toolbar + CSS. Tests `extractCss` (3) + e2e `chat.spec.ts` (réponse+proposition, application→aperçu, html sans data:image/). 113 tests verts + 6 e2e, tsc/lint/build OK. Snapshot avant-chat → Phase 6.
 - 2026-06-24 — Phase 5 terminée : La modale diff (avant/après) de la Phase 5 (port de `_openDiffModal`) s'appuyant trop sur le flux `_tailorBeforeHtml` et les snapshots non implémentés (qui incombent à la couche Storage), elle a été délibérément reportée à la Phase 6 (persistance) conformément aux instructions initiales de la "Prochaine action". Tous les tests (unitaires et e2e) sont verts.
+- 2026-06-24 — Phase 6 étape 1 : initialisation Dexie (`npm install dexie`) + création de `lib/storage/db.ts` (port de la logique de `app.js` et `history.js` : tables `snapshots`, `drafts`, `history`). Le build et les tests existants passent.
