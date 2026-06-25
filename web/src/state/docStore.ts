@@ -22,6 +22,10 @@ export type DocData = Resume | Letter;
 
 export type Doc = {
   docType: DocType;
+  /** Entreprise visée (barre meta) — utilisée pour le nommage et l'historique. */
+  company: string;
+  /** Poste visé (barre meta). */
+  role: string;
   templateId: TemplateId;
   json: DocData;
   html: string;
@@ -51,6 +55,8 @@ export type DocStore = Doc & {
   setJson: (json: DocData) => void;
   setHtml: (html: string) => void;
   setCss: (css: string) => void;
+  setCompany: (company: string) => void;
+  setRole: (role: string) => void;
   setDocType: (docType: DocType) => void;
   setTemplate: (templateId: TemplateId) => void;
   setPreviewOverride: (html: string | null) => void;
@@ -62,6 +68,8 @@ const INITIAL_TEMPLATE: TemplateId = "sobre";
 
 export const useDocStore = create<DocStore>((set, get) => ({
   docType: "CV",
+  company: "",
+  role: "",
   templateId: INITIAL_TEMPLATE,
   json: structuredClone(DEFAULT_RESUME),
   html: renderResume(DEFAULT_RESUME),
@@ -73,6 +81,8 @@ export const useDocStore = create<DocStore>((set, get) => ({
   setJson: (json) => set({ json, html: renderDoc(get().docType, json) }),
   setHtml: (html) => set({ html }),
   setCss: (css) => set({ css }),
+  setCompany: (company) => set({ company }),
+  setRole: (role) => set({ role }),
   setPreviewOverride: (previewOverride) => set({ previewOverride }),
   setAtsBoost: (atsBoost) => set({ atsBoost }),
   setTailorBefore: (tailorBefore) => set({ tailorBefore }),

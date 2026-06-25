@@ -91,7 +91,7 @@ export type VolunteerItem = z.infer<typeof volunteerItemSchema>;
 export type Resume = z.infer<typeof resumeSchema>;
 export type Letter = z.infer<typeof letterSchema>;
 
-export type DocType = "CV" | "Lettre";
+export type DocType = "CV" | "Lettre" | "Maître" | "Autre";
 
 /** Clés de premier niveau d'un CV — sert à dés-emballer une réponse IA mal formée. */
 export const RESUME_TOP_KEYS = [
