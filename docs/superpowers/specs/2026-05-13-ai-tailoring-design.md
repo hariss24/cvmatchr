@@ -1,7 +1,7 @@
 # Conception : Import CV + Tailoring IA
 
 **Date :** 2026-05-13  
-**Projet :** html-to-pdf  
+**Projet :** cv-tailor  
 **Approche retenue :** A — Purement additif (nouveaux fichiers, app.py modifié, rien d'autre touché)
 
 ---

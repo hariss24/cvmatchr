@@ -1,4 +1,4 @@
-# 🗂️ Index du Projet : html-to-pdf (Audit & Architecture)
+# 🗂️ Index du Projet : cv-tailor (Audit & Architecture)
 
 Ce fichier répertorie l'architecture complète, l'historique des modifications majeures et la cartographie des fichiers du projet. Il permet aux développeurs et aux IA de comprendre instantanément comment le projet est structuré et comment les différentes briques interagissent.
 

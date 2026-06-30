@@ -1,6 +1,6 @@
-# html-to-pdf
+# CV Tailor
 
-A tiny local web app to convert HTML/CSS into a PDF.
+A local web app to tailor a resume to a job offer and export it to PDF.
 Paste your HTML, click a button, the PDF downloads automatically.
 
 Rendering is done by **headless Chromium** via Playwright, so the PDF
@@ -25,8 +25,8 @@ matches what you see in a browser.
 ## Install
 
 ```bash
-git clone https://github.com/hariss24/html-to-pdf.git
-cd html-to-pdf
+git clone https://github.com/hariss24/cv-tailor.git
+cd cv-tailor
 pip install -r requirements.txt
 python -m playwright install chromium
 ```
@@ -133,7 +133,7 @@ Edit `%APPDATA%\Claude\claude_desktop_config.json` (Windows) or
   "mcpServers": {
     "html-to-pdf": {
       "command": "python",
-      "args": ["C:\\path\\to\\html-to-pdf\\mcp_server.py"]
+      "args": ["C:\\path\\to\\cv-tailor\\mcp_server.py"]
     }
   }
 }

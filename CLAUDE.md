@@ -1,6 +1,6 @@
 # 🤖 CLAUDE.md - Directives pour Claude (et autres IA)
 
-Ce fichier définit les règles de base pour intervenir sur le dépôt `html-to-pdf`.
+Ce fichier définit les règles de base pour intervenir sur le dépôt `cv-tailor`.
 
 > **🗺️ NAVIGATION RAPIDE : commence par `FILE_MAP.md`**
 > C'est la carte du dépôt : rôle de chaque fichier + table « quel fichier pour quelle tâche ». Lis-la AVANT d'explorer le code — elle évite de balayer des fichiers inutiles. La carte des routes API est dans la docstring de `app.py`.
@@ -70,7 +70,7 @@ Ajouter dans `%APPDATA%\Claude\claude_desktop_config.json` :
   "mcpServers": {
     "html-to-pdf": {
       "command": "python",
-      "args": ["C:\\Users\\tahet\\projects\\html-to-pdf\\mcp_server.py"]
+      "args": ["C:\\Users\\tahet\\projects\\cv-tailor\\mcp_server.py"]
     }
   }
 }

@@ -1,4 +1,4 @@
-# 🔌 Plan d'intégration : bot `agent-taff` → app web `html-to-pdf`
+# 🔌 Plan d'intégration : bot `agent-taff` → app web `cv-tailor`
 
 > **À lire par toute IA qui exécute ce plan.** Ce document est autonome : il contient le
 > contexte, le code de référence et les étapes. Il est découpé en **6 lots indépendants**
@@ -16,7 +16,7 @@ Fusionner deux projets Python complémentaires :
   récupère des offres France Travail, élimine stages/alternances, calcule les temps de
   trajet (Google Maps), note chaque offre sur 100 avec Gemini selon le profil de Hariss,
   écrit les bonnes (score ≥ 70) dans `offers.csv`.
-- **`C:\Users\tahet\projects\html-to-pdf\`** = *fabricant de CV* (app web Flask). Sait
+- **`C:\Users\tahet\projects\cv-tailor\`** = *fabricant de CV* (app web Flask). Sait
   déjà lire une offre depuis une URL (`/api/extract-job`) et adapter le CV à une offre
   (`/api/tailor-resume`).
 
@@ -32,7 +32,7 @@ qui enchaîne sur le tailoring **déjà existant**.
 
 ---
 
-## 🧱 Règles d'or de l'app `html-to-pdf` (à respecter absolument)
+## 🧱 Règles d'or de l'app `cv-tailor` (à respecter absolument)
 
 Issues de `PROJECT_INDEX.md` du projet :
 1. **Ne pas casser la synchro JSON/HTML.** Le CV est un objet JSON (source de vérité) ;
@@ -86,7 +86,7 @@ Ne pas ajouter `python-dotenv` ni `pytest` du bot : l'app lit `os.environ` direc
 
 ## 📦 LOT 2 — `job_scout.py` (NOUVEAU)
 
-Créer `C:\Users\tahet\projects\html-to-pdf\job_scout.py`. Reprend la logique de
+Créer `C:\Users\tahet\projects\cv-tailor\job_scout.py`. Reprend la logique de
 `agent-taff/bot.py` **sans** la boucle CLI, sans `offers.csv`, sans `seen.txt`.
 
 ### Ce qu'on reprend tel quel depuis `agent-taff/bot.py`

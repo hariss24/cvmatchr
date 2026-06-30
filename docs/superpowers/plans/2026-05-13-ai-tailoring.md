@@ -47,7 +47,7 @@ anthropic>=0.40.0
 - [ ] **Step 2 : Installer**
 
 ```bash
-cd C:/Users/tahet/projects/html-to-pdf
+cd C:/Users/tahet/projects/cv-tailor
 pip install -r requirements.txt
 ```
 
@@ -142,7 +142,7 @@ def test_remaining_on_new_day_returns_full_limit():
 - [ ] **Step 3 : Vérifier que les tests échouent (quota.py n'existe pas encore)**
 
 ```bash
-cd C:/Users/tahet/projects/html-to-pdf
+cd C:/Users/tahet/projects/cv-tailor
 python -m pytest tests/test_quota.py -v
 ```
 

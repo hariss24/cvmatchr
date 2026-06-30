@@ -7,7 +7,7 @@ equivalent on macOS/Linux):
       "mcpServers": {
         "html-to-pdf": {
           "command": "python",
-          "args": ["C:\\\\Users\\\\tahet\\\\projects\\\\html-to-pdf\\\\mcp_server.py"]
+          "args": ["C:\\\\Users\\\\tahet\\\\projects\\\\cv-tailor\\\\mcp_server.py"]
         }
       }
     }

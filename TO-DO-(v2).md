@@ -1,4 +1,4 @@
-# TO-DO (v2) — Roadmap d'optimisations `html-to-pdf`
+# TO-DO (v2) — Roadmap d'optimisations `cv-tailor`
 
 > **Document autoportant destiné à une IA exécutante (Gemini, Claude, etc.).**
 > État des lieux vérifié le 2026-06-12 : 106 tests pytest verts (~2,4 s), CI GitHub Actions (`ruff` + `pytest`), Tailwind CSS v4 intégré, migration HTML→JSON à ~70 %.

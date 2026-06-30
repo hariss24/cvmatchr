@@ -1,4 +1,4 @@
-# TODO — html-to-pdf CV Builder
+# TODO — CV Tailor
 
 Suivi des fonctionnalités : ce qui est fait, ce qui est prévu, ce qui est en réflexion.
 
