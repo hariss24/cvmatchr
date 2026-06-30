@@ -31,7 +31,7 @@ export async function scrapeJobText(url: string): Promise<{ text: string; title:
     } else {
       html = await res.text();
     }
-  } catch (err) {
+  } catch {
     // If fetch failed completely (e.g. timeout, connection reset), try fallback
     isBlocked = true;
   }
@@ -111,7 +111,7 @@ export async function scrapeJobText(url: string): Promise<{ text: string; title:
          throw new Error("BLOCKED");
       }
 
-    } catch (e) {
+    } catch {
       throw new Error("Impossible d'extraire l'offre : accès bloqué par le site (Cloudflare/Captcha). Essayez de copier-coller le texte manuellement.");
     }
   }

@@ -47,7 +47,7 @@ export default function JobExtractor({ onExtracted, disabled }: JobExtractorProp
       } else {
         toast(`Extrait : ${data.text.length} caractères`, "success");
       }
-    } catch (err) {
+    } catch {
       toast("Erreur réseau lors de l'extraction.", "error");
     } finally {
       setExtracting(false);

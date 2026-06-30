@@ -49,7 +49,7 @@ function isBlockedIp(ipStr: string): boolean {
       }
     }
     return false;
-  } catch (e) {
+  } catch {
     // If we can't parse the IP, block it just to be safe.
     return true;
   }
@@ -64,7 +64,7 @@ export async function validateUrlForScraping(urlStr: string): Promise<string> {
   let parsed: URL;
   try {
     parsed = new URL(urlStr);
-  } catch (e) {
+  } catch {
     throw new Error("URL invalide.");
   }
   

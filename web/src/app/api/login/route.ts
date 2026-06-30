@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     } else {
       return NextResponse.json({ error: "Mot de passe incorrect." }, { status: 401 });
     }
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: "Bad request." }, { status: 400 });
   }
 }

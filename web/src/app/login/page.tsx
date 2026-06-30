@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "@/state/uiStore";
 
 export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +27,7 @@ export default function LoginPage() {
         const data = await res.json();
         toast(data.error || "Échec de l'authentification.", "error");
       }
-    } catch (err) {
+    } catch {
       toast("Erreur réseau.", "error");
     } finally {
       setLoading(false);
