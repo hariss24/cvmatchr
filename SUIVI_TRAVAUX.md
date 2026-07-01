@@ -76,17 +76,18 @@ implémenter maintenant, mais ne pas fermer la porte) :
 - [x] Spec écrite dans `docs/superpowers/specs/2026-07-01-offres-nextjs-design.md` — ⏳ relecture utilisateur en attente.
 - [ ] Plan d'implémentation (writing-plans).
 - [x] `lib/jobs/` (profil paramétrable, FT, trajet, scoring) + `completeJson` + tests (20 verts).
-- [ ] Route `/api/jobs/search` + test.
-- [ ] Route `/api/jobs/score` + test.
+- [x] Route `/api/jobs/search` + test (+ `resolveProfile`).
+- [x] Route `/api/jobs/score` + test.
 - [ ] Table Dexie `jobs` + fonctions + tests.
 - [ ] Page `/jobs` + cartes + progression + états d'erreur/config.
 - [ ] Jonction « Adapter mon CV » (store + TailorModal valeur initiale) + e2e.
 - [ ] Doc (README/CLAUDE.md : variables d'env) + vérif bout-en-bout en prod.
 
 ### ➡️ Prochaine action
-Plan validé (`C:\Users\tahet\.claude\plans\majestic-questing-dewdrop.md`). **Étape 1 faite** (socle
-`lib/jobs/`). **Étape 2 en cours** : routes API `/api/jobs/search` + `/api/jobs/score` (runtime nodejs)
-+ helper `resolveProfile` + tests. Puis étape 3 (Dexie), 4 (jonction), 5 (écran /jobs), 6 (doc + vérif prod).
+Plan validé (`C:\Users\tahet\.claude\plans\majestic-questing-dewdrop.md`). **Étapes 1-2 faites**
+(socle `lib/jobs/` + routes API). **Étape 3 en cours** : table Dexie `jobs` (db.ts v2) + fonctions
+`jobExists/saveJob/listJobs/setJobStatus` + tests. Puis 4 (jonction), 5 (écran /jobs), 6 (doc + vérif prod).
+NB : rien n'est encore poussé/déployé (commits locaux) — pousser à un jalon (backend + UI).
 
 ### Blocages / décisions en attente
 - (aucun pour l'instant)
@@ -118,3 +119,9 @@ Plan validé (`C:\Users\tahet\.claude\plans\majestic-questing-dewdrop.md`). **É
   `completeJson`, bornage 0-100). Ajout `completeJson` (Gemini response schema) à `lib/ai/clients.ts`.
   Tests : `francetravail/maps/score.test.ts`. Vérif : `tsc --noEmit` OK, `vitest run` = **164 tests verts**
   (dont 20 nouveaux), 0 régression. Pas de nouvelle dépendance npm (fetch natif).
+- 2026-07-01 — **Étape 2 (routes API)**. `web/src/lib/jobs/resolveProfile.ts` (renvoie `DEFAULT_PROFILE`
+  aujourd'hui, point d'extension SaaS). `app/api/jobs/search/route.ts` (nodejs : token FT → boucle
+  mots-clés → filtre → dédup → `{offers}` ; 400 `config` si clés FT absentes ; 502 si FT échoue).
+  `app/api/jobs/score/route.ts` (nodejs : trajet Maps + `scoreOffer` ; `{score,breakdown,commute,commuteText}` ;
+  400 `config` si clé Maps absente ; **429** via `aiErrorResponse` si quota Gemini). Tests routes (7).
+  Vérif : `tsc` OK, `vitest` (27 verts jobs+routes), `npm run build` OK (routes ƒ enregistrées), `eslint` clean.

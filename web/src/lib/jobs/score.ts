@@ -65,12 +65,12 @@ function toInt(v: unknown, fallback = 0): number {
   return Number.isFinite(n) ? Math.round(n) : fallback;
 }
 
-/** Note une offre pour le profil donné. `key` = clé Gemini (serveur). */
+/** Note une offre pour le profil donné. `key` optionnelle : sinon clé Gemini serveur (env). */
 export async function scoreOffer(
   offer: RawOffer,
   commute: Partial<Record<CommuteMode, string>>,
   profile: JobSearchProfile,
-  key: string,
+  key?: string | null,
 ): Promise<JobScore> {
   const title = offer.intitule ?? "";
   const company = offer.entreprise?.nom ?? "Inconnue";
