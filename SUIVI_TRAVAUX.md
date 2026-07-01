@@ -70,7 +70,7 @@ implémenter maintenant, mais ne pas fermer la porte) :
 - Var d'env à documenter : FT_CLIENT_ID / FT_CLIENT_SECRET / GOOGLE_MAPS_API_KEY.
 
 ### Étapes (checklist — à affiner dans le plan d'implémentation)
-- [ ] Spec écrite dans `docs/superpowers/specs/` + relue par l'utilisateur.
+- [x] Spec écrite dans `docs/superpowers/specs/2026-07-01-offres-nextjs-design.md` — ⏳ relecture utilisateur en attente.
 - [ ] Plan d'implémentation (writing-plans).
 - [ ] `lib/jobs/` (constantes profil, filtre, mapping, prompt scoring) + tests.
 - [ ] Route `/api/jobs/search` + test.
@@ -81,8 +81,10 @@ implémenter maintenant, mais ne pas fermer la porte) :
 - [ ] Doc (README/CLAUDE.md : variables d'env) + vérif bout-en-bout en prod.
 
 ### ➡️ Prochaine action
-Rédiger la spec de la feature Offres dans `docs/superpowers/specs/2026-07-01-offres-nextjs-design.md`,
-auto-review, commit, puis demander relecture à l'utilisateur avant le plan d'implémentation.
+Spec rédigée + commitée. **Attendre la relecture/validation de l'utilisateur** sur
+`docs/superpowers/specs/2026-07-01-offres-nextjs-design.md`. Une fois validée → plan d'implémentation
+(skill writing-plans), puis exécution étape par étape (voir checklist). Au démarrage du dev :
+vérifier que `agent-taff/bot.py` existe (source du code à porter : get_commute_times, prompt scoring).
 
 ### Blocages / décisions en attente
 - (aucun pour l'instant)
@@ -95,4 +97,10 @@ auto-review, commit, puis demander relecture à l'utilisateur avant le plan d'im
   `FT_CLIENT_SECRET`, `GOOGLE_MAPS_API_KEY` ajoutées en env Vercel production (GEMINI déjà présente).
   Vérifié : `git check-ignore` confirme `.env.local` ignoré ; `vercel env ls production` liste les 4 clés.
   Système de suivi mis en place : ce fichier `SUIVI_TRAVAUX.md` + hook SessionStart étendu pour l'injecter.
-  Prochaine étape : rédaction de la spec.
+- 2026-07-01 — **Système de suivi opérationnel + spec Offres**. (1) `SUIVI_TRAVAUX.md` créé (ce fichier) ;
+  `.claude/inject-progress.ps1` étendu pour injecter SUIVI + REWRITE archive. Bug rencontré : Windows
+  PowerShell 5.1 émettait en cp1252 → JSON corrompu (emojis/accents). Fix : `[Console]::OutputEncoding =
+  UTF8` en tête + littéraux ASCII. Vérifié : `powershell -File inject-progress.ps1` → JSON valide, ctx
+  ~43 k, SUIVI+Offres+archive présents, emojis/accents OK. Commit `1567c71`. (2) Spec feature Offres
+  écrite dans `docs/superpowers/specs/2026-07-01-offres-nextjs-design.md` (objectif, décisions, archi
+  lib/jobs + routes + Dexie + jonction, flux, erreurs, sécurité/SaaS, tests). ⏳ En attente de relecture.
