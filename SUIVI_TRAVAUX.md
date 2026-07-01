@@ -81,7 +81,8 @@ implémenter maintenant, mais ne pas fermer la porte) :
 - [x] Table Dexie `jobs` (db.ts v2) + `jobExists/saveJob/listJobs/setJobStatus` (couverture e2e étape 5).
 - [x] Page `/jobs` + cartes + progression + états config + lien TopBar + CSS.
 - [x] Jonction « Adapter mon CV » (store `pendingJobDesc` + TailorModal + ActionsBar) — e2e `jobs.spec.ts` (4 verts).
-- [ ] Doc (README/CLAUDE.md : variables d'env) + vérif bout-en-bout en prod.
+- [x] Doc README (variables d'env FT/Maps/Gemini).
+- [ ] Push (auto-deploy) + vérif bout-en-bout en prod.
 
 ### ➡️ Prochaine action
 Plan validé (`C:\Users\tahet\.claude\plans\majestic-questing-dewdrop.md`). **Étapes 1-5 faites**
