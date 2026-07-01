@@ -80,14 +80,14 @@ implémenter maintenant, mais ne pas fermer la porte) :
 - [x] Route `/api/jobs/score` + test.
 - [x] Table Dexie `jobs` (db.ts v2) + `jobExists/saveJob/listJobs/setJobStatus` (couverture e2e étape 5).
 - [ ] Page `/jobs` + cartes + progression + états d'erreur/config.
-- [ ] Jonction « Adapter mon CV » (store + TailorModal valeur initiale) + e2e.
+- [x] Jonction « Adapter mon CV » (store `pendingJobDesc` + TailorModal + ActionsBar) — e2e à l'étape 5.
 - [ ] Doc (README/CLAUDE.md : variables d'env) + vérif bout-en-bout en prod.
 
 ### ➡️ Prochaine action
-Plan validé (`C:\Users\tahet\.claude\plans\majestic-questing-dewdrop.md`). **Étapes 1-3 faites**
-(socle `lib/jobs/`, routes API, Dexie table `jobs`). **Étape 4 en cours** : jonction « Adapter mon CV »
-(`docStore.pendingJobDesc` + init `TailorModal` + `useEffect` `ActionsBar`). Puis 5 (écran /jobs), 6 (doc + vérif prod).
-NB : rien n'est encore poussé/déployé (commits locaux) — pousser à un jalon (backend + UI).
+Plan validé (`C:\Users\tahet\.claude\plans\majestic-questing-dewdrop.md`). **Étapes 1-4 faites**
+(socle `lib/jobs/`, routes API, Dexie, jonction). **Étape 5 en cours** : écran `/jobs` (page +
+`components/jobs/{JobsView,ScanProgress,JobCard}` + lien TopBar + CSS + état config) + e2e `jobs.spec.ts`.
+Puis 6 (doc + vérif prod). NB : commits locaux non poussés — pousser après l'UI (jalon backend+UI).
 
 ### Blocages / décisions en attente
 - (aucun pour l'instant)
@@ -130,3 +130,10 @@ NB : rien n'est encore poussé/déployé (commits locaux) — pousser à un jalo
   fonctions `jobExists/saveJob/listJobs(status)/setJobStatus` (style try/catch + console.warn existant).
   Pas de test unitaire Dexie (le projet n'en a pas : pas de fake-indexeddb ; couverture via e2e étape 5).
   Vérif : `tsc` OK, `vitest run` = **171 tests verts**, 0 régression.
+- 2026-07-01 — **Étape 4 (jonction « Adapter mon CV »)**. `docStore.ts` : `pendingJobDesc` + `setPendingJobDesc`.
+  `TailorModal.tsx` : pré-remplit `jobDesc` depuis `pendingJobDesc` à l'ouverture via le pattern React
+  « ajustement d'état au rendu » (suivi de `open`) + consommation du pending dans un effet (setter zustand).
+  `ActionsBar.tsx` (monté sur `/`) : ouverture initiale via initialiseur `useState` paresseux + snapshot en effet.
+  ⚠️ Contrainte lint React 19 `react-hooks/set-state-in-effect` : interdit `setState` React dans un effet →
+  d'où ces deux patterns (init paresseux / ajustement au rendu). Vérif : `eslint` clean, `tsc` OK, `vitest`
+  171 verts, `build` OK. (e2e de la jonction à l'étape 5.)

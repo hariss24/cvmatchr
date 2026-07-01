@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDocStore } from "@/state/docStore";
 import { postJson } from "@/lib/ai/client";
 import { normalizeResume, isEmptyResume } from "@/lib/resume/normalize";
@@ -45,6 +45,21 @@ export default function TailorModal({
   const [packOpen, setPackOpen] = useState(false);
   const [diffOpen, setDiffOpen] = useState(false);
   const tailorBefore = useDocStore((s) => s.tailorBefore);
+
+  // Pré-remplissage depuis l'onglet Offres à l'ouverture : `setJobDesc` est un ajustement d'état
+  // au rendu (pattern React « adjust state while rendering »), et la consommation du pending
+  // (setter zustand) se fait dans un effet — évite un setState React dans l'effet.
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    const pending = useDocStore.getState().pendingJobDesc;
+    if (open && pending) setJobDesc(pending);
+  }
+  useEffect(() => {
+    if (open && useDocStore.getState().pendingJobDesc) {
+      useDocStore.getState().setPendingJobDesc(null);
+    }
+  }, [open]);
 
   if (!open) return null;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDocStore } from "@/state/docStore";
 import { defaultJsonFor } from "@/state/docStore";
 import { takeSnapshot } from "@/lib/storage/snapshots";
@@ -14,9 +14,19 @@ import TailorModal from "@/components/modals/TailorModal";
 export default function ActionsBar() {
   const docType = useDocStore((s) => s.docType);
   const setJson = useDocStore((s) => s.setJson);
-  const [tailorOpen, setTailorOpen] = useState(false);
+  const pendingJobDesc = useDocStore((s) => s.pendingJobDesc);
+  // Arrivée depuis l'onglet Offres (« Adapter mon CV ») : la page est remontée après navigation,
+  // donc l'ouverture initiale se décide ici (TailorModal consomme le pending à l'ouverture).
+  const [tailorOpen, setTailorOpen] = useState(
+    () => typeof window !== "undefined" && Boolean(useDocStore.getState().pendingJobDesc),
+  );
 
   const canTailor = docType === "CV" || docType === "Maître";
+
+  // Snapshot « avant adaptation » quand une offre arrive (écriture externe, pas de setState).
+  useEffect(() => {
+    if (pendingJobDesc) takeSnapshot("Avant adaptation");
+  }, [pendingJobDesc]);
 
   const onClear = async () => {
     if (!(await uiConfirm("Effacer le document courant et repartir d'un modèle vierge ?", "Effacer"))) return;
@@ -29,7 +39,7 @@ export default function ActionsBar() {
       {canTailor ? (
         <button
           type="button"
-          className="btn-nav"
+          className="btn-nav btn-orange"
           title="Importer une offre & adapter le CV avec l'IA"
           onClick={() => { takeSnapshot("Avant adaptation"); setTailorOpen(true); }}
         >
