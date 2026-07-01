@@ -1,0 +1,80 @@
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { getToken, fetchOffers, isExcluded, mapOffer, type RawOffer } from "./francetravail";
+import { DEFAULT_PROFILE } from "./profile";
+
+afterEach(() => vi.unstubAllGlobals());
+
+describe("isExcluded", () => {
+  const ex = DEFAULT_PROFILE.excludedWords;
+
+  it("exclut via le drapeau alternance", () => {
+    expect(isExcluded({ alternance: true, intitule: "Webmaster" }, ex)).toBe(true);
+  });
+
+  it("exclut un mot interdit dans la description", () => {
+    expect(isExcluded({ intitule: "Dev", description: "contrat d'apprentissage" }, ex)).toBe(true);
+  });
+
+  it("exclut « stage » en mot isolé (tirets = séparateurs)", () => {
+    expect(isExcluded({ intitule: "Offre de stage-web" }, ex)).toBe(true);
+  });
+
+  it("n'exclut pas un mot contenant « stage » (ex. stagecoach)", () => {
+    expect(isExcluded({ intitule: "Webmaster stagecoach" }, ex)).toBe(false);
+  });
+
+  it("garde une offre CDI normale", () => {
+    expect(isExcluded({ intitule: "Webmaster", description: "CDI", typeContratLibelle: "CDI" }, ex)).toBe(false);
+  });
+});
+
+describe("mapOffer", () => {
+  it("normalise et tronque la description", () => {
+    const raw: RawOffer = {
+      id: "42",
+      intitule: "Webmaster",
+      description: "x".repeat(5000),
+      entreprise: { nom: "ACME" },
+      lieuTravail: { libelle: "75 - Paris" },
+      origineOffre: { urlOrigine: "https://ex.fr/42" },
+    };
+    const out = mapOffer(raw, 3000);
+    expect(out).toMatchObject({ id: "42", title: "Webmaster", company: "ACME", location: "75 - Paris", url: "https://ex.fr/42" });
+    expect(out.jobText).toHaveLength(3000);
+  });
+
+  it("tolère les champs manquants", () => {
+    expect(mapOffer({}, 3000)).toEqual({ id: "", title: "", company: "", location: "", url: "", jobText: "" });
+  });
+});
+
+describe("getToken", () => {
+  it("renvoie l'access_token", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, json: async () => ({ access_token: "tok" }) })));
+    expect(await getToken("id", "secret")).toBe("tok");
+  });
+
+  it("lève si la réponse n'est pas ok", async () => {
+    vi.stubGlobal("fetch", async () => ({ ok: false, status: 401, json: async () => ({}) }));
+    await expect(getToken("id", "secret")).rejects.toThrow(/France Travail/);
+  });
+});
+
+describe("fetchOffers", () => {
+  it("renvoie resultats sur 200", async () => {
+    const fetchMock = vi.fn(async () => ({ status: 200, json: async () => ({ resultats: [{ id: "1" }] }) }));
+    vi.stubGlobal("fetch", fetchMock);
+    const out = await fetchOffers("tok", "SEO", DEFAULT_PROFILE);
+    expect(out).toEqual([{ id: "1" }]);
+    const [url] = fetchMock.mock.calls[0] as unknown as [string];
+    expect(url).toContain("offresdemploi/v2/offres/search");
+    expect(url).toContain("motsCles=SEO");
+    expect(url).toContain("minCreationDate=");
+    expect(url).toContain("maxCreationDate=");
+  });
+
+  it("renvoie [] sur un statut inattendu", async () => {
+    vi.stubGlobal("fetch", async () => ({ status: 500, json: async () => ({}) }));
+    expect(await fetchOffers("tok", "SEO", DEFAULT_PROFILE)).toEqual([]);
+  });
+});

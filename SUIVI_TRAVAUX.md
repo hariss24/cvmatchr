@@ -75,7 +75,7 @@ implémenter maintenant, mais ne pas fermer la porte) :
 ### Étapes (checklist — à affiner dans le plan d'implémentation)
 - [x] Spec écrite dans `docs/superpowers/specs/2026-07-01-offres-nextjs-design.md` — ⏳ relecture utilisateur en attente.
 - [ ] Plan d'implémentation (writing-plans).
-- [ ] `lib/jobs/` (constantes profil, filtre, mapping, prompt scoring) + tests.
+- [x] `lib/jobs/` (profil paramétrable, FT, trajet, scoring) + `completeJson` + tests (20 verts).
 - [ ] Route `/api/jobs/search` + test.
 - [ ] Route `/api/jobs/score` + test.
 - [ ] Table Dexie `jobs` + fonctions + tests.
@@ -84,10 +84,9 @@ implémenter maintenant, mais ne pas fermer la porte) :
 - [ ] Doc (README/CLAUDE.md : variables d'env) + vérif bout-en-bout en prod.
 
 ### ➡️ Prochaine action
-Spec rédigée + commitée. **Attendre la relecture/validation de l'utilisateur** sur
-`docs/superpowers/specs/2026-07-01-offres-nextjs-design.md`. Une fois validée → plan d'implémentation
-(skill writing-plans), puis exécution étape par étape (voir checklist). Au démarrage du dev :
-vérifier que `agent-taff/bot.py` existe (source du code à porter : get_commute_times, prompt scoring).
+Plan validé (`C:\Users\tahet\.claude\plans\majestic-questing-dewdrop.md`). **Étape 1 faite** (socle
+`lib/jobs/`). **Étape 2 en cours** : routes API `/api/jobs/search` + `/api/jobs/score` (runtime nodejs)
++ helper `resolveProfile` + tests. Puis étape 3 (Dexie), 4 (jonction), 5 (écran /jobs), 6 (doc + vérif prod).
 
 ### Blocages / décisions en attente
 - (aucun pour l'instant)
@@ -112,3 +111,10 @@ vérifier que `agent-taff/bot.py` existe (source du code à porter : get_commute
   profil candidat) + `DEFAULT_PROFILE` (Hariss) unique ; toutes les fonctions `lib/jobs/` prennent le
   profil en argument ; routes via helper `resolveProfile(req)` (défaut aujourd'hui, compte/body demain).
   §7 SaaS détaille les futurs paramètres. Multi-user reste **hors périmètre v1** (YAGNI). Commit spec révisée.
+- 2026-07-01 — **Étape 1 (socle lib/jobs)**. Créé `web/src/lib/jobs/` : `profile.ts` (type
+  `JobSearchProfile` + `DEFAULT_PROFILE` Hariss, 29 mots-clés, modes transit/vélo/marche, seuils),
+  `francetravail.ts` (`getToken` OAuth, `fetchOffers` avec min+maxCreationDate, `isExcluded`, `mapOffer`),
+  `maps.ts` (`getCommuteTimes` via Distance Matrix REST + `commuteSummary`), `score.ts` (`scoreOffer` →
+  `completeJson`, bornage 0-100). Ajout `completeJson` (Gemini response schema) à `lib/ai/clients.ts`.
+  Tests : `francetravail/maps/score.test.ts`. Vérif : `tsc --noEmit` OK, `vitest run` = **164 tests verts**
+  (dont 20 nouveaux), 0 régression. Pas de nouvelle dépendance npm (fetch natif).

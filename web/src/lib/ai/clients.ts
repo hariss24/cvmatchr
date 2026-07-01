@@ -1,4 +1,4 @@
-import { GoogleGenAI, type Part } from "@google/genai";
+import { GoogleGenAI, type Part, type Schema } from "@google/genai";
 import Anthropic from "@anthropic-ai/sdk";
 
 /**
@@ -175,6 +175,37 @@ async function completeGemini(
       model: GEMINI_MODEL,
       contents,
       config: { systemInstruction: system },
+    });
+    return response.text ?? "";
+  } catch (err) {
+    rethrowGeminiError(err);
+  }
+}
+
+/**
+ * Complétion Gemini à sortie JSON structurée (response schema). Utilisée pour le scoring d'offres.
+ * Gemini uniquement (le schéma structuré n'est pas porté sur Anthropic). Renvoie le texte JSON brut.
+ */
+export async function completeJson(
+  prompt: string,
+  system: string,
+  schema: Schema,
+  apiKey?: string | null,
+): Promise<string> {
+  const key = requireKey(apiKey);
+  if (isAnthropicKey(key)) {
+    throw new Error("La notation d'offres nécessite une clé Gemini (sortie JSON structurée).");
+  }
+  const ai = new GoogleGenAI({ apiKey: key });
+  try {
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt,
+      config: {
+        systemInstruction: system,
+        responseMimeType: "application/json",
+        responseSchema: schema,
+      },
     });
     return response.text ?? "";
   } catch (err) {
