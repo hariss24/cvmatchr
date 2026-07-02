@@ -37,9 +37,10 @@ describe("mapOffer", () => {
       entreprise: { nom: "ACME" },
       lieuTravail: { libelle: "75 - Paris", latitude: 48.8, longitude: 2.3 },
       origineOffre: { urlOrigine: "https://ex.fr/42" },
+      dateCreation: "2026-06-30T10:00:00Z",
     };
     const out = mapOffer(raw, 3000);
-    expect(out).toMatchObject({ id: "42", title: "Webmaster", company: "ACME", location: "75 - Paris", url: "https://ex.fr/42", commuteDestination: "48.8,2.3" });
+    expect(out).toMatchObject({ id: "42", title: "Webmaster", company: "ACME", location: "75 - Paris", url: "https://ex.fr/42", commuteDestination: "48.8,2.3", publishedAt: "2026-06-30T10:00:00Z" });
     expect(out.jobText).toHaveLength(3000);
   });
 
@@ -48,7 +49,7 @@ describe("mapOffer", () => {
   });
 
   it("tolère les champs manquants", () => {
-    expect(mapOffer({}, 3000)).toEqual({ id: "", title: "", company: "", location: "", commuteDestination: "", url: "", jobText: "" });
+    expect(mapOffer({}, 3000)).toEqual({ id: "", title: "", company: "", location: "", commuteDestination: "", url: "", jobText: "", publishedAt: "" });
   });
 });
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { listJobs, saveJob, jobExists, setJobStatus, type JobEntry } from "@/lib/storage/db";
+import { listJobs, saveJob, saveExplored, markJobSeen, jobExists, setJobStatus, type JobEntry } from "@/lib/storage/db";
 import { useDocStore } from "@/state/docStore";
 import { toast } from "@/state/uiStore";
 import type { JobOffer } from "@/lib/jobs/francetravail";
@@ -96,9 +96,14 @@ export default function JobsView() {
             score: d.score,
             url: offer.url,
             jobText: offer.jobText,
+            publishedAt: offer.publishedAt,
             status: "new",
+            seen: false,
           });
           retained++;
+        } else if (typeof d.score === "number") {
+          // Offre explorée mais sous le seuil : mémorisée pour ne jamais la re-noter.
+          await saveExplored(offer.id, d.score);
         }
         setProgress({ phase: "Notation des offres…", found: toScore.length, scored, retained });
       }
@@ -112,7 +117,8 @@ export default function JobsView() {
     }
   }
 
-  function adapt(job: JobEntry) {
+  async function adapt(job: JobEntry) {
+    await markJobSeen(job.id);
     setPendingJobDesc(job.jobText);
     router.push("/");
   }
@@ -120,6 +126,18 @@ export default function JobsView() {
   async function dismiss(job: JobEntry) {
     await setJobStatus(job.id, "dismissed");
     setJobs((prev) => prev.filter((j) => j.id !== job.id));
+    toast("Offre masquée.", "info", {
+      label: "Annuler",
+      onClick: async () => {
+        await setJobStatus(job.id, "new");
+        await reload();
+      },
+    });
+  }
+
+  async function seen(job: JobEntry) {
+    await markJobSeen(job.id);
+    setJobs((prev) => prev.map((j) => (j.id === job.id ? { ...j, seen: true } : j)));
   }
 
   if (configMsg) {
@@ -156,7 +174,7 @@ export default function JobsView() {
       ) : (
         <div className="jobs-list" data-testid="jobs-list">
           {jobs.map((job) => (
-            <JobCard key={job.id} job={job} onAdapt={adapt} onDismiss={dismiss} />
+            <JobCard key={job.id} job={job} onAdapt={adapt} onDismiss={dismiss} onSeen={seen} />
           ))}
         </div>
       )}

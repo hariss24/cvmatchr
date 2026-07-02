@@ -284,6 +284,12 @@ button.ghost:active { box-shadow: var(--neu-inset); transform: translateY(1px); 
 .ui-toast--success { border-left-color: var(--success); }
 .ui-toast--error { border-left-color: var(--error); }
 .ui-toast--info { border-left-color: var(--blue); }
+.ui-toast { display: flex; align-items: center; gap: 12px; }
+.ui-toast__message { flex: 1; }
+.ui-toast__action {
+  flex-shrink: 0; background: none; border: none; cursor: pointer;
+  color: var(--orange); font-weight: 700; font-size: 13px; padding: 2px 4px;
+}
 
 /* ---- Modale d'adaptation IA ---- */
 .tailor-modal { max-width: 520px; }
@@ -512,6 +518,12 @@ button.ghost:active { box-shadow: var(--neu-inset); transform: translateY(1px); 
 
 /* ---- Formulaire ---- */
 .form-editor { overflow-y: auto; padding: 16px; gap: 20px; }
+.form-import-pdf {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  margin-bottom: 18px; padding: 12px 16px;
+  background: var(--bg); border-radius: 12px; box-shadow: var(--neu-inset);
+}
+.form-import-pdf__hint { font-size: 13px; color: var(--muted); font-weight: 500; }
 .form-section { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
 .form-section__title {
   font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;
@@ -747,7 +759,13 @@ button.go:disabled {
 
 .job-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .job-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.job-new-badge {
+  display: inline-block; margin-right: 8px; padding: 1px 7px; border-radius: 999px;
+  background: var(--orange); color: #fff; font-size: 10px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle;
+}
 .job-meta { font-size: 13px; color: var(--muted); font-weight: 500; }
+.job-date { font-size: 12px; color: var(--faint); font-weight: 500; }
 .job-commute { font-size: 12px; color: var(--faint); font-family: var(--font-code); }
 
 .job-actions { display: flex; gap: 8px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }

@@ -27,6 +27,7 @@ export interface JobOffer {
   commuteDestination: string; // "lat,lng" si dispo, sinon libellé (calcul trajet) ; "" si absent
   url: string;
   jobText: string;
+  publishedAt: string;     // date de création de l'offre (ISO France Travail) ; "" si absente
 }
 
 const TOKEN_URL = "https://entreprise.francetravail.fr/connexion/oauth2/access_token";
@@ -114,5 +115,6 @@ export function mapOffer(offer: RawOffer, maxDescriptionChars: number): JobOffer
     commuteDestination: commuteDestination(offer),
     url: offer.origineOffre?.urlOrigine ?? "",
     jobText: (offer.description ?? "").slice(0, maxDescriptionChars),
+    publishedAt: offer.dateCreation ?? "",
   };
 }

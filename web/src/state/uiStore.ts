@@ -17,14 +17,15 @@ export type DialogState = {
 } | null;
 
 export type ToastType = "info" | "success" | "error";
-export type Toast = { id: number; message: string; type: ToastType };
+export type ToastAction = { label: string; onClick: () => void };
+export type Toast = { id: number; message: string; type: ToastType; action?: ToastAction };
 
 type UiStore = {
   dialog: DialogState;
   toasts: Toast[];
   openDialog: (d: NonNullable<DialogState>) => void;
   closeDialog: (value: boolean | string | null | void) => void;
-  pushToast: (message: string, type: ToastType) => void;
+  pushToast: (message: string, type: ToastType, action?: ToastAction) => void;
   removeToast: (id: number) => void;
 };
 
@@ -41,8 +42,8 @@ export const useUiStore = create<UiStore>((set, get) => ({
     d?.resolve(value);
   },
 
-  pushToast: (message, type) =>
-    set((s) => ({ toasts: [...s.toasts, { id: ++toastSeq, message, type }] })),
+  pushToast: (message, type, action) =>
+    set((s) => ({ toasts: [...s.toasts, { id: ++toastSeq, message, type, action }] })),
   removeToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
 }));
 
@@ -85,7 +86,7 @@ export function uiPrompt(message: string, defaultValue = "", title?: string): Pr
   });
 }
 
-/** Notification éphémère. */
-export function toast(message: string, type: ToastType = "info"): void {
-  useUiStore.getState().pushToast(message, type);
+/** Notification éphémère (avec un bouton d'action optionnel, ex. « Annuler »). */
+export function toast(message: string, type: ToastType = "info", action?: ToastAction): void {
+  useUiStore.getState().pushToast(message, type, action);
 }

@@ -59,7 +59,9 @@ export interface JobEntry {
   score: number;       // note IA /100
   url: string;         // lien vers l'offre d'origine
   jobText: string;     // description (pour « Adapter mon CV »)
-  status: "new" | "dismissed";
+  status: "new" | "dismissed" | "hidden"; // hidden = explorée mais sous le seuil (mémorisée, non affichée)
+  seen?: boolean;      // false = pas encore consultée (badge « Nouveau ») ; absent/true = déjà vue
+  publishedAt?: string; // date de publication de l'offre (ISO France Travail)
 }
 
 // ---------------------------------------------------------------------------
@@ -254,5 +256,35 @@ export async function setJobStatus(id: string, status: JobEntry["status"]) {
     await db.jobs.update(id, { status });
   } catch (e) {
     console.warn("setJobStatus error:", e);
+  }
+}
+
+/** Mémorise une offre explorée mais sous le seuil (marqueur minimal) pour ne jamais la re-noter. */
+export async function saveExplored(id: string, score: number) {
+  try {
+    await db.jobs.put({
+      id,
+      createdAt: Date.now(),
+      title: "",
+      company: "",
+      location: "",
+      commute: "",
+      score,
+      url: "",
+      jobText: "",
+      status: "hidden",
+      seen: true,
+    });
+  } catch (e) {
+    console.warn("saveExplored error:", e);
+  }
+}
+
+/** Marque une offre comme consultée (retire le badge « Nouveau »). */
+export async function markJobSeen(id: string) {
+  try {
+    await db.jobs.update(id, { seen: true });
+  } catch (e) {
+    console.warn("markJobSeen error:", e);
   }
 }

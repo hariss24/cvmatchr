@@ -85,7 +85,8 @@ function ToastHost() {
 
   useEffect(() => {
     if (toasts.length === 0) return;
-    const timers = toasts.map((t) => setTimeout(() => removeToast(t.id), 3500));
+    // Toast avec action (ex. « Annuler ») : laisser plus de temps pour réagir.
+    const timers = toasts.map((t) => setTimeout(() => removeToast(t.id), t.action ? 6000 : 3500));
     return () => timers.forEach(clearTimeout);
   }, [toasts, removeToast]);
 
@@ -95,7 +96,20 @@ function ToastHost() {
     <div className="ui-toasts" role="status" aria-live="polite">
       {toasts.map((t) => (
         <div key={t.id} className={`ui-toast ui-toast--${t.type}`} onClick={() => removeToast(t.id)}>
-          {t.message}
+          <span className="ui-toast__message">{t.message}</span>
+          {t.action ? (
+            <button
+              type="button"
+              className="ui-toast__action"
+              onClick={(e) => {
+                e.stopPropagation();
+                t.action?.onClick();
+                removeToast(t.id);
+              }}
+            >
+              {t.action.label}
+            </button>
+          ) : null}
         </div>
       ))}
     </div>

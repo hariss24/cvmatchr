@@ -207,7 +207,7 @@ export default function EditorPane() {
       </div>
 
       {tab === "form" ? (
-        docType === "Lettre" ? <LetterForm /> : <FormEditor />
+        docType === "Lettre" ? <LetterForm /> : <FormEditor onImportPdf={() => setImportPdfOpen(true)} />
       ) : tab === "import" ? (
         <div className="import-pane">
           <p className="import-hint">

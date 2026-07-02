@@ -14,6 +14,7 @@ const OFFER = {
   commuteDestination: "48.8,2.3",
   url: "https://example.fr/offre/1",
   jobText: "Offre de Webmaster SEO chez ACME, missions SEO et WordPress.",
+  publishedAt: "2026-06-30T10:00:00Z",
 };
 
 async function mockScanOk(page: import("@playwright/test").Page) {
@@ -27,7 +28,7 @@ async function mockScanOk(page: import("@playwright/test").Page) {
   );
 }
 
-test("le scan affiche une offre notée", async ({ page }) => {
+test("le scan affiche une offre notée, datée et marquée « Nouveau »", async ({ page }) => {
   await mockScanOk(page);
   await page.goto("/jobs");
   await page.getByTestId("jobs-scan").click();
@@ -37,6 +38,8 @@ test("le scan affiche une offre notée", async ({ page }) => {
   await expect(card).toContainText("Webmaster SEO");
   await expect(card).toContainText("88");
   await expect(card).toContainText("TC: 25 min");
+  await expect(card).toContainText("Publié le 30/06/2026");
+  await expect(card.getByTestId("job-new")).toBeVisible();
 });
 
 test("« Adapter mon CV » ouvre l'éditeur avec la modale pré-remplie", async ({ page }) => {
@@ -51,7 +54,7 @@ test("« Adapter mon CV » ouvre l'éditeur avec la modale pré-remplie", async 
   await expect(page.locator("#job-desc-input")).toHaveValue(/Webmaster SEO chez ACME/);
 });
 
-test("« Masquer » retire l'offre", async ({ page }) => {
+test("« Pas intéressé » retire l'offre, « Annuler » la restaure", async ({ page }) => {
   await mockScanOk(page);
   await page.goto("/jobs");
   await page.getByTestId("jobs-scan").click();
@@ -59,6 +62,43 @@ test("« Masquer » retire l'offre", async ({ page }) => {
 
   await page.getByTestId("job-dismiss").click();
   await expect(page.getByTestId("job-card")).toHaveCount(0);
+
+  // Le toast propose « Annuler » → l'offre revient.
+  await page.getByRole("button", { name: "Annuler" }).click();
+  await expect(page.getByTestId("job-card")).toHaveCount(1);
+});
+
+test("une offre déjà explorée n'est pas re-notée, et le badge s'efface au clic", async ({ page }) => {
+  let scoreCalls = 0;
+  await page.route("**/api/jobs/search", (route) =>
+    route.fulfill({ json: { offers: [OFFER], scoreLimit: 40, minScore: 70 } }),
+  );
+  await page.route("**/api/jobs/score", (route) => {
+    scoreCalls++;
+    route.fulfill({ json: { score: 88, breakdown: { total_score: 88 }, commute: {}, commuteText: "TC: 25 min" } });
+  });
+  // Empêche le popup « Voir l'offre » de partir sur le réseau.
+  await page.route("**example.fr**", (route) => route.fulfill({ body: "ok" }));
+
+  await page.goto("/jobs");
+  await page.getByTestId("jobs-scan").click();
+  await expect(page.getByTestId("job-card")).toHaveCount(1);
+  await expect(page.getByTestId("jobs-scan")).toBeEnabled();
+  expect(scoreCalls).toBe(1);
+
+  // 2e scan : l'offre est déjà en base → pas de nouvelle notation, badge « Nouveau » conservé.
+  await page.getByTestId("jobs-scan").click();
+  await expect(page.getByTestId("jobs-scan")).toBeEnabled();
+  expect(scoreCalls).toBe(1);
+  await expect(page.getByTestId("job-new")).toBeVisible();
+
+  // Clic sur « Voir l'offre » → l'offre est consultée → le badge disparaît.
+  const [popup] = await Promise.all([
+    page.waitForEvent("popup"),
+    page.getByRole("link", { name: "Voir l'offre" }).click(),
+  ]);
+  await popup.close();
+  await expect(page.getByTestId("job-new")).toHaveCount(0);
 });
 
 test("écran de configuration si les clés manquent", async ({ page }) => {

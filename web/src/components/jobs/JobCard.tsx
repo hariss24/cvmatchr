@@ -1,16 +1,27 @@
 import type { JobEntry } from "@/lib/storage/db";
 
-/** Carte d'une offre retenue : infos + score + actions (« Adapter mon CV » / « Masquer »). */
+/** Date de publication lisible (« Publié le 12/06/2026 ») ou null si absente/invalide. */
+function publishedLabel(iso?: string): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return `Publié le ${d.toLocaleDateString("fr-FR")}`;
+}
+
+/** Carte d'une offre retenue : infos + score + actions (« Adapter mon CV » / « Pas intéressé »). */
 export default function JobCard({
   job,
   onAdapt,
   onDismiss,
+  onSeen,
 }: {
   job: JobEntry;
   onAdapt: (job: JobEntry) => void;
   onDismiss: (job: JobEntry) => void;
+  onSeen: (job: JobEntry) => void;
 }) {
   const tier = job.score >= 85 ? "high" : job.score >= 70 ? "mid" : "low";
+  const published = publishedLabel(job.publishedAt);
 
   return (
     <div className="job-card" data-testid="job-card">
@@ -20,11 +31,15 @@ export default function JobCard({
       </div>
 
       <div className="job-main">
-        <div className="job-title">{job.title || "Sans titre"}</div>
+        <div className="job-title">
+          {job.seen === false ? <span className="job-new-badge" data-testid="job-new">Nouveau</span> : null}
+          {job.title || "Sans titre"}
+        </div>
         <div className="job-meta">
           {job.company || "Entreprise inconnue"}
           {job.location ? ` · ${job.location}` : ""}
         </div>
+        {published ? <div className="job-date">{published}</div> : null}
         {job.commute ? <div className="job-commute">🚉 {job.commute}</div> : null}
       </div>
 
@@ -33,12 +48,18 @@ export default function JobCard({
           Adapter mon CV
         </button>
         {job.url ? (
-          <a className="neu-btn-sm" href={job.url} target="_blank" rel="noopener noreferrer">
+          <a
+            className="neu-btn-sm"
+            href={job.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => onSeen(job)}
+          >
             Voir l&apos;offre
           </a>
         ) : null}
         <button type="button" className="neu-btn-sm danger" onClick={() => onDismiss(job)} data-testid="job-dismiss">
-          Masquer
+          Pas intéressé
         </button>
       </div>
     </div>

@@ -17,7 +17,7 @@ import type {
  * Toutes les sections du CV sont éditables. Le formulaire Lettre suivra (étape 4).
  * La photo base64 est stockée telle quelle ; elle n'est JAMAIS envoyée à l'IA (Phase 5).
  */
-export default function FormEditor() {
+export default function FormEditor({ onImportPdf }: { onImportPdf?: () => void }) {
   const docType = useDocStore((s) => s.docType);
   const json = useDocStore((s) => s.json);
   const setJson = useDocStore((s) => s.setJson);
@@ -47,6 +47,14 @@ export default function FormEditor() {
 
   return (
     <div className="pane-body form-editor">
+        {onImportPdf ? (
+          <div className="form-import-pdf">
+            <span className="form-import-pdf__hint">Préremplis le formulaire depuis un CV PDF</span>
+            <button type="button" className="form-btn-add" onClick={onImportPdf} data-testid="form-import-pdf">
+              Importer un PDF
+            </button>
+          </div>
+        ) : null}
         <section className="form-section">
           <h3 className="form-section__title">Informations personnelles</h3>
           <div className="form-grid">
