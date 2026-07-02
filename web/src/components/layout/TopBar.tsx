@@ -4,12 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useDocStore } from "@/state/docStore";
 import { DEFAULT_RESUME, type Resume } from "@/lib/resume/schema";
-import { toast, uiAlert, uiConfirm, uiPrompt } from "@/state/uiStore";
+import { promptApiKey } from "@/lib/settings";
+import { toast, uiAlert, uiConfirm } from "@/state/uiStore";
 import { saveHistoryEntry } from "@/lib/storage/db";
 import { takeSnapshot } from "@/lib/storage/snapshots";
 import ChatPanel from "@/components/modals/ChatPanel";
-
-const STORAGE_KEY_APIKEY = "userApiKey";
 
 function slug(s: string): string {
   return s.trim()
@@ -58,22 +57,7 @@ export default function TopBar() {
     toast("Nouveau CV.", "success");
   };
 
-  const onSettings = async () => {
-    const current = localStorage.getItem(STORAGE_KEY_APIKEY) || "";
-    const v = await uiPrompt(
-      "Collez votre clé API (Gemini ou Anthropic). Laissez vide pour utiliser la clé serveur.",
-      current,
-      "Paramètres API"
-    );
-    if (v === null) return;
-    if (v.trim()) {
-      localStorage.setItem(STORAGE_KEY_APIKEY, v.trim());
-      toast("Clé API enregistrée.", "success");
-    } else {
-      localStorage.removeItem(STORAGE_KEY_APIKEY);
-      toast("Clé API effacée (clé serveur utilisée).", "success");
-    }
-  };
+  const onSettings = () => { void promptApiKey(); };
 
   const onConvert = useCallback(async () => {
     if (busy) return;

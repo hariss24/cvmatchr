@@ -774,3 +774,23 @@ button.go:disabled {
   .job-card { grid-template-columns: 64px 1fr; }
   .job-actions { grid-column: 1 / -1; justify-content: flex-start; }
 }
+
+/* ---- Aide « Comment ça marche ? » ---- */
+.actions-help {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg); color: var(--text);
+  border: none; border-radius: 12px;
+  padding: 10px 14px; font-size: 13px; font-family: var(--font-ui); cursor: pointer;
+  box-shadow: var(--neu-raised-sm);
+}
+.actions-help:hover { box-shadow: var(--neu-raised); }
+.actions-help:active { box-shadow: var(--neu-inset); }
+
+.help-modal { max-width: 560px; max-height: 85vh; display: flex; flex-direction: column; }
+.help-body { overflow-y: auto; margin: 14px 0; display: flex; flex-direction: column; gap: 18px; flex: 1; min-height: 0; }
+.help-section__title { margin: 0 0 6px; font-size: 14px; font-weight: 700; color: var(--text); }
+.help-section p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
+.help-steps, .help-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.help-steps li, .help-list li { font-size: 13px; color: var(--muted); line-height: 1.45; }
+.help-section .go { margin-top: 10px; }
