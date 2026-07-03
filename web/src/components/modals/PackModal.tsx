@@ -96,7 +96,7 @@ export default function PackModal({ open, onClose }: { open: boolean; onClose: (
   return (
     <div className="ui-overlay" role="presentation" onClick={busy ? undefined : onClose}>
       <div
-        className="ui-dialog pack-modal"
+        className={result ? "ui-dialog pack-modal pack-modal--result" : "ui-dialog pack-modal"}
         role="dialog"
         aria-modal="true"
         aria-label="Pack candidature"
@@ -108,7 +108,7 @@ export default function PackModal({ open, onClose }: { open: boolean; onClose: (
 
         <textarea
           className="form-textarea"
-          rows={5}
+          rows={result ? 3 : 5}
           placeholder="Colle ici le texte de l'offre d'emploi, ou utilise l'extracteur ci-dessus…"
           value={jobDesc}
           onChange={(e) => setJobDesc(e.target.value)}
@@ -139,22 +139,26 @@ export default function PackModal({ open, onClose }: { open: boolean; onClose: (
 
         {result ? (
           <div className="pack-result">
-            <div className="pack-letter-title">Lettre de motivation</div>
-            <iframe
-              className="pack-letter-frame"
-              title="Aperçu de la lettre"
-              sandbox=""
-              srcDoc={mergeHtml(result.letter_html, result.letter_css)}
-            />
-            <button type="button" className="form-btn-mini" onClick={loadLetter} disabled={busy}>
-              {"Insérer dans l'éditeur (Lettre)"}
-            </button>
+            <div className="pack-col">
+              <div className="pack-letter-title">Lettre de motivation</div>
+              <iframe
+                className="pack-letter-frame"
+                title="Aperçu de la lettre"
+                sandbox=""
+                srcDoc={mergeHtml(result.letter_html, result.letter_css)}
+              />
+              <button type="button" className="go" onClick={loadLetter} disabled={busy}>
+                {"Insérer dans l'éditeur (Lettre)"}
+              </button>
+            </div>
 
-            <div className="pack-letter-title">{"Email d'accompagnement"}</div>
-            <textarea className="form-textarea" rows={6} readOnly value={result.email} />
-            <button type="button" className="form-btn-mini" onClick={copyEmail} disabled={busy}>
-              {"📋 Copier l'email"}
-            </button>
+            <div className="pack-col">
+              <div className="pack-letter-title">{"Email d'accompagnement"}</div>
+              <textarea className="form-textarea pack-email" readOnly value={result.email} />
+              <button type="button" className="go" onClick={copyEmail} disabled={busy}>
+                {"📋 Copier l'email"}
+              </button>
+            </div>
           </div>
         ) : null}
 

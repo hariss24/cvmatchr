@@ -29,11 +29,15 @@ test("le pack candidature génère lettre + email et insère la lettre dans l'é
     .fill("Développeur Full Stack React/Node, télétravail.");
   await page.locator(".pack-modal").getByRole("button", { name: "Générer le pack" }).click();
 
-  // L'aperçu de la lettre et l'email s'affichent.
+  // L'aperçu de la lettre et l'email s'affichent, côte à côte (lettre à gauche, email à droite).
   await expect(
     page.frameLocator(".pack-letter-frame").getByText("Madame, Monsieur"),
   ).toBeVisible();
   await expect(page.locator(".pack-result textarea")).toHaveValue(EMAIL_TEXT);
+  const letterBox = await page.locator(".pack-letter-frame").boundingBox();
+  const emailBox = await page.locator(".pack-result textarea").boundingBox();
+  expect(Math.abs(letterBox!.y - emailBox!.y)).toBeLessThan(5);
+  expect(emailBox!.x).toBeGreaterThan(letterBox!.x + letterBox!.width - 1);
 
   // Le CV (HTML) a bien été envoyé au serveur (clé cv_html présente).
   expect(sentBody).not.toBeNull();
