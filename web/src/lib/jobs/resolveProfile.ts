@@ -7,7 +7,7 @@ import { DEFAULT_PROFILE, type JobSearchProfile } from "./profile";
  * Demain, cette fonction lira le profil du compte (session) ou du corps de requête — les modules
  * `lib/jobs/` reçoivent déjà le profil en argument, donc rien d'autre ne changera.
  */
-export function resolveProfile(req: Request): JobSearchProfile {
+export function resolveProfile(req?: Request): JobSearchProfile {
   void req; // réservé pour la résolution par compte (SaaS)
   return DEFAULT_PROFILE;
 }

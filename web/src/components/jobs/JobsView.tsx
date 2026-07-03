@@ -6,6 +6,7 @@ import { listJobs, saveJob, saveExplored, markJobSeen, jobExists, setJobStatus, 
 import { useDocStore } from "@/state/docStore";
 import { toast } from "@/state/uiStore";
 import type { JobOffer } from "@/lib/jobs/francetravail";
+import { relevance } from "@/lib/jobs/prefilter";
 import ScanProgress from "./ScanProgress";
 import JobCard from "./JobCard";
 
@@ -19,7 +20,14 @@ import JobCard from "./JobCard";
 export type ScanState = { phase: string; found: number; scored: number; retained: number };
 const ZERO: ScanState = { phase: "", found: 0, scored: 0, retained: 0 };
 
-export default function JobsView() {
+export type JobsConfig = {
+  minScore: number;
+  aiShortlist: number;
+  prefilterKeywords: string[];
+  criteria: { label: string; max: number; description: string }[];
+};
+
+export default function JobsView({ config }: { config: JobsConfig }) {
   const [jobs, setJobs] = useState<JobEntry[]>([]);
   const [scanning, setScanning] = useState(false);
   const [progress, setProgress] = useState<ScanState>(ZERO);
@@ -53,15 +61,22 @@ export default function JobsView() {
       }
 
       const offers: JobOffer[] = data.offers ?? [];
-      const limit: number = data.scoreLimit ?? 40;
-      const minScore: number = data.minScore ?? 70;
+      const minScore = config.minScore;
 
       // Écarter les offres déjà en base (dédoublonnage local).
       const fresh: JobOffer[] = [];
       for (const o of offers) {
         if (o.id && !(await jobExists(o.id))) fresh.push(o);
       }
-      const toScore = fresh.slice(0, limit);
+
+      // Pré-filtre « Équilibré » : classer par pertinence mots-clés, écarter les offres
+      // à recoupement nul, ne noter que les meilleures (plafond aiShortlist). Zéro appel IA.
+      const toScore = fresh
+        .map((o) => ({ o, r: relevance(o, config.prefilterKeywords) }))
+        .filter((x) => x.r > 0)
+        .sort((a, b) => b.r - a.r)
+        .map((x) => x.o)
+        .slice(0, config.aiShortlist);
 
       let scored = 0;
       let retained = 0;

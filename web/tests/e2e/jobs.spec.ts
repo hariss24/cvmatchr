@@ -19,7 +19,7 @@ const OFFER = {
 
 async function mockScanOk(page: import("@playwright/test").Page) {
   await page.route("**/api/jobs/search", (route) =>
-    route.fulfill({ json: { offers: [OFFER], scoreLimit: 40, minScore: 70 } }),
+    route.fulfill({ json: { offers: [OFFER] } }),
   );
   await page.route("**/api/jobs/score", (route) =>
     route.fulfill({
@@ -71,7 +71,7 @@ test("« Pas intéressé » retire l'offre, « Annuler » la restaure", async ({
 test("une offre déjà explorée n'est pas re-notée, et le badge s'efface au clic", async ({ page }) => {
   let scoreCalls = 0;
   await page.route("**/api/jobs/search", (route) =>
-    route.fulfill({ json: { offers: [OFFER], scoreLimit: 40, minScore: 70 } }),
+    route.fulfill({ json: { offers: [OFFER] } }),
   );
   await page.route("**/api/jobs/score", (route) => {
     scoreCalls++;
@@ -99,6 +99,24 @@ test("une offre déjà explorée n'est pas re-notée, et le badge s'efface au cl
   ]);
   await popup.close();
   await expect(page.getByTestId("job-new")).toHaveCount(0);
+});
+
+test("une offre sans recoupement mots-clés n'est pas notée", async ({ page }) => {
+  let scoreCalls = 0;
+  const OFFTOPIC = { ...OFFER, id: "2", title: "Boulanger", jobText: "Pétrin, four et pâtisserie artisanale." };
+  await page.route("**/api/jobs/search", (route) =>
+    route.fulfill({ json: { offers: [OFFER, OFFTOPIC] } }),
+  );
+  await page.route("**/api/jobs/score", (route) => {
+    scoreCalls++;
+    route.fulfill({ json: { score: 88, breakdown: { total_score: 88 }, commute: {}, commuteText: "TC: 25 min" } });
+  });
+
+  await page.goto("/jobs");
+  await page.getByTestId("jobs-scan").click();
+  await expect(page.getByTestId("job-card")).toHaveCount(1);
+  await expect(page.getByTestId("jobs-scan")).toBeEnabled();
+  expect(scoreCalls).toBe(1); // seule l'offre pertinente (OFFER) est notée
 });
 
 test("écran de configuration si les clés manquent", async ({ page }) => {

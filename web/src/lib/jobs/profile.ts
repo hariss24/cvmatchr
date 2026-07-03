@@ -35,8 +35,6 @@ export interface JobSearchProfile {
   excludedWords: string[];
   /** Score minimum pour retenir une offre. */
   minScore: number;
-  /** Nombre maximum d'offres notées par recherche (garde-fou quota). */
-  scoreLimit: number;
   /** Troncature de la description envoyée à l'IA. */
   maxDescriptionChars: number;
   /** Résumé du candidat injecté dans le prompt de scoring. */
@@ -89,7 +87,6 @@ export const DEFAULT_PROFILE: JobSearchProfile = {
   maxAgeDays: 30,
   excludedWords: ["alternan", "apprenti", "stagiaire", "professionnalisation", "cfa"],
   minScore: 70,
-  scoreLimit: 40,
   maxDescriptionChars: 3000,
   candidateSummary:
     "Nom: Hariss Hafeji (Paris 75012)\n" +
