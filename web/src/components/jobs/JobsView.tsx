@@ -9,6 +9,7 @@ import type { JobOffer } from "@/lib/jobs/francetravail";
 import { relevance } from "@/lib/jobs/prefilter";
 import ScanProgress from "./ScanProgress";
 import JobCard from "./JobCard";
+import ScoringInfo from "./ScoringInfo";
 
 /**
  * Orchestrateur du scan d'offres (piloté par le navigateur, cf. spec §4) :
@@ -169,6 +170,7 @@ export default function JobsView({ config }: { config: JobsConfig }) {
 
   return (
     <div className="jobs-view">
+      <ScoringInfo criteria={config.criteria} minScore={config.minScore} />
       <div className="jobs-toolbar">
         <button
           type="button"

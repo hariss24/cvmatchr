@@ -119,6 +119,17 @@ test("une offre sans recoupement mots-clés n'est pas notée", async ({ page }) 
   expect(scoreCalls).toBe(1); // seule l'offre pertinente (OFFER) est notée
 });
 
+test("l'encart de notation s'ouvre et affiche la grille", async ({ page }) => {
+  await mockScanOk(page);
+  await page.goto("/jobs");
+
+  const info = page.getByTestId("scoring-info");
+  await expect(info).toBeVisible();
+  await info.locator("summary").click();
+  await expect(info.getByText("Technique")).toBeVisible();
+  await expect(info.getByText("Seuil de sélection")).toBeVisible();
+});
+
 test("écran de configuration si les clés manquent", async ({ page }) => {
   await page.route("**/api/jobs/search", (route) =>
     route.fulfill({ status: 400, json: { error: "config", message: "Configurez FT_CLIENT_ID et FT_CLIENT_SECRET." } }),
