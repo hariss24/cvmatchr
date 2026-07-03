@@ -18,14 +18,14 @@ test("l'ATS affiche un score local puis un score IA", async ({ page }) => {
   });
 
   await page.goto("/");
-  await page.getByRole("button", { name: "Score ATS" }).click();
-
+  // Le panneau ATS vit dans la modale « Adapter à une offre » (offre partagée).
+  await page.getByRole("button", { name: "Adapter à une offre" }).click();
   await page
-    .locator(".ats-modal .form-textarea")
+    .locator("#job-desc-input")
     .fill("Développeur React TypeScript Docker Kubernetes");
 
   // Analyse locale : un cercle de score apparaît.
-  await page.locator(".ats-modal").getByRole("button", { name: "Analyser", exact: true }).click();
+  await page.getByRole("button", { name: "Score ATS", exact: true }).click();
   await expect(page.locator(".ats-score-circle")).toBeVisible();
 
   // Analyse IA : le badge et le score mocké (82) s'affichent.
@@ -36,11 +36,11 @@ test("l'ATS affiche un score local puis un score IA", async ({ page }) => {
 
 test("le booster ATS injecte des mots-clés invisibles dans l'aperçu", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Score ATS" }).click();
+  await page.getByRole("button", { name: "Adapter à une offre" }).click();
   await page
-    .locator(".ats-modal .form-textarea")
+    .locator("#job-desc-input")
     .fill("Kubernetes Docker Terraform Golang Rust");
-  await page.locator(".ats-modal").getByRole("button", { name: "Analyser", exact: true }).click();
+  await page.getByRole("button", { name: "Score ATS", exact: true }).click();
 
   // Aucun span de boost au départ.
   const boostSpan = page

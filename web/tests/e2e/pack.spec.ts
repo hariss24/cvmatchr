@@ -20,7 +20,9 @@ test("le pack candidature génère lettre + email et insère la lettre dans l'é
   });
 
   await page.goto("/");
-  await page.getByRole("button", { name: "Pack candidature" }).click();
+  // Le pack se lance depuis la modale « Adapter à une offre ».
+  await page.getByRole("button", { name: "Adapter à une offre" }).click();
+  await page.getByRole("button", { name: "Créer le Pack candidature" }).click();
   await page
     .locator(".pack-modal .form-textarea")
     .first()
@@ -39,7 +41,7 @@ test("le pack candidature génère lettre + email et insère la lettre dans l'é
 
   // Insertion dans l'éditeur → bascule sur le type « Lettre » et l'aperçu montre la lettre.
   await page.getByRole("button", { name: /Insérer dans l'éditeur/ }).click();
-  await expect(page.locator(".toolbar-select").first()).toHaveValue("Lettre");
+  await expect(page.locator("#doc_type")).toHaveValue("Lettre");
   await expect(
     page.frameLocator(".preview-frame").getByText("Lettre générée par l'IA."),
   ).toBeVisible();

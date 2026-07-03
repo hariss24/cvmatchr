@@ -38,10 +38,8 @@ test("saisir un nom met à jour l'aperçu", async ({ page }) => {
 test("basculer CV → Lettre change le document", async ({ page }) => {
   await page.goto("/");
 
-  await page
-    .locator(".toolbar-select")
-    .first()
-    .selectOption("Lettre");
+  // Le type de document se choisit dans la barre meta (#doc_type).
+  await page.locator("#doc_type").selectOption("Lettre");
 
   // Le rendu d'une lettre contient la ligne « Objet : ».
   await expect(
@@ -49,9 +47,10 @@ test("basculer CV → Lettre change le document", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("l'onglet HTML affiche l'éditeur Monaco", async ({ page }) => {
+test("le Mode Expert affiche l'éditeur Monaco (onglet HTML)", async ({ page }) => {
   await page.goto("/");
 
-  await page.getByRole("button", { name: "HTML" }).click();
+  // « Mode Expert » ouvre directement l'onglet HTML.
+  await page.getByRole("button", { name: "Mode Expert" }).click();
   await expect(page.locator(".monaco-editor").first()).toBeVisible();
 });

@@ -24,13 +24,17 @@ test("adapter à une offre met à jour l'aperçu", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Adapter à une offre" }).click();
   await page
-    .locator(".tailor-modal .form-textarea")
+    .locator("#job-desc-input")
     .fill("Développeur Frontend React / TypeScript");
-  await page.locator(".tailor-modal").getByRole("button", { name: "Adapter" }).click();
+  await page
+    .locator(".tailor-modal-content")
+    .getByRole("button", { name: "Adapter le CV" })
+    .click();
 
-  // L'aperçu (iframe) reflète le CV adapté ; la modale se ferme.
+  // L'aperçu (iframe) reflète le CV adapté ; la modale reste ouverte (diff/pack/ATS).
   await expect(
     page.frameLocator(".preview-frame").getByText("Profil Adapté IA"),
   ).toBeVisible();
-  await expect(page.locator(".tailor-modal")).toHaveCount(0);
+  await page.locator(".tailor-modal-content").getByRole("button", { name: "Fermer" }).click();
+  await expect(page.locator(".tailor-modal-content")).toHaveCount(0);
 });
