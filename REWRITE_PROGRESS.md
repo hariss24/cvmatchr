@@ -53,11 +53,13 @@
 
 ## Prochaine action
 
-➡️ **Phase 1 — dérouler la Task 1 du plan** `docs/superpowers/plans/2026-07-04-react-pdf-phase-1.md` :
-installer `@react-pdf/renderer`, télécharger les polices TTF statiques (Roboto — substitut acté
-de Segoe UI ; Inter) dans `web/public/fonts/` + licences, écrire `fonts.ts`/`extractText.ts` et
-le smoke test Node (TDD : rouge → vert), vérifs globales, commit. Puis enchaîner Task 2
-(ResumeDocument Graphique) si le réveil le permet — sinon frontière propre après Task 1.
+➡️ **Phase 1 — Tasks 3 et 4 du plan** `docs/superpowers/plans/2026-07-04-react-pdf-phase-1.md` :
+(3) `LetterDocument` (port de `renderLetter`, police Inter, TDD) ; (4) prop `atsKeywords`
+(booster ATS invisible) sur les deux documents. Puis vérifs complètes (dont e2e 21/21),
+**fin de Phase 1** : push (module non branché → prod sans risque) + contrôle prod, synthèse
+au Journal, état des phases coché, « Prochaine action » → plan de la Phase 2.
+Astuce revalidation visuelle : recréer les 2 scripts temporaires décrits au Journal
+(test vitest `_visual` → sample.pdf, script Playwright + pdfjs par interception de route).
 
 ## Blocages (migration React PDF)
 
