@@ -41,8 +41,9 @@
 
 ## État des phases (migration React PDF)
 
-- [ ] **Phase 1 — Moteur de rendu React PDF** (`lib/pdfgen/` : fonts TTF, ResumeDocument,
-      LetterDocument, port ATS boost ; tests Node sans Chromium).
+- [x] **Phase 1 — Moteur de rendu React PDF** ✅ (2026-07-04) : `lib/pdfgen/` complet — fonts
+      TTF (Roboto/Inter), ResumeDocument (Graphique), LetterDocument, AtsBoost ; PDF Node sans
+      Chromium, typo validée visuellement, 196/196 + e2e 21/21.
 - [ ] **Phase 2 — Aperçu PDF.js + génération client + interrupteur `engine`** (Graphique seul).
       → 🛑 **checkpoint utilisateur** à la fin.
 - [ ] **Phase 3 — Flux IA 100 % JSON** (generate-pack → `Letter` JSON, editor-chat JSON,
@@ -53,13 +54,14 @@
 
 ## Prochaine action
 
-➡️ **Phase 1 — Tasks 3 et 4 du plan** `docs/superpowers/plans/2026-07-04-react-pdf-phase-1.md` :
-(3) `LetterDocument` (port de `renderLetter`, police Inter, TDD) ; (4) prop `atsKeywords`
-(booster ATS invisible) sur les deux documents. Puis vérifs complètes (dont e2e 21/21),
-**fin de Phase 1** : push (module non branché → prod sans risque) + contrôle prod, synthèse
-au Journal, état des phases coché, « Prochaine action » → plan de la Phase 2.
-Astuce revalidation visuelle : recréer les 2 scripts temporaires décrits au Journal
-(test vitest `_visual` → sample.pdf, script Playwright + pdfjs par interception de route).
+➡️ **Rédiger le plan détaillé de la Phase 2** (`docs/superpowers/plans/2026-07-XX-react-pdf-phase-2.md`,
+d'après le contrat de la Phase 2 du cadrage) : champ dérivé `engine: "pdf" | "html"` dans
+`docStore` (pdf ⇔ templateId "graphique"), aperçu PDF.js dans `PreviewPane` (génération client
+`pdf().toBlob()` debouncée, import dynamique, viewer canvas façon `pdfToImages.ts`, compteur de
+pages exact), « Convertir en PDF » = téléchargement du blob client quand `engine === "pdf"`
+(`/api/convert` conservé pour l'ancien moteur). Committer le plan, puis dérouler ses tâches.
+⚠️ Fin de Phase 2 = 🛑 **CHECKPOINT UTILISATEUR** (validation visuelle du Graphique) avant
+toute Phase 3. Astuce revalidation visuelle : scripts temporaires décrits au Journal.
 
 ## Blocages (migration React PDF)
 
@@ -342,3 +344,4 @@ Vérifié : Toolbar restauré, ClientLayout supprimé, `tsc` OK, **144 tests Vit
 - 2026-07-04 — **Migration React PDF : lancement du loop + plan Phase 1**. Dispositif décidé avec l'utilisateur : loop autonome auto-rythmé, push uniquement en fin de phase verte, checkpoint utilisateur obligatoire après la Phase 2 (validation visuelle du Graphique) — règles consignées en tête de ce fichier. Plan détaillé de la Phase 1 rédigé : `docs/superpowers/plans/2026-07-04-react-pdf-phase-1.md` (4 tasks TDD : fondations polices/smoke test Node, ResumeDocument Graphique + validation typographique précoce, LetterDocument, booster ATS intégré). Décision actée dans le plan : **Roboto** en substitut de Segoe UI (non redistribuable) pour le Graphique, **Inter** pour la Lettre — TTF statiques locaux dans `web/public/fonts/`, césure FR désactivée. Module `lib/pdfgen/` isolé : rien d'existant n'est touché en Phase 1.
 - 2026-07-04 — **Phase 1 / Task 1 : fondations react-pdf livrées**. `@react-pdf/renderer` 4.5.1 installé (0 vulnérabilité). 6 TTF statiques officiels téléchargés via l'API Google Fonts (UA sans woff2 → gstatic sert les TTF pleins, signature `00 01 00 00` vérifiée) dans `web/public/fonts/` : Roboto Regular/Italic/Medium/Bold + Inter Regular/Bold, licences OFL consignées (LICENSES.md). `lib/pdfgen/fonts.ts` (registre idempotent, chemins Node `process.cwd()` vs navigateur `/fonts/`, césure désactivée) + `extractText.ts` (util de test : PDF → texte par page via `pdfjs-dist/legacy`). Piège corrigé : `destroy()` est sur la loadingTask pdf.js, pas sur le document. `vitest.config.ts` : include étendu à `.test.tsx` (le JSX marche nativement, l'option esbuild.jsx n'existe pas dans vitest 4). Smoke test VERT : PDF `%PDF` généré en Node sans Chromium, accents/œ/guillemets français extraits du PDF (Roboto + Inter). Vérifs : tsc OK, lint 0 erreur (warning `<img>` préexistant), **187/187 unitaires** (186+1), build OK.
 - 2026-07-04 — **Phase 1 / Task 2 : ResumeDocument (template Graphique) livré + risque typo levé**. `lib/pdfgen/ResumeDocument.tsx` : port react-pdf du Graphique — en-tête flex (photo 75×75, nom MAJ + poste accent #0078d4, contact aligné droite), timeline en colonnes flex (pastille + barre, plus robuste que border-left/absolute), compétences en section bordée haut/bas avec split « Mot clé — Description » en gras, projets/certifs/bénévolat, langues+intérêts en 2 colonnes 48%, sections vides filtrées (mêmes règles que render.ts). TDD : 5 tests (défaut complet, filtrage vide, split compétences, sections optionnelles, photo data-URI) rouges puis verts — 192/192 au total. **Validation typographique précoce (risque n°1) : ✅** — PDF réel rendu en PNG via pdfjs dans le Chromium Playwright (fichiers servis par interception de route, zéro dépendance ; scripts temporaires supprimés après usage) : accents/gras/timeline/2 colonnes impeccables. 3 itérations visuelles : lineHeight sur les items compétences (react-pdf l'applique mal → retiré), colonne contact 180→210, espaces insécables ` ` dans les éléments de contact (le téléphone ne se coupe plus qu'aux « · »). Pièges : apostrophe JSX à échapper (react/no-unescaped-entities), faux positif jsx-a11y/alt-text sur l'Image react-pdf (disable ciblé commenté). Vérifs : tsc OK, lint 0 erreur, 192/192, build OK.
+- 2026-07-04 — **Phase 1 / Tasks 3+4 : LetterDocument + booster ATS — PHASE 1 TERMINÉE ✅**. (3) `lib/pdfgen/LetterDocument.tsx` : port react-pdf de `renderLetter` (Inter 10.5pt interligne 1.7, destinataire gauche / expéditeur droite + date, objet en gras, paragraphes filtrés sur les lignes vides, signature à droite) ; écart assumé : « Objet : » n'apparaît plus si le sujet est vide. Validation visuelle Playwright/pdfjs : fidèle au rendu HTML. (4) `AtsBoost.tsx` partagé (port de `applyAtsBoost` : mots-clés en Text 1pt blanc en fin de page) + prop optionnelle `atsKeywords` sur ResumeDocument et LetterDocument ; `score.ts` intact. TDD : 3 tests ajoutés (lettre défaut/minimale + booster présent/absent sur chaque doc) — commit unique Tasks 3+4 (les tests ATS touchent les mêmes fichiers de test que la lettre). **Critères de la Phase 1 tous remplis** : PDF valides générés en Node sans Chromium (CV Graphique + Lettre), textes/accents extraits et vérifiés, verdicts visuels ✅ (CV + lettre), booster porté, rien d'existant modifié. Vérifs finales : tsc OK, lint 0 erreur (warning `<img>` préexistant), **196/196 unitaires** (186→196), build OK, **e2e 21/21** (purge .next + port libre). Push de fin de phase → contrôle prod.

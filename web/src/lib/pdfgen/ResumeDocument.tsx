@@ -1,6 +1,7 @@
 import { Document, Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import type { Resume, ExperienceItem, EducationItem, ProjectItem, VolunteerItem } from "@/lib/resume/schema";
 import { registerPdfFonts } from "./fonts";
+import { AtsBoost } from "./AtsBoost";
 
 /**
  * CV en React PDF — port visuel du template « Graphique » (templates.ts l.292-346).
@@ -178,9 +179,11 @@ function SkillText({ skill }: { skill: string }) {
 export function ResumeDocument({
   resume,
   templateId,
+  atsKeywords,
 }: {
   resume: Resume;
   templateId: PdfTemplateId;
+  atsKeywords?: string[];
 }) {
   registerPdfFonts();
   void templateId; // un seul template porté pour l'instant (« graphique ») — Phase 4 élargira l'union.
@@ -358,6 +361,8 @@ export function ResumeDocument({
             ) : null}
           </View>
         ) : null}
+
+        <AtsBoost keywords={atsKeywords} />
       </Page>
     </Document>
   );

@@ -8,9 +8,9 @@ import { extractPdfText } from "./extractText";
 const PNG_1PX =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
 
-async function textOf(resume = DEFAULT_RESUME): Promise<string> {
+async function textOf(resume = DEFAULT_RESUME, atsKeywords?: string[]): Promise<string> {
   const buf = await renderToBuffer(
-    <ResumeDocument resume={resume} templateId="graphique" />,
+    <ResumeDocument resume={resume} templateId="graphique" atsKeywords={atsKeywords} />,
   );
   expect(Buffer.from(buf.subarray(0, 5)).toString("latin1")).toBe("%PDF-");
   const pages = await extractPdfText(new Uint8Array(buf));
@@ -96,6 +96,15 @@ describe("ResumeDocument (template graphique)", () => {
     expect(text).toContain("Certif AWS");
     expect(text).toContain("BÉNÉVOLAT");
     expect(text).toContain("Accompagnement hebdomadaire.");
+  });
+
+  it("intègre le booster ATS (mots-clés invisibles) quand demandé", async () => {
+    const boosted = await textOf(DEFAULT_RESUME, ["kubernetes", "gestion de projet"]);
+    expect(boosted).toContain("kubernetes");
+    expect(boosted).toContain("gestion de projet");
+
+    const plain = await textOf(DEFAULT_RESUME);
+    expect(plain).not.toContain("kubernetes");
   });
 
   it("ne plante pas avec une photo en data URI", async () => {
