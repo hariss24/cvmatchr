@@ -54,6 +54,20 @@ function renderDoc(docType: DocType, json: DocData): string {
     : renderResume(json as Resume);
 }
 
+export type DocEngine = "pdf" | "html";
+
+/**
+ * Moteur de rendu du document (dérivé, jamais stocké) : react-pdf pour les templates portés,
+ * HTML sinon. Conditions du moteur pdf : document CV (la Lettre migre en Phase 3), template
+ * porté (« graphique » seul pour l'instant), et `json` fiable (`htmlSource === false` — une
+ * édition Mode Expert rebascule sur le moteur HTML, cohérent avec la garde C1).
+ */
+export function docEngine(d: Pick<Doc, "docType" | "templateId" | "htmlSource">): DocEngine {
+  return d.docType !== "Lettre" && d.templateId === "graphique" && !d.htmlSource
+    ? "pdf"
+    : "html";
+}
+
 /** JSON par défaut pour un type de document (Lettre → lettre, sinon CV). */
 export function defaultJsonFor(docType: DocType): DocData {
   return docType === "Lettre"

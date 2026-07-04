@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { useDocStore } from "./docStore";
+import { useDocStore, docEngine } from "./docStore";
 import { DEFAULT_RESUME } from "@/lib/resume/schema";
 import { TEMPLATES } from "@/lib/resume/templates";
 
@@ -56,5 +56,19 @@ describe("useDocStore", () => {
     useDocStore.getState().setHtml("<p>expert 2</p>");
     useDocStore.getState().setDocType("Lettre");
     expect(useDocStore.getState().htmlSource).toBe(false);
+  });
+});
+
+describe("docEngine", () => {
+  it("choisit react-pdf pour un CV en template graphique (json fiable)", () => {
+    expect(docEngine({ docType: "CV", templateId: "graphique", htmlSource: false })).toBe("pdf");
+    expect(docEngine({ docType: "Maître", templateId: "graphique", htmlSource: false })).toBe("pdf");
+  });
+
+  it("reste en HTML pour la Lettre, les templates non portés et le mode expert", () => {
+    expect(docEngine({ docType: "Lettre", templateId: "graphique", htmlSource: false })).toBe("html");
+    expect(docEngine({ docType: "CV", templateId: "sobre", htmlSource: false })).toBe("html");
+    // htmlSource : le HTML a été édité directement → json périmé, on n'en rend pas un PDF.
+    expect(docEngine({ docType: "CV", templateId: "graphique", htmlSource: true })).toBe("html");
   });
 });
