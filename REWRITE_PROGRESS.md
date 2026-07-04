@@ -1,6 +1,72 @@
-# Suivi du chantier — Réécriture Next.js (loop autonome)
+# Suivi des chantiers — cv-tailor (loop autonome)
 
 > Fichier d'état du `/loop` autonome. **Toute session reprend ici.**
+
+---
+
+# 🚧 CHANTIER EN COURS — Migration React PDF
+
+> **Document de référence** (contrats, critères, risques des 5 phases) :
+> `docs/superpowers/plans/2026-07-04-migration-react-pdf.md` — le relire à chaque réveil.
+
+## Protocole (à suivre à CHAQUE réveil)
+
+1. Lire ce bloc + le document de cadrage.
+2. Regarder « **Prochaine action** » ci-dessous.
+3. **En début de phase** : rédiger d'abord le plan détaillé de la phase
+   (`docs/superpowers/plans/2026-07-XX-react-pdf-phase-N.md`, format du plan pré-filtre Offres :
+   tâches TDD, interfaces, steps cochables), le committer, puis l'exécuter tâche par tâche.
+4. Faire **une étape** par réveil (ou un morceau si c'est long). Travailler dans `web/`.
+5. **Vérifier** concrètement (commande lancée, sortie lue) — jamais de « c'est fait » sans preuve.
+   Suite : `npx tsc --noEmit`, `npm run lint`, `npx vitest run`, `npm run build`, e2e adaptés.
+6. **Commit** (un commit isolé par tâche, message français).
+7. Mettre à jour ce fichier : état des phases, nouvelle « Prochaine action », blocages, + entrée Journal.
+8. Terminer à une **frontière propre** (après commit, jamais au milieu d'une tâche) et
+   reprogrammer le prochain réveil (ScheduleWakeup, cadence lente : qualité > fréquence, quota Pro).
+
+## Règles du chantier (décisions utilisateur du 04/07)
+
+- **Branche** : `feature/refonte-ui-nextjs` — ⚠️ **c'est la branche de PROD Vercel** : un push déploie.
+- **Push : après chaque phase verte uniquement** (jamais en milieu de phase). Fin de phase =
+  toute la suite verte → push → **contrôler la prod** (https://cv-tailor-drab-rho.vercel.app).
+- **CHECKPOINT OBLIGATOIRE après la Phase 2** : s'arrêter (pas de Phase 3) et demander à
+  l'utilisateur de **valider visuellement** le rendu PDF du template Graphique (écart assumé
+  vs l'actuel). Le feu vert utilisateur débloque les phases 3-5.
+- Cohabitation des moteurs : ne **jamais** casser les templates non migrés (HTML) ni les flux existants.
+- Risque n°1 (polices TTF/typographie) : à valider **dès le début de la Phase 1**.
+- Blocage nécessitant une décision humaine → l'écrire dans « Blocages », passer à une autre
+  tâche faisable, sinon s'arrêter proprement.
+- Contraintes métier CLAUDE.md inchangées (jamais alert/confirm/prompt natifs, photo base64
+  jamais envoyée à l'IA, anti-wipe, `@google/genai` + `gemini-3.1-flash-lite`…).
+
+## État des phases (migration React PDF)
+
+- [ ] **Phase 1 — Moteur de rendu React PDF** (`lib/pdfgen/` : fonts TTF, ResumeDocument,
+      LetterDocument, port ATS boost ; tests Node sans Chromium).
+- [ ] **Phase 2 — Aperçu PDF.js + génération client + interrupteur `engine`** (Graphique seul).
+      → 🛑 **checkpoint utilisateur** à la fin.
+- [ ] **Phase 3 — Flux IA 100 % JSON** (generate-pack → `Letter` JSON, editor-chat JSON,
+      `text-to-letter`, Mode Expert → onglet JSON Monaco).
+- [ ] **Phase 4 — Porter Sobre, Moderne, Classique, Minimal** (primitives partagées).
+- [ ] **Phase 5 — Démontage du HTML** (render/mergeHtml/templates/convert/Chromium,
+      migration Dexie douce, `htmlSource` retiré).
+
+## Prochaine action
+
+➡️ **Démarrer la Phase 1** : rédiger le plan détaillé
+`docs/superpowers/plans/2026-07-04-react-pdf-phase-1.md` (d'après le contrat de la Phase 1 du
+cadrage), le committer, puis dérouler ses tâches. Premier point à trancher dans le plan : choix
+et téléchargement des polices TTF (Inter + police du Graphique) dans `public/fonts/`, et
+validation typographique précoce.
+
+## Blocages (migration React PDF)
+
+*(aucun)*
+
+---
+
+# ✅ CHANTIER TERMINÉ — Réécriture Next.js (2026-06)
+
 > Plan complet : `C:\Users\tahet\.claude\plans\kind-prancing-wand.md`
 
 ## Protocole du loop (à suivre à CHAQUE réveil)
