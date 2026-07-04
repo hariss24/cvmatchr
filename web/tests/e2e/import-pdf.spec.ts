@@ -24,6 +24,9 @@ test("l'import PDF rend les pages et peuple le CV depuis la réponse IA", async 
   await page.getByRole("button", { name: "Importer un PDF" }).click();
   await page.locator(".import-modal .import-file").setInputFiles("tests/e2e/fixtures/sample.pdf");
 
+  // Confirmation « L'import remplacera le CV actuel » (uiConfirm).
+  await page.locator(".ui-dialog").getByRole("button", { name: "OK" }).click();
+
   // Le CV importé apparaît dans l'aperçu.
   await expect(
     page.frameLocator(".preview-frame").getByText("Marie Testeur"),

@@ -153,7 +153,7 @@ export const DEFAULT_RESUME: Resume = {
 export const DEFAULT_LETTER: Letter = {
   sender_name: "Prénom Nom",
   sender_address: "Adresse, Ville",
-  sender_contact: "email@example.com &middot; +33 6 00 00 00 00",
+  sender_contact: "email@example.com · +33 6 00 00 00 00",
   date: "Ville, le JJ/MM/AAAA",
   recipient_name: "Nom de l'entreprise",
   recipient_service: "Service Recrutement",

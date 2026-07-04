@@ -26,7 +26,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+    // suppressHydrationWarning : le script inline pose `data-theme` avant l'hydratation
+    // (thème sombre anti-flash), attribut inconnu du rendu serveur.
+    <html lang="fr" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <body>
         <script
           dangerouslySetInnerHTML={{

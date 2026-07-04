@@ -8,6 +8,7 @@ import { mergeHtml } from "@/lib/resume/mergeHtml";
 import { toast } from "@/state/uiStore";
 import { saveDraft } from "@/lib/storage/db";
 import JobExtractor from "./JobExtractor";
+import { useEscapeClose } from "@/lib/useEscapeClose";
 
 /**
  * Modale « Pack candidature » : génère une lettre + un email cohérents avec le CV courant,
@@ -29,6 +30,8 @@ export default function PackModal({ open, onClose }: { open: boolean; onClose: (
   const [role, setRole] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<PackResult | null>(null);
+
+  useEscapeClose(open && !busy, onClose);
 
   if (!open) return null;
 
@@ -54,6 +57,8 @@ export default function PackModal({ open, onClose }: { open: boolean; onClose: (
         job_desc: desc,
         company: company.trim(),
         role: role.trim(),
+        // Date du jour côté client (M2) : l'IA ne doit pas inventer la date de la lettre.
+        today: new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }),
       });
       setResult(res);
       toast("Pack candidature généré.", "success");
@@ -77,18 +82,22 @@ export default function PackModal({ open, onClose }: { open: boolean; onClose: (
   // Insère la lettre dans l'éditeur en basculant sur le type « Lettre » (mode expert HTML/CSS).
   const loadLetter = async () => {
     if (!result) return;
-    const { setDocType, setHtml, setCss } = useDocStore.getState();
+    const { setDocType, setHtml, setCss, setCompany, setRole } = useDocStore.getState();
     await saveDraft({
       id: "draft-Lettre",
       html: result.letter_html,
       css: result.letter_css,
       json: null,
       templateId: null,
+      htmlSource: true,
       updatedAt: 0,
     });
     setDocType("Lettre");
     setHtml(result.letter_html);
     setCss(result.letter_css);
+    // Reprend Entreprise/Poste saisis dans la modale (nommage PDF + historique).
+    if (company.trim()) setCompany(company.trim());
+    if (role.trim()) setRole(role.trim());
     toast("Lettre chargée dans l'éditeur (type « Lettre »).", "success");
     onClose();
   };

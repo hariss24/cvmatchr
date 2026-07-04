@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useDocStore } from "@/state/docStore";
-import { DEFAULT_RESUME, type Resume } from "@/lib/resume/schema";
+import { DEFAULT_RESUME, type Resume, type Letter, type DocType } from "@/lib/resume/schema";
+import type { DocData } from "@/state/docStore";
 import { promptApiKey } from "@/lib/settings";
 import { toast, uiAlert, uiConfirm } from "@/state/uiStore";
 import { saveHistoryEntry } from "@/lib/storage/db";
@@ -15,6 +16,12 @@ function slug(s: string): string {
     .normalize("NFD").replace(/[̀-ͯ]/g, "")
     .replace(/[^a-zA-Z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "");
+}
+
+/** Nom de la personne selon le type : `sender_name` pour une lettre, `name` pour un CV (M3). */
+function personNameFor(docType: DocType, json: DocData): string {
+  const name = docType === "Lettre" ? (json as Letter).sender_name : (json as Resume).name;
+  return name?.trim() || docType;
 }
 
 function buildFilename(name: string, docType: string, company: string, role: string, includeDate: boolean): string {
@@ -41,7 +48,7 @@ export default function TopBar() {
   const [busy, setBusy] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
 
-  const personName = (json as Resume).name?.trim() || docType;
+  const personName = personNameFor(docType, json);
   const filename = buildFilename(personName, docType, company, role, includeDate);
 
   const toggleTheme = () => {
@@ -61,8 +68,8 @@ export default function TopBar() {
 
   const onConvert = useCallback(async () => {
     if (busy) return;
-    const { html, css, atsBoost, company, role } = useDocStore.getState();
-    const name = (json as Resume).name?.trim() || docType;
+    const { html, css, atsBoost, company, role, htmlSource } = useDocStore.getState();
+    const name = personNameFor(docType, json);
     const boostKeywords = atsBoost.enabled ? atsBoost.keywords : [];
     setBusy(true);
     try {
@@ -99,7 +106,9 @@ export default function TopBar() {
         last_viewed_at: new Date().toISOString(),
         html,
         css,
-        json: structuredClone(json),
+        // json périmé quand le HTML est la source (M1) : on ne le sauvegarde pas,
+        // le rechargement depuis l'historique repartira du HTML.
+        json: htmlSource ? null : structuredClone(json),
         templateId,
       });
     } catch {

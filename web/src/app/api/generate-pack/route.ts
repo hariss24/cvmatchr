@@ -13,6 +13,8 @@ type Body = {
   job_desc?: string;
   company?: string;
   role?: string;
+  /** Date du jour formatée côté client (fuseau de l'utilisateur) — pour dater la lettre. */
+  today?: string;
 };
 
 /** Pack candidature (lettre + email) cohérent avec le CV. Port de `generate_pack`. */
@@ -35,6 +37,10 @@ export async function POST(req: Request): Promise<Response> {
   content += `\n\nOffre d'emploi :\n${jobDesc}`;
   if (body.company?.trim()) content += `\n\nEntreprise visée : ${body.company.trim()}`;
   if (body.role?.trim()) content += `\n\nPoste visé : ${body.role.trim()}`;
+  const today =
+    body.today?.trim() ||
+    new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  content += `\n\nDate du jour (à utiliser pour dater la lettre) : ${today}`;
 
   const userKey = req.headers.get("x-api-key")?.trim() || null;
 

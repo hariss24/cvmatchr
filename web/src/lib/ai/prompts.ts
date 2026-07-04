@@ -614,7 +614,8 @@ export const SYSTEM_PACK =
   "présentes dans le CV.\n" +
   "- La lettre s'adresse NOMMÉMENT à l'entreprise et au poste visés (déduis-les de l'offre ou des " +
   "informations 'Entreprise'/'Poste' fournies). Si l'entreprise est inconnue, écris " +
-  "'À l'attention du responsable du recrutement'.\n\n" +
+  "'À l'attention du responsable du recrutement'.\n" +
+  "- Date la lettre avec la 'Date du jour' fournie dans le message — n'invente JAMAIS de date.\n\n" +
   "ÉTAPE 3 — EMAIL D'ACCROCHE (champ 'email') :\n" +
   "- Texte BRUT (pas de HTML), prêt à coller dans un client mail.\n" +
   "- Première ligne = 'Objet : ...'. Puis un corps court (5-8 lignes) : accroche, 2-3 atouts clés " +

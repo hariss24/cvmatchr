@@ -5,6 +5,7 @@ import { useDocStore } from "@/state/docStore";
 import { listSnapshots, deleteSnapshot, saveDraft, type Snapshot } from "@/lib/storage/db";
 import { takeManualSnapshot } from "@/lib/storage/snapshots";
 import { uiConfirm, toast } from "@/state/uiStore";
+import { useEscapeClose } from "@/lib/useEscapeClose";
 
 interface SnapshotsModalProps {
   open: boolean;
@@ -27,6 +28,8 @@ export default function SnapshotsModal({ open, onClose }: SnapshotsModalProps) {
       listSnapshots().then(setSnapshots);
     }
   }, [open]);
+
+  useEscapeClose(open, onClose);
 
   const handleRestore = async (snap: Snapshot) => {
     if (

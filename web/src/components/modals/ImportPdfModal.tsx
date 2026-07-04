@@ -6,7 +6,8 @@ import { postJson } from "@/lib/ai/client";
 import { pdfToImages } from "@/lib/pdf/pdfToImages";
 import { normalizeResume, isEmptyResume } from "@/lib/resume/normalize";
 import type { Resume } from "@/lib/resume/schema";
-import { toast } from "@/state/uiStore";
+import { toast, uiConfirm } from "@/state/uiStore";
+import { useEscapeClose } from "@/lib/useEscapeClose";
 
 /**
  * Import PDF → CV (champs structurés). Port de `_pdfToResumeFields` (app.js l.2133-2170).
@@ -30,10 +31,22 @@ export default function ImportPdfModal({
   const [status, setStatus] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
+  useEscapeClose(open && !busy, onClose);
+
   if (!open) return null;
 
   const onFile = async (file: File | null) => {
     if (!file) return;
+    if (
+      !(await uiConfirm(
+        "L'import remplacera le CV actuellement dans l'éditeur. Continuer ?",
+        "Importer un PDF",
+      ))
+    ) {
+      // Vide l'input : re-choisir le même fichier doit redéclencher onChange.
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
     setBusy(true);
     try {
       setStatus("Lecture du PDF…");

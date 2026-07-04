@@ -242,6 +242,8 @@ button.ghost:active { box-shadow: var(--neu-inset); transform: translateY(1px); 
   .wrap { height: auto; min-height: 100vh; }
   .split { flex-direction: column; }
   .pane.editor-pane, .pane.preview-pane { flex: 1 1 auto; }
+  /* L'aperçu ne doit pas s'écraser (~150px) en colonne : hauteur minimale lisible. */
+  .pane.preview-pane { min-height: 70vh; }
 }
 .pane-title {
   background: var(--bg);
@@ -583,6 +585,12 @@ button.ghost:active { box-shadow: var(--neu-inset); transform: translateY(1px); 
 .page-badge {
   font-family: var(--font-code); font-size: 11px; font-weight: 600;
   color: var(--muted); padding: 2px 8px; border-radius: 8px;
+  background: var(--bg); box-shadow: var(--neu-inset);
+}
+/* Aperçu transitoire d'une proposition du chat IA (non appliquée au document). */
+.preview-override-badge {
+  font-size: 11px; font-weight: 600; text-transform: none; letter-spacing: 0;
+  color: var(--orange); padding: 2px 8px; border-radius: 8px;
   background: var(--bg); box-shadow: var(--neu-inset);
 }
 

@@ -144,6 +144,8 @@ export default function ChatPanel({ open, onClose }: { open: boolean; onClose: (
         aria-modal="true"
         aria-label="Assistant IA"
         aria-hidden={!open}
+        // inert : panneau fermé = ni focusable ni cliquable (aria-hidden seul laisse le focus passer).
+        inert={!open}
       >
         <div className="chat-panel__head">
           <span className="chat-panel__title">Assistant IA</span>

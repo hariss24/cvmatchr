@@ -1,9 +1,13 @@
-import { saveSnapshot, type Snapshot } from "@/lib/storage/db";
+import { saveSnapshot, listSnapshots, type Snapshot } from "@/lib/storage/db";
 import { useDocStore } from "@/state/docStore";
 
 export async function takeSnapshot(customLabel?: string) {
-  const { json, html, css, docType, company, role } = useDocStore.getState();
+  const { json, html, css, docType, company, role, htmlSource } = useDocStore.getState();
   if (!html) return;
+
+  // Anti-doublon : contenu identique au snapshot le plus récent → rien à sauvegarder.
+  const [latest] = await listSnapshots();
+  if (latest && latest.html === html && latest.css === css && latest.doc_type === docType) return;
 
   const label = customLabel || new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
 
@@ -12,7 +16,8 @@ export async function takeSnapshot(customLabel?: string) {
     label,
     html,
     css,
-    json: structuredClone(json),
+    // json périmé quand le HTML est la source : la restauration repartira du HTML.
+    json: htmlSource ? null : structuredClone(json),
     doc_type: docType,
     company,
     role,

@@ -46,4 +46,15 @@ describe("useDocStore", () => {
     expect(s.html).toBe("<p>direct</p>");
     expect(s.css).toBe("body{color:red}");
   });
+
+  it("setHtml marque le HTML comme source de vérité ; setJson et setDocType la rendent au JSON (C1)", () => {
+    expect(useDocStore.getState().htmlSource).toBe(false);
+    useDocStore.getState().setHtml("<p>expert</p>");
+    expect(useDocStore.getState().htmlSource).toBe(true);
+    useDocStore.getState().setJson({ ...DEFAULT_RESUME, name: "Retour Formulaire" });
+    expect(useDocStore.getState().htmlSource).toBe(false);
+    useDocStore.getState().setHtml("<p>expert 2</p>");
+    useDocStore.getState().setDocType("Lettre");
+    expect(useDocStore.getState().htmlSource).toBe(false);
+  });
 });

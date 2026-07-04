@@ -30,6 +30,11 @@ export type Doc = {
   json: DocData;
   html: string;
   css: string;
+  /**
+   * True si le HTML a été écrit directement (mode expert, chat IA, pack, import lettre) :
+   * `json` est alors périmé et le formulaire ne doit plus écraser `html` sans confirmation.
+   */
+  htmlSource: boolean;
   /** Aperçu transitoire (proposition du chat IA) : si non null, l'aperçu l'affiche au lieu du document. */
   previewOverride: string | null;
   /** Booster ATS invisible : mots-clés absents injectés en texte 1px à l'aperçu et à l'export. */
@@ -81,14 +86,15 @@ export const useDocStore = create<DocStore>((set, get) => ({
   json: structuredClone(DEFAULT_RESUME),
   html: renderResume(DEFAULT_RESUME),
   css: TEMPLATES[INITIAL_TEMPLATE].css,
+  htmlSource: false,
   previewOverride: null,
   atsBoost: { enabled: false, keywords: [] },
   tailorBefore: null,
   pendingJobDesc: null,
   includeDate: typeof window !== "undefined" ? localStorage.getItem("pdfIncludeDate") === "true" : false,
 
-  setJson: (json) => set({ json, html: renderDoc(get().docType, json) }),
-  setHtml: (html) => set({ html }),
+  setJson: (json) => set({ json, html: renderDoc(get().docType, json), htmlSource: false }),
+  setHtml: (html) => set({ html, htmlSource: true }),
   setCss: (css) => set({ css }),
   setCompany: (company) => set({ company }),
   setRole: (role) => set({ role }),
@@ -103,7 +109,7 @@ export const useDocStore = create<DocStore>((set, get) => ({
 
   setDocType: (docType) => {
     const json = defaultJsonFor(docType);
-    set({ docType, json, html: renderDoc(docType, json) });
+    set({ docType, json, html: renderDoc(docType, json), htmlSource: false });
   },
 
   setTemplate: (templateId) => set({ templateId, css: TEMPLATES[templateId].css }),

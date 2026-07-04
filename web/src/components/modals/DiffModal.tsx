@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useDocStore } from "@/state/docStore";
 import { mergeHtml } from "@/lib/resume/mergeHtml";
+import { useEscapeClose } from "@/lib/useEscapeClose";
 
 interface DiffModalProps {
   open: boolean;
@@ -39,6 +40,8 @@ export default function DiffModal({ open, onClose }: DiffModalProps) {
       setSrcAfter(injectZoom(aHtml));
     });
   }, [open, tailorBefore, currentHtml, currentCss]);
+
+  useEscapeClose(open && !!tailorBefore, onClose);
 
   if (!open || !tailorBefore) return null;
 

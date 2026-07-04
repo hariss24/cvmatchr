@@ -23,6 +23,7 @@ export function useAutoDraft() {
             templateId: draft.templateId || "sobre",
             ...(draft.company !== undefined ? { company: draft.company } : {}),
             ...(draft.role !== undefined ? { role: draft.role } : {}),
+            htmlSource: draft.htmlSource ?? !draft.json,
           });
           toast("Brouillon restauré.", "info");
         }
@@ -52,6 +53,7 @@ export function useAutoDraft() {
               templateId: draft.templateId || "sobre",
               ...(draft.company !== undefined ? { company: draft.company } : {}),
               ...(draft.role !== undefined ? { role: draft.role } : {}),
+              htmlSource: draft.htmlSource ?? !draft.json,
             });
             toast(`Brouillon ${state.docType} chargé.`, "info");
           } else {
@@ -73,6 +75,7 @@ export function useAutoDraft() {
           templateId: state.templateId,
           company: state.company,
           role: state.role,
+          htmlSource: state.htmlSource,
           updatedAt: Date.now(),
         }).catch((e) => console.warn("Failed to save draft:", e));
       }, 1000); // 1s debounce

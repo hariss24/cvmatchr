@@ -8,7 +8,7 @@ import { useDocStore } from "@/state/docStore";
 import { TEMPLATE_IDS, type TemplateId } from "@/lib/resume/templates";
 import { normalizeResume, normalizeLetter } from "@/lib/resume/normalize";
 import { resumeToJsonResume } from "@/lib/resume/jsonResume";
-import { toast, uiPrompt } from "@/state/uiStore";
+import { toast, uiPrompt, uiConfirm } from "@/state/uiStore";
 import SnapshotsModal from "@/components/modals/SnapshotsModal";
 import ImportTextModal from "@/components/modals/ImportTextModal";
 import ImportPdfModal from "@/components/modals/ImportPdfModal";
@@ -39,6 +39,7 @@ export default function EditorPane() {
   const [importPdfOpen, setImportPdfOpen] = useState(false);
 
   const docType = useDocStore((s) => s.docType);
+  const htmlSource = useDocStore((s) => s.htmlSource);
   const html = useDocStore((s) => s.html);
   const css = useDocStore((s) => s.css);
   const templateId = useDocStore((s) => s.templateId);
@@ -101,6 +102,21 @@ export default function EditorPane() {
     }
   };
 
+  // C1 : le HTML a été édité directement (mode expert / IA) → le formulaire est désynchronisé.
+  // On bloque la saisie et on demande une confirmation explicite avant de re-rendre depuis le JSON.
+  const onResumeFromForm = async () => {
+    if (
+      !(await uiConfirm(
+        "Le document a été modifié en mode expert (HTML) ou par l'IA. Reprendre avec le formulaire régénérera le document depuis les champs et ÉCRASERA ces modifications. Continuer ?",
+        "Formulaire désynchronisé",
+      ))
+    )
+      return;
+    const { json, setJson } = useDocStore.getState();
+    setJson(json);
+    toast("Document régénéré depuis le formulaire.", "success");
+  };
+
   const onExportRr = () => {
     const json = JSON.stringify(
       resumeToJsonResume(useDocStore.getState().json as Resume),
@@ -132,7 +148,7 @@ export default function EditorPane() {
 
           <button
             type="button"
-            className={`tab tab--expert${expert ? " active" : ""}`}
+            className={`tab tab--expert${expert && tab !== "form" ? " active" : ""}`}
             title="Activer le mode expert (HTML/CSS)"
             onClick={toggleExpert}
           >
@@ -207,7 +223,34 @@ export default function EditorPane() {
       </div>
 
       {tab === "form" ? (
-        docType === "Lettre" ? <LetterForm /> : <FormEditor onImportPdf={() => setImportPdfOpen(true)} />
+        htmlSource ? (
+          <div className="import-pane">
+            <p className="import-hint">
+              ⚠️ Ce document a été modifié en mode expert (HTML) ou par l&apos;IA : le formulaire
+              n&apos;est plus synchronisé avec l&apos;aperçu. Modifier un champ écraserait ces
+              changements.
+            </p>
+            <div className="import-pane-actions">
+              <button type="button" className="form-btn-add" onClick={onResumeFromForm}>
+                Reprendre avec le formulaire (écrase le HTML)
+              </button>
+              <button
+                type="button"
+                className="form-btn-add"
+                onClick={() => {
+                  setExpert(true);
+                  setTab("html");
+                }}
+              >
+                Continuer en mode expert
+              </button>
+            </div>
+          </div>
+        ) : docType === "Lettre" ? (
+          <LetterForm />
+        ) : (
+          <FormEditor onImportPdf={() => setImportPdfOpen(true)} />
+        )
       ) : tab === "import" ? (
         <div className="import-pane">
           <p className="import-hint">

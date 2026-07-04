@@ -52,6 +52,13 @@ describe("analyzeAts", () => {
     expect(a.matched).toContain("tests");
   });
 
+  it("matche les composés dans le CV (« Power BI » ↔ mot-clé « powerbi »)", () => {
+    const a = analyzeAts("<p>Dashboards Power BI et Machine Learning</p>", "Power BI machine learning");
+    expect(a.matched).toContain("powerbi");
+    expect(a.matched).toContain("machine-learning");
+    expect(a.missing).toHaveLength(0);
+  });
+
   it("boostKeywords remplace les tirets par des espaces", () => {
     const a = analyzeAts("<p>rien</p>", "machine learning");
     expect(a.boostKeywords).toContain("machine learning");

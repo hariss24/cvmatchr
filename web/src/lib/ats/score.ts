@@ -156,7 +156,11 @@ export type AtsAnalysis = {
  */
 export function analyzeAts(cvHtml: string, jobDesc: string): AtsAnalysis {
   const jobKw = extractKeywords(jobDesc);
-  const cvNorm = stripAccents(cvHtml.replace(/<[^>]+>/g, " ").toLowerCase());
+  // Mêmes composés que côté offre : « Power BI » dans le CV doit matcher le mot-clé « powerbi ».
+  let cvNorm = stripAccents(cvHtml.replace(/<[^>]+>/g, " ").toLowerCase());
+  for (const [phrase, replacement] of COMPOUNDS) {
+    cvNorm = cvNorm.split(phrase).join(replacement);
+  }
 
   const isMatched = (kw: string): boolean => {
     if (cvNorm.includes(kw)) return true;

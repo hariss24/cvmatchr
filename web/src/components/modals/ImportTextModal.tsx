@@ -5,7 +5,8 @@ import { useDocStore } from "@/state/docStore";
 import { postJson, streamSse } from "@/lib/ai/client";
 import { normalizeResume, isEmptyResume } from "@/lib/resume/normalize";
 import type { Resume } from "@/lib/resume/schema";
-import { toast } from "@/state/uiStore";
+import { toast, uiConfirm } from "@/state/uiStore";
+import { useEscapeClose } from "@/lib/useEscapeClose";
 
 /**
  * Import texte → données structurées. Port de `btn-text-to-html` (app.js).
@@ -25,6 +26,8 @@ export default function ImportTextModal({
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
 
+  useEscapeClose(open && !busy, onClose);
+
   if (!open) return null;
 
   const run = async () => {
@@ -33,6 +36,13 @@ export default function ImportTextModal({
       toast("Colle d'abord le contenu de ton CV.", "error");
       return;
     }
+    if (
+      !(await uiConfirm(
+        "L'import remplacera le document actuellement dans l'éditeur. Continuer ?",
+        "Importer un texte",
+      ))
+    )
+      return;
     const { docType, setJson, setHtml, setCss } = useDocStore.getState();
     setBusy(true);
     try {

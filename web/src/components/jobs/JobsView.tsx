@@ -34,6 +34,8 @@ export default function JobsView({ config }: { config: JobsConfig }) {
   const [progress, setProgress] = useState<ScanState>(ZERO);
   const [configMsg, setConfigMsg] = useState<string | null>(null);
   const setPendingJobDesc = useDocStore((s) => s.setPendingJobDesc);
+  const setCompany = useDocStore((s) => s.setCompany);
+  const setRole = useDocStore((s) => s.setRole);
   const router = useRouter();
 
   useEffect(() => {
@@ -136,6 +138,9 @@ export default function JobsView({ config }: { config: JobsConfig }) {
   async function adapt(job: JobEntry) {
     await markJobSeen(job.id);
     setPendingJobDesc(job.jobText);
+    // Préremplit la barre meta (nommage PDF + historique) depuis l'offre.
+    if (job.company) setCompany(job.company);
+    if (job.title) setRole(job.title);
     router.push("/");
   }
 

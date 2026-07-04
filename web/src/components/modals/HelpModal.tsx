@@ -1,6 +1,7 @@
 "use client";
 
 import { promptApiKey } from "@/lib/settings";
+import { useEscapeClose } from "@/lib/useEscapeClose";
 
 /**
  * Fenêtre d'aide « Comment ça marche ? » — contenu statique expliquant l'usage de l'app.
@@ -13,6 +14,8 @@ export default function HelpModal({
   open: boolean;
   onClose: () => void;
 }) {
+  useEscapeClose(open, onClose);
+
   if (!open) return null;
 
   return (

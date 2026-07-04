@@ -26,6 +26,8 @@ export interface Draft {
   templateId: TemplateId | null;
   company?: string;
   role?: string;
+  /** True si le HTML est la source de vérité (json périmé). Absent = déduit de `json == null`. */
+  htmlSource?: boolean;
   updatedAt: number;
 }
 

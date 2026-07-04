@@ -104,7 +104,7 @@ ${items}
       <span class="entry-list__date">${esc(e.date)}</span>
       <div class="entry-list__company-row">
         <span class="entry-list__subtitle">${esc(e.school)}</span>${
-          t(e.location) ? `<span class="entry-list__location">${esc(e.location)}</span>` : ""
+          t(e.location) ? ` &mdash; <span class="entry-list__location">${esc(e.location)}</span>` : ""
         }
       </div>
     </div>`,
@@ -194,7 +194,7 @@ ${bullets.map((b) => `          <li>${esc(b)}</li>`).join("\n")}
           : "";
         const orgRow = t(v.organization)
           ? `        <span class="entry-list__subtitle">${esc(v.organization)}</span>${
-              t(v.location) ? `<span class="entry-list__location">${esc(v.location)}</span>` : ""
+              t(v.location) ? ` &mdash; <span class="entry-list__location">${esc(v.location)}</span>` : ""
             }`
           : "";
         return `    <div class="entry-list__item">

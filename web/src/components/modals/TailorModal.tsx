@@ -12,6 +12,7 @@ import { loadMasterResume } from "@/lib/storage/master";
 import type { Resume } from "@/lib/resume/schema";
 import type { TailorLevel } from "@/lib/ai/prompts";
 import { toast } from "@/state/uiStore";
+import { useEscapeClose } from "@/lib/useEscapeClose";
 
 /**
  * Modale d'adaptation IA d'un CV à une offre (4 niveaux). Port de `_tailorResumeFields` (app.js).
@@ -54,6 +55,9 @@ export default function TailorModal({
   useEffect(() => {
     if (useDocStore.getState().pendingJobDesc) useDocStore.getState().setPendingJobDesc(null);
   }, []);
+
+  // Échap ferme la modale du dessus d'abord : inactif tant que Pack ou Diff est ouverte (M4).
+  useEscapeClose(open && !busy && !packOpen && !diffOpen, onClose);
 
   if (!open) return null;
 

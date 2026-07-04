@@ -25,6 +25,9 @@ test("l'import texte remplit le formulaire et l'aperçu depuis un CV JSON", asyn
     .fill("Jean Dupont\nDéveloppeur web");
   await page.locator(".import-modal").getByRole("button", { name: "Importer", exact: true }).click();
 
+  // Confirmation « L'import remplacera le document actuel » (uiConfirm).
+  await page.locator(".ui-dialog").getByRole("button", { name: "OK" }).click();
+
   // Le CV extrait apparaît dans l'aperçu (rendu depuis le JSON).
   await expect(
     page.frameLocator(".preview-frame").getByText("Jean Dupont"),

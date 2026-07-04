@@ -55,6 +55,9 @@ export default function PreviewPane() {
     <>
       <div className="pane-title">
         <span>Aperçu</span>
+        {previewOverride !== null ? (
+          <span className="preview-override-badge">Proposition IA — non appliquée</span>
+        ) : null}
         <span className="page-badge">{pageLabel}</span>
       </div>
       <div className="pane-body">
