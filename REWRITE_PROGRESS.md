@@ -46,7 +46,8 @@
       Chromium, typo validée visuellement, 196/196 + e2e 21/21.
 - [x] **Phase 2 — Aperçu PDF.js + génération client + interrupteur `engine`** ✅ (2026-07-05) :
       `docEngine` + `PdfPreview` + export client sans serveur (Graphique seul), 198/198 +
-      e2e 23/23. → 🛑 **checkpoint utilisateur EN COURS** (validation visuelle avant Phase 3).
+      e2e 23/23. Correctif d'échelle px→pt après retour checkpoint (commit `8a149c3`).
+      → ✅ **checkpoint utilisateur VALIDÉ le 2026-07-05** (« ok très bien c'est corrigé »).
 - [ ] **Phase 3 — Flux IA 100 % JSON** (generate-pack → `Letter` JSON, editor-chat JSON,
       `text-to-letter`, Mode Expert → onglet JSON Monaco).
 - [ ] **Phase 4 — Porter Sobre, Moderne, Classique, Minimal** (primitives partagées).
@@ -55,11 +56,10 @@
 
 ## Prochaine action
 
-🛑 **EN ATTENTE DU CHECKPOINT UTILISATEUR** (Phase 2 livrée et poussée). Ne PAS entamer la
-Phase 3 sans le feu vert explicite de l'utilisateur sur le rendu visuel du template Graphique
-(aperçu + export PDF). Une fois le feu vert obtenu : « Prochaine action » = rédiger le plan
-détaillé de la Phase 3 (flux IA 100 % JSON : generate-pack → `Letter` JSON, editor-chat JSON,
-`text-to-letter`, Mode Expert → onglet JSON Monaco).
+**Phase 3 — exécuter le plan détaillé** `docs/superpowers/plans/2026-07-05-react-pdf-phase-3.md`
+(flux IA 100 % JSON : generate-pack → `Letter` JSON, editor-chat JSON, `text-to-letter`,
+Mode Expert → onglet JSON Monaco), task par task (TDD, vérifs, commit, journal).
+Push uniquement en fin de phase verte, puis contrôle prod.
 
 ## Blocages (migration React PDF)
 
@@ -349,3 +349,4 @@ Vérifié : Toolbar restauré, ClientLayout supprimé, `tsc` OK, **144 tests Vit
 - 2026-07-05 — **Phase 2 / T3+T4 : export client + e2e — PHASE 2 TERMINÉE ✅ (code)**. T3 : `TopBar.onConvert` branche sur `docEngine` — moteur pdf → `generateResumePdfBlob` dans le navigateur (aucun appel serveur), sinon `/api/convert` inchangé ; téléchargement + `saveHistoryEntry` + toast communs aux 2 chemins (filename calculé une fois) ; message d'erreur générique « Impossible de générer le PDF. ». T4 : `tests/e2e/pdf-preview.spec.ts` — (1) bascule Graphique → `pdf-preview` + canvas + badge « 1 page », retour Sobre → iframe ; (2) export Graphique : event download, fichier signé `%PDF-`, **0 appel** `/api/convert` (route espionnée). Vérifs : tsc OK, lint 0 erreur (warning `<img>` préexistant), 198/198 unitaires, build OK, **e2e 23/23** (21 anciens intacts sans modification + 2 nouveaux), imports statiques `@react-pdf/renderer` confinés à `lib/pdfgen/` (bundle initial épargné). Critères du cadrage Phase 2 remplis : aperçu = PDF réel sur Graphique, export = même moteur, compteur exact, autres templates/Lettre intacts. Reste : push + contrôle prod + 🛑 checkpoint utilisateur.
 - 2026-07-05 — **Push de fin de Phase 2 + contrôle prod ✅ — loop en pause (checkpoint)**. Push `fffa771..ba80b14` → deploy `dpl_F4w4mh…` Ready (47 s), alias à jour. Contrôle prod réel (Playwright MCP) : fausse alerte instructive — l'aperçu restait en iframe car le profil de test portait un vieux brouillon `htmlSource:true` (résidu de l'audit du 04/07 sur la prod) → **la garde fonctionnait comme conçu** ; après « Reprendre avec le formulaire », l'aperçu PDF apparaît : canvas + badge « 1 page ✓ » sur le template Graphique, 0 erreur console. Diagnostic utile : vérifier `.pdf-preview` dans le CSS servi pour distinguer « vieux build » de « condition runtime ». Capture checkpoint : `C:\Users\tahet\checkpoint-phase2-prod.png`. **Loop arrêté — en attente du feu vert utilisateur sur le rendu visuel avant la Phase 3.**
 - 2026-07-05 — **Checkpoint Phase 2 : retour utilisateur NÉGATIF → correctif d'échelle px→pt**. Constat (captures avant/après fournies) : photo trop grande, marges trop larges, CV passé de 1 à 2 pages. **Cause racine** : le CSS d'origine mesure les polices en `pt` (correctes) mais toute la géométrie en `px` CSS (photo 75px, padding page 16/36/12px, retraits…) ; or react-pdf mesure tout en pt (1 px = 0,75 pt) — les nombres px recopiés tels quels en pt donnaient **+33 % sur toute la géométrie**. Correctif (`ResumeDocument.tsx`) : helper `px(n) = n × 0,75` appliqué à toutes les valeurs issues de px (les nombres restent lisibles face au CSS d'origine) ; au passage, colonne contact ramenée à sa vraie valeur (`px(250)` au lieu de 210). + 2 correctifs de fidélité repérés en re-comparant à l'original : **traits bleus séparateurs** au-dessus de chaque section (règle `border-top: 2px` du template de base, oubliée au port — sauf en-tête et langues/intérêts) et `padding-bottom` conservé sur le **dernier item de timeline** (le CSS ne le supprime pas). Vérifié : PDF de contrôle avec le contenu réel du CV original (fixture) → **1 page**, rendu PNG inspecté conforme à la capture de référence (densité, photo, séparateurs) ; 198/198 unitaires, tsc OK, lint 0 erreur (warning `<img>` préexistant), **e2e 23/23**. Technique PDF→PNG remontée en script réutilisable (scratchpad, non commité). Push du correctif → contrôle prod. Checkpoint utilisateur TOUJOURS EN COURS sur la version corrigée.
+- 2026-07-05 — **✅ CHECKPOINT VALIDÉ (« ok très bien c'est corrigé ») + plan Phase 3 rédigé** : `docs/superpowers/plans/2026-07-05-react-pdf-phase-3.md` (4 tasks TDD). Décisions de conception actées en lisant le code : (1) `text-to-html` **supprimé** en Task 1 (unique appelant : branche Lettre d'ImportTextModal → `text-to-letter` JSON) ; (2) `generate-pack` prendra le **JSON du CV** en entrée (photo strippée) et sortira `{letter: Letter, email}` — règle date du jour (M2) conservée via `letter.date` ; (3) `previewOverride` passe de HTML à **JSON** : PreviewPane rendra la proposition avec le moteur du template courant (pdf pour Graphique, HTML sinon) ; (4) Mode Expert → onglet **JSON Monaco** unique (parse + schema + normalize, jamais d'application partielle) ; la garde C1 reste pour les chemins legacy (historique/snapshots) jusqu'à la Phase 5. Loop relancé sur l'exécution Task par Task.
