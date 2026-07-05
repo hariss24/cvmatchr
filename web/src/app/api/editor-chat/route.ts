@@ -3,21 +3,21 @@ import { complete, type ChatMessage } from "@/lib/ai/clients";
 import { SYSTEM_EDITOR_CHAT } from "@/lib/ai/prompts";
 import { parseAiJson } from "@/lib/ai/json";
 import { aiErrorResponse } from "@/lib/ai/http";
+import type { DocData } from "@/state/docStore";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 type Body = {
   messages?: ChatMessage[];
-  html?: string;
-  css?: string;
+  doc_json?: DocData;
   doc_type?: string;
   job_desc?: string;
 };
 
-type Proposal = { id: string; title: string; summary: string; html: string; css: string };
+type Proposal = { id: string; title: string; summary: string; json: DocData };
 
-/** Chat éditeur : réponse {reply, proposals}. Port de `complete_chat` (ai_engine.py). */
+/** Chat éditeur : réponse {reply, proposals}. Port de `complete_chat` adapté au JSON. */
 export async function POST(req: Request): Promise<Response> {
   let body: Body;
   try {
@@ -31,15 +31,13 @@ export async function POST(req: Request): Promise<Response> {
     return NextResponse.json({ error: "Message manquant." }, { status: 400 });
   }
 
-  const html = body.html ?? "";
-  const css = body.css ?? "";
+  const docJson = body.doc_json ? JSON.stringify(body.doc_json, null, 2) : "{}";
   const docType = body.doc_type ?? "CV";
 
-  let context = `Document actuel (${docType}) :\n\nHTML :\n${html}`;
-  if (css) context += `\n\nCSS :\n${css}`;
+  let context = `Document actuel (${docType}) :\n\nJSON :\n${docJson}`;
   if (body.job_desc) context += `\n\nOffre d'emploi cible :\n${body.job_desc}`;
 
-  // Contexte injecté en tête comme premier échange user/assistant (port fidèle).
+  // Contexte injecté en tête comme premier échange user/assistant.
   const augmented: ChatMessage[] = [
     { role: "user", content: context },
     { role: "assistant", content: "Contexte reçu. Que souhaitez-vous modifier ?" },
@@ -65,16 +63,14 @@ export async function POST(req: Request): Promise<Response> {
     for (const item of Array.isArray(r.proposals) ? r.proposals : []) {
       if (typeof item !== "object" || item === null) continue;
       const p = item as Record<string, unknown>;
-      const pHtml = String(p.html ?? "").trim();
-      const pCss = String(p.css ?? "").trim();
-      // Ignore les propositions identiques au document courant.
-      if (pHtml === html.trim() && pCss === css.trim()) continue;
+      const pJson = p.json as DocData;
+      if (!pJson) continue;
+      
       proposals.push({
         id: String(p.id ?? `p${proposals.length + 1}`),
         title: String(p.title ?? "Proposition").slice(0, 100),
         summary: String(p.summary ?? "").slice(0, 500),
-        html: pHtml,
-        css: pCss,
+        json: pJson,
       });
     }
 

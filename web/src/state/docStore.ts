@@ -36,7 +36,7 @@ export type Doc = {
    */
   htmlSource: boolean;
   /** Aperçu transitoire (proposition du chat IA) : si non null, l'aperçu l'affiche au lieu du document. */
-  previewOverride: string | null;
+  previewOverride: DocData | null;
   /** Booster ATS invisible : mots-clés absents injectés en texte 1px à l'aperçu et à l'export. */
   atsBoost: { enabled: boolean; keywords: string[] };
   /** État HTML/CSS avant adaptation (Tailor) pour le DiffModal. */
@@ -83,7 +83,7 @@ export type DocStore = Doc & {
   setRole: (role: string) => void;
   setDocType: (docType: DocType) => void;
   setTemplate: (templateId: TemplateId) => void;
-  setPreviewOverride: (html: string | null) => void;
+  setPreviewOverride: (previewOverride: DocData | null) => void;
   setAtsBoost: (atsBoost: { enabled: boolean; keywords: string[] }) => void;
   setTailorBefore: (state: { html: string; css: string } | null) => void;
   setPendingJobDesc: (v: string | null) => void;

@@ -5,7 +5,8 @@ import { useDocStore, docEngine } from "@/state/docStore";
 import { mergeHtml } from "@/lib/resume/mergeHtml";
 import { applyAtsBoost } from "@/lib/ats/score";
 import { generateResumePdfBlob } from "@/lib/pdfgen/generatePdf";
-import type { Resume } from "@/lib/resume/schema";
+import type { Resume, Letter } from "@/lib/resume/schema";
+import { renderResume, renderLetter } from "@/lib/resume/render";
 import PdfPreview from "./PdfPreview";
 
 // A4 à 96 dpi ≈ 1122px (297mm × 96 / 25.4). Port de updatePageCount (app.js, l.712).
@@ -36,7 +37,9 @@ export default function PreviewPane() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const genRef = useRef(0);
 
-  const usePdf = docEngine({ docType, templateId, htmlSource }) === "pdf" && previewOverride === null;
+  const isPreview = previewOverride !== null;
+  const currentHtmlSource = isPreview ? false : htmlSource;
+  const usePdf = docEngine({ docType, templateId, htmlSource: currentHtmlSource }) === "pdf";
 
   // Sortie du mode pdf : purge du blob pendant le rendu (pattern « derived state reset »,
   // pas de setState dans un effet) — au retour, on repart du loader, jamais d'un blob périmé.
@@ -55,8 +58,9 @@ export default function PreviewPane() {
     const gen = ++genRef.current;
     const id = setTimeout(async () => {
       try {
+        const jsonToRender = isPreview ? previewOverride : json;
         const blob = await generateResumePdfBlob(
-          json as Resume,
+          jsonToRender as Resume,
           "graphique",
           atsBoost.enabled ? atsBoost.keywords : [],
         );
@@ -66,21 +70,21 @@ export default function PreviewPane() {
       }
     }, 500);
     return () => clearTimeout(id);
-  }, [usePdf, json, atsBoost]);
+  }, [usePdf, json, previewOverride, isPreview, atsBoost]);
 
   // Moteur HTML : debounce de la fusion html/css (port de schedulePreview).
   // Une proposition du chat IA (previewOverride) court-circuite l'aperçu live, sans debounce.
   useEffect(() => {
     if (usePdf) return;
     const boostKw = atsBoost.enabled ? atsBoost.keywords : [];
-    const value =
-      previewOverride !== null
-        ? previewOverride
-        : applyAtsBoost(mergeHtml(html, css), boostKw);
-    const delay = previewOverride !== null ? 0 : 150;
+    const htmlToMerge = isPreview
+      ? (docType === "Lettre" ? renderLetter(previewOverride as Letter) : renderResume(previewOverride as Resume))
+      : html;
+    const value = applyAtsBoost(mergeHtml(htmlToMerge, css), boostKw);
+    const delay = isPreview ? 0 : 150;
     const id = setTimeout(() => setSrcDoc(value), delay);
     return () => clearTimeout(id);
-  }, [usePdf, html, css, previewOverride, atsBoost]);
+  }, [usePdf, html, css, previewOverride, isPreview, atsBoost, docType]);
 
   const measurePages = () => {
     try {

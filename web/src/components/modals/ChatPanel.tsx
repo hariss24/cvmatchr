@@ -3,22 +3,21 @@
 import { useEffect, useRef, useState } from "react";
 import { useDocStore } from "@/state/docStore";
 import { postJson } from "@/lib/ai/client";
-import { mergeHtml, extractCss } from "@/lib/resume/mergeHtml";
-import { stripBase64ForChat, restoreBase64InProposals } from "@/lib/ai/base64";
+import type { DocData } from "@/state/docStore";
 
 /**
  * Panneau latéral « Assistant IA » : chat éditeur. Port de `_sendChat`/`_appendProposals` (app.js).
  *
  * Flux métier :
- * - la photo base64 est retirée du HTML avant l'appel (`stripBase64ForChat`) et restaurée dans les
- *   propositions au retour (`restoreBase64InProposals`) — jamais envoyée à l'IA ;
- * - chaque proposition se prévisualise (override transitoire de l'aperçu), s'applique (HTML/CSS du
+ * - la photo base64 est retirée du JSON avant l'appel et restaurée dans les
+ *   propositions au retour — jamais envoyée à l'IA ;
+ * - chaque proposition se prévisualise (override transitoire de l'aperçu), s'applique (JSON du
  *   store, mode expert) ou se rejette.
  *
  * Le snapshot « Avant chat IA » avant application est reporté en Phase 6 (storage).
  */
 
-type Proposal = { id: string; title: string; summary: string; html: string; css: string };
+type Proposal = { id: string; title: string; summary: string; json: DocData };
 type Item =
   | { kind: "msg"; role: "user" | "assistant"; text: string }
   | { kind: "proposal"; data: Proposal; status: "open" | "applied" | "rejected" };
@@ -59,27 +58,36 @@ export default function ChatPanel({ open, onClose }: { open: boolean; onClose: (
     if (!text || busy) return;
     setInput("");
 
-    const { html, css, docType } = useDocStore.getState();
+    const { json, docType } = useDocStore.getState();
 
     setItems((prev) => [...prev, { kind: "msg", role: "user", text }]);
     historyRef.current.push({ role: "user", content: text });
 
     // Photo retirée avant l'appel ; mémorisée pour restauration dans les propositions.
-    const { html: strippedHtml, data: photoData } = stripBase64ForChat(html);
-    const payload = mergeHtml(strippedHtml, css);
+    const strippedJson = structuredClone(json);
+    let photoData = "";
+    if (strippedJson && typeof strippedJson === "object" && "photo" in strippedJson && typeof strippedJson.photo === "string" && strippedJson.photo.startsWith("data:image")) {
+      photoData = strippedJson.photo;
+      strippedJson.photo = "";
+    }
 
     setBusy(true);
     try {
       const res = await postJson<{ reply: string; proposals?: Proposal[] }>("/api/editor-chat", {
         messages: historyRef.current,
-        html: payload,
-        css: "",
+        doc_json: strippedJson,
         doc_type: docType,
       });
       setItems((prev) => [...prev, { kind: "msg", role: "assistant", text: res.reply }]);
       historyRef.current.push({ role: "assistant", content: res.reply });
 
-      const restored = restoreBase64InProposals(res.proposals ?? [], photoData);
+      const restored = (res.proposals ?? []).map(p => {
+        if (photoData && p.json && typeof p.json === "object" && "photo" in p.json) {
+          (p.json as any).photo = photoData;
+        }
+        return p;
+      });
+      
       if (restored.length) {
         setItems((prev) => [
           ...prev,
@@ -106,14 +114,12 @@ export default function ChatPanel({ open, onClose }: { open: boolean; onClose: (
   }
 
   function previewProposal(p: Proposal) {
-    useDocStore.getState().setPreviewOverride(mergeHtml(p.html, p.css));
+    useDocStore.getState().setPreviewOverride(p.json);
   }
 
   function applyProposal(idx: number, p: Proposal) {
-    const { setHtml, setCss, setPreviewOverride } = useDocStore.getState();
-    const { html: applyHtml, css: applyCss } = extractCss(p.html || "");
-    setHtml(applyHtml);
-    setCss(applyCss !== null ? applyCss : p.css || "");
+    const { setJson, setPreviewOverride } = useDocStore.getState();
+    setJson(p.json);
     setPreviewOverride(null);
     setItems((prev) =>
       prev.map((it, i) =>

@@ -1,19 +1,17 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * Chat éditeur (Phase 5) avec `/api/editor-chat` mocké via `page.route`.
- * Vérifie : ouverture du panneau, envoi d'un message, affichage de la réponse + proposition,
- * application de la proposition (le HTML/CSS du store change → l'aperçu reflète la proposition).
+ * Chat éditeur (Phase 3) avec `/api/editor-chat` mocké via `page.route`.
+ * Vérifie : ouverture du panneau, envoi d'un message (en JSON), affichage de la réponse + proposition,
+ * application de la proposition (le JSON du store change → l'aperçu HTML/PDF reflète la proposition).
  */
 
-const PROPOSAL_HTML =
-  "<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"utf-8\"><style>body{color:#111}</style></head><body><h1>CV Modifié IA</h1></body></html>";
-
-test("le chat applique une proposition à l'aperçu", async ({ page }) => {
+test("le chat applique une proposition JSON à l'aperçu", async ({ page }) => {
   await page.route("**/api/editor-chat", async (route) => {
-    const body = route.request().postDataJSON() as { html?: string };
+    const body = route.request().postDataJSON() as { doc_json?: any };
     // La photo base64 ne doit jamais partir vers l'IA (retirée côté client).
-    expect(body.html ?? "").not.toContain("data:image/");
+    expect(body.doc_json?.photo ?? "").toBe("");
+    
     await route.fulfill({
       json: {
         reply: "Voici une proposition adaptée.",
@@ -22,8 +20,10 @@ test("le chat applique une proposition à l'aperçu", async ({ page }) => {
             id: "p1",
             title: "Titre plus impactant",
             summary: "Met en avant le poste visé.",
-            html: PROPOSAL_HTML,
-            css: "",
+            json: {
+              ...body.doc_json,
+              role: "Développeur IA Sénior"
+            },
           },
         ],
       },
@@ -42,6 +42,7 @@ test("le chat applique une proposition à l'aperçu", async ({ page }) => {
 
   // Application → l'aperçu reflète la proposition, la carte passe en "appliquée".
   await page.getByRole("button", { name: "Appliquer" }).click();
-  await expect(page.frameLocator(".preview-frame").getByText("CV Modifié IA")).toBeVisible();
+  // On vérifie que le texte 'Développeur IA Sénior' apparaît (dans le rendu react-pdf ou HTML).
+  await expect(page.locator("text=Développeur IA Sénior")).toBeVisible();
   await expect(page.getByRole("button", { name: "Appliquer" })).toBeDisabled();
 });

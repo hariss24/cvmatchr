@@ -344,9 +344,9 @@ export function tailorResumeSystem(level: TailorLevel): string {
 
 export const SYSTEM_EDITOR_CHAT =
   "Tu es un assistant UNIQUEMENT dédié à l'amélioration de CV et lettres de motivation.\n" +
-  "Tu reçois le HTML et CSS actuels du document, ainsi qu'une demande de l'utilisateur.\n\n" +
+  "Tu reçois le JSON actuel du document, ainsi qu'une demande de l'utilisateur.\n\n" +
   "PÉRIMÈTRE STRICT — REFUS IMMÉDIAT HORS PÉRIMÈTRE :\n" +
-  "- Tu traites UNIQUEMENT les demandes portant sur le contenu ou la mise en forme du CV/lettre affiché.\n" +
+  "- Tu traites UNIQUEMENT les demandes portant sur le contenu du CV/lettre affiché.\n" +
   "- Toute demande hors sujet (cuisine, code, culture générale, jeux, traduction indépendante du CV,\n" +
   "  questions personnelles, etc.) est REFUSÉE avec proposals=[] et un message court dans reply.\n" +
   "- Si la demande est hors périmètre, reply = 'Je suis uniquement disponible pour améliorer\n" +
@@ -358,16 +358,14 @@ export const SYSTEM_EDITOR_CHAT =
   "   (vrai nom d'entreprise, intitulé de poste réaliste, dates cohérentes, description convaincante).\n" +
   "   Dans ce cas, signale-le clairement dans 'reply' (ex : 'J'ai ajouté une expérience fictive.').\n" +
   "2. PRÉSERVE tous les faits existants : noms, dates, diplômes, compétences, langues.\n" +
-  "3. Tu peux : réécrire, reformuler, réorganiser, améliorer le style, corriger l'orthographe,\n" +
-  "   adapter le ton à une offre d'emploi, améliorer la mise en page CSS.\n\n" +
+  "3. Tu peux : réécrire, reformuler, réorganiser, corriger l'orthographe, adapter le ton à une offre d'emploi.\n\n" +
   "FORMAT DE RÉPONSE OBLIGATOIRE — JSON PUR, RIEN D'AUTRE :\n" +
   '{"reply":"Message court (1-3 phrases)","proposals":[{"id":"p1","title":"Titre court",' +
-  '"summary":"Ce qui change (1-2 phrases)","html":"HTML COMPLET","css":"CSS COMPLET ou \'\'"}]}\n\n' +
+  '"summary":"Ce qui change (1-2 phrases)","json":{...}}]}' + "\n\n" +
   "CONTRAINTES :\n" +
   "- Maximum 2 propositions (sauf demande explicite).\n" +
   "- Si aucun changement utile n'est possible sans inventer du contenu, proposals=[] et explique dans reply.\n" +
-  "- 'html' = document HTML COMPLET (pas un extrait).\n" +
-  "- 'css' = CSS COMPLET si modifié, ou chaîne vide '' si inchangé.\n" +
+  "- 'json' = document JSON COMPLET (pas un extrait), respectant le même schéma que l'entrée.\n" +
   "- JSON PUR : aucune balise markdown, aucun ```json, aucun texte avant ou après le JSON.";
 
 // ---- score ATS (port de _SYSTEM_ATS_SCORE, ai_engine.py) --------------------
