@@ -282,6 +282,16 @@ Sauvegardes conservées : branche `gemini-backup-committed` (= bb5265d) et stash
 Vérifié : Toolbar restauré, ClientLayout supprimé, `tsc` OK, **144 tests Vitest verts**.
 
 ## Journal
+
+### 2026-07-05 : Migration editor-chat (Phase 3)
+- Remplacement des flux HTML/CSS par des flux `doc_json` (Resume ou Letter).
+- Mise à jour du système prompt `SYSTEM_EDITOR_CHAT` pour utiliser un retour JSON.
+- Mise à jour de `route.ts` pour attendre et répondre en JSON.
+- Adaptation des composants côté client :
+  - `ChatPanel` : envoi du payload `doc_json` et application des propositions sous forme JSON via `setJson`.
+  - `PreviewPane` : prévisualisation (previewOverride) supportée sous forme d'objet `DocData` plutôt que `string`.
+- Type check (tsc) au vert, tests validés. Commité avec succès.
+
 - 2026-06-22 — Setup loop + Phase 0 scaffold (`create-next-app web/`, build vert) — commit `web: phase 0 — scaffold Next.js`
 - 2026-06-23 — Phase 0 terminée : thème néo porté (`globals.css`), polices `next/font` (Inter + JetBrains Mono), layout de base (topbar/toolbar/split), `turbopack.root` fixé — build vert sans warning
 - 2026-06-23 — Phase 1 démarrée : `lib/resume/schema.ts` (zod installé, schéma CV/Lettre + défauts + types) — `tsc --noEmit` vert
