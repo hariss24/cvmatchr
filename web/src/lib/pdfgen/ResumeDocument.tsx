@@ -21,79 +21,88 @@ const ACCENT = "#0078d4";
 const INK = "#111";
 const BODY = "#555";
 
+/**
+ * Le CSS d'origine mesure la géométrie en px CSS et les polices en pt.
+ * react-pdf mesure tout en pt : 1 px = 0,75 pt. `px(n)` garde les nombres
+ * du CSS lisibles tels quels (px(75) = photo 75px) sans erreur d'échelle.
+ */
+const px = (n: number): number => n * 0.75;
+
 const s = StyleSheet.create({
   page: {
     fontFamily: "Roboto",
     fontSize: 9.5,
     color: BODY,
     lineHeight: 1.25,
-    paddingTop: 16,
-    paddingBottom: 12,
-    paddingHorizontal: 36,
+    paddingTop: px(16),
+    paddingBottom: px(12),
+    paddingHorizontal: px(36),
   },
 
   // En-tête
-  header: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
-  photo: { width: 75, height: 75, borderRadius: 4, marginRight: 16, objectFit: "cover" },
+  header: { flexDirection: "row", alignItems: "center", marginBottom: px(10) },
+  photo: { width: px(75), height: px(75), borderRadius: px(4), marginRight: px(16), objectFit: "cover" },
   headerTitles: { flex: 1 },
   name: { fontSize: 14, fontWeight: 700, color: INK, lineHeight: 1.2 },
-  jobTitle: { fontSize: 12, fontWeight: 700, color: ACCENT, marginTop: 2 },
+  jobTitle: { fontSize: 12, fontWeight: 700, color: ACCENT, marginTop: px(2) },
   contact: {
-    width: 210,
-    marginLeft: 20,
+    width: px(250),
+    marginLeft: px(20),
     textAlign: "right",
     fontSize: 9.5,
     color: "#444",
     lineHeight: 1.5,
   },
 
-  // Sections
+  // Sections : trait bleu séparateur au-dessus de chaque section (règle du template
+  // de base), sauf en-tête et bloc langues/intérêts (override graphique).
+  section: { borderTopWidth: px(2), borderTopColor: ACCENT, paddingTop: px(5) },
   sectionTitle: {
     color: ACCENT,
     fontSize: 10,
     fontWeight: 700,
-    marginTop: 10,
-    marginBottom: 10,
+    marginTop: px(10),
+    marginBottom: px(10),
   },
-  summary: { fontSize: 10, textAlign: "justify", marginBottom: 10 },
+  summarySection: { marginBottom: px(6) },
+  summary: { fontSize: 10, textAlign: "justify", marginBottom: px(10) },
 
   // Timeline (expériences, formations, projets, bénévolat)
-  tlItem: { flexDirection: "row", marginLeft: 10 },
-  tlGutter: { width: 20 },
-  tlDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: BODY },
-  tlLine: { width: 2, flexGrow: 1, backgroundColor: BODY, marginLeft: 4 },
-  tlBody: { flex: 1, paddingBottom: 12 },
+  tlItem: { flexDirection: "row", marginLeft: px(10) },
+  tlGutter: { width: px(20) },
+  tlDot: { width: px(10), height: px(10), borderRadius: px(5), backgroundColor: BODY },
+  tlLine: { width: px(2), flexGrow: 1, backgroundColor: BODY, marginLeft: px(4) },
+  tlBody: { flex: 1, paddingBottom: px(12) },
   tlHead: { flexDirection: "row", justifyContent: "space-between" },
-  tlTitle: { fontSize: 10, fontWeight: 700, color: INK, flex: 1, paddingRight: 8 },
+  tlTitle: { fontSize: 10, fontWeight: 700, color: INK, flex: 1, paddingRight: px(8) },
   tlDate: { fontSize: 10, color: "#888" },
-  tlSubtitleRow: { marginTop: 1 },
+  tlSubtitleRow: { marginTop: px(1) },
   tlSubtitle: { fontSize: 9, fontWeight: 700, color: INK },
-  tlDesc: { marginTop: 3 },
+  tlDesc: { marginTop: px(3) },
 
   // Listes à puces
-  bullets: { paddingLeft: 15 },
-  bulletRow: { flexDirection: "row", marginBottom: 1 },
-  bulletGlyph: { width: 8 },
+  bullets: { paddingLeft: px(15) },
+  bulletRow: { flexDirection: "row", marginBottom: px(1) },
+  bulletGlyph: { width: px(8) },
   bulletText: { flex: 1 },
 
   // Compétences (section bordée haut/bas)
   skillsSection: {
-    marginTop: 8,
-    borderTopWidth: 2,
+    borderTopWidth: px(2),
     borderTopColor: ACCENT,
-    borderBottomWidth: 2,
+    borderBottomWidth: px(2),
     borderBottomColor: ACCENT,
-    paddingTop: 5,
-    paddingBottom: 8,
-    marginBottom: 10,
+    paddingTop: px(5),
+    paddingBottom: px(8),
+    marginBottom: px(10),
   },
-  skillItem: { color: INK, marginBottom: 4 },
+  skillItem: { color: INK, marginBottom: px(4) },
 
   // Langues & centres d'intérêt côte à côte
   twoCols: { flexDirection: "row" },
   col: { width: "48%" },
   colSpacer: { width: "4%" },
-  colItem: { color: INK, marginBottom: 4 },
+  colItem: { color: INK, marginBottom: px(4) },
   langLevel: { color: BODY },
 });
 
@@ -120,7 +129,7 @@ function TimelineItem({
         <View style={s.tlDot} />
         {!last ? <View style={s.tlLine} /> : null}
       </View>
-      <View style={[s.tlBody, last ? { paddingBottom: 0 } : {}]}>
+      <View style={s.tlBody}>
         <View style={s.tlHead}>
           <Text style={s.tlTitle}>{title}</Text>
           {t(date) ? <Text style={s.tlDate}>{date}</Text> : null}
@@ -219,10 +228,14 @@ export function ResumeDocument({
           {contact ? <Text style={s.contact}>{contact}</Text> : null}
         </View>
 
-        {t(d.summary) ? <Text style={s.summary}>{d.summary}</Text> : null}
+        {t(d.summary) ? (
+          <View style={[s.section, s.summarySection]}>
+            <Text style={s.summary}>{d.summary}</Text>
+          </View>
+        ) : null}
 
         {exp.length ? (
-          <View>
+          <View style={s.section}>
             <SectionTitle>EXPÉRIENCES</SectionTitle>
             {exp.map((e: ExperienceItem, i) => (
               <TimelineItem
@@ -243,7 +256,7 @@ export function ResumeDocument({
         ) : null}
 
         {edu.length ? (
-          <View>
+          <View style={s.section}>
             <SectionTitle>FORMATIONS</SectionTitle>
             {edu.map((e: EducationItem, i) => (
               <TimelineItem
@@ -277,7 +290,7 @@ export function ResumeDocument({
         ) : null}
 
         {projects.length ? (
-          <View>
+          <View style={s.section}>
             <SectionTitle>PROJETS</SectionTitle>
             {projects.map((p: ProjectItem, i) => (
               <TimelineItem
@@ -294,7 +307,7 @@ export function ResumeDocument({
         ) : null}
 
         {certs.length ? (
-          <View>
+          <View style={[s.section, { marginBottom: px(10) }]}>
             <SectionTitle>CERTIFICATIONS</SectionTitle>
             <View style={s.bullets}>
               {certs.map((c, i) => (
@@ -308,7 +321,7 @@ export function ResumeDocument({
         ) : null}
 
         {volunteer.length ? (
-          <View>
+          <View style={s.section}>
             <SectionTitle>BÉNÉVOLAT</SectionTitle>
             {volunteer.map((v: VolunteerItem, i) => (
               <TimelineItem
