@@ -17,10 +17,8 @@ import { stripBase64FromJson, restoreBase64InJson } from "@/lib/ai/base64";
 
 const TEMPLATE_LABELS: Record<TemplateId, string> = {
   sobre: "Sobre",
-  moderne: "Moderne",
-  classique: "Classique",
-  minimal: "Minimal",
   graphique: "Graphique",
+  kakuna: "Kakuna",
 };
 
 type Tab = "form" | "json" | "import";

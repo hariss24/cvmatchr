@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDocStore } from "@/state/docStore";
 import { postJson } from "@/lib/ai/client";
-import { renderLetter } from "@/lib/resume/render";
+import { generateLetterPdfBlob } from "@/lib/pdfgen/generatePdf";
+import PdfPreview from "../editor/PdfPreview";
 import type { Letter } from "@/lib/resume/schema";
 import { toast } from "@/state/uiStore";
 import { saveDraft } from "@/lib/storage/db";
@@ -28,6 +29,12 @@ export default function PackModal({ open, onClose }: { open: boolean; onClose: (
   const [role, setRole] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<PackResult | null>(null);
+  const [packPdfBlob, setPackPdfBlob] = useState<Blob | null>(null);
+
+  useEffect(() => {
+    if (!result?.letter) return;
+    generateLetterPdfBlob(result.letter, []).then(setPackPdfBlob).catch(console.error);
+  }, [result?.letter]);
 
   useEscapeClose(open && !busy, onClose);
 
@@ -81,7 +88,7 @@ export default function PackModal({ open, onClose }: { open: boolean; onClose: (
     const { setDocType, setJson, setCompany, setRole } = useDocStore.getState();
     await saveDraft({
       id: "draft-Lettre",
-      html: renderLetter(result.letter as Letter),
+      html: "",
       css: "",
       json: result.letter,
       templateId: null,
@@ -144,12 +151,11 @@ export default function PackModal({ open, onClose }: { open: boolean; onClose: (
           <div className="pack-result">
             <div className="pack-col">
               <div className="pack-letter-title">Lettre de motivation</div>
-              <iframe
-                className="pack-letter-frame"
-                title="Aperçu de la lettre"
-                sandbox=""
-                srcDoc={renderLetter(result.letter)}
-              />
+              {packPdfBlob ? (
+                <PdfPreview blob={packPdfBlob} />
+              ) : (
+                <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>Génération du PDF...</div>
+              )}
               <button type="button" className="go" onClick={loadLetter} disabled={busy}>
                 {"Insérer dans l'éditeur (Lettre)"}
               </button>

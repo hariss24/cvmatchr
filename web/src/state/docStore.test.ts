@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { useDocStore, docEngine } from "./docStore";
+import { useDocStore } from "./docStore";
 import { DEFAULT_RESUME } from "@/lib/resume/schema";
 import { TEMPLATES } from "@/lib/resume/templates";
 import * as pdfGen from "@/lib/pdfgen/generatePdf";

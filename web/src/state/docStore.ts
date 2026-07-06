@@ -40,7 +40,7 @@ export type Doc = {
   /** Booster ATS invisible : mots-clés absents injectés en texte 1px à l'aperçu et à l'export. */
   atsBoost: { enabled: boolean; keywords: string[] };
   /** État HTML/CSS avant adaptation (Tailor) pour le DiffModal. */
-  tailorBefore: { html: string; css: string } | null;
+  tailorBefore: { json: DocData; templateId: TemplateId | null } | null;
   /** Offre en attente (depuis l'onglet Offres) : pré-remplit `TailorModal` à l'ouverture. */
   pendingJobDesc: string | null;
   /** Option : inclure la date dans le nom du fichier PDF. */
@@ -71,7 +71,7 @@ export type DocStore = Doc & {
   setTemplate: (templateId: TemplateId) => void;
   setPreviewOverride: (previewOverride: DocData | null) => void;
   setAtsBoost: (atsBoost: { enabled: boolean; keywords: string[] }) => void;
-  setTailorBefore: (state: { html: string; css: string } | null) => void;
+  setTailorBefore: (state: { json: DocData; templateId: TemplateId | null } | null) => void;
   setPendingJobDesc: (v: string | null) => void;
   setIncludeDate: (v: boolean) => void;
 };
@@ -116,5 +116,5 @@ export const useDocStore = create<DocStore>((set, get) => ({
 }));
 
 if (typeof window !== "undefined") {
-  (window as any).useDocStore = useDocStore;
+  (window as unknown as { useDocStore: typeof useDocStore }).useDocStore = useDocStore;
 }
