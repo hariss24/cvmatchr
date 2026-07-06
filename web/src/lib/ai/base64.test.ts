@@ -4,6 +4,9 @@ import {
   restoreBase64InTailor,
   stripBase64ForChat,
   restoreBase64InProposals,
+  stripBase64FromJson,
+  restoreBase64InJson,
+  PHOTO_PLACEHOLDER,
 } from "./base64";
 
 const IMG_A = "data:image/png;base64," + "A".repeat(40);
@@ -65,5 +68,36 @@ describe("strip/restore chat", () => {
   it("ne modifie rien si data null", () => {
     const proposals = [{ html: '<img src="[IMAGE_BASE64]">' }];
     expect(restoreBase64InProposals(proposals, null)).toBe(proposals);
+  });
+});
+
+describe("strip/restore json", () => {
+  it("remplace la photo par le placeholder", () => {
+    const json = { name: "test", photo: IMG_A };
+    const { json: stripped, data } = stripBase64FromJson(json);
+    expect(stripped.photo).toBe(PHOTO_PLACEHOLDER);
+    expect(data).toBe(IMG_A);
+    expect(json.photo).toBe(IMG_A); // original inchangé
+  });
+
+  it("ne touche pas si photo absente ou courte", () => {
+    const json = { name: "test", photo: "courte" };
+    const { json: stripped, data } = stripBase64FromJson(json);
+    expect(stripped.photo).toBe("courte");
+    expect(data).toBeNull();
+  });
+
+  it("restaure la photo si placeholder inchangé", () => {
+    const json = { photo: PHOTO_PLACEHOLDER };
+    const restored = restoreBase64InJson(json, IMG_B);
+    expect(restored.photo).toBe(IMG_B);
+  });
+
+  it("ne restaure pas si placeholder a été supprimé ou modifié", () => {
+    const json1 = { photo: "" };
+    expect(restoreBase64InJson(json1, IMG_B).photo).toBe("");
+
+    const json2 = { photo: "data:image/png;base64,nouvelle_image" };
+    expect(restoreBase64InJson(json2, IMG_B).photo).toBe("data:image/png;base64,nouvelle_image");
   });
 });

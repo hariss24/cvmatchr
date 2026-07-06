@@ -13,6 +13,7 @@ import SnapshotsModal from "@/components/modals/SnapshotsModal";
 import ImportTextModal from "@/components/modals/ImportTextModal";
 import ImportPdfModal from "@/components/modals/ImportPdfModal";
 import type { Resume } from "@/lib/resume/schema";
+import { stripBase64FromJson, restoreBase64InJson } from "@/lib/ai/base64";
 
 const TEMPLATE_LABELS: Record<TemplateId, string> = {
   sobre: "Sobre",
@@ -22,13 +23,12 @@ const TEMPLATE_LABELS: Record<TemplateId, string> = {
   graphique: "Graphique",
 };
 
-type Tab = "form" | "html" | "css" | "import";
+type Tab = "form" | "json" | "import";
 
 /**
- * Panneau d'édition : onglet Formulaire + mode expert (HTML / CSS / Importer).
+ * Panneau d'édition : onglet Formulaire + mode expert (JSON / Importer).
  * Outils intégrés à la barre de titre : Coller/Copier JSON, export Reactive Resume,
  * sélection de modèle, indicateur de brouillon dynamique, snapshots ⟲.
- * Port de la barre d'outils éditeur de l'app Flask (templates/index.html).
  */
 export default function EditorPane() {
   const [tab, setTab] = useState<Tab>("form");
@@ -40,15 +40,41 @@ export default function EditorPane() {
 
   const docType = useDocStore((s) => s.docType);
   const htmlSource = useDocStore((s) => s.htmlSource);
-  const html = useDocStore((s) => s.html);
-  const css = useDocStore((s) => s.css);
+  const storeJson = useDocStore((s) => s.json);
   const templateId = useDocStore((s) => s.templateId);
-  const setHtml = useDocStore((s) => s.setHtml);
-  const setCss = useDocStore((s) => s.setCss);
   const setJson = useDocStore((s) => s.setJson);
   const setTemplate = useDocStore((s) => s.setTemplate);
 
   const isResumeType = docType !== "Lettre";
+
+  const [localJsonStr, setLocalJsonStr] = useState("");
+  const [jsonError, setJsonError] = useState(false);
+  const isTyping = useRef(false);
+
+  useEffect(() => {
+    if (isTyping.current) {
+      isTyping.current = false;
+      return;
+    }
+    const { json: stripped } = stripBase64FromJson(storeJson);
+    setLocalJsonStr(JSON.stringify(stripped, null, 2));
+    setJsonError(false);
+  }, [storeJson]);
+
+  const onMonacoChange = (value: string | undefined) => {
+    const val = value ?? "";
+    setLocalJsonStr(val);
+    try {
+      const parsed = JSON.parse(val);
+      const restored = restoreBase64InJson(parsed, (storeJson as any).photo);
+      const normalized = isResumeType ? normalizeResume(restored) : normalizeLetter(restored);
+      isTyping.current = true;
+      setJsonError(false);
+      setJson(normalized);
+    } catch (e) {
+      setJsonError(true);
+    }
+  };
 
   // Indicateur de sauvegarde dynamique : « Enregistrement… » puis « ✓ Brouillon sauvegardé »
   // (calqué sur le debounce de 1 s de useAutoDraft).
@@ -76,7 +102,7 @@ export default function EditorPane() {
   const toggleExpert = () => {
     const next = !expert;
     setExpert(next);
-    setTab(next ? "html" : "form");
+    setTab(next ? "json" : "form");
   };
 
   const onPasteJson = async () => {
@@ -149,7 +175,7 @@ export default function EditorPane() {
           <button
             type="button"
             className={`tab tab--expert${expert && tab !== "form" ? " active" : ""}`}
-            title="Activer le mode expert (HTML/CSS)"
+            title="Activer le mode expert (JSON/Importer)"
             onClick={toggleExpert}
           >
             Mode Expert
@@ -160,17 +186,11 @@ export default function EditorPane() {
               <span className="expert-divider" />
               <button
                 type="button"
-                className={`tab${tab === "html" ? " active" : ""}`}
-                onClick={() => setTab("html")}
+                className={`tab${tab === "json" ? " active" : ""}`}
+                onClick={() => setTab("json")}
               >
-                HTML
-              </button>
-              <button
-                type="button"
-                className={`tab${tab === "css" ? " active" : ""}`}
-                onClick={() => setTab("css")}
-              >
-                CSS
+                JSON
+                {jsonError && <span style={{ color: "var(--red)", marginLeft: 6, fontSize: 11 }}>⚠ Invalide</span>}
               </button>
               <button
                 type="button"
@@ -239,7 +259,7 @@ export default function EditorPane() {
                 className="form-btn-add"
                 onClick={() => {
                   setExpert(true);
-                  setTab("html");
+                  setTab("json");
                 }}
               >
                 Continuer en mode expert
@@ -270,10 +290,10 @@ export default function EditorPane() {
       ) : (
         <div className="pane-body editor-monaco">
           <Editor
-            language={tab === "html" ? "html" : "css"}
+            language="json"
             theme="vs-dark"
-            value={tab === "html" ? html : css}
-            onChange={(value) => (tab === "html" ? setHtml(value ?? "") : setCss(value ?? ""))}
+            value={localJsonStr}
+            onChange={onMonacoChange}
             options={{
               minimap: { enabled: false },
               fontSize: 13,

@@ -47,10 +47,36 @@ test("basculer CV → Lettre change le document", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("le Mode Expert affiche l'éditeur Monaco (onglet HTML)", async ({ page }) => {
+test("le Mode Expert affiche l'éditeur Monaco (onglet JSON) et l'édition synchronise le formulaire et l'aperçu", async ({ page }) => {
   await page.goto("/");
 
-  // « Mode Expert » ouvre directement l'onglet HTML.
+  // Saisir un nom de base
+  const nameInput = page.locator(".form-field", { hasText: "Nom complet" }).locator(".form-input");
+  await nameInput.fill("Jean Dupont");
+
+  // Passer en mode expert (onglet JSON)
   await page.getByRole("button", { name: "Mode Expert" }).click();
   await expect(page.locator(".monaco-editor").first()).toBeVisible();
+
+  // Attendre que l'éditeur soit prêt
+  await page.waitForFunction(() => (window as any).monaco && (window as any).monaco.editor.getModels().length > 0);
+
+  // Éditer le JSON via l'API Monaco
+  await page.evaluate(() => {
+    const model = (window as any).monaco.editor.getModels()[0];
+    const val = JSON.parse(model.getValue());
+    val.name = "Jean Modifié par Monaco";
+    model.setValue(JSON.stringify(val, null, 2));
+  });
+
+  // Revenir au formulaire
+  await page.getByRole("button", { name: "Formulaire" }).click();
+
+  // Le champ nom a été mis à jour via le JSON
+  await expect(nameInput).toHaveValue("Jean Modifié par Monaco");
+
+  // L'aperçu a également été mis à jour
+  await expect(
+    page.frameLocator(".preview-frame").getByText("Jean Modifié par Monaco")
+  ).toBeVisible();
 });

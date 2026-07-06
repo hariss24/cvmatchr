@@ -48,20 +48,17 @@
       `docEngine` + `PdfPreview` + export client sans serveur (Graphique seul), 198/198 +
       e2e 23/23. Correctif d'échelle px→pt après retour checkpoint (commit `8a149c3`).
       → ✅ **checkpoint utilisateur VALIDÉ le 2026-07-05** (« ok très bien c'est corrigé »).
-- [ ] **Phase 3 — Flux IA 100 % JSON** (generate-pack → `Letter` JSON, editor-chat JSON,
-      `text-to-letter`, Mode Expert → onglet JSON Monaco).
+- [x] **Phase 3 — Flux IA 100 % JSON** ✅ (2026-07-06) : generate-pack → `Letter` JSON, editor-chat JSON,
+      `text-to-letter`, Mode Expert → onglet JSON Monaco. e2e 23/23 verts.
 - [ ] **Phase 4 — Porter Sobre, Moderne, Classique, Minimal** (primitives partagées).
 - [ ] **Phase 5 — Démontage du HTML** (render/mergeHtml/templates/convert/Chromium,
       migration Dexie douce, `htmlSource` retiré).
 
 ## Prochaine action
 
-⚠️ **LOOP ARRÊTÉ le 2026-07-05 (demande utilisateur : plus de tokens) — travail MANUEL
-désormais, ne PAS relancer de loop/ScheduleWakeup.** Reste à faire :
-**Phase 3 — exécuter le plan détaillé** `docs/superpowers/plans/2026-07-05-react-pdf-phase-3.md`
-(flux IA 100 % JSON : generate-pack → `Letter` JSON, editor-chat JSON, `text-to-letter`,
-Mode Expert → onglet JSON Monaco), task par task (TDD, vérifs, commit, journal).
-Push uniquement en fin de phase verte, puis contrôle prod.
+⚠️ **LOOP ARRÊTÉ**
+**Phase 3 terminée.**
+Prochaine étape: **Phase 4 — Porter Sobre, Moderne, Classique, Minimal**.
 
 ## Blocages (migration React PDF)
 
@@ -291,6 +288,12 @@ Vérifié : Toolbar restauré, ClientLayout supprimé, `tsc` OK, **144 tests Vit
   - `ChatPanel` : envoi du payload `doc_json` et application des propositions sous forme JSON via `setJson`.
   - `PreviewPane` : prévisualisation (previewOverride) supportée sous forme d'objet `DocData` plutôt que `string`.
 - Type check (tsc) au vert, tests validés. Commité avec succès.
+
+### 2026-07-06 : Phase 3 Task 4 & finalisation
+- Remplacement du Mode Expert HTML/CSS par un onglet unique Monaco pour l'édition JSON.
+- Extraction de la logique base64 photo lors de l'édition (strippée dans l'éditeur, restaurée à la sauvegarde).
+- Tests e2e corrigés (`chat.spec.ts` utilisait `role` au lieu de `title` ; `pack.spec.ts` ne générait pas de HTML pour la modale) : 23/23 e2e verts.
+- Migration de Phase 3 terminée.
 
 - 2026-06-22 — Setup loop + Phase 0 scaffold (`create-next-app web/`, build vert) — commit `web: phase 0 — scaffold Next.js`
 - 2026-06-23 — Phase 0 terminée : thème néo porté (`globals.css`), polices `next/font` (Inter + JetBrains Mono), layout de base (topbar/toolbar/split), `turbopack.root` fixé — build vert sans warning

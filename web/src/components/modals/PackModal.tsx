@@ -81,7 +81,7 @@ export default function PackModal({ open, onClose }: { open: boolean; onClose: (
     const { setDocType, setJson, setCompany, setRole } = useDocStore.getState();
     await saveDraft({
       id: "draft-Lettre",
-      html: "",
+      html: renderLetter(result.letter as Letter),
       css: "",
       json: result.letter,
       templateId: null,

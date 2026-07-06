@@ -9,6 +9,7 @@ const LETTER_JSON = {
   sender_name: "John Doe",
   recipient_name: "Madame, Monsieur",
   body: "Lettre générée par l'IA.",
+  signoff: "",
 };
 const EMAIL_TEXT = "Bonjour,\n\nVeuillez trouver ma candidature.\n\nCordialement.";
 

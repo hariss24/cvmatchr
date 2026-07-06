@@ -22,7 +22,7 @@ test("le chat applique une proposition JSON à l'aperçu", async ({ page }) => {
             summary: "Met en avant le poste visé.",
             json: {
               ...body.doc_json,
-              role: "Développeur IA Sénior"
+              title: "Développeur IA Sénior"
             },
           },
         ],
@@ -42,7 +42,7 @@ test("le chat applique une proposition JSON à l'aperçu", async ({ page }) => {
 
   // Application → l'aperçu reflète la proposition, la carte passe en "appliquée".
   await page.getByRole("button", { name: "Appliquer" }).click();
-  // On vérifie que le texte 'Développeur IA Sénior' apparaît (dans le rendu react-pdf ou HTML).
-  await expect(page.locator("text=Développeur IA Sénior")).toBeVisible();
+  // On vérifie que le texte 'Développeur IA Sénior' apparaît (dans l'iframe HTML).
+  await expect(page.frameLocator(".preview-frame").getByText("Développeur IA Sénior")).toBeVisible();
   await expect(page.getByRole("button", { name: "Appliquer" })).toBeDisabled();
 });
