@@ -61,7 +61,7 @@ export default function PreviewPane() {
         const jsonToRender = isPreview ? previewOverride : json;
         const blob = await generateResumePdfBlob(
           jsonToRender as Resume,
-          "graphique",
+          templateId as import("@/lib/pdfgen/ResumeDocument").PdfTemplateId,
           atsBoost.enabled ? atsBoost.keywords : [],
         );
         if (genRef.current === gen) setPdfBlob(blob);

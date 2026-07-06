@@ -78,7 +78,11 @@ export default function TopBar() {
       let blob: Blob;
       if (docEngine({ docType, templateId, htmlSource }) === "pdf") {
         // Moteur react-pdf : le PDF est généré dans le navigateur — aucun appel serveur.
-        blob = await generateResumePdfBlob(json as Resume, "graphique", boostKeywords);
+        blob = await generateResumePdfBlob(
+          json as Resume,
+          templateId as import("@/lib/pdfgen/ResumeDocument").PdfTemplateId,
+          boostKeywords
+        );
       } else {
         const res = await fetch("/api/convert", {
           method: "POST",
