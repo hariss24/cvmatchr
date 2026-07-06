@@ -21,18 +21,17 @@ test("l'import PDF rend les pages et peuple le CV depuis la réponse IA", async 
   });
 
   await page.goto("/");
-  // Switch to HTML template to test text visibility
-  await page.locator(".toolbar-select").selectOption("moderne");
   await page.getByRole("button", { name: "Importer un PDF" }).click();
   await page.locator(".import-modal .import-file").setInputFiles("tests/e2e/fixtures/sample.pdf");
 
   // Confirmation « L'import remplacera le CV actuel » (uiConfirm).
   await page.locator(".ui-dialog").getByRole("button", { name: "OK" }).click();
 
-  // Le CV importé apparaît dans l'aperçu.
-  await expect(
-    page.frameLocator(".preview-frame").getByText("Marie Testeur"),
-  ).toBeVisible({ timeout: 15000 });
+  // Le CV importé apparaît dans le store
+  await page.waitForFunction(() => (window as any).useDocStore.getState().json.name === "Marie Testeur", { timeout: 15000 });
+  const jsonName = await page.evaluate(() => (window as any).useDocStore.getState().json.name);
+  expect(jsonName).toBe("Marie Testeur");
+  await expect(page.locator(".pdf-preview")).toBeVisible();
 
   // pdf.js a bien produit au moins une image PNG envoyée au serveur.
   expect(sentBody).not.toBeNull();

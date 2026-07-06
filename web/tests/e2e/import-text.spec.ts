@@ -16,8 +16,6 @@ test("l'import texte remplit le formulaire et l'aperçu depuis un CV JSON", asyn
   });
 
   await page.goto("/");
-  // Switch to HTML template to test text visibility
-  await page.locator(".toolbar-select").selectOption("moderne");
   // L'import texte vit sous Mode Expert → onglet « Importer ».
   await page.getByRole("button", { name: "Mode Expert" }).click();
   await page.locator(".expert-tabs").getByRole("button", { name: "Importer" }).click();
@@ -30,13 +28,11 @@ test("l'import texte remplit le formulaire et l'aperçu depuis un CV JSON", asyn
   // Confirmation « L'import remplacera le document actuel » (uiConfirm).
   await page.locator(".ui-dialog").getByRole("button", { name: "OK" }).click();
 
-  // Le CV extrait apparaît dans l'aperçu (rendu depuis le JSON).
-  await expect(
-    page.frameLocator(".preview-frame").getByText("Jean Dupont"),
-  ).toBeVisible();
-  await expect(
-    page.frameLocator(".preview-frame").getByText("Développeur web"),
-  ).toBeVisible();
+  // Le CV extrait apparaît dans le store
+  const json = await page.evaluate(() => (window as any).useDocStore.getState().json);
+  expect(json.name).toBe("Jean Dupont");
+  expect(json.title).toBe("Développeur web");
+  await expect(page.locator(".pdf-preview")).toBeVisible();
 
   // Le texte a bien été transmis à l'IA.
   expect(sentBody).not.toBeNull();

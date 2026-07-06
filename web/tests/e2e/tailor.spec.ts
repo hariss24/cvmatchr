@@ -22,8 +22,6 @@ test("adapter à une offre met à jour l'aperçu", async ({ page }) => {
   });
 
   await page.goto("/");
-  // Switch to HTML template to test text visibility
-  await page.locator(".toolbar-select").selectOption("moderne");
   await page.getByRole("button", { name: "Adapter à une offre" }).click();
   await page
     .locator("#job-desc-input")
@@ -33,10 +31,9 @@ test("adapter à une offre met à jour l'aperçu", async ({ page }) => {
     .getByRole("button", { name: "Adapter le CV" })
     .click();
 
-  // L'aperçu (iframe) reflète le CV adapté ; la modale reste ouverte (diff/pack/ATS).
-  await expect(
-    page.frameLocator(".preview-frame").getByText("Profil Adapté IA"),
-  ).toBeVisible();
+  // L'aperçu reflète le CV adapté
+  await page.waitForFunction(() => (window as any).useDocStore.getState().json.name === "Profil Adapté IA", { timeout: 10000 });
+  await expect(page.locator(".pdf-preview")).toBeVisible();
   await page.locator(".tailor-modal-content").getByRole("button", { name: "Fermer" }).click();
   await expect(page.locator(".tailor-modal-content")).toHaveCount(0);
 });

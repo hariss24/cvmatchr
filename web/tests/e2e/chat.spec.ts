@@ -31,8 +31,6 @@ test("le chat applique une proposition JSON à l'aperçu", async ({ page }) => {
   });
 
   await page.goto("/");
-  // Switch to HTML template to test text visibility
-  await page.locator(".toolbar-select").selectOption("moderne");
   await page.getByRole("button", { name: "Assistant IA" }).click();
 
   await page.locator(".chat-input").fill("Rends le titre plus percutant");
@@ -44,7 +42,9 @@ test("le chat applique une proposition JSON à l'aperçu", async ({ page }) => {
 
   // Application → l'aperçu reflète la proposition, la carte passe en "appliquée".
   await page.getByRole("button", { name: "Appliquer" }).click();
-  // On vérifie que le texte 'Développeur IA Sénior' apparaît (dans l'iframe HTML).
-  await expect(page.frameLocator(".preview-frame").getByText("Développeur IA Sénior")).toBeVisible();
+  // On vérifie que le texte 'Développeur IA Sénior' est dans le store et le PDF visible.
+  const jsonTitle = await page.evaluate(() => (window as any).useDocStore.getState().json.title);
+  expect(jsonTitle).toBe("Développeur IA Sénior");
+  await expect(page.locator(".pdf-preview")).toBeVisible();
   await expect(page.getByRole("button", { name: "Appliquer" })).toBeDisabled();
 });

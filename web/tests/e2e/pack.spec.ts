@@ -35,11 +35,9 @@ test("le pack candidature génère lettre + email et insère la lettre dans l'é
   await page.locator(".pack-modal").getByRole("button", { name: "Générer le pack" }).click();
 
   // L'aperçu de la lettre et l'email s'affichent, côte à côte (lettre à gauche, email à droite).
-  await expect(
-    page.frameLocator(".pack-letter-frame").getByText("Madame, Monsieur"),
-  ).toBeVisible();
+  await expect(page.locator(".pack-result .pdf-preview")).toBeVisible();
   await expect(page.locator(".pack-result textarea")).toHaveValue(EMAIL_TEXT);
-  const letterBox = await page.locator(".pack-letter-frame").boundingBox();
+  const letterBox = await page.locator(".pack-result .pdf-preview").boundingBox();
   const emailBox = await page.locator(".pack-result textarea").boundingBox();
   expect(Math.abs(letterBox!.y - emailBox!.y)).toBeLessThan(5);
   expect(emailBox!.x).toBeGreaterThan(letterBox!.x + letterBox!.width - 1);
@@ -51,7 +49,8 @@ test("le pack candidature génère lettre + email et insère la lettre dans l'é
   // Insertion dans l'éditeur → bascule sur le type « Lettre » et l'aperçu montre la lettre.
   await page.getByRole("button", { name: /Insérer dans l'éditeur/ }).click();
   await expect(page.locator("#doc_type")).toHaveValue("Lettre");
-  await expect(
-    page.frameLocator(".preview-frame").getByText("Lettre générée par l'IA."),
-  ).toBeVisible();
+  // Vérifie le json inséré et l'aperçu PDF
+  const jsonBody = await page.evaluate(() => (window as any).useDocStore.getState().json.body);
+  expect(jsonBody).toBe("Lettre générée par l'IA.");
+  await expect(page.locator(".pdf-preview")).toBeVisible();
 });

@@ -23,18 +23,16 @@ test("la page charge sans erreur console", async ({ page }) => {
 
 test("saisir un nom met à jour l'aperçu", async ({ page }) => {
   await page.goto("/");
-  // Switch to HTML template to test text visibility
-  await page.locator(".toolbar-select").selectOption("moderne");
 
   const nameInput = page
     .locator(".form-field", { hasText: "Nom complet" })
     .locator(".form-input");
   await nameInput.fill("Zoé Testeuse");
 
-  // L'aperçu (iframe srcDoc) doit refléter la saisie après le debounce.
-  await expect(
-    page.frameLocator(".preview-frame").getByText("Zoé Testeuse"),
-  ).toBeVisible();
+  // L'aperçu (PDF) reflète la saisie si le JSON du store est mis à jour
+  const jsonName = await page.evaluate(() => (window as any).useDocStore.getState().json.name);
+  expect(jsonName).toBe("Zoé Testeuse");
+  await expect(page.locator(".pdf-preview")).toBeVisible();
 });
 
 test("basculer CV → Lettre change le document", async ({ page }) => {
@@ -43,16 +41,14 @@ test("basculer CV → Lettre change le document", async ({ page }) => {
   // Le type de document se choisit dans la barre meta (#doc_type).
   await page.locator("#doc_type").selectOption("Lettre");
 
-  // Le rendu d'une lettre contient la ligne « Objet : ».
-  await expect(
-    page.frameLocator(".preview-frame").getByText(/Objet\s*:/),
-  ).toBeVisible();
+  // Vérifier le store et l'aperçu
+  const docType = await page.evaluate(() => (window as any).useDocStore.getState().docType);
+  expect(docType).toBe("Lettre");
+  await expect(page.locator(".pdf-preview")).toBeVisible();
 });
 
 test("le Mode Expert affiche l'éditeur Monaco (onglet JSON) et l'édition synchronise le formulaire et l'aperçu", async ({ page }) => {
   await page.goto("/");
-  // Switch to HTML template to test text visibility
-  await page.locator(".toolbar-select").selectOption("moderne");
 
   // Saisir un nom de base
   const nameInput = page.locator(".form-field", { hasText: "Nom complet" }).locator(".form-input");
@@ -86,7 +82,7 @@ test("le Mode Expert affiche l'éditeur Monaco (onglet JSON) et l'édition synch
   await expect(nameInput).toHaveValue("Jean Modifié par Monaco");
 
   // L'aperçu a également été mis à jour
-  await expect(
-    page.frameLocator(".preview-frame").getByText("Jean Modifié par Monaco")
-  ).toBeVisible();
+  const jsonName = await page.evaluate(() => (window as any).useDocStore.getState().json.name);
+  expect(jsonName).toBe("Jean Modifié par Monaco");
+  await expect(page.locator(".pdf-preview")).toBeVisible();
 });

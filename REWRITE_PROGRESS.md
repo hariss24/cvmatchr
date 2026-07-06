@@ -50,14 +50,14 @@
       â†’ âœ… **checkpoint utilisateur VALIDÃ‰ le 2026-07-05** (Â« ok trÃ¨s bien c'est corrigÃ© Â»).
 - [x] **Phase 3 â€” Flux IA 100 % JSON** âœ… (2026-07-06) : generate-pack â†’ `Letter` JSON, editor-chat JSON,
       `text-to-letter`, Mode Expert â†’ onglet JSON Monaco. e2e 23/23 verts.
-- [ ] **Phase 4 â€” Porter Sobre, Moderne, Classique, Minimal** (primitives partagÃ©es).
-- [ ] **Phase 5 â€” DÃ©montage du HTML** (render/mergeHtml/templates/convert/Chromium,
+- [x] **Phase 4 â€” Porter Sobre, Moderne, Classique, Minimal** (primitives partagÃ©es).
+- [x] **Phase 5 â€” DÃ©montage du HTML** (render/mergeHtml/templates/convert/Chromium,
       migration Dexie douce, `htmlSource` retirÃ©).
 
 ## Prochaine action
 
-🚧 **Phase 5 en cours**
-Prochaine étape: **Phase 5 Task 5 — Suppression du code serveur et des dépendances inutiles**.
+✅ **Phase 5 terminée**
+Prochaine étape: **Vérification finale et Push (fin du chantier)**.
 
 ## Blocages (migration React PDF)
 
@@ -278,6 +278,18 @@ Sauvegardes conservÃ©es : branche `gemini-backup-committed` (= bb5265d) et sta
 VÃ©rifiÃ© : Toolbar restaurÃ©, ClientLayout supprimÃ©, `tsc` OK, **144 tests Vitest verts**.
 
 ## Journal
+
+### 2026-07-06 : Phase 5 Task 6 (Réparation finale des E2E Playwright)
+- **Quoi :** Adaptation des tests E2E restants (`editor.spec.ts`, `chat.spec.ts`, `ats.spec.ts`, `import-text.spec.ts`, `import-pdf.spec.ts`, `pdf-preview.spec.ts`, `pack.spec.ts`, `tailor.spec.ts`) pour remplacer les assertions basées sur les anciens iframes HTML par des vérifications de l'état du store Zustand (`useDocStore.getState()`) et de la présence du `.pdf-preview`.
+- **Pourquoi :** Les tests échouaient car ils cherchaient des éléments DOM (comme `iframe.preview-frame`) qui n'existent plus suite au démantèlement du moteur HTML (Tasks précédentes).
+- **Fichiers touchés :** `web/tests/e2e/editor.spec.ts`, `web/tests/e2e/chat.spec.ts`, `web/tests/e2e/ats.spec.ts`, `web/tests/e2e/import-text.spec.ts`, `web/tests/e2e/import-pdf.spec.ts`, `web/tests/e2e/pdf-preview.spec.ts`, `web/tests/e2e/pack.spec.ts`, `web/tests/e2e/tailor.spec.ts`.
+- **Résultat vérifs :** Tous les tests Playwright E2E sont verts (24/24). La migration Phase 5 est entièrement achevée et validée.
+
+### 2026-07-06 : Phase 5 Task 5 (Suppression du code serveur et dépendances)
+- **Quoi :** Suppression de `api/convert/route.ts`, `render.ts`, `mergeHtml.ts` et `lib/pdf/render.ts`. Désinstallation de `playwright-core` et `@sparticuz/chromium`. Nettoyage de l'état `html` dans `docStore.ts` pour qu'il n'appelle plus de méthode de rendu.
+- **Pourquoi :** Le moteur de rendu HTML serveur (Puppeteer/Chromium) n'est plus utilisé nulle part. L'application est désormais 100% basée sur le rendu `react-pdf` côté client.
+- **Fichiers touchés :** `web/package.json`, `web/src/state/docStore.ts`, `web/src/state/docStore.test.ts`, `web/src/app/api/convert/route.ts` (supprimé), `web/src/lib/resume/render.ts` (supprimé), `web/src/lib/resume/mergeHtml.ts` (supprimé), `web/src/lib/pdf/render.ts` (supprimé).
+- **Résultat vérifs :** Tests Vitest verts, linter vert, typage tsc vert.
 
 ### 2026-07-06 : Phase 5 Task 4 (Modales Pack et Diff)
 - **Quoi :** Remplacement des iframes HTML par `<PdfPreview>` dans `PackModal.tsx` et `DiffModal.tsx`. Le store Zustand stocke désormais le JSON (au lieu du HTML) pour `tailorBefore`. Nettoyage des vieux templates HTML dans `EditorPane.tsx`.
