@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useDocStore, docEngine } from "@/state/docStore";
+import { useDocStore } from "@/state/docStore";
 import { DEFAULT_RESUME, type Resume, type Letter, type DocType } from "@/lib/resume/schema";
 import type { DocData } from "@/state/docStore";
-import { generateResumePdfBlob } from "@/lib/pdfgen/generatePdf";
+import { generateResumePdfBlob, generateLetterPdfBlob } from "@/lib/pdfgen/generatePdf";
 import { promptApiKey } from "@/lib/settings";
 import { toast, uiAlert, uiConfirm } from "@/state/uiStore";
 import { saveHistoryEntry } from "@/lib/storage/db";
@@ -69,32 +69,21 @@ export default function TopBar() {
 
   const onConvert = useCallback(async () => {
     if (busy) return;
-    const { html, css, atsBoost, company, role, htmlSource, includeDate } = useDocStore.getState();
+    const { html, css, atsBoost, company, role, includeDate } = useDocStore.getState();
     const name = personNameFor(docType, json);
     const boostKeywords = atsBoost.enabled ? atsBoost.keywords : [];
     const filename = buildFilename(name, docType, company, role, includeDate);
     setBusy(true);
     try {
       let blob: Blob;
-      if (docEngine({ docType, templateId, htmlSource }) === "pdf") {
-        // Moteur react-pdf : le PDF est généré dans le navigateur — aucun appel serveur.
+      if (docType === "Lettre") {
+        blob = await generateLetterPdfBlob(json as Letter, boostKeywords);
+      } else {
         blob = await generateResumePdfBlob(
           json as Resume,
           templateId as import("@/lib/pdfgen/ResumeDocument").PdfTemplateId,
           boostKeywords
         );
-      } else {
-        const res = await fetch("/api/convert", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ html, css, filename, boostKeywords }),
-        });
-        if (!res.ok) {
-          const { error } = await res.json().catch(() => ({ error: "Échec de la conversion." }));
-          await uiAlert(error ?? "Échec de la conversion.", "Conversion PDF");
-          return;
-        }
-        blob = await res.blob();
       }
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -120,7 +109,7 @@ export default function TopBar() {
         css,
         // json périmé quand le HTML est la source (M1) : on ne le sauvegarde pas,
         // le rechargement depuis l'historique repartira du HTML.
-        json: htmlSource ? null : structuredClone(json),
+        json: useDocStore.getState().htmlSource ? null : structuredClone(json),
         templateId,
       });
     } catch {

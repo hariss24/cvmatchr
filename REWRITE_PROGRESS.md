@@ -57,7 +57,7 @@
 ## Prochaine action
 
 🚧 **Phase 5 en cours**
-Prochaine étape: **Phase 5 Task 2 — Refactorisation TopBar (Export)**.
+Prochaine étape: **Phase 5 Task 4 — Nettoyage PackModal et DiffModal**.
 
 ## Blocages (migration React PDF)
 
@@ -278,6 +278,12 @@ Sauvegardes conservÃ©es : branche `gemini-backup-committed` (= bb5265d) et sta
 VÃ©rifiÃ© : Toolbar restaurÃ©, ClientLayout supprimÃ©, `tsc` OK, **144 tests Vitest verts**.
 
 ## Journal
+
+### 2026-07-06 : Phase 5 Task 2 et Task 3 (Refactorisation TopBar et PreviewPane)
+- **Quoi :** Refactorisation de `TopBar.tsx` pour générer le PDF de la Lettre et du CV directement côté client via react-pdf (suppression du fallback `/api/convert`). Refactorisation de `PreviewPane.tsx` pour n'utiliser que `<PdfPreview>` et supprimer l'iframe HTML. Ajout du test E2E `export.spec.ts`.
+- **Pourquoi :** Rendre l'export et la prévisualisation 100% PDF natifs et indépendants du backend HTML.
+- **Fichiers touchés :** `web/src/components/layout/TopBar.tsx`, `web/src/components/editor/PreviewPane.tsx`, `web/tests/e2e/export.spec.ts`.
+- **Résultat vérifs :** Tests Vitest verts, tests Playwright E2E verts (`export.spec.ts` passe).
 
 ### 2026-07-06 : Phase 5 Task 1 (Nettoyage)
 - **Quoi :** Suppression de la logique conditionnelle `docEngine` dans `docStore.ts`, suppression des templates HTML inutilisés (`moderne`, `classique`, `minimal`), et ajout de l'export `generateLetterPdfBlob` via react-pdf.

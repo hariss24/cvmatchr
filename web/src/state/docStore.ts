@@ -114,3 +114,7 @@ export const useDocStore = create<DocStore>((set, get) => ({
 
   setTemplate: (templateId) => set({ templateId, css: TEMPLATES[templateId].css }),
 }));
+
+if (typeof window !== "undefined") {
+  (window as any).useDocStore = useDocStore;
+}
