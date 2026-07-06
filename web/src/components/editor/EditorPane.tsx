@@ -66,12 +66,13 @@ export default function EditorPane() {
     setLocalJsonStr(val);
     try {
       const parsed = JSON.parse(val);
-      const restored = restoreBase64InJson(parsed, (storeJson as any).photo);
+      const currentPhoto = "photo" in storeJson ? storeJson.photo : undefined;
+      const restored = restoreBase64InJson(parsed, currentPhoto);
       const normalized = isResumeType ? normalizeResume(restored) : normalizeLetter(restored);
       isTyping.current = true;
       setJsonError(false);
       setJson(normalized);
-    } catch (e) {
+    } catch {
       setJsonError(true);
     }
   };

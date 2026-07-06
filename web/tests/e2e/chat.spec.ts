@@ -8,7 +8,7 @@ import { test, expect } from "@playwright/test";
 
 test("le chat applique une proposition JSON à l'aperçu", async ({ page }) => {
   await page.route("**/api/editor-chat", async (route) => {
-    const body = route.request().postDataJSON() as { doc_json?: any };
+    const body = route.request().postDataJSON() as { doc_json?: { photo?: string; [k: string]: unknown } };
     // La photo base64 ne doit jamais partir vers l'IA (retirée côté client).
     expect(body.doc_json?.photo ?? "").toBe("");
     

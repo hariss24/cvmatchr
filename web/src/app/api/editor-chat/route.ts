@@ -3,6 +3,7 @@ import { complete, type ChatMessage } from "@/lib/ai/clients";
 import { SYSTEM_EDITOR_CHAT } from "@/lib/ai/prompts";
 import { parseAiJson } from "@/lib/ai/json";
 import { aiErrorResponse } from "@/lib/ai/http";
+import { normalizeResume, normalizeLetter, isEmptyResume, isEmptyLetter } from "@/lib/resume/normalize";
 import type { DocData } from "@/state/docStore";
 
 export const runtime = "nodejs";
@@ -31,8 +32,10 @@ export async function POST(req: Request): Promise<Response> {
     return NextResponse.json({ error: "Message manquant." }, { status: 400 });
   }
 
-  const docJson = body.doc_json ? JSON.stringify(body.doc_json, null, 2) : "{}";
+  const currentDoc = body.doc_json;
+  const docJson = currentDoc ? JSON.stringify(currentDoc, null, 2) : "{}";
   const docType = body.doc_type ?? "CV";
+  const isLetter = docType === "Lettre";
 
   let context = `Document actuel (${docType}) :\n\nJSON :\n${docJson}`;
   if (body.job_desc) context += `\n\nOffre d'emploi cible :\n${body.job_desc}`;
@@ -59,18 +62,25 @@ export async function POST(req: Request): Promise<Response> {
     }
     const r = result as Record<string, unknown>;
 
+    const currentStr = currentDoc ? JSON.stringify(currentDoc) : null;
     const proposals: Proposal[] = [];
     for (const item of Array.isArray(r.proposals) ? r.proposals : []) {
       if (typeof item !== "object" || item === null) continue;
       const p = item as Record<string, unknown>;
-      const pJson = p.json as DocData;
-      if (!pJson) continue;
-      
+      if (!p.json) continue;
+
+      // Garde anti-vidage : rejette une proposition vide ou strictement identique au doc courant.
+      const normalizedLetter = isLetter ? normalizeLetter(p.json) : null;
+      const normalizedResume = isLetter ? null : normalizeResume(p.json);
+      if (normalizedLetter ? isEmptyLetter(normalizedLetter) : isEmptyResume(normalizedResume!)) continue;
+      const normalized: DocData = normalizedLetter ?? normalizedResume!;
+      if (currentStr && JSON.stringify(normalized) === currentStr) continue;
+
       proposals.push({
         id: String(p.id ?? `p${proposals.length + 1}`),
         title: String(p.title ?? "Proposition").slice(0, 100),
         summary: String(p.summary ?? "").slice(0, 500),
-        json: pJson,
+        json: normalized,
       });
     }
 

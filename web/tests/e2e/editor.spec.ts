@@ -58,12 +58,18 @@ test("le Mode Expert affiche l'éditeur Monaco (onglet JSON) et l'édition synch
   await page.getByRole("button", { name: "Mode Expert" }).click();
   await expect(page.locator(".monaco-editor").first()).toBeVisible();
 
+  type MonacoModel = { getValue: () => string; setValue: (v: string) => void };
+  type MonacoWindow = { monaco?: { editor: { getModels: () => MonacoModel[] } } };
+
   // Attendre que l'éditeur soit prêt
-  await page.waitForFunction(() => (window as any).monaco && (window as any).monaco.editor.getModels().length > 0);
+  await page.waitForFunction(() => {
+    const w = window as unknown as MonacoWindow;
+    return !!w.monaco && w.monaco.editor.getModels().length > 0;
+  });
 
   // Éditer le JSON via l'API Monaco
   await page.evaluate(() => {
-    const model = (window as any).monaco.editor.getModels()[0];
+    const model = (window as unknown as MonacoWindow).monaco!.editor.getModels()[0];
     const val = JSON.parse(model.getValue());
     val.name = "Jean Modifié par Monaco";
     model.setValue(JSON.stringify(val, null, 2));

@@ -22,13 +22,22 @@ describe("POST /api/editor-chat", () => {
       JSON.stringify({
         reply: "Voici une amélioration.",
         proposals: [
-          { id: "p1", title: "Nouveau", summary: "s", json: { sender_name: "NEW" } },
+          {
+            id: "p1",
+            title: "Nouveau",
+            summary: "s",
+            json: { sender_name: "NEW", body: "Corps modifié" },
+          },
         ],
       }),
     );
 
     const res = await POST(
-      req({ messages: [{ role: "user", content: "améliore" }], doc_json: { sender_name: "OLD" } }),
+      req({
+        messages: [{ role: "user", content: "améliore" }],
+        doc_json: { sender_name: "OLD", body: "Corps existant" },
+        doc_type: "Lettre",
+      }),
     );
     expect(res.status).toBe(200);
     const data = await res.json();

@@ -295,6 +295,22 @@ Vérifié : Toolbar restauré, ClientLayout supprimé, `tsc` OK, **144 tests Vit
 - Tests e2e corrigés (`chat.spec.ts` utilisait `role` au lieu de `title` ; `pack.spec.ts` ne générait pas de HTML pour la modale) : 23/23 e2e verts.
 - Migration de Phase 3 terminée.
 
+### 2026-07-06 : Revue Phase 3 (implémentation Gemini) + correctifs avant push
+- Revue du travail réalisé par Gemini sur le plan `2026-07-05-react-pdf-phase-3.md` : Tasks 1-4
+  vérifiées individuellement (routes, prompts, composants), suite complète relancée (tsc, vitest,
+  playwright sur serveur propre, build) — tout vert, mais **lint rouge (10 erreurs `any`)** et
+  **garde anti-vidage manquante sur `editor-chat`** (le plan l'exigeait, Task 3.2).
+- Correctifs appliqués :
+  - `api/editor-chat/route.ts` : chaque proposition IA est désormais normalisée
+    (`normalizeResume`/`normalizeLetter`) puis rejetée si vide (`isEmptyResume`/`isEmptyLetter`) ou
+    strictement identique au document courant — garde anti-vidage du plan enfin posée.
+  - Suppression des `any` restants (`EditorPane.tsx`, `ChatPanel.tsx`, `base64.ts`, `chat.spec.ts`,
+    `editor.spec.ts`) au profit de types précis.
+  - `editor-chat/route.test.ts` adapté (proposition de test typée Lettre avec `doc_type`, sinon
+    filtrée par la nouvelle garde).
+- Vérification finale : `npm run lint` 0 erreur, `tsc --noEmit` OK, `vitest` 200/200,
+  `playwright test` 23/23, `npm run build` OK. Phase 3 réellement prête pour le push prod.
+
 - 2026-06-22 — Setup loop + Phase 0 scaffold (`create-next-app web/`, build vert) — commit `web: phase 0 — scaffold Next.js`
 - 2026-06-23 — Phase 0 terminée : thème néo porté (`globals.css`), polices `next/font` (Inter + JetBrains Mono), layout de base (topbar/toolbar/split), `turbopack.root` fixé — build vert sans warning
 - 2026-06-23 — Phase 1 démarrée : `lib/resume/schema.ts` (zod installé, schéma CV/Lettre + défauts + types) — `tsc --noEmit` vert

@@ -74,24 +74,23 @@ export function restoreBase64InProposals<T extends { html?: string }>(
 export const PHOTO_PLACEHOLDER = "(photo gérée par le formulaire)";
 
 /** Remplace la photo base64 par un placeholder pour l'édition JSON. */
-export function stripBase64FromJson(json: any): { json: any; data: string | null } {
+export function stripBase64FromJson<T>(json: T): { json: T; data: string | null } {
   if (!json || typeof json !== "object") return { json, data: null };
-  const out = structuredClone(json);
-  let data = null;
+  const out = structuredClone(json) as Record<string, unknown>;
+  let data: string | null = null;
   if ("photo" in out && typeof out.photo === "string" && out.photo.startsWith("data:image")) {
     data = out.photo;
     out.photo = PHOTO_PLACEHOLDER;
   }
-  return { json: out, data };
+  return { json: out as T, data };
 }
 
 /** Restaure la photo base64 depuis le store si le placeholder est inchangé. */
-export function restoreBase64InJson(newJson: any, storePhoto: string | undefined): any {
+export function restoreBase64InJson<T>(newJson: T, storePhoto: string | undefined): T {
   if (!newJson || typeof newJson !== "object") return newJson;
-  if ("photo" in newJson) {
-    if (newJson.photo === PHOTO_PLACEHOLDER) {
-      newJson.photo = storePhoto ?? "";
-    }
+  const out = newJson as Record<string, unknown>;
+  if ("photo" in out && out.photo === PHOTO_PLACEHOLDER) {
+    out.photo = storePhoto ?? "";
   }
   return newJson;
 }

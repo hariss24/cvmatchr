@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDocStore } from "@/state/docStore";
 import { postJson } from "@/lib/ai/client";
 import type { DocData } from "@/state/docStore";
+import type { Resume } from "@/lib/resume/schema";
 
 /**
  * Panneau latéral « Assistant IA » : chat éditeur. Port de `_sendChat`/`_appendProposals` (app.js).
@@ -83,7 +84,7 @@ export default function ChatPanel({ open, onClose }: { open: boolean; onClose: (
 
       const restored = (res.proposals ?? []).map(p => {
         if (photoData && p.json && typeof p.json === "object" && "photo" in p.json) {
-          (p.json as any).photo = photoData;
+          (p.json as Resume).photo = photoData;
         }
         return p;
       });
