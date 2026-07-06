@@ -1,6 +1,7 @@
 import type { Resume } from "@/lib/resume/schema";
 import { registerPdfFonts } from "./fonts";
 import { GraphiqueTemplate } from "./templates/GraphiqueTemplate";
+import { SobreTemplate } from "./templates/SobreTemplate";
 
 export type PdfTemplateId = "graphique" | "sobre" | "moderne" | "classique" | "minimal";
 
@@ -16,7 +17,8 @@ export function ResumeDocument({
   registerPdfFonts();
 
   switch (templateId) {
-    // Les autres templates seront ajoutés dans les prochaines tâches.
+    case "sobre":
+      return <SobreTemplate resume={resume} atsKeywords={atsKeywords} />;
     case "graphique":
     default:
       return <GraphiqueTemplate resume={resume} atsKeywords={atsKeywords} />;

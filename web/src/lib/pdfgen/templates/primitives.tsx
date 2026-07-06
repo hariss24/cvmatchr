@@ -54,21 +54,25 @@ export function TimelineItem({
   date,
   subtitleParts,
   children,
+  hideGutter,
 }: {
   last: boolean;
   title: string;
   date: string;
   subtitleParts: { text: string; bold?: boolean; muted?: boolean }[];
   children?: React.ReactNode;
+  hideGutter?: boolean;
 }) {
   const theme = React.useContext(ThemeContext);
   const parts = subtitleParts.filter((p) => t(p.text));
   return (
-    <View style={s.tlItem} wrap={false}>
-      <View style={s.tlGutter}>
-        <View style={[s.tlDot, { backgroundColor: theme.body }]} />
-        {!last ? <View style={[s.tlLine, { backgroundColor: theme.body }]} /> : null}
-      </View>
+    <View style={[s.tlItem, hideGutter ? { marginLeft: 0 } : {}]} wrap={false}>
+      {!hideGutter && (
+        <View style={s.tlGutter}>
+          <View style={[s.tlDot, { backgroundColor: theme.body }]} />
+          {!last ? <View style={[s.tlLine, { backgroundColor: theme.body }]} /> : null}
+        </View>
+      )}
       <View style={s.tlBody}>
         <View style={s.tlHead}>
           <Text style={[s.tlTitle, { color: theme.ink }]}>{title}</Text>
