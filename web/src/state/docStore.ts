@@ -63,7 +63,7 @@ export type DocEngine = "pdf" | "html";
  * édition Mode Expert rebascule sur le moteur HTML, cohérent avec la garde C1).
  */
 export function docEngine(d: Pick<Doc, "docType" | "templateId" | "htmlSource">): DocEngine {
-  return d.docType !== "Lettre" && d.templateId === "graphique" && !d.htmlSource
+  return d.docType !== "Lettre" && ["graphique", "sobre"].includes(d.templateId) && !d.htmlSource
     ? "pdf"
     : "html";
 }
