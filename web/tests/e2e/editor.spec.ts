@@ -30,7 +30,10 @@ test("saisir un nom met à jour l'aperçu", async ({ page }) => {
   await nameInput.fill("Zoé Testeuse");
 
   // L'aperçu (PDF) reflète la saisie si le JSON du store est mis à jour
-  const jsonName = await page.evaluate(() => (window as any).useDocStore.getState().json.name);
+  const jsonName = await page.evaluate(() => {
+    const store = (window as unknown as { useDocStore: { getState: () => { json: { name: string } } } }).useDocStore.getState();
+    return store.json.name;
+  });
   expect(jsonName).toBe("Zoé Testeuse");
   await expect(page.locator(".pdf-preview")).toBeVisible();
 });
@@ -42,7 +45,10 @@ test("basculer CV → Lettre change le document", async ({ page }) => {
   await page.locator("#doc_type").selectOption("Lettre");
 
   // Vérifier le store et l'aperçu
-  const docType = await page.evaluate(() => (window as any).useDocStore.getState().docType);
+  const docType = await page.evaluate(() => {
+    const store = (window as unknown as { useDocStore: { getState: () => { docType: string } } }).useDocStore.getState();
+    return store.docType;
+  });
   expect(docType).toBe("Lettre");
   await expect(page.locator(".pdf-preview")).toBeVisible();
 });
@@ -82,7 +88,10 @@ test("le Mode Expert affiche l'éditeur Monaco (onglet JSON) et l'édition synch
   await expect(nameInput).toHaveValue("Jean Modifié par Monaco");
 
   // L'aperçu a également été mis à jour
-  const jsonName = await page.evaluate(() => (window as any).useDocStore.getState().json.name);
+  const jsonName = await page.evaluate(() => {
+    const store = (window as unknown as { useDocStore: { getState: () => { json: { name: string } } } }).useDocStore.getState();
+    return store.json.name;
+  });
   expect(jsonName).toBe("Jean Modifié par Monaco");
   await expect(page.locator(".pdf-preview")).toBeVisible();
 });

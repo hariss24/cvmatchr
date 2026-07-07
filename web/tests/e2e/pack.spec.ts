@@ -50,7 +50,10 @@ test("le pack candidature génère lettre + email et insère la lettre dans l'é
   await page.getByRole("button", { name: /Insérer dans l'éditeur/ }).click();
   await expect(page.locator("#doc_type")).toHaveValue("Lettre");
   // Vérifie le json inséré et l'aperçu PDF
-  const jsonBody = await page.evaluate(() => (window as any).useDocStore.getState().json.body);
+  const jsonBody = await page.evaluate(() => {
+    const store = (window as unknown as { useDocStore: { getState: () => { json: { body: string } } } }).useDocStore.getState();
+    return store.json.body;
+  });
   expect(jsonBody).toBe("Lettre générée par l'IA.");
   await expect(page.locator(".pdf-preview")).toBeVisible();
 });

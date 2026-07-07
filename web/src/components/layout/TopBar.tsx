@@ -138,7 +138,7 @@ export default function TopBar() {
         </div>
       </div>
 
-      <div className="topbar-pill" title="Nom du fichier PDF">{filename}</div>
+      <div className="topbar-pill" title="Nom du fichier PDF" suppressHydrationWarning>{filename}</div>
 
       <div className="topbar-actions">
         <button type="button" className="btn-nav" onClick={onNewCv}>

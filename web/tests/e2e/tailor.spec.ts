@@ -32,7 +32,10 @@ test("adapter à une offre met à jour l'aperçu", async ({ page }) => {
     .click();
 
   // L'aperçu reflète le CV adapté
-  await page.waitForFunction(() => (window as any).useDocStore.getState().json.name === "Profil Adapté IA", { timeout: 10000 });
+  await page.waitForFunction(() => {
+    const store = (window as unknown as { useDocStore: { getState: () => { json: { name: string } } } }).useDocStore.getState();
+    return store.json.name === "Profil Adapté IA";
+  }, { timeout: 10000 });
   await expect(page.locator(".pdf-preview")).toBeVisible();
   await page.locator(".tailor-modal-content").getByRole("button", { name: "Fermer" }).click();
   await expect(page.locator(".tailor-modal-content")).toHaveCount(0);

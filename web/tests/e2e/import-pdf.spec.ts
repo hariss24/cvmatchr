@@ -28,8 +28,14 @@ test("l'import PDF rend les pages et peuple le CV depuis la réponse IA", async 
   await page.locator(".ui-dialog").getByRole("button", { name: "OK" }).click();
 
   // Le CV importé apparaît dans le store
-  await page.waitForFunction(() => (window as any).useDocStore.getState().json.name === "Marie Testeur", { timeout: 15000 });
-  const jsonName = await page.evaluate(() => (window as any).useDocStore.getState().json.name);
+  await page.waitForFunction(() => {
+    const store = (window as unknown as { useDocStore: { getState: () => { json: { name: string } } } }).useDocStore.getState();
+    return store.json.name === "Marie Testeur";
+  }, { timeout: 15000 });
+  const jsonName = await page.evaluate(() => {
+    const store = (window as unknown as { useDocStore: { getState: () => { json: { name: string } } } }).useDocStore.getState();
+    return store.json.name;
+  });
   expect(jsonName).toBe("Marie Testeur");
   await expect(page.locator(".pdf-preview")).toBeVisible();
 

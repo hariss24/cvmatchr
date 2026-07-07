@@ -43,7 +43,10 @@ test("le chat applique une proposition JSON à l'aperçu", async ({ page }) => {
   // Application → l'aperçu reflète la proposition, la carte passe en "appliquée".
   await page.getByRole("button", { name: "Appliquer" }).click();
   // On vérifie que le texte 'Développeur IA Sénior' est dans le store et le PDF visible.
-  const jsonTitle = await page.evaluate(() => (window as any).useDocStore.getState().json.title);
+  const jsonTitle = await page.evaluate(() => {
+    const store = (window as unknown as { useDocStore: { getState: () => { json: { title: string } } } }).useDocStore.getState();
+    return store.json.title;
+  });
   expect(jsonTitle).toBe("Développeur IA Sénior");
   await expect(page.locator(".pdf-preview")).toBeVisible();
   await expect(page.getByRole("button", { name: "Appliquer" })).toBeDisabled();

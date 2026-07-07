@@ -43,12 +43,18 @@ test("le booster ATS injecte des mots-clés invisibles dans l'aperçu", async ({
   await page.getByRole("button", { name: "Score ATS", exact: true }).click();
 
   // Aucun boost au départ.
-  let atsBoost = await page.evaluate(() => (window as any).useDocStore.getState().atsBoost);
+  let atsBoost = await page.evaluate(() => {
+    const store = (window as unknown as { useDocStore: { getState: () => { atsBoost: { enabled: boolean; keywords: string[] } } } }).useDocStore.getState();
+    return store.atsBoost;
+  });
   expect(atsBoost.enabled).toBe(false);
 
   // Activation du booster → le state change.
   await page.getByRole("button", { name: /Booster ATS invisible/ }).click();
-  atsBoost = await page.evaluate(() => (window as any).useDocStore.getState().atsBoost);
+  atsBoost = await page.evaluate(() => {
+    const store = (window as unknown as { useDocStore: { getState: () => { atsBoost: { enabled: boolean; keywords: string[] } } } }).useDocStore.getState();
+    return store.atsBoost;
+  });
   expect(atsBoost.enabled).toBe(true);
   expect(atsBoost.keywords.length).toBeGreaterThan(0);
 });

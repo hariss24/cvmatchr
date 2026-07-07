@@ -29,7 +29,10 @@ test("l'import texte remplit le formulaire et l'aperçu depuis un CV JSON", asyn
   await page.locator(".ui-dialog").getByRole("button", { name: "OK" }).click();
 
   // Le CV extrait apparaît dans le store
-  const json = await page.evaluate(() => (window as any).useDocStore.getState().json);
+  const json = await page.evaluate(() => {
+    const store = (window as unknown as { useDocStore: { getState: () => { json: { name: string, title: string } } } }).useDocStore.getState();
+    return store.json;
+  });
   expect(json.name).toBe("Jean Dupont");
   expect(json.title).toBe("Développeur web");
   await expect(page.locator(".pdf-preview")).toBeVisible();
