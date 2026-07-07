@@ -1,20 +1,9 @@
-__pycache__/
-*.py[cod]
-*$py.class
-*.egg-info/
-.venv/
-venv/
-env/
 .env
 .idea/
 .vscode/
-*.pdf
 *.log
 
 .claude/worktrees/
-tmp_pytest/
-tmp_*/
-test_history.html
 
 # Tests frontend (Node/Playwright)
 node_modules/
