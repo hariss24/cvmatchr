@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useDocStore } from "@/state/docStore";
 import { DEFAULT_RESUME, type Resume, type Letter, type DocType } from "@/lib/resume/schema";
@@ -47,6 +47,7 @@ export default function TopBar() {
   const includeDate = useDocStore((s) => s.includeDate);
   const setJson = useDocStore((s) => s.setJson);
   const [busy, setBusy] = useState(false);
+  const isConverting = useRef(false);
   const [chatOpen, setChatOpen] = useState(false);
 
   const personName = personNameFor(docType, json);
@@ -68,11 +69,12 @@ export default function TopBar() {
   const onSettings = () => { void promptApiKey(); };
 
   const onConvert = useCallback(async () => {
-    if (busy) return;
+    if (isConverting.current) return;
     const { html, css, atsBoost, company, role, includeDate } = useDocStore.getState();
     const name = personNameFor(docType, json);
     const boostKeywords = atsBoost.enabled ? atsBoost.keywords : [];
     const filename = buildFilename(name, docType, company, role, includeDate);
+    isConverting.current = true;
     setBusy(true);
     try {
       let blob: Blob;
@@ -115,6 +117,7 @@ export default function TopBar() {
     } catch {
       await uiAlert("Impossible de générer le PDF.", "Conversion PDF");
     } finally {
+      isConverting.current = false;
       setBusy(false);
     }
   }, [busy, docType, json, templateId]);
