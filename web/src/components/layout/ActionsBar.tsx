@@ -47,7 +47,8 @@ export default function ActionsBar() {
           onClick={() => { takeSnapshot("Avant adaptation"); setTailorOpen(true); }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>
-          <span className="btn-label">Adapter à une offre</span>
+          <span className="btn-label mobile-hidden">Adapter à une offre</span>
+          <span className="btn-label mobile-only">Adapter</span>
         </button>
       ) : null}
 
