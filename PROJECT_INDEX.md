@@ -88,6 +88,7 @@ Il est retiré avant l'appel et restauré à la réception (`src/lib/ai/base64.t
   - `drafts` — brouillon courant par type de document (`draft-CV`, `draft-Lettre`)
   - `history` — CV/lettres générés (historique consultable, stats de vues)
   - `jobs` — offres retenues/masquées par le chasseur d'offres (dédoublonnage par id)
+  - `templates` — modèles avec variables dynamiques (Lettre + Email)
 
 ---
 
@@ -137,7 +138,8 @@ l'import PDF). Modèle Gemini par défaut : `gemini-3.1-flash-lite` (réglable v
 | `tailor` | Adaptation HTML → HTML (mode expert, streaming SSE) |
 | `editor-chat` | Chat de l'éditeur : réponses + propositions de modification (`propose/preview/apply`) |
 | `ats-score` | Score ATS piloté par l'IA (mots-clés attendus par l'offre) |
-| `generate-pack` | Génère un pack candidature cohérent : lettre structurée + email, à partir du CV adapté |
+| `adapt-letter` | Adapte le corps du modèle de lettre de l'utilisateur à une offre (IA optionnelle du Pack) |
+| `extract-meta` | Extrait entreprise + poste d'une offre (préremplissage barre meta / nommage PDF) |
 | `pdf-to-resume` | Importe un CV depuis un PDF (rendu en images côté client via `pdf.js`, puis vision IA) |
 | `text-to-resume` | Importe un CV depuis du texte brut collé |
 | `text-to-letter` | Importe une lettre depuis du texte brut collé |
@@ -204,12 +206,13 @@ components/
   layout/           # TopBar, MetaBar, ActionsBar, DraftManager
   modals/           # TailorModal, ChatPanel, PackModal, DiffModal, ImportPdfModal,
                      # ImportTextModal, JobExtractor, AtsPanel, SnapshotsModal, HelpModal
+  pack/             # TemplateEditorPanel
   ui/               # UiHost (toasts + uiAlert/uiConfirm/uiPrompt)
 ```
 
 Design system : CSS unique `src/app/globals.css`, variables de thème
 (`--bg`, `--text`, etc., support Light/Dark) — **jamais de couleur en dur**.
-Modales de référence : `TailorModal.tsx`, `PackModal.tsx`.
+Modales de référence : `TailorModal.tsx`, `PackModal.tsx` (Pack candidature : lettre + email construits depuis des modèles à variables (table Dexie `templates`, seed 3 modèles), IA optionnelle).
 
 ---
 

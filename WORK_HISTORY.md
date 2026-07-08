@@ -43,6 +43,13 @@ l'intégrité de bout en bout post-migration ».
 
 ## Journal
 
+### 2026-07-08 : Refonte du Pack candidature (Lettre + Email) — Tasks 6 à 8
+- **Quoi :** Refonte majeure de la modale PackModal (Task 6) pour passer à un système de modèles avec variables dynamiques remplaçant la génération par l'IA par défaut. L'IA reste optionnelle (« Adapter à l'offre »). Ajout du bouton « Candidater » sur les cartes d'offres (Task 7) permettant d'ouvrir directement l'éditeur et le Pack prérempli avec l'entreprise et le poste. Le préremplissage des champs entreprises et postes de la barre meta se fait également automatiquement après adaptation du CV par IA si les champs étaient vides (Task 8).
+- **Pourquoi :** Exécution du plan `2026-07-08-templates-lettre-email.md`.
+- **Fichiers touchés :** `web/src/components/pack/TemplateEditorPanel.tsx` (nouveau), `web/src/components/modals/PackModal.tsx`, `web/src/app/globals.css`, `web/src/components/jobs/JobCard.tsx`, `web/src/components/jobs/JobsView.tsx`, `web/src/components/modals/TailorModal.tsx`.
+- **Résultat vérifs :** TypeScript (`tsc --noEmit`), ESLint et tests Vitest à 100% (0 erreur). **Tests e2e échouent** sur `pack.spec.ts` car la nouvelle UI n'a plus le bouton « Générer le pack » (la refonte retire cette IA par défaut) et `editor.spec.ts` présente aussi des erreurs d'assertions UI.
+- **Commit :** `1699294` (Task 6), `2dc83b0` (Task 7), `738e767` (Task 8).
+
 ### 2026-07-08 : Aperçu en premier, Éditeur en tiroir & Pinch-to-zoom (Tasks 3 et 4)
 - **Quoi :** Implémentation du layout mobile-first. L'aperçu passe en tête via `flex-direction: column-reverse`, le formulaire `EditorPane` est mis dans un nouveau wrapper `EditorDrawer` plein écran qui s'ouvre via le bouton `✏️` de la topbar (événement `cvforge:toggle-form`). Actions fixes en bas via `.actions` en `position: sticky`. Ajout du pinch-to-zoom pour l'aperçu PDF avec bouton `Agrandir l'aperçu` qui active une classe `.pdf-preview--zoom`.
 - **Pourquoi :** Finitions de la disposition mobile-first (Task 3 et Task 4 de l'audit design).
