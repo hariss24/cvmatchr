@@ -1,7 +1,7 @@
 // Templates HTML/CSS intégrés — port fidèle de TEMPLATES (static/js/app.js, l.70-409).
 // 5 modèles : sobre, moderne, classique, minimal, graphique. Chaque modèle = { html, css }.
 
-export type TemplateId = "sobre" | "graphique" | "kakuna";
+export type TemplateId = "sobre" | "graphique" | "kakuna" | "marine";
 export type Template = { html: string; css: string };
 
 export const TEMPLATES = {
@@ -214,6 +214,12 @@ TEMPLATES.graphique = {
 
 // Modèle « Kakuna » : port de Reactive Resume
 TEMPLATES.kakuna = {
+  html: TEMPLATES.sobre.html,
+  css: TEMPLATES.sobre.css,
+};
+
+// Modèle « Marine » : sidebar bleu marine (rendu réel géré par MarineTemplate.tsx en React-PDF).
+TEMPLATES.marine = {
   html: TEMPLATES.sobre.html,
   css: TEMPLATES.sobre.css,
 };

@@ -32,6 +32,16 @@ Suivi des fonctionnalités de l'application (version Next.js).
 - [ ] **Nettoyage et stabilisation globale**
   Vérifier l'intégrité de bout en bout de l'application post-migration.
 
+- [ ] **Annuler / Rétablir (Ctrl+Z / Ctrl+Shift+Z)**
+  Permettre de revenir en arrière (Ctrl+Z) et de rétablir (Ctrl+Shift+Z) les
+  modifications du CV, pour récupérer après une fausse manipulation ou une
+  adaptation IA ratée.
+
+- [ ] **Supprimer la modal de re-saisie de l'offre pour le Pack candidature**
+  Le clic sur « Créer le pack candidature » ouvre une modal qui redemande la
+  description du poste — la supprimer et réutiliser directement l'offre déjà
+  fournie.
+
 ---
 
 ## 🟡 Priorité moyenne — bonnes idées
@@ -52,4 +62,4 @@ Suivi des fonctionnalités de l'application (version Next.js).
 
 ---
 
-*Dernière mise à jour : Juillet 2026 (Post-migration Next.js)*
+*Dernière mise à jour : 7 juillet 2026*

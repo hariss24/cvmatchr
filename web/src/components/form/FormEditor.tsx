@@ -110,6 +110,18 @@ export default function FormEditor({ onImportPdf }: { onImportPdf?: () => void }
           items={cv.skills}
           onChange={(v) => update({ skills: v })}
         />
+        <StringListSection
+          title="Soft skills"
+          addLabel="+ Ajouter un soft skill"
+          items={cv.softSkills ?? []}
+          onChange={(v) => update({ softSkills: v })}
+        />
+        <StringListSection
+          title="Outils"
+          addLabel="+ Ajouter un outil"
+          items={cv.tools ?? []}
+          onChange={(v) => update({ tools: v })}
+        />
         <LanguagesSection items={cv.languages} onChange={(v) => update({ languages: v })} />
         <ProjectsSection items={cv.projects} onChange={(v) => update({ projects: v })} />
         <StringListSection

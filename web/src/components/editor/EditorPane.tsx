@@ -19,6 +19,7 @@ const TEMPLATE_LABELS: Record<TemplateId, string> = {
   sobre: "Sobre",
   graphique: "Graphique",
   kakuna: "Kakuna",
+  marine: "Marine",
 };
 
 type Tab = "form" | "json" | "import";

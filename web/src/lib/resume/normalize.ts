@@ -134,6 +134,8 @@ export function normalizeResume(input: unknown): Resume {
     experience: experience.slice(0, 20),
     education: education.slice(0, 20),
     skills: cleanList(d.skills).slice(0, 60),
+    softSkills: cleanList(d.softSkills).slice(0, 40),
+    tools: cleanList(d.tools).slice(0, 40),
     languages: languages.slice(0, 20),
     interests: cleanList(d.interests).slice(0, 20),
     projects: projects.slice(0, 20),

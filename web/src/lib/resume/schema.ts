@@ -61,6 +61,8 @@ export const resumeSchema = z.object({
   experience: z.array(experienceItemSchema).default([]),
   education: z.array(educationItemSchema).default([]),
   skills: z.array(z.string()).default([]),
+  softSkills: z.array(z.string()).default([]),
+  tools: z.array(z.string()).default([]),
   languages: z.array(languageItemSchema).default([]),
   interests: z.array(z.string()).default([]),
   projects: z.array(projectItemSchema).default([]),
@@ -96,7 +98,7 @@ export type DocType = "CV" | "Lettre" | "Maître";
 /** Clés de premier niveau d'un CV — sert à dés-emballer une réponse IA mal formée. */
 export const RESUME_TOP_KEYS = [
   "name", "title", "location", "email", "phone", "linkedin", "summary",
-  "experience", "education", "skills", "languages", "interests",
+  "experience", "education", "skills", "softSkills", "tools", "languages", "interests",
   "projects", "certifications", "volunteer",
 ] as const;
 
@@ -139,6 +141,8 @@ export const DEFAULT_RESUME: Resume = {
     "Compétence 1", "Compétence 2", "Compétence 3",
     "Compétence 4", "Compétence 5", "Compétence 6",
   ],
+  softSkills: ["Soft skill 1", "Soft skill 2", "Soft skill 3"],
+  tools: ["Outil 1", "Outil 2", "Outil 3"],
   languages: [
     { name: "Français", level: "Natif" },
     { name: "Anglais", level: "Courant" },
