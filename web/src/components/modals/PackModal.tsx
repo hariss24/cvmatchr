@@ -21,15 +21,32 @@ import { useEscapeClose } from "@/lib/useEscapeClose";
  * (bibliothèque locale, zéro IA par défaut). IA optionnelle : « Adapter à l'offre »
  * ajuste le corps de la lettre au texte de l'offre (photo jamais envoyée).
  */
-export default function PackModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+export default function PackModal({
+  open,
+  onClose,
+  initialJobDesc = "",
+}: {
+  open: boolean;
+  onClose: () => void;
+  /** Offre déjà saisie dans TailorModal (flux « Candidater » depuis les Offres). */
+  initialJobDesc?: string;
+}) {
   const [templates, setTemplates] = useState<MailTemplate[]>([]);
   const [tpl, setTpl] = useState<MailTemplate | null>(null);
   const [company, setCompanyLocal] = useState(() => useDocStore.getState().company);
   const [role, setRoleLocal] = useState(() => useDocStore.getState().role);
   const [contact, setContact] = useState("");
-  const [jobDesc, setJobDesc] = useState("");
+  const [jobDesc, setJobDesc] = useState(initialJobDesc);
   const [busy, setBusy] = useState(false);
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
+
+  // Reprend l'offre saisie dans TailorModal à chaque ouverture, si le champ local est
+  // encore vide (ajustement pendant le rendu — pas de setState dans un effet).
+  const [prevOpen, setPrevOpen] = useState(false);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (open && !jobDesc && initialJobDesc) setJobDesc(initialJobDesc);
+  }
 
   // Chargement de la bibliothèque à l'ouverture (seed au premier lancement).
   useEffect(() => {

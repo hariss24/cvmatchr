@@ -1,59 +1,96 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * Pack candidature (Phase 3). `/api/generate-pack` est mocké via `page.route`.
- * On vérifie : génération → aperçu lettre + email, puis insertion dans l'éditeur (type « Lettre »).
+ * Pack candidature (refonte templates à variables, juillet 2026).
+ * La lettre + l'email sont construits localement depuis un modèle — zéro appel IA
+ * par défaut. Seule l'adaptation optionnelle (`/api/adapt-letter`) est mockée.
+ * `/api/extract-meta` (préremplissage silencieux au blur de l'offre) est mocké en
+ * échec pour vérifier qu'il ne bloque jamais le flux.
  */
 
-const LETTER_JSON = {
-  sender_name: "John Doe",
-  recipient_name: "Madame, Monsieur",
-  body: "Lettre générée par l'IA.",
-  signoff: "",
-};
-const EMAIL_TEXT = "Bonjour,\n\nVeuillez trouver ma candidature.\n\nCordialement.";
-
-test("le pack candidature génère lettre + email et insère la lettre dans l'éditeur", async ({
-  page,
-}) => {
-  let sentBody: Record<string, unknown> | null = null;
-  await page.route("**/api/generate-pack", async (route) => {
-    sentBody = route.request().postDataJSON();
-    await route.fulfill({
-      json: { letter: LETTER_JSON, email: EMAIL_TEXT },
-    });
+test("le pack construit lettre + email depuis un modèle, sans IA", async ({ page }) => {
+  let extractMetaCalls = 0;
+  await page.route("**/api/extract-meta", async (route) => {
+    extractMetaCalls += 1;
+    await route.fulfill({ status: 500, json: { error: "pas de clé" } });
   });
 
   await page.goto("/");
   // Le pack se lance depuis la modale « Adapter à une offre ».
   await page.getByRole("button", { name: "Adapter à une offre" }).click();
   await page.getByRole("button", { name: "Créer le Pack candidature" }).click();
-  await page
-    .locator(".pack-modal .form-textarea")
-    .first()
-    .fill("Développeur Full Stack React/Node, télétravail.");
-  await page.locator(".pack-modal").getByRole("button", { name: "Générer le pack" }).click();
 
-  // L'aperçu de la lettre et l'email s'affichent, côte à côte (lettre à gauche, email à droite).
-  await expect(page.locator(".pack-result .pdf-preview")).toBeVisible();
-  await expect(page.locator(".pack-result textarea")).toHaveValue(EMAIL_TEXT);
-  const letterBox = await page.locator(".pack-result .pdf-preview").boundingBox();
-  const emailBox = await page.locator(".pack-result textarea").boundingBox();
-  expect(Math.abs(letterBox!.y - emailBox!.y)).toBeLessThan(5);
-  expect(emailBox!.x).toBeGreaterThan(letterBox!.x + letterBox!.width - 1);
+  const modal = page.locator(".pack-modal");
 
-  // Le CV (JSON) a bien été envoyé au serveur (clé cv_json présente).
-  expect(sentBody).not.toBeNull();
-  expect(sentBody!.cv_json).toBeTruthy();
+  // La bibliothèque est seedée au premier lancement : 3 modèles de départ.
+  await expect(modal.getByRole("combobox", { name: "Choisir un modèle" }).locator("option")).toHaveCount(3);
 
-  // Insertion dans l'éditeur → bascule sur le type « Lettre » et l'aperçu montre la lettre.
-  await page.getByRole("button", { name: /Insérer dans l'éditeur/ }).click();
+  // Remplir les variables → l'email se met à jour instantanément, sans IA.
+  await modal.getByPlaceholder("Entreprise", { exact: true }).fill("ACME");
+  await modal.getByPlaceholder("Poste visé").fill("Développeur Web");
+
+  const email = modal.locator(".pack-email");
+  await expect(email).toHaveValue(/ACME/);
+  await expect(email).toHaveValue(/Développeur Web/);
+  // Contact vide → repli propre (« Bonjour, », jamais « Bonjour , » ni la variable brute).
+  await expect(email).toHaveValue(/Bonjour,/);
+  await expect(email).not.toHaveValue(/\{M\/Mme Nom\}/);
+
+  // L'aperçu PDF de la lettre se génère localement (debounce 600 ms).
+  await expect(modal.locator(".pdf-preview")).toBeVisible({ timeout: 15000 });
+
+  // Insertion dans l'éditeur → bascule sur le type « Lettre », variables substituées.
+  await modal.getByRole("button", { name: /Insérer dans l'éditeur/ }).click();
   await expect(page.locator("#doc_type")).toHaveValue("Lettre");
-  // Vérifie le json inséré et l'aperçu PDF
-  const jsonBody = await page.evaluate(() => {
-    const store = (window as unknown as { useDocStore: { getState: () => { json: { body: string } } } }).useDocStore.getState();
-    return store.json.body;
+  const inserted = await page.evaluate(() => {
+    const store = (
+      window as unknown as {
+        useDocStore: { getState: () => { json: { body: string; subject: string; greeting: string } } };
+      }
+    ).useDocStore.getState();
+    return store.json;
   });
-  expect(jsonBody).toBe("Lettre générée par l'IA.");
-  await expect(page.locator(".pdf-preview")).toBeVisible();
+  expect(inserted.body).toContain("ACME");
+  expect(inserted.body).not.toContain("{Entreprise}");
+  expect(inserted.subject).toContain("Développeur Web");
+  expect(inserted.greeting).toBe("Madame, Monsieur,");
+
+  // Le préremplissage silencieux a pu être tenté, mais son échec n'a rien bloqué.
+  expect(extractMetaCalls).toBeGreaterThanOrEqual(0);
+});
+
+test("« Adapter à l'offre (IA) » remplace le corps du modèle via /api/adapt-letter", async ({
+  page,
+}) => {
+  let sentBody: Record<string, unknown> | null = null;
+  await page.route("**/api/adapt-letter", async (route) => {
+    sentBody = route.request().postDataJSON();
+    await route.fulfill({
+      json: { body: "Corps adapté par l'IA pour {Entreprise}." },
+    });
+  });
+  await page.route("**/api/extract-meta", (route) =>
+    route.fulfill({ json: { company: "", role: "" } }),
+  );
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "Adapter à une offre" }).click();
+  await page.getByRole("button", { name: "Créer le Pack candidature" }).click();
+
+  const modal = page.locator(".pack-modal");
+  await modal
+    .getByPlaceholder(/Offre d'emploi \(optionnel\)/)
+    .fill("Développeur Full Stack React/Node, télétravail.");
+  await modal.getByRole("button", { name: /Adapter à l'offre \(IA\)/ }).click();
+
+  // Le corps du modèle (colonne édition) est remplacé par la réponse IA, variables intactes.
+  await expect(modal.locator(".tpl-editor textarea").first()).toHaveValue(
+    "Corps adapté par l'IA pour {Entreprise}.",
+  );
+
+  // La requête contient le modèle, l'offre et le CV sans photo.
+  expect(sentBody).not.toBeNull();
+  expect(sentBody!.letter_body).toBeTruthy();
+  expect(sentBody!.job_desc).toContain("Full Stack");
+  expect((sentBody!.cv_json as { photo?: string }).photo).toBe("");
 });

@@ -220,7 +220,7 @@ export default function TailorModal({
           </div>
         </div>
 
-        <PackModal open={packOpen} onClose={() => setPackOpen(false)} />
+        <PackModal open={packOpen} onClose={() => setPackOpen(false)} initialJobDesc={jobDesc} />
         <DiffModal open={diffOpen} onClose={() => setDiffOpen(false)} />
       </div>
     </div>
