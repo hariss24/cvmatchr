@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useDocStore } from "@/state/docStore";
 import { postJson } from "@/lib/ai/client";
+import { fetchJobMeta } from "@/lib/ai/jobMeta";
 import { normalizeResume, isEmptyResume } from "@/lib/resume/normalize";
 import JobExtractor from "./JobExtractor";
 import AtsPanel from "./AtsPanel";
@@ -105,6 +106,17 @@ export default function TailorModal({
         master ? "CV adapté depuis le CV Maître." : "CV adapté avec succès.",
         "success",
       );
+
+      // Préremplissage de la barre meta (nommage PDF/historique) — champs vides uniquement.
+      const { company, role, setCompany, setRole } = useDocStore.getState();
+      if (!company.trim() || !role.trim()) {
+        void fetchJobMeta(desc).then((meta) => {
+          if (!meta) return;
+          const s = useDocStore.getState();
+          if (!s.company.trim() && meta.company) setCompany(meta.company);
+          if (!s.role.trim() && meta.role) setRole(meta.role);
+        });
+      }
     } catch (err) {
       toast(err instanceof Error ? err.message : "Échec de l'adaptation.", "error");
     } finally {
