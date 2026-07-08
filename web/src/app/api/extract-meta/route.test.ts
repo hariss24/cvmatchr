@@ -1,35 +1,37 @@
-import { describe, it, expect, vi } from "vitest";
-import { POST } from "./route";
-import { aiClient } from "@/lib/ai/client";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("@/lib/ai/client", () => ({
-  aiClient: { generateObject: vi.fn() }
-}));
+vi.mock("@/lib/ai/clients", () => ({ complete: vi.fn() }));
+import { complete } from "@/lib/ai/clients";
+import { POST } from "./route";
+
+const mockComplete = vi.mocked(complete);
+
+function req(body: unknown): Request {
+  return new Request("http://localhost/api/extract-meta", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+beforeEach(() => mockComplete.mockReset());
 
 describe("POST /api/extract-meta", () => {
-  it("rejette les requêtes invalides", async () => {
-    const req = new Request("http://localhost/api/extract-meta", {
-      method: "POST",
-      body: JSON.stringify({}),
-    });
-    const res = await POST(req);
-    expect(res.status).toBe(400);
+  it("renvoie company/role extraits", async () => {
+    mockComplete.mockResolvedValue(JSON.stringify({ company: "ACME", role: "Dev" }));
+    const res = await POST(req({ job_desc: "offre de dev chez ACME" }));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ company: "ACME", role: "Dev" });
   });
 
-  it("appelle l'IA et renvoie l'entreprise et le poste", async () => {
-    vi.mocked(aiClient.generateObject).mockResolvedValueOnce({
-      company: "Google",
-      role: "Software Engineer",
-    });
+  it("normalise en chaînes vides les champs absents", async () => {
+    mockComplete.mockResolvedValue(JSON.stringify({}));
+    const res = await POST(req({ job_desc: "texte" }));
+    expect(await res.json()).toEqual({ company: "", role: "" });
+  });
 
-    const req = new Request("http://localhost/api/extract-meta", {
-      method: "POST",
-      body: JSON.stringify({ jobText: "Offre..." }),
-    });
-    const res = await POST(req);
-    expect(res.status).toBe(200);
-    const data = await res.json();
-    expect(data.company).toBe("Google");
-    expect(data.role).toBe("Software Engineer");
+  it("400 si offre manquante", async () => {
+    const res = await POST(req({}));
+    expect(res.status).toBe(400);
   });
 });

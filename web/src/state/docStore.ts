@@ -43,6 +43,8 @@ export type Doc = {
   tailorBefore: { json: DocData; templateId: TemplateId | null } | null;
   /** Offre en attente (depuis l'onglet Offres) : pré-remplit `TailorModal` à l'ouverture. */
   pendingJobDesc: string | null;
+  /** True si l'arrivée sur l'éditeur doit ouvrir directement le Pack candidature (bouton « Candidater » des Offres). */
+  pendingPackOpen: boolean;
   /** Option : inclure la date dans le nom du fichier PDF. */
   includeDate: boolean;
 };
@@ -68,6 +70,7 @@ export type DocStore = Doc & {
   setAtsBoost: (atsBoost: { enabled: boolean; keywords: string[] }) => void;
   setTailorBefore: (state: { json: DocData; templateId: TemplateId | null } | null) => void;
   setPendingJobDesc: (v: string | null) => void;
+  setPendingPackOpen: (v: boolean) => void;
   setIncludeDate: (v: boolean) => void;
 };
 
@@ -86,6 +89,7 @@ export const useDocStore = create<DocStore>((set) => ({
   atsBoost: { enabled: false, keywords: [] },
   tailorBefore: null,
   pendingJobDesc: null,
+  pendingPackOpen: false,
   includeDate: typeof window !== "undefined" ? localStorage.getItem("pdfIncludeDate") === "true" : false,
 
   setJson: (json) => {
@@ -99,6 +103,7 @@ export const useDocStore = create<DocStore>((set) => ({
   setAtsBoost: (atsBoost) => set({ atsBoost }),
   setTailorBefore: (tailorBefore) => set({ tailorBefore }),
   setPendingJobDesc: (pendingJobDesc) => set({ pendingJobDesc }),
+  setPendingPackOpen: (pendingPackOpen) => set({ pendingPackOpen }),
   setIncludeDate: (includeDate) => {
     if (typeof window !== "undefined") localStorage.setItem("pdfIncludeDate", String(includeDate));
     set({ includeDate });
