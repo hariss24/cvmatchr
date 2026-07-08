@@ -2,6 +2,7 @@ import Dexie, { type Table } from "dexie";
 import type { DocData } from "@/state/docStore";
 import type { DocType } from "@/lib/resume/schema";
 import type { TemplateId } from "@/lib/resume/templates";
+import { DEFAULT_TEMPLATES, type MailTemplate } from "@/lib/templates/defaults";
 
 // ---------------------------------------------------------------------------
 // TYPES
@@ -75,6 +76,7 @@ export class AppDatabase extends Dexie {
   drafts!: Table<Draft, string>;       // Primary key: id
   history!: Table<HistoryEntry, string>; // Primary key: id
   jobs!: Table<JobEntry, string>;      // Primary key: id
+  templates!: Table<MailTemplate, string>; // Primary key: id
 
   constructor() {
     // Nouveau nom pour éviter les collisions si on lance sur le même port que Flask
@@ -104,6 +106,11 @@ export class AppDatabase extends Dexie {
         if (!cv) await tx.table("drafts").put({ ...autre, id: "draft-CV" });
         await tx.table("drafts").delete("draft-Autre");
       }
+    });
+
+    // v4 : bibliothèque de modèles lettre/email (feature « Pack candidature » sans IA).
+    this.version(4).stores({
+      templates: "id, updatedAt",
     });
   }
 }
@@ -303,5 +310,46 @@ export async function markJobSeen(id: string) {
     await db.jobs.update(id, { seen: true });
   } catch (e) {
     console.warn("markJobSeen error:", e);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// TEMPLATES API (modèles lettre/email)
+// ---------------------------------------------------------------------------
+
+/** Seed les modèles de départ si la table est vide (premier lancement). */
+export async function ensureDefaultTemplates() {
+  try {
+    if ((await db.templates.count()) === 0) {
+      await db.templates.bulkPut(DEFAULT_TEMPLATES.map((t) => ({ ...t, updatedAt: Date.now() })));
+    }
+  } catch (e) {
+    console.warn("ensureDefaultTemplates error:", e);
+  }
+}
+
+export async function listTemplates(): Promise<MailTemplate[]> {
+  try {
+    const all = await db.templates.toArray();
+    return all.sort((a, b) => a.name.localeCompare(b.name));
+  } catch (e) {
+    console.warn("listTemplates error:", e);
+    return [];
+  }
+}
+
+export async function saveTemplate(tpl: MailTemplate) {
+  try {
+    await db.templates.put({ ...tpl, updatedAt: Date.now() });
+  } catch (e) {
+    console.warn("saveTemplate error:", e);
+  }
+}
+
+export async function deleteTemplate(id: string) {
+  try {
+    await db.templates.delete(id);
+  } catch (e) {
+    console.warn("deleteTemplate error:", e);
   }
 }
