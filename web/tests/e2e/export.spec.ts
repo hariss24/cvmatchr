@@ -14,7 +14,7 @@ test("TopBar génère un PDF côté client pour la Lettre sans appel réseau /ap
 
   const [download] = await Promise.all([
     page.waitForEvent("download"),
-    page.locator("text=Convertir en PDF").click()
+    page.locator("text=Télécharger").click()
   ]);
   
   expect(apiCalled).toBeFalsy();

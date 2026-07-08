@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 
 /**
  * Moteur react-pdf (Phase 2 migration) : sur le template Graphique, l'aperçu est le vrai PDF
- * (canvas PDF.js) et « Convertir en PDF » télécharge le blob généré dans le navigateur,
+ * (canvas PDF.js) et « Télécharger » télécharge le blob généré dans le navigateur,
  * sans aucun appel à `/api/convert`. Les autres templates gardent l'iframe HTML.
  */
 
@@ -34,7 +34,7 @@ test("l'export du Graphique télécharge un PDF sans appeler le serveur", async 
   });
 
   const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Convertir en PDF" }).click();
+  await page.getByRole("button", { name: "Télécharger" }).click();
   const download = await downloadPromise;
 
   expect(download.suggestedFilename()).toMatch(/\.pdf$/);
