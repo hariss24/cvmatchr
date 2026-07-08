@@ -25,7 +25,7 @@ export function useAutoDraft() {
             ...(draft.role !== undefined ? { role: draft.role } : {}),
             htmlSource: draft.htmlSource ?? !draft.json,
           });
-          toast("Brouillon restauré.", "info");
+
         }
       } catch (e) {
         console.warn("Failed to load draft:", e);
@@ -55,7 +55,7 @@ export function useAutoDraft() {
               ...(draft.role !== undefined ? { role: draft.role } : {}),
               htmlSource: draft.htmlSource ?? !draft.json,
             });
-            toast(`Brouillon ${state.docType} chargé.`, "info");
+
           } else {
             // New draft, just keep current state or clear it. The old app cleared it or applied default template.
             // But we already have logic for template change. We'll just save it as is.
