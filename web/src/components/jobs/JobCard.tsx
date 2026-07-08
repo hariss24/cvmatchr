@@ -12,11 +12,13 @@ function publishedLabel(iso?: string): string | null {
 export default function JobCard({
   job,
   onAdapt,
+  onApply,
   onDismiss,
   onSeen,
 }: {
   job: JobEntry;
   onAdapt: (job: JobEntry) => void;
+  onApply: (job: JobEntry) => void;
   onDismiss: (job: JobEntry) => void;
   onSeen: (job: JobEntry) => void;
 }) {
@@ -46,6 +48,9 @@ export default function JobCard({
       <div className="job-actions">
         <button type="button" className="tailor-btn" onClick={() => onAdapt(job)} data-testid="job-adapt">
           Adapter mon CV
+        </button>
+        <button type="button" className="tailor-btn pack-btn-variant" onClick={() => onApply(job)} data-testid="job-apply">
+          Candidater
         </button>
         {job.url ? (
           <a

@@ -144,6 +144,16 @@ export default function JobsView({ config }: { config: JobsConfig }) {
     router.push("/");
   }
 
+  /** « Candidater » : ouvre l'éditeur avec le Pack candidature prérempli (offre + meta). */
+  async function apply(job: JobEntry) {
+    await markJobSeen(job.id);
+    setPendingJobDesc(job.jobText);
+    if (job.company) setCompany(job.company);
+    if (job.title) setRole(job.title);
+    useDocStore.getState().setPendingPackOpen(true);
+    router.push("/");
+  }
+
   async function dismiss(job: JobEntry) {
     await setJobStatus(job.id, "dismissed");
     setJobs((prev) => prev.filter((j) => j.id !== job.id));
@@ -196,7 +206,7 @@ export default function JobsView({ config }: { config: JobsConfig }) {
       ) : (
         <div className="jobs-list" data-testid="jobs-list">
           {jobs.map((job) => (
-            <JobCard key={job.id} job={job} onAdapt={adapt} onDismiss={dismiss} onSeen={seen} />
+            <JobCard key={job.id} job={job} onAdapt={adapt} onApply={apply} onDismiss={dismiss} onSeen={seen} />
           ))}
         </div>
       )}
