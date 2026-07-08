@@ -43,6 +43,21 @@ l'intégrité de bout en bout post-migration ».
 
 ## Journal
 
+### 2026-07-08 : Recette de la refonte Pack — correctif « Candidater » + e2e adaptés
+- **Quoi :** Revue de l'exécution Gemini du plan templates. Correctif : l'offre saisie
+  suit maintenant jusqu'au Pack (`PackModal` accepte `initialJobDesc`, transmis par
+  `TailorModal` — trou de la Task 7 du plan). `pack.spec.ts` réécrit pour la nouvelle UI
+  (construction sans IA depuis un modèle, repli « Bonjour, », insertion éditeur,
+  adaptation IA mockée via `/api/adapt-letter`).
+- **Pourquoi :** l'ancien test e2e visait le bouton « Générer le pack » supprimé ; les
+  16 autres échecs e2e constatés étaient de la contention du serveur dev en parallèle
+  (tout passe avec `--workers=1`), pas des régressions.
+- **Fichiers touchés :** `web/src/components/modals/PackModal.tsx`,
+  `web/src/components/modals/TailorModal.tsx`, `web/tests/e2e/pack.spec.ts`.
+- **Résultat vérifs :** `tsc --noEmit` 0 erreur, ESLint 0 erreur (3 warnings préexistants
+  hors chantier), Vitest 194/194, Playwright **28/28** (`--workers=1`).
+- **Commit :** `4111839`.
+
 ### 2026-07-08 : Refonte du Pack candidature (Lettre + Email) — Tasks 6 à 8
 - **Quoi :** Refonte majeure de la modale PackModal (Task 6) pour passer à un système de modèles avec variables dynamiques remplaçant la génération par l'IA par défaut. L'IA reste optionnelle (« Adapter à l'offre »). Ajout du bouton « Candidater » sur les cartes d'offres (Task 7) permettant d'ouvrir directement l'éditeur et le Pack prérempli avec l'entreprise et le poste. Le préremplissage des champs entreprises et postes de la barre meta se fait également automatiquement après adaptation du CV par IA si les champs étaient vides (Task 8).
 - **Pourquoi :** Exécution du plan `2026-07-08-templates-lettre-email.md`.
