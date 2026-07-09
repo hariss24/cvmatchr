@@ -756,7 +756,7 @@ button.go:disabled {
   background: var(--bg); color: var(--text); border: none;
   box-shadow: var(--neu-raised-sm); border-radius: 10px;
   padding: 7px 14px; font-size: 12px; font-weight: 600;
-  cursor: pointer; text-decoration: none; display: inline-flex; align-items: center;
+  cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
   font-family: var(--font-ui); transition: box-shadow 100ms, transform 100ms;
 }
 .neu-btn-sm:hover { box-shadow: var(--neu-raised); transform: translateY(-1px); text-decoration: none; }
@@ -997,6 +997,14 @@ button.go:disabled {
   /* -- Pages secondaires (Historique, Offres) : le header wrappe au lieu de déborder -- */
   .topbar--secondary { flex-wrap: wrap; row-gap: 8px; }
   .topbar--secondary .topbar-actions { flex-wrap: wrap; justify-content: flex-end; row-gap: 8px; }
+  /* Le switcher de thème vit dans le menu ☰ (éditeur) — pas dans ces headers étroits. */
+  .topbar--secondary #btn-theme { display: none; }
+
+  /* -- Boutons secondaires : icône seule, libellé masqué (nom accessible via aria-label) -- */
+  .card-actions .btn-label,
+  .actions .ghost .btn-label,
+  .actions-help .btn-label { display: none; }
+  .card-actions .neu-btn-sm { padding: 10px 12px; }
   .go.go-top { padding: 10px 14px; font-size: 13px; }
   .mobile-menu { width: min(320px, 86vw); }
 

@@ -60,7 +60,8 @@ test.describe("mobile", () => {
       await expect(page.getByRole("button", { name })).toBeInViewport({ ratio: 1 });
     }
     await expect(page.getByRole("link", { name: "‹ Retour" })).toBeInViewport({ ratio: 1 });
-    await expect(page.locator("#btn-theme")).toBeInViewport({ ratio: 1 });
+    // Le switcher de thème n'apparaît pas sur mobile (il vit dans le menu ☰ de l'éditeur).
+    await expect(page.locator("#btn-theme")).toBeHidden();
 
     // Et la page ne défile pas horizontalement.
     const overflow = await page.evaluate(
