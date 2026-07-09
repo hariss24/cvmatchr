@@ -5,6 +5,9 @@ import { listHistoryEntries, deleteHistoryEntry, updateHistoryEntryStat, saveDra
 import { uiConfirm, uiAlert, toast } from "@/state/uiStore";
 import { useDocStore } from "@/state/docStore";
 import { useRouter } from "next/navigation";
+import { generateResumePdfBlob, generateLetterPdfBlob } from "@/lib/pdfgen/generatePdf";
+import type { Resume, Letter } from "@/lib/resume/schema";
+import type { PdfTemplateId } from "@/lib/pdfgen/ResumeDocument";
 
 function fmtDate(iso: string) {
   if (!iso) return "";
@@ -34,28 +37,31 @@ export default function HistoryList() {
     setEntries(await listHistoryEntries());
   }
 
+  // Le PDF est régénéré côté client depuis le JSON (pipeline react-pdf), comme dans TopBar.
+  // Les entrées de l'ancien moteur HTML (json absent) ne sont plus convertibles directement.
   async function handleViewPdf(id: string) {
     const entry = entries.find(e => e.id === id);
-    if (!entry || !entry.html) {
-      await uiAlert("HTML introuvable. Chargez ce document dans l'éditeur et générez le PDF au moins une fois.", "PDF indisponible");
+    if (!entry) return;
+    if (!entry.json) {
+      await uiAlert(
+        "Cette entrée date de l'ancien moteur HTML : rechargez-la dans l'éditeur, puis exportez le PDF depuis la barre du haut.",
+        "PDF indisponible",
+      );
       return;
     }
     try {
       toast("Génération du PDF...", "info");
-      const res = await fetch("/api/convert", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ html: entry.html, css: entry.css, format: "A4", margin: "0", background: true, filename: entry.filename }),
-      });
-      if (!res.ok) { await uiAlert("Erreur lors de la génération du PDF.", "Erreur"); return; }
-      const blob = await res.blob();
+      const blob =
+        entry.doc_type === "Lettre"
+          ? await generateLetterPdfBlob(entry.json as Letter, [])
+          : await generateResumePdfBlob(entry.json as Resume, (entry.templateId ?? "sobre") as PdfTemplateId, []);
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
       setTimeout(() => URL.revokeObjectURL(url), 60000);
       await updateHistoryEntryStat(id, "pdf_views");
       await load();
     } catch {
-      await uiAlert("Erreur réseau.", "Erreur");
+      await uiAlert("Erreur lors de la génération du PDF.", "Erreur");
     }
   }
 
