@@ -59,7 +59,7 @@ test.describe("mobile", () => {
     for (const name of ["↑ Importer", "↓ Exporter"]) {
       await expect(page.getByRole("button", { name })).toBeInViewport({ ratio: 1 });
     }
-    await expect(page.getByRole("link", { name: "‹ Retour" })).toBeInViewport({ ratio: 1 });
+    await expect(page.getByRole("link", { name: "Retour" })).toBeInViewport({ ratio: 1 });
     // Le switcher de thème n'apparaît pas sur mobile (il vit dans le menu ☰ de l'éditeur).
     await expect(page.locator("#btn-theme")).toBeHidden();
 

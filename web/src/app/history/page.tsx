@@ -13,8 +13,9 @@ export default function HistoryPage() {
         <h1 className="hist-h1">Historique</h1>
         <div className="topbar-actions">
           <HistoryActions />
-          <Link href="/" style={{ color: "var(--link)", fontWeight: 600, fontSize: "14px" }}>
-            ‹ Retour
+          <Link href="/" className="btn-nav">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+            Retour
           </Link>
         </div>
       </header>
