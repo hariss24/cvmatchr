@@ -94,3 +94,31 @@ test("« Adapter à l'offre (IA) » remplace le corps du modèle via /api/adapt-
   expect(sentBody!.job_desc).toContain("Full Stack");
   expect((sentBody!.cv_json as { photo?: string }).photo).toBe("");
 });
+
+test("en mobile, la barre de modèles ne déborde pas de la modale", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.route("**/api/extract-meta", (route) =>
+    route.fulfill({ status: 500, json: { error: "pas de clé" } }),
+  );
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "Adapter à une offre" }).click();
+  await page.getByRole("button", { name: "Créer le Pack candidature" }).click();
+
+  const bar = page.locator(".pack-tpl-bar");
+  await expect(bar).toBeVisible();
+
+  // Aucun débordement horizontal : « Supprimer » n'est plus coupé.
+  const overflow = await bar.evaluate((el) => el.scrollWidth - el.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+
+  // « Supprimer » est entièrement dans la modale.
+  const barBox = await bar.boundingBox();
+  const deleteBox = await bar.getByRole("button", { name: "Supprimer" }).boundingBox();
+  expect(barBox).not.toBeNull();
+  expect(deleteBox).not.toBeNull();
+  expect(deleteBox!.x + deleteBox!.width).toBeLessThanOrEqual(barBox!.x + barBox!.width + 1);
+
+  // Les trois boutons de la barre sont traités à l'identique : aucun emoji.
+  await expect(bar.getByRole("button", { name: "Enregistrer" })).toHaveText("Enregistrer");
+});

@@ -1003,6 +1003,11 @@ button.go:disabled {
 }
 @media (max-width: 700px) {
   .pack-vars { grid-template-columns: 1fr; }
+  /* Sous 700px, le sélecteur prend sa ligne et les 3 actions passent en dessous :
+     « Supprimer » n'est plus coupé au bord droit de la modale. */
+  .pack-tpl-bar { flex-wrap: wrap; }
+  .pack-tpl-bar select { flex: 1 1 100%; }
+  .pack-tpl-bar .form-btn-mini { flex: 1 1 0; justify-content: center; }
 }
 
 .tpl-editor { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }

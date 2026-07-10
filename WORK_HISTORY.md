@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Continuer l'exécution du plan de cohérence UI 2026-07-10-coherence-ui-audit.md (Task 6 : gabarit de la barre de modèles en mobile).
+**Prochaine étape suggérée :** Les 7 constats haute+moyenne de l'audit sont soldés ; restent les constats basses 08 à 11 (emojis, z-index du FAB, coche de sauvegarde, casse « CV Tailor »).
 
 ---
 
@@ -40,6 +40,13 @@
 ---
 
 ## Journal
+
+### 2026-07-10 : Barre de modèles du Pack en mobile (constat 05)
+- **Quoi :** La barre de modèles du Pack candidature permet le retour à la ligne (flex-wrap) sous 700px, pour que le bouton « Supprimer » ne soit plus coupé. L'icône disquette de « Enregistrer » a été supprimée pour l'harmoniser avec « Dupliquer » et « Supprimer ».
+- **Pourquoi :** Audit UI, constat 05.
+- **Fichiers touchés :** `src/app/globals.css`, `src/components/modals/PackModal.tsx`, `tests/e2e/pack.spec.ts`.
+- **Résultat vérifs :** `tsc --noEmit` 0 erreur, ESLint 0 erreur, Vitest 194/194, Build OK, Playwright 35/35 (tout vert).
+- **Commit :** Sera commité dans la foulée.
 
 ### 2026-07-10 : Segmented control du niveau d'adaptation (constat 06)
 - **Quoi :** Le sélecteur du niveau d'adaptation a maintenant un contenant discret pour les cellules inactives (fond et bordure creuse), ce qui clarifie qu'il s'agit d'un « segmented control » cliquable, et non de texte nu.

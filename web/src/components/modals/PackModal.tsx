@@ -230,7 +230,7 @@ export default function PackModal({
               <option key={t.id} value={t.id}>{t.name}</option>
             ))}
           </select>
-          <button type="button" className="form-btn-mini" onClick={onSaveTpl} disabled={busy || !tpl}>💾 Enregistrer</button>
+          <button type="button" className="form-btn-mini" onClick={onSaveTpl} disabled={busy || !tpl}>Enregistrer</button>
           <button type="button" className="form-btn-mini" onClick={onDuplicateTpl} disabled={busy || !tpl}>Dupliquer</button>
           <button type="button" className="form-btn-mini" onClick={onDeleteTpl} disabled={busy || !tpl}>Supprimer</button>
         </div>
