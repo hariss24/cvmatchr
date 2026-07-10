@@ -138,3 +138,25 @@ test("écran de configuration si les clés manquent", async ({ page }) => {
   await page.getByTestId("jobs-scan").click();
   await expect(page.getByTestId("jobs-config")).toContainText("Configurez FT_CLIENT_ID");
 });
+
+test("« Candidater » est un bouton de contour, pas une seconde primaire pleine", async ({ page }) => {
+  await mockScanOk(page);
+  await page.goto("/jobs");
+  await page.getByTestId("jobs-scan").click();
+  await expect(page.getByTestId("job-card")).toHaveCount(1);
+
+  // « Adapter mon CV » est la seule primaire : fond en dégradé orange.
+  const adaptBg = await page
+    .getByTestId("job-adapt")
+    .evaluate((el) => getComputedStyle(el).backgroundImage);
+  expect(adaptBg).toContain("gradient");
+
+  // « Candidater » n'a aucun fond plein ni dégradé : c'est un contour.
+  const apply = page.getByTestId("job-apply");
+  const applyBg = await apply.evaluate((el) => getComputedStyle(el).backgroundImage);
+  expect(applyBg).toBe("none");
+
+  // Sa couleur de texte est la teinte sémantique « candidature », pas du blanc.
+  const applyColor = await apply.evaluate((el) => getComputedStyle(el).color);
+  expect(applyColor).not.toBe("rgb(255, 255, 255)");
+});

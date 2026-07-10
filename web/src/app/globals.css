@@ -23,6 +23,10 @@
   --neu-inset-deep: inset -1.4px -1.4px 11px rgba(255,255,255,0.48), inset 1.8px 1.8px 13px rgba(163,177,198,1.0);
 
   --success:       #256D2A;
+  /* Vert « candidature » : couleur SÉMANTIQUE, jamais un fond de bouton plein.
+     --apply sert au trait de contour, --apply-text au texte (4.5:1 sur --bg clair). */
+  --apply:         #1E8E6A;
+  --apply-text:    #146B4F;
   --warning:       #BF5000;
   --error:         #C62828;
   --blue:          #1565C0;
@@ -51,6 +55,8 @@
   --neu-inset-deep: inset -4px -4px 11px rgba(255,255,255,0.05), inset 5px 5px 13px rgba(0,0,0,0.72);
 
   --success:       #66BB6A;
+  --apply:         #2FA982;
+  --apply-text:    #4FC49F;
   --warning:       #FFA726;
   --error:         #EF5350;
   --blue:          #64B5F6;
@@ -445,7 +451,6 @@ button.ghost:active { box-shadow: var(--neu-inset); transform: translateY(1px); 
 .tailor-btn:active { transform: translateY(1px); box-shadow: var(--neu-inset); }
 .tailor-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .tailor-btn-block { width: 100%; padding: 11px 16px; font-size: 13.5px; }
-.pack-btn-variant { background: linear-gradient(145deg, #2fa982, #1e8e6a); color: #fff; }
 
 .level-selector { display: flex; flex-direction: column; gap: 9px; }
 .level-label {
@@ -763,6 +768,26 @@ button.go:disabled {
 .neu-btn-sm:active { box-shadow: var(--neu-inset); transform: translateY(0); }
 .neu-btn-sm.danger { color: var(--error); }
 .neu-btn-sm.view-pdf { color: var(--orange-text); }
+
+/* Modificateur « candidature » : contour vert sémantique, applicable sur .tailor-btn
+   comme sur .neu-btn-sm. Jamais de fond plein — une seule primaire par écran. */
+.pack-btn-variant {
+  background: var(--bg);
+  color: var(--apply-text);
+  box-shadow: var(--neu-raised-sm), inset 0 0 0 1.5px var(--apply);
+}
+.pack-btn-variant:hover {
+  box-shadow: var(--neu-raised), inset 0 0 0 1.5px var(--apply);
+  transform: translateY(-1px);
+}
+.pack-btn-variant:active {
+  box-shadow: var(--neu-inset), inset 0 0 0 1.5px var(--apply);
+  transform: translateY(1px);
+}
+.pack-btn-variant:disabled {
+  opacity: 0.5;
+  transform: none;
+}
 @media (max-width: 768px) {
   .hist-content { padding: 14px; }
   .history-card { grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -815,7 +840,7 @@ button.go:disabled {
 }
 .job-score-num { font-size: 22px; font-weight: 800; line-height: 1; }
 .job-score-max { font-size: 10px; color: var(--faint); font-weight: 600; margin-top: 2px; }
-.job-score-high .job-score-num { color: #2fa982; }
+.job-score-high .job-score-num { color: var(--apply-text); }
 .job-score-mid .job-score-num { color: var(--orange-text); }
 .job-score-low .job-score-num { color: var(--muted); }
 

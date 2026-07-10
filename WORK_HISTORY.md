@@ -15,9 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** rien d'urgent en cours. Point ouvert dans
-`TODO.md` (priorité haute) : « Nettoyage et stabilisation globale — vérifier
-l'intégrité de bout en bout post-migration ».
+**Prochaine étape suggérée :** Continuer l'exécution du plan de cohérence UI 2026-07-10-coherence-ui-audit.md (Task 2 : rangée d'actions des offres).
 
 ---
 
@@ -42,6 +40,13 @@ l'intégrité de bout en bout post-migration ».
 ---
 
 ## Journal
+
+### 2026-07-10 : Vert « candidature » en contour (audit UI, constat 01)
+- **Quoi :** Le vert devient une couleur sémantique « candidature » employée en contour uniquement. La classe `.pack-btn-variant` devient un modificateur de contour (plus de fond plein). Une seule primaire pleine orange par écran. Le vert du score élevé n'est plus en dur.
+- **Pourquoi :** Audit UI, constat 01.
+- **Fichiers touchés :** `src/app/globals.css`, `tests/e2e/jobs.spec.ts`.
+- **Résultat vérifs :** `tsc --noEmit` 0 erreur, ESLint 0 erreur, Vitest 194/194, Build OK, Playwright 30/30 (tout vert).
+- **Commit :** Sera commité dans la foulée.
 
 ### 2026-07-09 : UI mobile Historique + réparation « Voir PDF »
 - **Quoi :** (1) le header d'Historique/Offres wrappe en mobile (classe `topbar--secondary`,
