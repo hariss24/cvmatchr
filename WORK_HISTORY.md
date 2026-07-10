@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Continuer l'exécution du plan de cohérence UI 2026-07-10-coherence-ui-audit.md (Task 3 : uniformisation des modales).
+**Prochaine étape suggérée :** Continuer l'exécution du plan de cohérence UI 2026-07-10-coherence-ui-audit.md (Task 4 : gabarits d'import en double colonne).
 
 ---
 
@@ -40,6 +40,13 @@
 ---
 
 ## Journal
+
+### 2026-07-10 : Patron de modale unique (audit UI, constat 03)
+- **Quoi :** Uniformisation des modales sur un seul patron de fermeture : la croix en haut à droite (`.ui-dialog__close` dans `.ui-dialog__head`). Les boutons « Fermer » redondants en pied des modales Aide et Pack ont été supprimés.
+- **Pourquoi :** Audit UI, constat 03.
+- **Fichiers touchés :** `src/components/modals/HelpModal.tsx`, `src/components/modals/PackModal.tsx`, `tests/e2e/help.spec.ts`.
+- **Résultat vérifs :** `tsc --noEmit` 0 erreur, ESLint 0 erreur, Vitest 194/194, Build OK, Playwright 32/32 (tout vert).
+- **Commit :** Sera commité dans la foulée.
 
 ### 2026-07-10 : Hiérarchie actions offres (audit UI, constat 02)
 - **Quoi :** La rangée d'actions des offres perd sa double primaire pleine. Seul « Adapter mon CV » reste plein (`.tailor-btn`), « Candidater » et « Voir l'offre » passent en secondaire claire (`.neu-btn-sm`), et « Pas intéressé » devient un lien discret (`.job-dismiss-link`). Modification de la grille mobile.

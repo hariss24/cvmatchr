@@ -27,7 +27,12 @@ export default function HelpModal({
         aria-label="Comment ça marche ?"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="ui-dialog__title">Comment ça marche ?</h2>
+        <div className="ui-dialog__head">
+          <h2 className="ui-dialog__title">Comment ça marche ?</h2>
+          <button type="button" className="ui-dialog__close" aria-label="Fermer" onClick={onClose}>
+            &times;
+          </button>
+        </div>
 
         <div className="help-body">
           <section className="help-section">
@@ -97,11 +102,7 @@ export default function HelpModal({
           </section>
         </div>
 
-        <div className="ui-dialog__actions">
-          <button type="button" className="form-btn-mini" onClick={onClose}>
-            Fermer
-          </button>
-        </div>
+
       </div>
     </div>
   );

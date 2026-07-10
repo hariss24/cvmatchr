@@ -210,7 +210,12 @@ export default function PackModal({
         aria-label="Pack candidature"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="ui-dialog__title">Pack candidature</h2>
+        <div className="ui-dialog__head">
+          <h2 className="ui-dialog__title">Pack candidature</h2>
+          <button type="button" className="ui-dialog__close" aria-label="Fermer" onClick={onClose} disabled={busy}>
+            &times;
+          </button>
+        </div>
 
         {/* Barre modèle */}
         <div className="pack-tpl-bar">
@@ -287,11 +292,7 @@ export default function PackModal({
           </div>
         </div>
 
-        <div className="ui-dialog__actions">
-          <button type="button" className="form-btn-mini" onClick={onClose} disabled={busy}>
-            Fermer
-          </button>
-        </div>
+
       </div>
     </div>
   );
