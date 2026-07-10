@@ -45,3 +45,25 @@ test("l'import PDF rend les pages et peuple le CV depuis la réponse IA", async 
   expect(sentBody!.images!.length).toBeGreaterThan(0);
   expect(sentBody!.images![0]).toMatch(/^data:image\/png;base64,/);
 });
+
+test("Import PDF : pied d'actions à droite, primaire dominante, comme Import texte", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Importer un PDF" }).click();
+
+  const modal = page.locator(".import-modal");
+  await expect(modal.locator(".ui-dialog__close")).toBeVisible();
+
+  // Le pied porte exactement deux boutons : secondaire « Annuler », primaire « Choisir un PDF… ».
+  const footerButtons = modal.locator(".ui-dialog__actions button");
+  await expect(footerButtons).toHaveCount(2);
+  await expect(footerButtons.nth(0)).toHaveText("Annuler");
+  await expect(footerButtons.nth(1)).toHaveText("Choisir un PDF…");
+
+  // Le primaire est le dernier (à droite) et n'est jamais dominé par le secondaire.
+  const cancel = await footerButtons.nth(0).boundingBox();
+  const primary = await footerButtons.nth(1).boundingBox();
+  expect(cancel).not.toBeNull();
+  expect(primary).not.toBeNull();
+  expect(primary!.width).toBeGreaterThanOrEqual(cancel!.width - 1);
+  expect(primary!.x).toBeGreaterThan(cancel!.x);
+});

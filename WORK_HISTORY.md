@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Continuer l'exécution du plan de cohérence UI 2026-07-10-coherence-ui-audit.md (Task 4 : gabarits d'import en double colonne).
+**Prochaine étape suggérée :** Continuer l'exécution du plan de cohérence UI 2026-07-10-coherence-ui-audit.md (Task 5 : gabarit du selecteur "Niveau d'adaptation").
 
 ---
 
@@ -40,6 +40,13 @@
 ---
 
 ## Journal
+
+### 2026-07-10 : Les deux imports sur le même gabarit (constats 04 et 07)
+- **Quoi :** Les modales d'import (PDF et texte) partagent désormais le même gabarit avec le bouton de fermeture principal en croix (`.ui-dialog__close` dans `.ui-dialog__head`) et un pied `.ui-dialog__actions` standardisé « Annuler » (secondaire) à gauche et l'action principale à droite. La hiérarchie visuelle est rétablie.
+- **Pourquoi :** Audit UI, constats 04 et 07.
+- **Fichiers touchés :** `src/components/modals/ImportPdfModal.tsx`, `src/components/modals/ImportTextModal.tsx`, `tests/e2e/import-pdf.spec.ts`.
+- **Résultat vérifs :** `tsc --noEmit` 0 erreur, ESLint 0 erreur, Vitest 194/194, Build OK, Playwright 33/33 (tout vert).
+- **Commit :** Sera commité dans la foulée.
 
 ### 2026-07-10 : Patron de modale unique (audit UI, constat 03)
 - **Quoi :** Uniformisation des modales sur un seul patron de fermeture : la croix en haut à droite (`.ui-dialog__close` dans `.ui-dialog__head`). Les boutons « Fermer » redondants en pied des modales Aide et Pack ont été supprimés.

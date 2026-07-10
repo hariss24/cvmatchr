@@ -84,7 +84,12 @@ export default function ImportTextModal({
         aria-label="Importer un texte"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="ui-dialog__title">Importer un texte</h2>
+        <div className="ui-dialog__head">
+          <h2 className="ui-dialog__title">Importer un texte</h2>
+          <button type="button" className="ui-dialog__close" aria-label="Fermer" onClick={onClose} disabled={busy}>
+            &times;
+          </button>
+        </div>
         <p className="import-hint">
           Colle le contenu brut de ton CV (ou ta lettre) : l&apos;IA en extrait les données.
         </p>

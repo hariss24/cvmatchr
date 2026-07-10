@@ -83,7 +83,12 @@ export default function ImportPdfModal({
         aria-label="Importer un PDF"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="ui-dialog__title">Importer un PDF</h2>
+        <div className="ui-dialog__head">
+          <h2 className="ui-dialog__title">Importer un PDF</h2>
+          <button type="button" className="ui-dialog__close" aria-label="Fermer" onClick={onClose} disabled={busy}>
+            &times;
+          </button>
+        </div>
         <p className="import-hint">
           Choisis un CV au format PDF : ses pages sont analysées et les champs remplis automatiquement.
         </p>
@@ -96,20 +101,21 @@ export default function ImportPdfModal({
           disabled={busy}
           onChange={(e) => onFile(e.target.files?.[0] ?? null)}
         />
-        <button
-          type="button"
-          className="form-btn-add"
-          disabled={busy}
-          onClick={() => inputRef.current?.click()}
-        >
-          Choisir un PDF…
-        </button>
+
 
         {status ? <p className="import-status status-busy">{status}</p> : null}
 
         <div className="ui-dialog__actions">
           <button type="button" className="form-btn-mini" onClick={onClose} disabled={busy}>
-            Fermer
+            Annuler
+          </button>
+          <button
+            type="button"
+            className="go"
+            disabled={busy}
+            onClick={() => inputRef.current?.click()}
+          >
+            Choisir un PDF…
           </button>
         </div>
       </div>
