@@ -41,6 +41,13 @@
 
 ## Journal
 
+### 2026-07-11 : Éditeur à étiquettes (VariableEditor) sur les corps lettre/email du Pack
+- **Quoi :** Task 4 du plan `2026-07-10-pack-editeur-etiquettes.md`. Nouveau composant `VariableEditor` (`contentEditable` maison, sans dépendance) : les tokens `{Var}` s'affichent en pastilles atomiques cliquables, insérées via chips et supprimées au Backspace/Delete (handler manuel pour fiabiliser la suppression des pastilles). Les deux corps (lettre, email) passent en éditeur à étiquettes dans `PackView` ; `TemplateEditorPanel` est réduit aux 4 champs courts (objets, formule d'appel, politesse).
+- **Pourquoi :** Livrer le cœur de la refonte façon Candiboost — édition visuelle des variables. Gemini s'était arrêté après la Task 3.
+- **Fichiers touchés :** `src/components/pack/VariableEditor.tsx` (créé), `src/components/pack/TemplateEditorPanel.tsx`, `src/components/pack/PackView.tsx`, `src/app/globals.css`, `tests/e2e/pack.spec.ts`.
+- **Résultat vérifs :** `tsc` 0, `lint` 0 erreur, `vitest` 199/199, `build` OK, `playwright` 36/36.
+- **Écart au plan :** ajout d'un `onKeyDown` (non prévu) pour supprimer les pastilles de façon fiable — cas limite du `contentEditable` que le plan anticipait.
+
 ### 2026-07-10 : parseTokens — modèle de tokens pour l'éditeur à étiquettes
 - **Quoi :** Création d'une fonction pure `parseTokens` pour découper une chaîne avec variables `{Var}` en segments typés (texte / variable), et de sa suite de tests.
 - **Pourquoi :** Exécution de la Task 3 du plan `2026-07-10-pack-editeur-etiquettes.md` (prérequis pour l'éditeur à étiquettes `VariableEditor`).

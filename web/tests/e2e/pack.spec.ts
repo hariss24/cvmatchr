@@ -79,7 +79,8 @@ test("« Adapter à l'offre (IA) » remplace le corps du modèle via /api/adapt-
   await modal.getByRole("button", { name: /Adapter à l'offre \(IA\)/ }).click();
 
   // Le corps du modèle (colonne édition) est remplacé par la réponse IA, variables intactes.
-  await expect(modal.locator(".tpl-editor textarea").first()).toHaveValue(
+  await expect(page.locator('.var-editor[aria-label="Corps de la lettre"]')).toHaveAttribute(
+    "data-value",
     "Corps adapté par l'IA pour {Entreprise}.",
   );
 
@@ -114,4 +115,35 @@ test("en mobile, la barre de modèles ne déborde pas de la modale", async ({ pa
 
   // Les trois boutons de la barre sont traités à l'identique : aucun emoji.
   await expect(bar.getByRole("button", { name: "Enregistrer" })).toHaveText("Enregistrer");
+});
+
+test("l'éditeur à étiquettes insère et supprime une variable dans le corps de la lettre", async ({ page }) => {
+  await page.route("**/api/extract-meta", (route) =>
+    route.fulfill({ status: 500, json: { error: "pas de clé" } }),
+  );
+  await page.goto("/pack");
+
+  // La zone d'édition du corps de la lettre est un éditeur à étiquettes.
+  const group = page.locator(".var-editor-group", {
+    has: page.locator('[aria-label="Corps de la lettre"]'),
+  });
+  const body = group.locator('.var-editor[aria-label="Corps de la lettre"]');
+  await expect(body).toBeVisible();
+
+  // Vider puis insérer la variable Poste via la chip du même groupe.
+  await body.click();
+  await page.keyboard.press("Control+A");
+  await page.keyboard.press("Delete");
+  await group.locator(".var-btn", { hasText: "Poste" }).click();
+
+  // Une pastille « Poste » apparaît, et la valeur tokenisée contient {Poste}.
+  await expect(body.locator(".var-pill")).toHaveText("Poste");
+  await expect(body).toHaveAttribute("data-value", /\{Poste\}/);
+
+  // Supprimer la pastille (curseur après elle → Backspace) la retire.
+  await body.click();
+  await page.keyboard.press("End");
+  await page.keyboard.press("Backspace");
+  await expect(body.locator(".var-pill")).toHaveCount(0);
+  await expect(body).not.toHaveAttribute("data-value", /\{Poste\}/);
 });

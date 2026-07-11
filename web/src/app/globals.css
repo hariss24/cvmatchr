@@ -1040,6 +1040,21 @@ button.go:disabled {
 }
 .var-btn:hover { background: var(--surface-2, var(--bg)); }
 
+/* Éditeur à étiquettes (VariableEditor) : zone éditable + pastilles inline. */
+.var-editor-group { display: flex; flex-direction: column; gap: 6px; }
+.var-btns { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.var-editor {
+  background: var(--bg); color: var(--text); border: none; border-radius: 10px;
+  padding: 10px 12px; font-size: 13px; font-family: var(--font-ui); line-height: 1.5;
+  box-shadow: var(--neu-inset); outline: none; white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.var-editor:focus { box-shadow: var(--neu-inset), 0 0 0 2px rgba(232,93,4,0.25); }
+.var-pill {
+  display: inline-block; padding: 0 8px; margin: 0 1px; border-radius: 999px;
+  background: var(--bg); color: var(--orange-text); font-weight: 600; font-size: 12px;
+  box-shadow: var(--neu-raised-sm); user-select: none; white-space: nowrap;
+}
+
 /* ============================================================
    Règles mobiles (≤900px) — en fin de fichier exprès : à
    spécificité égale, la dernière règle gagne, donc elles doivent

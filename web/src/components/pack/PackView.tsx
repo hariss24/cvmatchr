@@ -8,6 +8,8 @@ import { fetchJobMeta } from "@/lib/ai/jobMeta";
 import { generateLetterPdfBlob } from "@/lib/pdfgen/generatePdf";
 import PdfPreview from "../editor/PdfPreview";
 import TemplateEditorPanel from "./TemplateEditorPanel";
+import VariableEditor from "./VariableEditor";
+import { TEMPLATE_VARIABLES } from "@/lib/templates/render";
 import type { Resume } from "@/lib/resume/schema";
 import type { MailTemplate } from "@/lib/templates/defaults";
 import { buildLetterFromTemplate, renderEmail } from "@/lib/templates/build";
@@ -243,7 +245,29 @@ export default function PackView() {
 
         <div className="pack-result">
           <div className="pack-col">
-            {tpl ? <TemplateEditorPanel tpl={tpl} onChange={patchTpl} disabled={busy} /> : null}
+            {tpl ? (
+              <>
+                <label className="form-label">Corps de la lettre</label>
+                <VariableEditor
+                  value={tpl.letterBody}
+                  onChange={(v) => patchTpl({ letterBody: v })}
+                  variables={TEMPLATE_VARIABLES}
+                  disabled={busy}
+                  ariaLabel="Corps de la lettre"
+                  minHeightPx={160}
+                />
+                <label className="form-label">Corps de l&apos;email</label>
+                <VariableEditor
+                  value={tpl.emailBody}
+                  onChange={(v) => patchTpl({ emailBody: v })}
+                  variables={TEMPLATE_VARIABLES}
+                  disabled={busy}
+                  ariaLabel="Corps de l'email"
+                  minHeightPx={120}
+                />
+                <TemplateEditorPanel tpl={tpl} onChange={patchTpl} disabled={busy} />
+              </>
+            ) : null}
             <button type="button" className="go" onClick={adaptWithAi} disabled={busy || !tpl}>
               {busy ? "Adaptation…" : "✨ Adapter à l'offre (IA)"}
             </button>
