@@ -10,7 +10,8 @@ import { TEMPLATE_VARIABLES, type TemplateVars } from "@/lib/templates/render";
 import type { Resume } from "@/lib/resume/schema";
 import type { MailTemplate } from "@/lib/templates/defaults";
 import { buildLetterFromTemplate } from "@/lib/templates/build";
-import { ensureDefaultTemplates, listTemplates, saveTemplate, saveDraft } from "@/lib/storage/db";
+import { ensureDefaultTemplates, listTemplates, saveTemplate, saveDraft, loadProfile } from "@/lib/storage/db";
+import { resolveLetterIdentity, type UserProfile } from "@/lib/profile/profile";
 import { toast } from "@/state/uiStore";
 import JobExtractor from "../modals/JobExtractor";
 
@@ -23,6 +24,7 @@ import JobExtractor from "../modals/JobExtractor";
 export default function PackView() {
   const router = useRouter();
   const [tpl, setTpl] = useState<MailTemplate | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [company, setCompanyLocal] = useState(() => useDocStore.getState().company);
   const [role, setRoleLocal] = useState(() => useDocStore.getState().role);
   const [contact, setContact] = useState("");
@@ -44,31 +46,32 @@ export default function PackView() {
   useEffect(() => {
     (async () => {
       await ensureDefaultTemplates();
-      const all = await listTemplates();
+      const [all, p] = await Promise.all([listTemplates(), loadProfile()]);
       setTpl((cur) => cur ?? all[0] ?? null);
+      setProfile(p || null);
     })();
   }, []);
 
-  const cv = useDocStore((s) => s.json) as Resume;
-  const isCv = "name" in (cv as object);
+  const cvRaw = useDocStore((s) => s.json) as Resume;
+  const isCv = "name" in (cvRaw as object);
   const today = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 
+  const identity = useMemo(() => isCv ? resolveLetterIdentity(cvRaw, profile) : null, [cvRaw, profile, isCv]);
+
   const vars: TemplateVars = useMemo(() => {
-    const name = (isCv ? cv.name : "").trim();
-    const [prenom, ...rest] = name.split(/\s+/);
     return {
       Entreprise: company.trim(),
       Poste: role.trim(),
       "M/Mme Nom": contact.trim(),
-      "Prénom": prenom ?? "",
-      Nom: rest.join(" "),
+      "Prénom": identity?.prenom ?? "",
+      Nom: identity?.nom ?? "",
       Date: today,
     };
-  }, [company, role, contact, cv, isCv, today]);
+  }, [company, role, contact, identity, today]);
 
   const letter = useMemo(
-    () => (tpl && isCv ? buildLetterFromTemplate(tpl, vars, cv, today) : null),
-    [tpl, vars, cv, isCv, today],
+    () => (tpl && isCv && identity ? buildLetterFromTemplate(tpl, vars, identity.cv, today) : null),
+    [tpl, vars, identity, isCv, today],
   );
 
   const patchTpl = (patch: Partial<MailTemplate>) => setTpl((t) => (t ? { ...t, ...patch } : t));
@@ -106,7 +109,7 @@ export default function PackView() {
       const { body } = await postJson<{ body: string }>("/api/adapt-letter", {
         letter_body: tpl.letterBody,
         job_desc: desc,
-        cv_json: { ...cv, photo: "" },
+        cv_json: { ...(identity?.cv ?? cvRaw), photo: "" },
         company: company.trim(),
         role: role.trim(),
       });
