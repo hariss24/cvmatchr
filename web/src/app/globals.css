@@ -351,6 +351,12 @@ button.ghost:active { box-shadow: var(--neu-inset); transform: translateY(1px); 
 /* Page /pack (remplace la modale) : contenu en colonne, marge interne confortable. */
 .pack-page { padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; }
 @media (max-width: 768px) { .pack-page { padding: 14px; } }
+/* Seul le bloc résultat absorbe la hauteur restante ; les champs du haut (dont la
+   zone « Offre ») gardent leur taille au lieu de s'écraser en filet. */
+.pack-page > *:not(.pack-result) { flex-shrink: 0; }
+.pack-page .pack-result { flex: 1; align-items: start; }
+.pack-advanced { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.pack-advanced-toggle { align-self: flex-start; }
 .pack-meta { display: flex; gap: 8px; margin-top: 8px; }
 .pack-meta .form-input { flex: 1; }
 .pack-result { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; margin-top: 4px; }

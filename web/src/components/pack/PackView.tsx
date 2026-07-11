@@ -35,6 +35,7 @@ export default function PackView() {
   );
   const [busy, setBusy] = useState(false);
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Consomme l'offre en attente (depuis TailorModal ou « Candidater ») une fois lue.
   useEffect(() => {
@@ -206,23 +207,6 @@ export default function PackView() {
       </header>
 
       <div className="pane pack-page" style={{ overflowY: "auto" }}>
-        <div className="pack-tpl-bar">
-          <select
-            className="form-input"
-            value={tpl?.id ?? ""}
-            onChange={(e) => selectTpl(e.target.value)}
-            disabled={busy}
-            aria-label="Choisir un modèle"
-          >
-            {templates.map((t) => (
-              <option key={t.id} value={t.id}>{t.name}</option>
-            ))}
-          </select>
-          <button type="button" className="form-btn-mini" onClick={onSaveTpl} disabled={busy || !tpl}>Enregistrer</button>
-          <button type="button" className="form-btn-mini" onClick={onDuplicateTpl} disabled={busy || !tpl}>Dupliquer</button>
-          <button type="button" className="form-btn-mini" onClick={onDeleteTpl} disabled={busy || !tpl}>Supprimer</button>
-        </div>
-
         <div className="pack-vars">
           <input className="form-input" placeholder="Entreprise" value={company}
             onChange={(e) => setCompanyLocal(e.target.value)} disabled={busy} />
@@ -265,12 +249,43 @@ export default function PackView() {
                   ariaLabel="Corps de l'email"
                   minHeightPx={120}
                 />
-                <TemplateEditorPanel tpl={tpl} onChange={patchTpl} disabled={busy} />
               </>
             ) : null}
             <button type="button" className="go" onClick={adaptWithAi} disabled={busy || !tpl}>
               {busy ? "Adaptation…" : "✨ Adapter à l'offre (IA)"}
             </button>
+
+            <button
+              type="button"
+              className="form-btn-mini pack-advanced-toggle"
+              aria-expanded={showAdvanced}
+              onClick={() => setShowAdvanced((v) => !v)}
+            >
+              {showAdvanced ? "▾ Personnaliser (modèle, objets, formules)" : "▸ Personnaliser (modèle, objets, formules)"}
+            </button>
+            {showAdvanced ? (
+              <div className="pack-advanced">
+                {templates.length > 1 ? (
+                  <select
+                    className="form-input"
+                    value={tpl?.id ?? ""}
+                    onChange={(e) => selectTpl(e.target.value)}
+                    disabled={busy}
+                    aria-label="Choisir un modèle"
+                  >
+                    {templates.map((t) => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </select>
+                ) : null}
+                {tpl ? <TemplateEditorPanel tpl={tpl} onChange={patchTpl} disabled={busy} /> : null}
+                <div className="pack-tpl-bar">
+                  <button type="button" className="form-btn-mini" onClick={onSaveTpl} disabled={busy || !tpl}>Enregistrer</button>
+                  <button type="button" className="form-btn-mini" onClick={onDuplicateTpl} disabled={busy || !tpl}>Dupliquer</button>
+                  <button type="button" className="form-btn-mini" onClick={onDeleteTpl} disabled={busy || !tpl}>Supprimer</button>
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <div className="pack-col">

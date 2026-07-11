@@ -19,9 +19,6 @@ test("le pack construit lettre + email depuis un modèle, sans IA", async ({ pag
 
   const modal = page.locator(".pack-page");
 
-  // La bibliothèque est seedée au premier lancement : 3 modèles de départ.
-  await expect(modal.getByRole("combobox", { name: "Choisir un modèle" }).locator("option")).toHaveCount(1);
-
   // Remplir les variables → l'email se met à jour instantanément, sans IA.
   await modal.getByPlaceholder("Entreprise", { exact: true }).fill("ACME");
   await modal.getByPlaceholder("Poste visé").fill("Développeur Web");
@@ -91,30 +88,21 @@ test("« Adapter à l'offre (IA) » remplace le corps du modèle via /api/adapt-
   expect((sentBody!.cv_json as { photo?: string }).photo).toBe("");
 });
 
-test("en mobile, la barre de modèles ne déborde pas de la modale", async ({ page }) => {
+test("en mobile, la page /pack ne déborde pas horizontalement", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.route("**/api/extract-meta", (route) =>
     route.fulfill({ status: 500, json: { error: "pas de clé" } }),
   );
-
   await page.goto("/pack");
 
-  const bar = page.locator(".pack-tpl-bar");
-  await expect(bar).toBeVisible();
-
-  // Aucun débordement horizontal : « Supprimer » n'est plus coupé.
-  const overflow = await bar.evaluate((el) => el.scrollWidth - el.clientWidth);
+  const pageEl = page.locator(".pack-page");
+  await expect(pageEl).toBeVisible();
+  // Pas de scroll horizontal : le contenu tient dans la largeur.
+  const overflow = await pageEl.evaluate((el) => el.scrollWidth - el.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
 
-  // « Supprimer » est entièrement dans la modale.
-  const barBox = await bar.boundingBox();
-  const deleteBox = await bar.getByRole("button", { name: "Supprimer" }).boundingBox();
-  expect(barBox).not.toBeNull();
-  expect(deleteBox).not.toBeNull();
-  expect(deleteBox!.x + deleteBox!.width).toBeLessThanOrEqual(barBox!.x + barBox!.width + 1);
-
-  // Les trois boutons de la barre sont traités à l'identique : aucun emoji.
-  await expect(bar.getByRole("button", { name: "Enregistrer" })).toHaveText("Enregistrer");
+  // Avec un seul modèle, le sélecteur de modèle n'est pas affiché.
+  await expect(page.getByRole("combobox", { name: "Choisir un modèle" })).toHaveCount(0);
 });
 
 test("l'éditeur à étiquettes insère et supprime une variable dans le corps de la lettre", async ({ page }) => {

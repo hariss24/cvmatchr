@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Poursuivre le plan `2026-07-10-pack-editeur-etiquettes.md` avec la Task 4 (`VariableEditor`).
+**Prochaine étape suggérée :** Refonte Pack terminée (page /pack + éditeur à étiquettes, 5 tasks du plan `2026-07-10-pack-editeur-etiquettes.md` livrées).
 
 ---
 
@@ -40,6 +40,12 @@
 ---
 
 ## Journal
+
+### 2026-07-11 : Disposition finale du Pack — dépliant Personnaliser + colonnes pleine largeur
+- **Quoi :** Task 5 du plan `2026-07-10-pack-editeur-etiquettes.md`. Vue par défaut épurée : variables, offre, les deux éditeurs à étiquettes et « Adapter à l'offre » ; tout le reste (sélecteur de modèle — masqué s'il n'y a qu'un modèle —, champs courts, boutons Enregistrer/Dupliquer/Supprimer) passe sous un dépliant « Personnaliser » replié par défaut. Correctif adjacent : la zone « Offre d'emploi » ne s'écrase plus (les enfants du haut de `.pack-page` ne rétrécissent plus).
+- **Pourquoi :** Finaliser l'ergonomie de la page /pack.
+- **Fichiers touchés :** `src/components/pack/PackView.tsx`, `src/app/globals.css`, `tests/e2e/pack.spec.ts`.
+- **Résultat vérifs :** `tsc` 0, `lint` 0 erreur, `vitest` 199/199, `build` OK, `playwright` 36/36. Recette visuelle desktop faite (2 colonnes, pastilles inline, dépliant fermé par défaut, zone Offre à sa taille).
 
 ### 2026-07-11 : Éditeur à étiquettes (VariableEditor) sur les corps lettre/email du Pack
 - **Quoi :** Task 4 du plan `2026-07-10-pack-editeur-etiquettes.md`. Nouveau composant `VariableEditor` (`contentEditable` maison, sans dépendance) : les tokens `{Var}` s'affichent en pastilles atomiques cliquables, insérées via chips et supprimées au Backspace/Delete (handler manuel pour fiabiliser la suppression des pastilles). Les deux corps (lettre, email) passent en éditeur à étiquettes dans `PackView` ; `TemplateEditorPanel` est réduit aux 4 champs courts (objets, formule d'appel, politesse).
