@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useDocStore } from "@/state/docStore";
 import { defaultJsonFor } from "@/state/docStore";
+import { loadProfile } from "@/lib/storage/db";
+import { applyProfileToResume } from "@/lib/profile/profile";
+import type { Resume } from "@/lib/resume/schema";
 import { takeSnapshot } from "@/lib/storage/snapshots";
 import { uiConfirm, toast } from "@/state/uiStore";
 import TailorModal from "@/components/modals/TailorModal";
@@ -34,7 +37,13 @@ export default function ActionsBar() {
 
   const onClear = async () => {
     if (!(await uiConfirm("Effacer le document courant et repartir d'un modèle vierge ?", "Effacer"))) return;
-    setJson(defaultJsonFor(docType));
+    const base = defaultJsonFor(docType);
+    if (docType === "Lettre") {
+      setJson(base);
+    } else {
+      const profile = await loadProfile();
+      setJson(applyProfileToResume(base as Resume, profile));
+    }
     toast("Document effacé.", "success");
   };
 

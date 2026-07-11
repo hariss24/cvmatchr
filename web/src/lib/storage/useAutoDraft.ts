@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 import { useDocStore } from "@/state/docStore";
-import { saveDraft, loadDraft } from "@/lib/storage/db";
+import { saveDraft, loadDraft, loadProfile } from "@/lib/storage/db";
 import { toast } from "@/state/uiStore";
+import { applyProfileToResume } from "@/lib/profile/profile";
+import type { Resume } from "@/lib/resume/schema";
 
 export function useAutoDraft() {
   const isLoaded = useRef(false);
@@ -25,7 +27,13 @@ export function useAutoDraft() {
             ...(draft.role !== undefined ? { role: draft.role } : {}),
             htmlSource: draft.htmlSource ?? !draft.json,
           });
-
+        } else if (docType === "CV" || docType === "Maître") {
+          const profile = await loadProfile();
+          if (profile) {
+            useDocStore.setState({
+              json: applyProfileToResume(useDocStore.getState().json as Resume, profile),
+            });
+          }
         }
       } catch (e) {
         console.warn("Failed to load draft:", e);

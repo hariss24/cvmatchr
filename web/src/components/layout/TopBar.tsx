@@ -8,7 +8,8 @@ import type { DocData } from "@/state/docStore";
 import { generateResumePdfBlob, generateLetterPdfBlob } from "@/lib/pdfgen/generatePdf";
 import { promptApiKey } from "@/lib/settings";
 import { toast, uiAlert, uiConfirm } from "@/state/uiStore";
-import { saveHistoryEntry } from "@/lib/storage/db";
+import { saveHistoryEntry, loadProfile } from "@/lib/storage/db";
+import { applyProfileToResume } from "@/lib/profile/profile";
 import { takeSnapshot } from "@/lib/storage/snapshots";
 import ChatPanel from "@/components/modals/ChatPanel";
 import MobileMenu from "@/components/layout/MobileMenu";
@@ -64,7 +65,8 @@ export default function TopBar() {
 
   const onNewCv = async () => {
     if (!(await uiConfirm("Repartir d'un CV vierge ? Le contenu actuel sera remplacé.", "Nouveau CV"))) return;
-    setJson(structuredClone(DEFAULT_RESUME));
+    const profile = await loadProfile();
+    setJson(applyProfileToResume(structuredClone(DEFAULT_RESUME), profile));
     toast("Nouveau CV.", "success");
   };
 
