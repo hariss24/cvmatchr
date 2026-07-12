@@ -1,6 +1,7 @@
 "use client";
 
 import { useDocStore } from "@/state/docStore";
+import { buildSections } from "@/lib/resume/sections";
 import type {
   Resume,
   ExperienceItem,
@@ -9,6 +10,7 @@ import type {
   ProjectItem,
   VolunteerItem,
   CustomSection,
+  CustomField,
 } from "@/lib/resume/schema";
 
 /**
@@ -92,6 +94,13 @@ export default function FormEditor({ onImportPdf }: { onImportPdf?: () => void }
             </div>
           </div>
         </section>
+
+        <CustomFieldsSection
+          items={cv.customFields ?? []}
+          onChange={(v) => update({ customFields: v })}
+        />
+
+        <SectionOrderSection cv={cv} onChange={(v) => update({ sectionOrder: v })} />
 
         <section className="form-section">
           <h3 className="form-section__title">À propos</h3>
@@ -278,6 +287,117 @@ const EMPTY_VOLUNTEER: VolunteerItem = {
   title: "", organization: "", location: "", date: "", bullets: [],
 };
 const EMPTY_CUSTOM_SECTION: CustomSection = { title: "", items: [] };
+const EMPTY_CUSTOM_FIELD: CustomField = { label: "", value: "" };
+
+/**
+ * Infos personnelles sans case dédiée : permis, âge, mobilité, portfolio, GitHub…
+ * Pendant de `CustomSectionsSection`, mais pour l'en-tête plutôt que pour le corps du CV.
+ * Ce sont les modèles qui s'adaptent — jamais l'inverse.
+ */
+function CustomFieldsSection({
+  items,
+  onChange,
+}: {
+  items: CustomField[];
+  onChange: (items: CustomField[]) => void;
+}) {
+  const patch = (i: number, p: Partial<CustomField>) =>
+    onChange(replaceAt(items, i, { ...items[i], ...p }));
+  return (
+    <section className="form-section">
+      <h3 className="form-section__title">Informations complémentaires</h3>
+      <p className="form-hint">
+        Tout ce qui n&apos;a pas de case : permis, âge, mobilité, portfolio, disponibilité…
+      </p>
+      {items.map((f, i) => (
+        <div key={i} className="form-row">
+          <input
+            className="form-input"
+            placeholder="Intitulé (ex : Permis)"
+            value={f.label}
+            onChange={(e) => patch(i, { label: e.target.value })}
+          />
+          <input
+            className="form-input"
+            placeholder="Valeur (ex : B, véhiculé)"
+            value={f.value}
+            onChange={(e) => patch(i, { value: e.target.value })}
+          />
+          <button
+            type="button"
+            className="form-btn-mini"
+            aria-label="Supprimer l'information"
+            onClick={() => onChange(removeAt(items, i))}
+          >
+            ✕
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        className="form-btn-add"
+        onClick={() => onChange([...items, { ...EMPTY_CUSTOM_FIELD }])}
+      >
+        + Ajouter une information
+      </button>
+    </section>
+  );
+}
+
+/**
+ * Ordre des sections. La liste est DÉRIVÉE du CV (`buildSections`) et non écrite en dur :
+ * une rubrique relevée à l'import — même inconnue de l'application — apparaît donc ici
+ * d'elle-même, et devient déplaçable sans qu'une ligne de code la mentionne.
+ *
+ * Chaque déplacement réécrit la liste complète des identifiants présents : `sectionOrder`
+ * reste ainsi toujours aligné sur le contenu réel du CV.
+ */
+function SectionOrderSection({ cv, onChange }: { cv: Resume; onChange: (order: string[]) => void }) {
+  const sections = buildSections(cv);
+  if (sections.length < 2) return null;
+
+  const move = (i: number, dir: -1 | 1) => {
+    const ids = sections.map((sec) => sec.id);
+    const j = i + dir;
+    if (j < 0 || j >= ids.length) return;
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+    onChange(ids);
+  };
+
+  return (
+    <section className="form-section">
+      <h3 className="form-section__title">Ordre des sections</h3>
+      <p className="form-hint">
+        L&apos;ordre du CV importé est conservé. Réorganisez-le comme vous voulez : le modèle suit.
+      </p>
+      <ul className="form-order">
+        {sections.map((sec, i) => (
+          <li key={sec.id} className="form-order__row">
+            <span className="form-order__label">{sec.title}</span>
+            <button
+              type="button"
+              className="form-btn-mini"
+              aria-label={`Monter « ${sec.title} »`}
+              disabled={i === 0}
+              onClick={() => move(i, -1)}
+            >
+              ↑
+            </button>
+            <button
+              type="button"
+              className="form-btn-mini"
+              aria-label={`Descendre « ${sec.title} »`}
+              disabled={i === sections.length - 1}
+              onClick={() => move(i, 1)}
+            >
+              ↓
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
 
 function ExperienceSection({
   items,

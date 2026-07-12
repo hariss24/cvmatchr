@@ -1,10 +1,12 @@
 import React from "react";
 import { View, Text, StyleSheet } from "@react-pdf/renderer";
-import type { Style } from "@react-pdf/types";
 import type { ResumeSection } from "@/lib/resume/sections";
 
 export const px = (n: number): number => n * 0.75;
 export const t = (v: unknown): string => (v == null ? "" : String(v)).trim();
+
+/** Gris des informations secondaires (lieu, contrat, niveau de langue). */
+export const MUTED = "#787673";
 
 // On utilise un contexte de thème pour que les templates puissent facilement personnaliser les couleurs des primitives
 export interface PdfTheme {
@@ -117,57 +119,114 @@ export function SectionTitle({ children }: { children: string }) {
 }
 
 /**
- * Rend les sections qu'un modèle ne stylise pas lui-même.
+ * Corps d'une section, quel que soit son type. Le TITRE reste à la charge du modèle
+ * (chacun a le sien) ; ici on ne rend que le contenu.
  *
- * C'est le filet qui rend la perte de données impossible : un modèle déclare les
- * sections qu'il prend en charge, TOUT le reste (y compris les sections libres créées
- * par l'IA à l'import) passe ici et s'affiche quand même. Ajouter un champ au CV
- * n'oblige donc plus à toucher aux 4 modèles.
+ * C'est ce qui rend la perte de données impossible. Un modèle n'a plus besoin de
+ * CONNAÎTRE une section pour l'afficher : il itère sur celles que le CV lui donne et
+ * délègue le corps ici. Ajouter un champ au CV — ou laisser l'IA inventer une rubrique
+ * à l'import — n'oblige donc plus à toucher aux 4 modèles, et n'ouvre plus la porte à
+ * un oubli silencieux.
  */
-export function GenericSections({
-  sections,
-  Title,
-  wrapperStyle,
+export function SectionContent({
+  section,
+  hideGutter,
+  color,
+  subtitle = "bold",
 }: {
-  sections: ResumeSection[];
-  Title: React.ComponentType<{ children: string }>;
-  wrapperStyle?: Style;
+  section: ResumeSection;
+  hideGutter?: boolean;
+  color?: string;
+  /** Rendu du sous-titre d'un parcours (entreprise, école, organisation) : gras, ou capitales grisées. */
+  subtitle?: "bold" | "caps";
 }) {
-  if (!sections.length) return null;
-  return (
-    <>
-      {sections.map((sec) => (
-        <View key={sec.id} style={wrapperStyle} wrap={false}>
-          <Title>{sec.title}</Title>
-          {sec.kind === "text" ? <Text style={{ textAlign: "justify" }}>{sec.text}</Text> : null}
-          {sec.kind === "list" ? <Bullets items={sec.items} /> : null}
-          {sec.kind === "languages" ? (
-            <Bullets items={sec.items.map((l) => (t(l.level) ? `${l.name} : ${l.level}` : l.name))} />
-          ) : null}
-          {sec.kind === "timeline"
-            ? sec.items.map((e, i) => (
-                <TimelineItem
-                  key={i}
-                  last={i === sec.items.length - 1}
-                  title={e.title}
-                  date={e.date}
-                  hideGutter={true}
-                  subtitleParts={[
-                    { text: e.subtitle, bold: true },
-                    ...e.meta.map((m) => ({ text: m, muted: true })),
-                  ]}
-                >
-                  {t(e.description) ? (
-                    <Text style={{ marginTop: px(3) }}>{e.description}</Text>
-                  ) : null}
-                  <Bullets items={e.bullets} />
-                </TimelineItem>
-              ))
-            : null}
+  const theme = React.useContext(ThemeContext);
+  const itemColor = color ?? theme.ink;
+
+  switch (section.kind) {
+    case "text":
+      return (
+        <Text style={[{ textAlign: "justify" }, color ? { color } : {}]}>{section.text}</Text>
+      );
+
+    case "list":
+      return (
+        <View style={s.bullets}>
+          {section.items.map((item, i) => (
+            <View key={i} style={s.bulletRow}>
+              <Text style={[s.bulletGlyph, { color: itemColor }]}>•</Text>
+              <Text style={[s.bulletText, { color: itemColor }]}>
+                <SkillText skill={item} />
+              </Text>
+            </View>
+          ))}
         </View>
-      ))}
-    </>
-  );
+      );
+
+    case "languages":
+      return (
+        <View style={s.bullets}>
+          {section.items.map((l, i) => (
+            <View key={i} style={s.bulletRow}>
+              <Text style={[s.bulletGlyph, { color: itemColor }]}>•</Text>
+              <Text style={[s.bulletText, { color: itemColor }]}>
+                {l.name}
+                {t(l.level) ? <Text style={{ color: MUTED }}> : {l.level}</Text> : null}
+              </Text>
+            </View>
+          ))}
+        </View>
+      );
+
+    case "timeline":
+      return (
+        <>
+          {section.items.map((e, i) => (
+            <TimelineItem
+              key={i}
+              last={i === section.items.length - 1}
+              title={e.title}
+              date={e.date}
+              hideGutter={hideGutter}
+              subtitleParts={[
+                subtitle === "caps"
+                  ? { text: e.subtitle.toUpperCase(), muted: true }
+                  : { text: e.subtitle, bold: true },
+                ...e.meta.map((m) => ({ text: m, muted: true })),
+              ]}
+            >
+              {t(e.description) ? <Text style={{ marginTop: px(3) }}>{e.description}</Text> : null}
+              <Bullets items={e.bullets} />
+            </TimelineItem>
+          ))}
+        </>
+      );
+  }
+}
+
+/**
+ * Regroupe deux sections VOISINES dont l'id figure dans `pairIds` — Graphique et Kakuna
+ * affichent Langues et Centres d'intérêt côte à côte pour gagner de la hauteur.
+ *
+ * Le regroupement suit l'ordre RÉEL des sections : si l'utilisateur les sépare avec les
+ * flèches, chacune reprend toute la largeur. La mise en page suit le CV, jamais l'inverse.
+ */
+export function pairAdjacent(
+  sections: ResumeSection[],
+  pairIds: Set<string>,
+): (ResumeSection | [ResumeSection, ResumeSection])[] {
+  const out: (ResumeSection | [ResumeSection, ResumeSection])[] = [];
+  for (let i = 0; i < sections.length; i++) {
+    const a = sections[i];
+    const b = sections[i + 1];
+    if (b && pairIds.has(a.id) && pairIds.has(b.id)) {
+      out.push([a, b]);
+      i++;
+    } else {
+      out.push(a);
+    }
+  }
+  return out;
 }
 
 export function SkillText({ skill }: { skill: string }) {

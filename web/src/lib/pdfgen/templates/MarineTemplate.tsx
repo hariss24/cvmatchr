@@ -1,9 +1,9 @@
 import React from "react";
 import { Document, Page, View, Text, Image, StyleSheet, Svg, Path, Circle } from "@react-pdf/renderer";
-import type { Resume, ExperienceItem, EducationItem } from "@/lib/resume/schema";
+import type { Resume } from "@/lib/resume/schema";
 import { AtsBoost } from "../AtsBoost";
-import { px, t, ThemeContext, PdfTheme, TimelineItem, Bullets, GenericSections } from "./primitives";
-import { buildSections } from "@/lib/resume/sections";
+import { px, t, ThemeContext, PdfTheme, SectionContent } from "./primitives";
+import { buildSections, buildContacts, contactText, type ResumeSection } from "@/lib/resume/sections";
 
 const theme: PdfTheme = {
   accent: "#26485a", // teal-navy des titres (nom du poste, titres de section)
@@ -14,6 +14,7 @@ const theme: PdfTheme = {
 const SIDEBAR_BG = "#14313f"; // navy profond de la barre latérale
 const SIDEBAR_RULE = "#3c5766"; // ligne de séparation sous les titres de la sidebar
 const MAIN_RULE = "#26485a"; // ligne de séparation sous les titres de la colonne principale
+const SIDEBAR_INK = "#e8edf1"; // texte clair de la barre latérale
 
 const SIDEBAR_WIDTH = "34%";
 
@@ -69,7 +70,7 @@ const s = StyleSheet.create({
   contactText: {
     flex: 1,
     fontSize: 9,
-    color: "#e8edf1",
+    color: SIDEBAR_INK,
   },
   sideBulletRow: {
     flexDirection: "row",
@@ -77,12 +78,12 @@ const s = StyleSheet.create({
   },
   sideBulletGlyph: {
     width: px(8),
-    color: "#e8edf1",
+    color: SIDEBAR_INK,
   },
   sideBulletText: {
     flex: 1,
     fontSize: 9,
-    color: "#e8edf1",
+    color: SIDEBAR_INK,
   },
   langRow: {
     marginBottom: px(6),
@@ -96,9 +97,9 @@ const s = StyleSheet.create({
     fontSize: 8.5,
     color: "#c8d3da",
   },
-  interestsText: {
+  sideText: {
     fontSize: 9,
-    color: "#e8edf1",
+    color: SIDEBAR_INK,
     lineHeight: 1.4,
   },
 
@@ -136,11 +137,6 @@ const s = StyleSheet.create({
     borderBottomWidth: px(1),
     borderBottomColor: MAIN_RULE,
   },
-  summary: {
-    fontSize: 9.5,
-    textAlign: "justify",
-    color: theme.body,
-  },
 });
 
 function PinIcon() {
@@ -148,7 +144,7 @@ function PinIcon() {
     <Svg viewBox="0 0 24 24" style={{ width: "100%", height: px(11) }}>
       <Path
         d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"
-        fill="#e8edf1"
+        fill={SIDEBAR_INK}
       />
     </Svg>
   );
@@ -159,7 +155,7 @@ function MailIcon() {
     <Svg viewBox="0 0 24 24" style={{ width: "100%", height: px(11) }}>
       <Path
         d="M2 5.5A1.5 1.5 0 0 1 3.5 4h17A1.5 1.5 0 0 1 22 5.5v13a1.5 1.5 0 0 1-1.5 1.5h-17A1.5 1.5 0 0 1 2 18.5v-13zm2.2.5 7.3 5.4a.8.8 0 0 0 1 0l7.3-5.4H4.2zM20 7.4l-6.7 4.9a2.8 2.8 0 0 1-3.3 0L3.3 7.4V18h16.7V7.4z"
-        fill="#e8edf1"
+        fill={SIDEBAR_INK}
       />
     </Svg>
   );
@@ -170,7 +166,7 @@ function PhoneIcon() {
     <Svg viewBox="0 0 24 24" style={{ width: "100%", height: px(11) }}>
       <Path
         d="M6.6 10.8c1.4 2.7 3.6 4.9 6.3 6.3l2.1-2.1c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.5.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.6c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.5.1.4 0 .8-.2 1L6.6 10.8z"
-        fill="#e8edf1"
+        fill={SIDEBAR_INK}
       />
     </Svg>
   );
@@ -179,10 +175,10 @@ function PhoneIcon() {
 function LinkIcon() {
   return (
     <Svg viewBox="0 0 24 24" style={{ width: "100%", height: px(11) }}>
-      <Circle cx="12" cy="12" r="9" stroke="#e8edf1" strokeWidth={1.6} fill="none" />
+      <Circle cx="12" cy="12" r="9" stroke={SIDEBAR_INK} strokeWidth={1.6} fill="none" />
       <Path
         d="M9.5 8.5a3.2 3.2 0 0 1 4.5 0l.5.5a3.2 3.2 0 0 1 0 4.5l-1.5 1.5M14.5 15.5a3.2 3.2 0 0 1-4.5 0l-.5-.5a3.2 3.2 0 0 1 0-4.5l1.5-1.5"
-        stroke="#e8edf1"
+        stroke={SIDEBAR_INK}
         strokeWidth={1.4}
         fill="none"
       />
@@ -190,22 +186,26 @@ function LinkIcon() {
   );
 }
 
-function ContactLine({ icon, text }: { icon: React.ReactNode; text: string }) {
-  if (!t(text)) return null;
+/** Puce neutre : icône des coordonnées libres (permis, portfolio, mobilité…), qui n'en ont pas. */
+function DotIcon() {
   return (
-    <View style={s.contactRow}>
-      <View style={s.contactIcon}>{icon}</View>
-      <Text style={s.contactText}>{text}</Text>
-    </View>
+    <Svg viewBox="0 0 24 24" style={{ width: "100%", height: px(11) }}>
+      <Circle cx="12" cy="12" r="4" fill={SIDEBAR_INK} />
+    </Svg>
   );
 }
 
+const CONTACT_ICONS: Record<string, React.ComponentType> = {
+  location: PinIcon,
+  email: MailIcon,
+  phone: PhoneIcon,
+  linkedin: LinkIcon,
+};
+
 function SideList({ items }: { items: string[] }) {
-  const kept = items.filter((x) => t(x));
-  if (!kept.length) return null;
   return (
     <>
-      {kept.map((item, i) => (
+      {items.map((item, i) => (
         <View key={i} style={s.sideBulletRow}>
           <Text style={s.sideBulletGlyph}>•</Text>
           <Text style={s.sideBulletText}>{item}</Text>
@@ -215,13 +215,41 @@ function SideList({ items }: { items: string[] }) {
   );
 }
 
-/** Sections que Marine met en page lui-même (barre latérale + colonne principale). */
-const MARINE_HANDLED = new Set([
-  "summary", "experience", "education", "softSkills", "tools", "languages", "interests",
-]);
+/** Sections que Marine place dans sa barre latérale. Tout le reste va en colonne principale. */
+const MARINE_SIDEBAR = new Set(["softSkills", "tools", "languages", "interests"]);
 
-function MarineTitle({ children }: { children: string }) {
-  return <Text style={s.mainSectionTitle}>{children}</Text>;
+/** Marine nomme l'accroche « Profil » ; les autres sections gardent le titre porté par le CV. */
+const MARINE_TITLES: Record<string, string> = { summary: "Profil" };
+
+/** Corps d'une section de la barre latérale : texte clair sur fond navy, piloté par le type. */
+function MarineSide({ section }: { section: ResumeSection }) {
+  if (section.kind === "languages") {
+    return (
+      <>
+        {section.items.map((l, i) => (
+          <View key={i} style={s.langRow}>
+            <Text style={s.langName}>
+              {l.name}
+              {t(l.level) ? <Text style={s.langLevel}> — {l.level}</Text> : null}
+            </Text>
+          </View>
+        ))}
+      </>
+    );
+  }
+  if (section.kind === "text") {
+    return <Text style={s.sideText}>{section.text}</Text>;
+  }
+  if (section.kind === "list") {
+    // Les centres d'intérêt tiennent sur une ligne : Marine les met bout à bout plutôt
+    // qu'en puces, pour économiser la hauteur de la barre latérale.
+    return section.id === "interests" ? (
+      <Text style={s.sideText}>{section.items.join(", ")}</Text>
+    ) : (
+      <SideList items={section.items} />
+    );
+  }
+  return <SectionContent section={section} hideGutter color={SIDEBAR_INK} />;
 }
 
 export function MarineTemplate({
@@ -233,125 +261,61 @@ export function MarineTemplate({
 }) {
   const d = resume;
 
-  const exp = d.experience.filter((e) => e && (e.title || e.company || e.bullets.length));
-  const edu = d.education.filter((e) => e && (e.title || e.school));
-  const softSkills = (d.softSkills ?? []).filter((x) => t(x));
-  const tools = (d.tools ?? []).filter((x) => t(x));
-  const langs = d.languages.filter((l) => l && t(l.name));
-  const interests = d.interests.filter((x) => t(x)).join(", ");
-  // Marine ne stylise que la barre latérale + profil/expériences/formation. Compétences,
-  // projets, certifications, bénévolat et sections libres passaient jusqu'ici à la trappe :
-  // ils sont désormais rendus génériquement dans la colonne principale.
-  const extra = buildSections(d).filter((sec) => !MARINE_HANDLED.has(sec.id));
+  const contacts = buildContacts(d);
+
+  // Le modèle rend les sections DU CV, dans l'ordre du CV. Il ne décide que de la zone
+  // (barre latérale ou colonne principale) et du style. Compétences, projets,
+  // certifications, bénévolat et sections libres — jadis avalés — remontent d'eux-mêmes.
+  const sections = buildSections(d);
+  const sideSections = sections.filter((sec) => MARINE_SIDEBAR.has(sec.id));
+  const mainSections = sections.filter((sec) => !MARINE_SIDEBAR.has(sec.id));
 
   return (
     <ThemeContext.Provider value={theme}>
       <Document>
         <Page size="A4" style={s.page}>
-            <View style={s.sidebar}>
-              {/* eslint-disable-next-line jsx-a11y/alt-text */}
-              {d.photo ? <Image style={s.photo} src={d.photo} /> : null}
+          <View style={s.sidebar}>
+            {/* eslint-disable-next-line jsx-a11y/alt-text */}
+            {d.photo ? <Image style={s.photo} src={d.photo} /> : null}
 
+            {contacts.length > 0 ? (
               <View style={s.sideSection}>
                 <Text style={s.sideTitle}>Contact</Text>
-                <ContactLine icon={<PinIcon />} text={d.location} />
-                <ContactLine icon={<MailIcon />} text={d.email} />
-                <ContactLine icon={<PhoneIcon />} text={d.phone} />
-                <ContactLine icon={<LinkIcon />} text={d.linkedin} />
-              </View>
-
-              {softSkills.length > 0 ? (
-                <View style={s.sideSection}>
-                  <Text style={s.sideTitle}>Soft skills</Text>
-                  <SideList items={softSkills} />
-                </View>
-              ) : null}
-
-              {tools.length > 0 ? (
-                <View style={s.sideSection}>
-                  <Text style={s.sideTitle}>Outils</Text>
-                  <SideList items={tools} />
-                </View>
-              ) : null}
-
-              {langs.length > 0 ? (
-                <View style={s.sideSection}>
-                  <Text style={s.sideTitle}>Langues</Text>
-                  {langs.map((l, i) => (
-                    <View key={i} style={s.langRow}>
-                      <Text style={s.langName}>
-                        {l.name}
-                        {t(l.level) ? <Text style={s.langLevel}> — {l.level}</Text> : null}
-                      </Text>
+                {contacts.map((c) => {
+                  const Icon = CONTACT_ICONS[c.id] ?? DotIcon;
+                  return (
+                    <View key={c.id} style={s.contactRow}>
+                      <View style={s.contactIcon}>
+                        <Icon />
+                      </View>
+                      <Text style={s.contactText}>{contactText(c)}</Text>
                     </View>
-                  ))}
-                </View>
-              ) : null}
-
-              {interests ? (
-                <View style={s.sideSection}>
-                  <Text style={s.sideTitle}>{"Centres d'intérêt"}</Text>
-                  <Text style={s.interestsText}>{interests}</Text>
-                </View>
-              ) : null}
-            </View>
-
-            <View style={s.main}>
-              <View style={s.header}>
-                {t(d.title) ? <Text style={s.jobTitle}>{d.title}</Text> : null}
-                {t(d.name) ? <Text style={s.name}>{d.name}</Text> : null}
+                  );
+                })}
               </View>
+            ) : null}
 
-              {t(d.summary) ? (
-                <View style={s.mainSection}>
-                  <Text style={s.mainSectionTitle}>Profil</Text>
-                  <Text style={s.summary}>{d.summary}</Text>
-                </View>
-              ) : null}
+            {sideSections.map((sec) => (
+              <View key={sec.id} style={s.sideSection}>
+                <Text style={s.sideTitle}>{sec.title}</Text>
+                <MarineSide section={sec} />
+              </View>
+            ))}
+          </View>
 
-              {exp.length > 0 ? (
-                <View style={s.mainSection}>
-                  <Text style={s.mainSectionTitle}>Expériences</Text>
-                  {exp.map((e: ExperienceItem, i) => (
-                    <TimelineItem
-                      key={i}
-                      last={i === exp.length - 1}
-                      title={e.title}
-                      date={e.date}
-                      hideGutter={true}
-                      subtitleParts={[
-                        { text: e.company.toUpperCase(), muted: true },
-                        { text: e.contract, muted: true },
-                        { text: e.location, muted: true },
-                      ]}
-                    >
-                      <Bullets items={e.bullets} />
-                    </TimelineItem>
-                  ))}
-                </View>
-              ) : null}
-
-              {edu.length > 0 ? (
-                <View style={s.mainSection}>
-                  <Text style={s.mainSectionTitle}>Formation</Text>
-                  {edu.map((e: EducationItem, i) => (
-                    <TimelineItem
-                      key={i}
-                      last={i === edu.length - 1}
-                      title={e.title}
-                      date={e.date}
-                      hideGutter={true}
-                      subtitleParts={[
-                        { text: e.school.toUpperCase(), muted: true },
-                        { text: e.location, muted: true },
-                      ]}
-                    />
-                  ))}
-                </View>
-              ) : null}
-
-              <GenericSections sections={extra} Title={MarineTitle} wrapperStyle={s.mainSection} />
+          <View style={s.main}>
+            <View style={s.header}>
+              {t(d.title) ? <Text style={s.jobTitle}>{d.title}</Text> : null}
+              {t(d.name) ? <Text style={s.name}>{d.name}</Text> : null}
             </View>
+
+            {mainSections.map((sec) => (
+              <View key={sec.id} style={s.mainSection}>
+                <Text style={s.mainSectionTitle}>{MARINE_TITLES[sec.id] ?? sec.title}</Text>
+                <SectionContent section={sec} hideGutter subtitle="caps" />
+              </View>
+            ))}
+          </View>
 
           <AtsBoost keywords={atsKeywords} />
         </Page>

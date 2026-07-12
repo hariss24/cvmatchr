@@ -60,6 +60,17 @@ export const customSectionSchema = z.object({
   items: z.array(z.string()).default([]),
 });
 
+/**
+ * Info d'en-tête libre : rattrape tout ce que l'état civil d'un CV peut contenir sans
+ * avoir de case dédiée (« Permis B », « Portfolio », « Mobilité », « Âge », « GitHub »,
+ * « Disponibilité »…). Même rôle que `customSections`, mais pour l'identité plutôt que
+ * pour le corps du CV.
+ */
+export const customFieldSchema = z.object({
+  label: z.string().default(""),
+  value: z.string().default(""),
+});
+
 export const resumeSchema = z.object({
   name: z.string().default(""),
   title: z.string().default(""),
@@ -80,6 +91,14 @@ export const resumeSchema = z.object({
   certifications: z.array(z.string()).default([]),
   volunteer: z.array(volunteerItemSchema).default([]),
   customSections: z.array(customSectionSchema).default([]),
+  customFields: z.array(customFieldSchema).default([]),
+  /**
+   * Ordre d'affichage des sections, par identifiant (cf. `SECTION_IDS`, plus `custom:<i>`
+   * pour les sections libres). Vide = ordre canonique du modèle. C'est une DONNÉE du CV,
+   * pas une constante du modèle : l'IA le remplit à l'import en recopiant l'ordre du CV
+   * source, et l'utilisateur le réordonne à la main dans le formulaire.
+   */
+  sectionOrder: z.array(z.string()).default([]),
 });
 
 export const letterSchema = z.object({
@@ -103,6 +122,7 @@ export type LanguageItem = z.infer<typeof languageItemSchema>;
 export type ProjectItem = z.infer<typeof projectItemSchema>;
 export type VolunteerItem = z.infer<typeof volunteerItemSchema>;
 export type CustomSection = z.infer<typeof customSectionSchema>;
+export type CustomField = z.infer<typeof customFieldSchema>;
 export type Resume = z.infer<typeof resumeSchema>;
 export type Letter = z.infer<typeof letterSchema>;
 
@@ -112,7 +132,7 @@ export type DocType = "CV" | "Lettre" | "Maître";
 export const RESUME_TOP_KEYS = [
   "name", "title", "location", "email", "phone", "linkedin", "summary",
   "experience", "education", "skills", "softSkills", "tools", "languages", "interests",
-  "projects", "certifications", "volunteer", "customSections",
+  "projects", "certifications", "volunteer", "customSections", "customFields", "sectionOrder",
 ] as const;
 
 /** Port fidèle de `DEFAULT_RESUME` (resume-form.js, l.20-51). */
@@ -165,6 +185,8 @@ export const DEFAULT_RESUME: Resume = {
   certifications: [],
   volunteer: [],
   customSections: [],
+  customFields: [],
+  sectionOrder: [],
 };
 
 /** Port fidèle de `DEFAULT_LETTER` (resume-form.js, l.54-67). */

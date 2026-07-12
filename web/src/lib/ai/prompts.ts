@@ -6,7 +6,7 @@
  * squelettes doit rester synchrone avec `lib/resume/templates.ts` (modèle « sobre »).
  */
 
-
+import { SECTION_IDS } from "@/lib/resume/sections";
 
 // ---- règles de préservation / élagage ---------------------------------------
 
@@ -188,7 +188,9 @@ export const RESUME_SCHEMA_DESC =
   '  "certifications": ["...", "..."],\n' +
   '  "volunteer": [{"title": "...", "organization": "...", "location": "...", ' +
   '"date": "...", "bullets": ["...", "..."]}],\n' +
-  '  "customSections": [{"title": "...", "items": ["...", "..."]}]\n' +
+  '  "customSections": [{"title": "...", "items": ["...", "..."]}],\n' +
+  '  "customFields": [{"label": "...", "value": "..."}],\n' +
+  '  "sectionOrder": ["...", "..."]\n' +
   "}";
 
 /**
@@ -221,7 +223,23 @@ export const SECTION_ROUTING_RULES =
   "faire entrer de force dans un champ existant. Si elle ne rentre nulle part, crée-la en section " +
   "libre — c'est précisément à ça que sert 'customSections'. Le CV de l'utilisateur n'a pas à se " +
   "plier au format de l'application : c'est l'application qui s'adapte au CV.\n" +
-  "- Objectif : AUCUNE information du CV d'origine ne doit être perdue à l'extraction.\n";
+  "- Objectif : AUCUNE information du CV d'origine ne doit être perdue à l'extraction.\n\n" +
+  "INFOS PERSONNELLES HORS CASES ('customFields') — même filet, pour l'en-tête :\n" +
+  "- Les seules coordonnées ayant un champ dédié sont 'location', 'email', 'phone' et 'linkedin'.\n" +
+  "- TOUTE autre information d'état civil ou de contact va dans 'customFields', sous la forme " +
+  '{"label": <l\'intitulé EXACT du CV>, "value": <la valeur>}. Ex : permis de conduire, âge ou ' +
+  "date de naissance, nationalité, mobilité / zone de déplacement, situation familiale, " +
+  "disponibilité, prétentions salariales, portfolio, site web, GitHub, Behance, téléphone " +
+  "secondaire, adresse postale complète.\n" +
+  "- Ne les fais JAMAIS entrer de force dans 'location' ou 'linkedin', et ne les jette pas.\n\n" +
+  "ORDRE DES SECTIONS ('sectionOrder') :\n" +
+  "- Relève l'ordre dans lequel les rubriques apparaissent dans le CV source et renvoie-le, " +
+  "de haut en bas, par identifiant.\n" +
+  "- Identifiants valides : " +
+  SECTION_IDS.join(", ") +
+  ", plus 'custom:0', 'custom:1'… (l'index de la section dans 'customSections').\n" +
+  "- N'inclus que les sections réellement présentes. En cas de doute, renvoie une liste vide : " +
+  "l'application appliquera son ordre par défaut.\n";
 
 export const RESUME_TAILOR_RULES: Record<TailorLevel, string> = {
   peu:
@@ -296,6 +314,9 @@ export const SYSTEM_TAILOR_RESUME_BASE =
   "(logiciels) sont trois listes DISTINCTES : ne les fusionne jamais, ne déplace pas un élément " +
   "de l'une vers l'autre. 'customSections' (sections libres du candidat) doit être renvoyé tel " +
   "quel : n'en supprime aucune, ne renomme aucun titre.\n" +
+  "- CHAMPS INTOUCHABLES : renvoie 'customFields' (permis, portfolio, mobilité…) et " +
+  "'sectionOrder' (ordre d'affichage choisi par le candidat) EXACTEMENT tels qu'en entrée, " +
+  "sans en retirer ni en réordonner un seul élément.\n" +
   "- LONGUEUR : le 'summary' (Résumé / A propos) ne doit JAMAIS dépasser 350 caractères.\n\n";
 
 export const SYSTEM_TAILOR_RESUME_BASE_INVENT =
@@ -327,6 +348,9 @@ export const SYSTEM_TAILOR_RESUME_BASE_INVENT =
   "(logiciels) sont trois listes DISTINCTES : ne les fusionne jamais, ne déplace pas un élément " +
   "de l'une vers l'autre. 'customSections' (sections libres du candidat) doit être renvoyé tel " +
   "quel : n'en supprime aucune, ne renomme aucun titre.\n" +
+  "- CHAMPS INTOUCHABLES : renvoie 'customFields' (permis, portfolio, mobilité…) et " +
+  "'sectionOrder' (ordre d'affichage choisi par le candidat) EXACTEMENT tels qu'en entrée, " +
+  "sans en retirer ni en réordonner un seul élément.\n" +
   "- LONGUEUR : le 'summary' (Résumé / A propos) ne doit JAMAIS dépasser 350 caractères.\n" +
   "- LONGUEUR GLOBALE STRICTE (1 PAGE MAX) : Le texte JSON généré doit IMPÉRATIVEMENT être concis " +
   "pour tenir sur une seule page (idéalement moins de 2500 caractères au total). Le CV d'entrée " +

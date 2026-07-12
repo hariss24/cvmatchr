@@ -17,6 +17,8 @@ async function textOf(resume = DEFAULT_RESUME, atsKeywords?: string[]): Promise<
   return pages.join("\n");
 }
 
+const TEMPLATE_IDS = ["graphique", "sobre", "kakuna", "marine"] as const;
+
 describe("ResumeDocument (template graphique)", () => {
   it("rend le CV par défaut : identité, sections et contenus clés", async () => {
     const text = await textOf();
@@ -90,6 +92,10 @@ describe("ResumeDocument (template graphique)", () => {
       { title: "Publications", items: ["PublicationTest"] },
       { title: "Distinctions", items: ["DistinctionTest"] },
     ],
+    customFields: [
+      { label: "Permis", value: "PermisTest" },
+      { label: "Portfolio", value: "PortfolioTest" },
+    ],
   });
 
   /** Chaque valeur du CV ci-dessus doit ressortir dans le PDF, quel que soit le modèle. */
@@ -103,9 +109,12 @@ describe("ResumeDocument (template graphique)", () => {
     "CertifTest",
     "BenevolatTest", "AssoTest", "MissionTest",
     "PublicationTest", "DistinctionTest",
+    // Infos personnelles hors cases : un permis ou un portfolio n'a aucun champ dédié,
+    // et ne doit pas pour autant être jeté à l'import.
+    "PermisTest", "PortfolioTest",
   ];
 
-  it.each(["graphique", "sobre", "kakuna", "marine"] as const)(
+  it.each(TEMPLATE_IDS)(
     "n'avale aucune donnée du CV (modèle %s)",
     async (templateId: PdfTemplateId) => {
       const buf = await renderToBuffer(<ResumeDocument resume={FULL_RESUME} templateId={templateId} />);
@@ -118,6 +127,32 @@ describe("ResumeDocument (template graphique)", () => {
         (v) => !pdf.includes(v.toLowerCase()),
       );
       expect(missing, `${templateId} : données absentes du PDF`).toEqual([]);
+    },
+  );
+
+  // GARDE-FOU « ORDRE » — le CV commande la mise en page, pas l'inverse.
+  //
+  // `sectionOrder` vient soit de l'IA (qui recopie l'ordre du CV importé), soit des flèches
+  // du formulaire. Un modèle n'a plus le droit d'imposer son ordre : on le vérifie sur le
+  // PDF réellement produit, en remontant une section normalement placée tout en bas.
+  it.each(TEMPLATE_IDS)(
+    "respecte l'ordre des sections demandé (modèle %s)",
+    async (templateId: PdfTemplateId) => {
+      const reordered = resumeSchema.parse({
+        ...FULL_RESUME,
+        // « Distinctions » (custom:1) est normalement la toute dernière section.
+        sectionOrder: ["custom:1", "experience", "summary"],
+      });
+      const buf = await renderToBuffer(<ResumeDocument resume={reordered} templateId={templateId} />);
+      const pdf = (await extractPdfText(new Uint8Array(buf))).join("\n").toLowerCase();
+
+      const distinction = pdf.indexOf("distinctiontest");
+      const experience = pdf.indexOf("postetest");
+      const resume = pdf.indexOf("profil resumetest");
+
+      expect(distinction, `${templateId} : « Distinctions » absent`).toBeGreaterThanOrEqual(0);
+      expect(distinction, `${templateId} : « Distinctions » n'est pas remonté en tête`).toBeLessThan(experience);
+      expect(experience, `${templateId} : « Expériences » ne précède pas l'accroche`).toBeLessThan(resume);
     },
   );
 

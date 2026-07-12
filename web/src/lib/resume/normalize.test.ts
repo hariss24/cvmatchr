@@ -75,6 +75,31 @@ describe("normalizeResume", () => {
     });
     expect(r.customSections).toEqual([{ title: "Distinctions", items: ["Prix Z"] }]);
   });
+
+  it("conserve les infos personnelles sans case dédiée", () => {
+    const r = normalizeResume({
+      customFields: [
+        { label: "Permis", value: "B — véhiculé" },
+        { label: "Portfolio", value: "monsite.fr" },
+      ],
+    });
+    expect(r.customFields).toEqual([
+      { label: "Permis", value: "B — véhiculé" },
+      { label: "Portfolio", value: "monsite.fr" },
+    ]);
+  });
+
+  it("jette une info complémentaire sans valeur (un libellé seul ne dit rien)", () => {
+    const r = normalizeResume({
+      customFields: [{ label: "Permis", value: "" }, { label: "Âge", value: "28 ans" }],
+    });
+    expect(r.customFields).toEqual([{ label: "Âge", value: "28 ans" }]);
+  });
+
+  it("conserve l'ordre des sections relevé dans le CV source", () => {
+    const r = normalizeResume({ sectionOrder: ["education", "experience", "custom:0"] });
+    expect(r.sectionOrder).toEqual(["education", "experience", "custom:0"]);
+  });
 });
 
 describe("normalizeLetter", () => {
@@ -117,6 +142,8 @@ describe("mergeTailored (anti-wipe)", () => {
     projects: [{ title: "P1", date: "2024", description: "x" }],
     volunteer: [{ title: "Croix-Rouge", bullets: [] }],
     customSections: [{ title: "Publications", items: ["Article X"] }],
+    customFields: [{ label: "Permis", value: "B" }],
+    sectionOrder: ["education", "experience"],
   });
 
   it("restaure languages/interests même si l'IA les renvoie", () => {
@@ -138,6 +165,13 @@ describe("mergeTailored (anti-wipe)", () => {
     expect(merged.projects).toHaveLength(1);
     expect(merged.volunteer).toHaveLength(1);
     expect(merged.customSections).toEqual([{ title: "Publications", items: ["Article X"] }]);
+  });
+
+  it("restaure customFields et sectionOrder si l'IA les oublie", () => {
+    const tailored = normalizeResume({ name: "Alice", experience: [{ title: "Dev" }] });
+    const merged = mergeTailored(base, tailored);
+    expect(merged.customFields).toEqual([{ label: "Permis", value: "B" }]);
+    expect(merged.sectionOrder).toEqual(["education", "experience"]);
   });
 
   it("lève si la réponse IA vide un CV qui avait un cœur", () => {

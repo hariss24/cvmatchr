@@ -131,6 +131,14 @@ export function normalizeResume(input: unknown): Resume {
     })
     .filter((c) => c.title && c.items.length);
 
+  // Un champ libre sans valeur n'a rien à afficher (un libellé seul ne dit rien).
+  const customFields = asArray(d.customFields)
+    .map((raw) => {
+      const f = asRecord(raw);
+      return { label: s(f.label), value: s(f.value) };
+    })
+    .filter((f) => f.value);
+
   const coerced = {
     name: s(d.name),
     title: s(d.title),
@@ -151,6 +159,10 @@ export function normalizeResume(input: unknown): Resume {
     certifications: cleanList(d.certifications).slice(0, 40),
     volunteer: volunteer.slice(0, 20),
     customSections: customSections.slice(0, 10),
+    customFields: customFields.slice(0, 12),
+    // Aucun filtrage sur les identifiants : `buildSections` ignore ceux qui ne correspondent
+    // à rien, et une section absente de la liste se range à la fin plutôt que de disparaître.
+    sectionOrder: cleanList(d.sectionOrder).slice(0, 40),
   };
 
   // Garantie finale de forme via Zod (les défauts comblent un éventuel champ manquant).
@@ -199,8 +211,9 @@ export function preservePhoto(incoming: Resume, base: Resume | null | undefined)
 
 /**
  * Anti-wipe du tailoring (port de `tailor_resume`, l.756-771) :
- *  - projects/certifications/volunteer/customSections : restaurés depuis la base si l'IA les a vidés ;
- *  - languages/interests : TOUJOURS restaurés depuis la base (aucun niveau ne les modifie) ;
+ *  - projects/certifications/volunteer/customSections/customFields : restaurés depuis la base
+ *    si l'IA les a vidés ;
+ *  - languages/interests/sectionOrder : TOUJOURS restaurés depuis la base (aucun niveau ne les modifie) ;
  *  - lève une erreur si la base avait un cœur (nom ou expériences) et que la réponse est vide.
  *
  * `base` et `tailored` doivent déjà être normalisés.
@@ -215,6 +228,11 @@ export function mergeTailored(base: Resume, tailored: Resume): Resume {
   if (result.volunteer.length === 0 && base.volunteer.length > 0) result.volunteer = base.volunteer;
   if (result.customSections.length === 0 && base.customSections.length > 0)
     result.customSections = base.customSections;
+  if (result.customFields.length === 0 && base.customFields.length > 0)
+    result.customFields = base.customFields;
+  // L'ordre des sections est une préférence de mise en page, pas du contenu : une adaptation
+  // à une offre n'a aucune raison de le changer, et surtout aucune de le perdre.
+  if (base.sectionOrder.length > 0) result.sectionOrder = base.sectionOrder;
 
   // Toujours restaurés depuis la base (aucun niveau d'adaptation ne les modifie).
   if (base.languages.length > 0) result.languages = base.languages;

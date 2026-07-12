@@ -1,9 +1,9 @@
 import React from "react";
 import { Document, Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer";
-import type { Resume, ExperienceItem, EducationItem, ProjectItem, VolunteerItem } from "@/lib/resume/schema";
+import type { Resume } from "@/lib/resume/schema";
 import { AtsBoost } from "../AtsBoost";
-import { px, t, ThemeContext, PdfTheme, TimelineItem, Bullets, SkillText, GenericSections } from "./primitives";
-import { buildSections } from "@/lib/resume/sections";
+import { px, t, ThemeContext, PdfTheme, SkillText, SectionContent } from "./primitives";
+import { buildSections, buildContacts, contactText, type ResumeSection } from "@/lib/resume/sections";
 
 const theme: PdfTheme = {
   accent: "#c9c6c1", // La couleur de personnalisation par défaut du template sobre
@@ -37,7 +37,7 @@ const s = StyleSheet.create({
     color: theme.body,
     fontWeight: "heavy",
   },
-  
+
   // Layouts
   flexRow: { flexDirection: "row" },
   flexCol: { flexDirection: "column" },
@@ -103,7 +103,7 @@ const s = StyleSheet.create({
     color: "#787673",
     marginLeft: px(4),
   },
-  
+
   skillsWrapper: {
     flexDirection: "column",
   },
@@ -126,14 +126,39 @@ const s = StyleSheet.create({
   },
 });
 
-/** Sections que Sobre met en page lui-même ; le reste passe par `GenericSections`. */
-const SOBRE_HANDLED = new Set([
-  "summary", "experience", "education", "skills",
-  "projects", "certifications", "volunteer", "languages", "interests",
-]);
-
-function SobreTitle({ children }: { children: string }) {
-  return <Text style={s.sectionTitle}>{children.toUpperCase()}</Text>;
+/**
+ * Corps d'une section « annexe » (tout sauf les parcours) au style Sobre : des lignes
+ * nues, sans puces. Piloté par le TYPE de la section, jamais par son nom — une rubrique
+ * que personne n'a prévue (« Publications ») hérite donc automatiquement du bon rendu.
+ */
+function SobreAside({ section }: { section: ResumeSection }) {
+  if (section.kind === "text") {
+    return <Text style={{ textAlign: "justify" }}>{section.text}</Text>;
+  }
+  if (section.kind === "languages") {
+    return (
+      <View style={[s.flexRow, { flexWrap: "wrap" }]}>
+        {section.items.map((l, i) => (
+          <View key={i} style={s.langItem}>
+            <Text style={s.langName}>{l.name}</Text>
+            {t(l.level) ? <Text style={s.langLevel}>({l.level})</Text> : null}
+          </View>
+        ))}
+      </View>
+    );
+  }
+  if (section.kind === "list") {
+    return (
+      <View style={s.skillsWrapper}>
+        {section.items.map((item, i) => (
+          <Text key={i} style={s.skillItem}>
+            <SkillText skill={item} />
+          </Text>
+        ))}
+      </View>
+    );
+  }
+  return <SectionContent section={section} hideGutter />;
 }
 
 export function SobreTemplate({
@@ -145,29 +170,21 @@ export function SobreTemplate({
 }) {
   const d = resume;
 
-  const contact = [d.location, d.email, d.phone, d.linkedin]
-    .map(t)
-    .filter(Boolean)
-    .map((p) => p.replace(/ /g, "\u00A0"))
+  // Espaces insécables : la ligne de contact ne casse qu'aux séparateurs « · ».
+  const contact = buildContacts(d)
+    .map((c) => contactText(c).replace(/ /g, " "))
     .join(" · ");
-    
-  const exp = d.experience.filter((e) => e && (e.title || e.company || e.bullets.length));
-  const edu = d.education.filter((e) => e && (e.title || e.school));
-  const skills = d.skills.filter((x) => t(x));
-  const projects = d.projects.filter((p) => p && (p.title || p.description));
-  const certs = d.certifications.filter((x) => t(x));
-  const volunteer = d.volunteer.filter((v) => v && (v.title || v.organization || v.bullets.length));
-  const langs = d.languages.filter((l) => l && t(l.name));
-  const interests = d.interests.filter((x) => t(x));
-  // Tout ce que ce modèle ne stylise pas lui-même (soft skills, outils, sections libres…)
-  // est rendu génériquement plus bas : aucune donnée du CV ne peut être avalée.
-  const extra = buildSections(d).filter((sec) => !SOBRE_HANDLED.has(sec.id));
+
+  // Le modèle n'énumère plus les sections qu'il connaît : il rend CELLES DU CV, dans
+  // l'ordre du CV. Il ne décide que de la mise en page — parcours en pleine largeur,
+  // reste en deux colonnes (libellé à gauche, contenu à droite).
+  const sections = buildSections(d);
 
   return (
     <ThemeContext.Provider value={theme}>
       <Document>
         <Page size="A4" style={s.page}>
-          
+
           <View style={s.personalData}>
             <View style={s.photoWrapper}>
               {/* eslint-disable-next-line jsx-a11y/alt-text */}
@@ -182,173 +199,25 @@ export function SobreTemplate({
             </View>
           </View>
 
-          {t(d.summary) ? (
-            <View style={s.section}>
-              <View style={s.flexRow}>
-                <View style={s.leftCol}>
-                  <Text style={s.sectionTitle}>À PROPOS</Text>
-                </View>
-                <View style={s.rightCol}>
-                  <Text style={{ textAlign: "justify" }}>{d.summary}</Text>
-                </View>
+          {sections.map((sec) =>
+            sec.kind === "timeline" ? (
+              <View key={sec.id} style={s.section}>
+                <Text style={s.sectionTitle}>{sec.title}</Text>
+                <SectionContent section={sec} hideGutter />
               </View>
-            </View>
-          ) : null}
-
-          {exp.length > 0 ? (
-            <View style={s.section}>
-              <Text style={s.sectionTitle}>EXPÉRIENCES</Text>
-              {exp.map((e: ExperienceItem, i) => (
-                <TimelineItem
-                  key={i}
-                  last={i === exp.length - 1}
-                  title={e.title}
-                  date={e.date}
-                  hideGutter={true}
-                  subtitleParts={[
-                    { text: e.company, bold: true },
-                    { text: e.contract, muted: true },
-                    { text: e.location, muted: true },
-                  ]}
-                >
-                  <Bullets items={e.bullets} />
-                </TimelineItem>
-              ))}
-            </View>
-          ) : null}
-
-          {edu.length > 0 ? (
-            <View style={s.section}>
-              <Text style={s.sectionTitle}>FORMATIONS</Text>
-              {edu.map((e: EducationItem, i) => (
-                <TimelineItem
-                  key={i}
-                  last={i === edu.length - 1}
-                  title={e.title}
-                  date={e.date}
-                  hideGutter={true}
-                  subtitleParts={[
-                    { text: e.school, bold: true },
-                    { text: e.location, muted: true },
-                  ]}
-                />
-              ))}
-            </View>
-          ) : null}
-
-          {skills.length > 0 ? (
-            <View style={s.section}>
-              <View style={s.flexRow}>
-                <View style={s.leftCol}>
-                  <Text style={s.sectionTitle}>COMPÉTENCES</Text>
-                </View>
-                <View style={s.rightCol}>
-                  <View style={s.skillsWrapper}>
-                    {skills.map((sk, i) => (
-                      <Text key={i} style={s.skillItem}>
-                        <SkillText skill={sk} />
-                      </Text>
-                    ))}
+            ) : (
+              <View key={sec.id} style={s.section}>
+                <View style={s.flexRow}>
+                  <View style={s.leftCol}>
+                    <Text style={s.sectionTitle}>{sec.title}</Text>
+                  </View>
+                  <View style={s.rightCol}>
+                    <SobreAside section={sec} />
                   </View>
                 </View>
               </View>
-            </View>
-          ) : null}
-
-          {projects.length > 0 ? (
-            <View style={s.section}>
-              <Text style={s.sectionTitle}>PROJETS</Text>
-              {projects.map((p: ProjectItem, i) => (
-                <TimelineItem
-                  key={i}
-                  last={i === projects.length - 1}
-                  title={p.title}
-                  date={p.date}
-                  hideGutter={true}
-                  subtitleParts={[]}
-                >
-                  {t(p.description) ? <Text style={{ marginTop: px(3) }}>{p.description}</Text> : null}
-                </TimelineItem>
-              ))}
-            </View>
-          ) : null}
-
-          {certs.length > 0 ? (
-            <View style={s.section}>
-              <View style={s.flexRow}>
-                <View style={s.leftCol}>
-                  <Text style={s.sectionTitle}>CERTIFICATIONS</Text>
-                </View>
-                <View style={s.rightCol}>
-                  <View style={s.skillsWrapper}>
-                    {certs.map((c, i) => (
-                      <Text key={i} style={s.skillItem}>{c}</Text>
-                    ))}
-                  </View>
-                </View>
-              </View>
-            </View>
-          ) : null}
-
-          {volunteer.length > 0 ? (
-            <View style={s.section}>
-              <Text style={s.sectionTitle}>BÉNÉVOLAT</Text>
-              {volunteer.map((v: VolunteerItem, i) => (
-                <TimelineItem
-                  key={i}
-                  last={i === volunteer.length - 1}
-                  title={v.title}
-                  date={v.date}
-                  hideGutter={true}
-                  subtitleParts={[
-                    { text: v.organization, bold: true },
-                    { text: v.location, muted: true },
-                  ]}
-                >
-                  <Bullets items={v.bullets} />
-                </TimelineItem>
-              ))}
-            </View>
-          ) : null}
-
-          {langs.length > 0 ? (
-            <View style={s.section}>
-              <View style={s.flexRow}>
-                <View style={s.leftCol}>
-                  <Text style={s.sectionTitle}>LANGUES</Text>
-                </View>
-                <View style={s.rightCol}>
-                  <View style={[s.flexRow, { flexWrap: "wrap" }]}>
-                    {langs.map((l, i) => (
-                      <View key={i} style={s.langItem}>
-                        <Text style={s.langName}>{l.name}</Text>
-                        {t(l.level) ? <Text style={s.langLevel}>({l.level})</Text> : null}
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              </View>
-            </View>
-          ) : null}
-
-          {interests.length > 0 ? (
-            <View style={s.section}>
-              <View style={s.flexRow}>
-                <View style={s.leftCol}>
-                  <Text style={s.sectionTitle}>CENTRES D&apos;INTÉRÊT</Text>
-                </View>
-                <View style={s.rightCol}>
-                  <View style={s.skillsWrapper}>
-                    {interests.map((it, i) => (
-                      <Text key={i} style={s.skillItem}>{it}</Text>
-                    ))}
-                  </View>
-                </View>
-              </View>
-            </View>
-          ) : null}
-
-          <GenericSections sections={extra} Title={SobreTitle} wrapperStyle={s.section} />
+            ),
+          )}
 
           <AtsBoost keywords={atsKeywords} />
         </Page>
