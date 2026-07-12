@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useDocStore } from "@/state/docStore";
 import { saveDraft, loadDraft, loadProfile } from "@/lib/storage/db";
-import { toast } from "@/state/uiStore";
 import { applyProfileToResume } from "@/lib/profile/profile";
 import type { Resume } from "@/lib/resume/schema";
 

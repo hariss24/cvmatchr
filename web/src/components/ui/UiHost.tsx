@@ -2,12 +2,15 @@
 
 import { useEffect, useRef } from "react";
 import { useUiStore } from "@/state/uiStore";
+import { useGlobalUndoRedo } from "@/lib/useGlobalUndoRedo";
 
 /**
  * Monte les dialogs et toasts applicatifs. À placer une fois dans le layout racine.
  * Remplace les `alert/confirm/prompt` natifs par des modales accessibles (Échap, focus, fermeture).
  */
 export default function UiHost() {
+  useGlobalUndoRedo();
+
   return (
     <>
       <DialogHost />

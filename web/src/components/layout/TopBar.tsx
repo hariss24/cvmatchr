@@ -124,7 +124,7 @@ export default function TopBar() {
       isConverting.current = false;
       setBusy(false);
     }
-  }, [busy, docType, json, templateId]);
+  }, [docType, json, templateId]);
 
   useEffect(() => {
     const handleConvert = () => {
@@ -143,40 +143,28 @@ export default function TopBar() {
   return (
     <>
     <header className="topbar">
-      <div className="logo-badge">
-        <div className="logo-icon"><div className="logo-icon-inner">T</div></div>
-        <div className="logo-text">
-          <span className="logo-title">CV Tailor</span>
+      {/* ZONE GAUCHE : Logo + Nav */}
+      <div className="topbar-left">
+        <div className="logo-badge">
+          <div className="logo-icon"><div className="logo-icon-inner">T</div></div>
+          <div className="logo-text">
+            <span className="logo-title">CV Tailor</span>
+          </div>
         </div>
+        <Link href="/jobs" className="topbar-nav-link mobile-hidden">Offres</Link>
+        <Link href="/history" className="topbar-nav-link mobile-hidden">Historique</Link>
       </div>
 
-      <div className="topbar-pill" title="Nom du fichier PDF" suppressHydrationWarning>{filename}</div>
+      {/* ZONE CENTRE : Contexte */}
+      <div className="topbar-center">
+        <div className="topbar-pill" title="Nom du fichier PDF" suppressHydrationWarning>{filename}</div>
+      </div>
 
-      <div className="topbar-actions">
-        <button type="button" className="btn-nav btn-nav-outline-orange mobile-hidden" onClick={onNewCv}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-          Nouveau CV
-        </button>
-
-        <button type="button" className="btn-nav mobile-hidden" onClick={openChat}>
+      {/* ZONE DROITE : Utilitaires + Actions */}
+      <div className="topbar-right">
+        <button type="button" className="btn-nav mobile-hidden" onClick={openChat} title="Assistant IA">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" /></svg>
-          Assistant IA
         </button>
-
-        <Link href="/jobs" className="btn-nav btn-nav-outline-blue mobile-hidden">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
-          Offres
-        </Link>
-
-        <Link href="/history" className="btn-nav mobile-hidden">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><polyline points="12 7 12 12 15 14" /></svg>
-          Historique
-        </Link>
-
-        <Link href="/profil" className="btn-nav mobile-hidden">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-          Mes infos
-        </Link>
 
         <div id="btn-theme" className="mobile-hidden" role="button" tabIndex={0} title="Basculer thème clair/sombre" aria-label="Basculer thème" onClick={toggleTheme} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") toggleTheme(); }}>
           <span className="toggle-icon toggle-sun">
@@ -192,10 +180,22 @@ export default function TopBar() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
         </button>
 
+        <Link href="/profil" className="btn-avatar mobile-hidden" title="Mes infos">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+        </Link>
+
+        <div className="expert-divider mobile-hidden" style={{ margin: "0 4px" }} />
+
+        <button type="button" className="btn-nav mobile-hidden" onClick={onNewCv} title="Nouveau CV">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+          Nouveau CV
+        </button>
+
         <button className="go go-top" type="button" onClick={onConvert} disabled={busy}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
           {busy ? "Téléchargement…" : "Télécharger"}
         </button>
+
         <button
           type="button"
           className="btn-nav mobile-only"

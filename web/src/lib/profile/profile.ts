@@ -14,8 +14,6 @@ export interface UserProfile {
   telephone: string;
   ville: string;
   // Optionnels
-  adresse: string;
-  codePostal: string;
   linkedin: string;
   updatedAt: number;
 }
@@ -27,8 +25,6 @@ export const EMPTY_PROFILE: UserProfile = {
   email: "",
   telephone: "",
   ville: "",
-  adresse: "",
-  codePostal: "",
   linkedin: "",
   updatedAt: 0,
 };

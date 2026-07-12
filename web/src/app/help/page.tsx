@@ -1,0 +1,177 @@
+"use client";
+
+import Link from "next/link";
+import { promptApiKey } from "@/lib/settings";
+
+export default function HelpPage() {
+  return (
+    <div className="wrap help-page">
+      <header className="topbar topbar--secondary">
+        <Link href="/" className="btn-nav">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
+          Retour
+        </Link>
+        <div className="logo-badge">
+          <div className="logo-icon"><div className="logo-icon-inner">T</div></div>
+          <div className="logo-text">
+            <span className="logo-title">CV Tailor</span>
+          </div>
+        </div>
+        <div style={{ width: 100 }} className="mobile-hidden"></div>
+      </header>
+
+      <main className="help-container">
+        <section className="help-section help-section--hero">
+          <h1 className="help-title">Comment fonctionne CV Tailor ?</h1>
+          <p className="help-desc">
+            CV Tailor est conçu pour être simple, rapide, et <strong>100% privé</strong>. 
+            Contrairement à la majorité des applications web, <strong>aucune de vos données personnelles n&apos;est envoyée sur un serveur distant</strong>.
+            Vos CVs, lettres, et informations de profil sont stockés directement dans le stockage local de votre navigateur (IndexedDB).
+          </p>
+          <p className="help-desc">
+            C&apos;est pour cette raison que vous n&apos;avez pas besoin de créer de compte ou de vous connecter.
+            Vos données vous appartiennent.
+          </p>
+        </section>
+
+        <section className="help-section">
+          <h2>Foire Aux Questions (FAQ)</h2>
+
+          <details className="faq-accordion">
+            <summary className="faq-summary">
+              <span className="faq-question">Comment démarrer rapidement en 4 étapes ?</span>
+              <svg className="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </summary>
+            <div className="faq-content">
+              <ol className="help-steps">
+                <li>Importe ton CV (PDF ou texte) avec « Importer un PDF », ou pars du modèle par défaut.</li>
+                <li>Complète les champs dans le formulaire.</li>
+                <li>Clique « Adapter à une offre », colle l&apos;annonce : l&apos;IA adapte ton CV.</li>
+                <li>Exporte en PDF (bouton en haut, ou Ctrl+Entrée).</li>
+              </ol>
+            </div>
+          </details>
+
+          <details className="faq-accordion">
+            <summary className="faq-summary">
+              <span className="faq-question">Qu&apos;est-ce que le «&nbsp;CV Maître&nbsp;» ?</span>
+              <svg className="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </summary>
+            <div className="faq-content">
+              <p>
+                C&apos;est ton CV le plus complet (contenant toute ton expérience sans limite de pages). 
+                Quand tu adaptes à une offre, l&apos;IA y pioche et élague le superflu pour tenir sur une page. 
+                Tu l&apos;actives en cochant « Utiliser le CV Maître » dans la fenêtre d&apos;adaptation.
+              </p>
+            </div>
+          </details>
+
+          <details className="faq-accordion">
+            <summary className="faq-summary">
+              <span className="faq-question">Comment l&apos;IA choisit-elle ce qu&apos;elle garde dans mon CV ?</span>
+              <svg className="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </summary>
+            <div className="faq-content">
+              <p>
+                Lorsque tu fournis une offre d&apos;emploi, l&apos;IA analyse les mots-clés et les compétences requises. Elle puise ensuite dans ton « CV Maître » pour ne conserver et ne mettre en valeur que les expériences directement pertinentes pour ce poste, tout en s&apos;assurant que le résultat final tienne sur une seule page.
+              </p>
+            </div>
+          </details>
+
+          <details className="faq-accordion">
+            <summary className="faq-summary">
+              <span className="faq-question">Puis-je modifier la couleur ou le design du CV ?</span>
+              <svg className="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </summary>
+            <div className="faq-content">
+              <p>
+                Non, et c&apos;est volontaire. Le design de CV Tailor a été méticuleusement pensé pour être sobre, ultra-lisible, et parfaitement optimisé pour passer les logiciels de tri de CV automatiques (ATS). L&apos;objectif est que tu te concentres à 100% sur ton contenu, sans perdre de temps sur la mise en page.
+              </p>
+            </div>
+          </details>
+
+          <details className="faq-accordion">
+            <summary className="faq-summary">
+              <span className="faq-question">Si je change d&apos;ordinateur, est-ce que je retrouve mes CV ?</span>
+              <svg className="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </summary>
+            <div className="faq-content">
+              <p>
+                Étant donné que CV Tailor respecte totalement ta vie privée et stocke tout directement dans ton navigateur localement, tes données ne sont pas synchronisées sur un serveur. Si tu changes de machine ou de navigateur, tu devras réimporter ton CV existant (en PDF ou en texte).
+              </p>
+            </div>
+          </details>
+
+          <details className="faq-accordion">
+            <summary className="faq-summary">
+              <span className="faq-question">Où sont enregistrées les offres d&apos;emploi que j&apos;ajoute ?</span>
+              <svg className="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </summary>
+            <div className="faq-content">
+              <p>
+                Toutes les offres sont sauvegardées dans l&apos;onglet « Offres » de l&apos;application (toujours localement sur ta machine). Tu peux t&apos;en servir comme d&apos;un tableau de bord pour suivre l&apos;état de tes candidatures (À postuler, En cours, Refusé...).
+              </p>
+            </div>
+          </details>
+
+          <details className="faq-accordion">
+            <summary className="faq-summary">
+              <span className="faq-question">Puis-je utiliser CV Tailor sur mon téléphone ?</span>
+              <svg className="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </summary>
+            <div className="faq-content">
+              <p>
+                Bien que l&apos;application soit accessible sur mobile pour dépanner (lire un document ou consulter ses offres), <strong>nous conseillons fortement de l&apos;utiliser sur un ordinateur (PC/Mac)</strong>. L&apos;édition d&apos;un CV ou d&apos;une lettre et la prévisualisation PDF nécessitent un écran large pour une expérience optimale et un confort visuel maximal.
+              </p>
+            </div>
+          </details>
+
+          <details className="faq-accordion">
+            <summary className="faq-summary">
+              <span className="faq-question">Pourquoi et comment utiliser ma propre clé API (IA) ?</span>
+              <svg className="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </summary>
+            <div className="faq-content">
+              <p>
+                Par défaut, l&apos;app utilise une clé serveur partagée. Tu peux renseigner ta propre
+                clé (Gemini ou Anthropic) pour ne pas dépendre du quota commun ni des limites de requêtes. Une clé Gemini gratuite
+                s&apos;obtient sur Google AI Studio.
+              </p>
+              <button type="button" className="go" onClick={() => promptApiKey()} style={{ marginTop: 12 }}>
+                Régler ma clé API
+              </button>
+            </div>
+          </details>
+
+          <details className="faq-accordion">
+            <summary className="faq-summary">
+              <span className="faq-question">Quelle est la différence entre le Formulaire et le mode Expert ?</span>
+              <svg className="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </summary>
+            <div className="faq-content">
+              <p>
+                Le <strong>Formulaire</strong> (recommandé) te laisse remplir des champs simples. Le
+                mode <strong>Expert</strong> montre le code : le <strong>JSON</strong> = tes données
+                structurées, le <strong>HTML/CSS</strong> = la mise en page. Réservé aux usages avancés ou à des bidouillages poussés.
+              </p>
+            </div>
+          </details>
+
+          <details className="faq-accordion">
+            <summary className="faq-summary">
+              <span className="faq-question">Quels sont les raccourcis clavier utiles ?</span>
+              <svg className="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </summary>
+            <div className="faq-content">
+              <ul className="help-list">
+                <li><strong>Ctrl+Entrée</strong> → exporter en PDF</li>
+                <li><strong>Ctrl+Maj+S</strong> → ouvrir les Snapshots</li>
+              </ul>
+            </div>
+          </details>
+
+        </section>
+      </main>
+    </div>
+  );
+}

@@ -77,10 +77,6 @@ export default function ProfileView() {
         </button>
         {showMore ? (
           <div className="pack-advanced">
-            <input className="form-input" placeholder="Adresse (rue)" autoComplete="address-line1"
-              value={p.adresse} onChange={(e) => set({ adresse: e.target.value })} />
-            <input className="form-input" placeholder="Code postal" autoComplete="postal-code"
-              value={p.codePostal} onChange={(e) => set({ codePostal: e.target.value })} />
             <input className="form-input" placeholder="LinkedIn" autoComplete="url"
               value={p.linkedin} onChange={(e) => set({ linkedin: e.target.value })} />
           </div>

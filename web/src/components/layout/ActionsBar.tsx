@@ -10,8 +10,7 @@ import type { Resume } from "@/lib/resume/schema";
 import { takeSnapshot } from "@/lib/storage/snapshots";
 import { uiConfirm, toast } from "@/state/uiStore";
 import TailorModal from "@/components/modals/TailorModal";
-import HelpModal from "@/components/modals/HelpModal";
-
+import Link from "next/link";
 /**
  * Barre d'actions du bas (`.actions`) : adapter à une offre, effacer, rappel des raccourcis.
  * Port de la `.actions` de l'app Flask (templates/index.html).
@@ -25,7 +24,6 @@ export default function ActionsBar() {
   const [tailorOpen, setTailorOpen] = useState(
     () => typeof window !== "undefined" && Boolean(useDocStore.getState().pendingJobDesc),
   );
-  const [helpOpen, setHelpOpen] = useState(false);
 
   const canTailor = docType === "CV" || docType === "Maître";
 
@@ -67,19 +65,17 @@ export default function ActionsBar() {
         <span className="btn-label">Effacer</span>
       </button>
 
-      <button
-        type="button"
+      <Link
+        href="/help"
         className="actions-help"
         aria-label="Comment ça marche"
-        onClick={() => setHelpOpen(true)}
         data-testid="help-open"
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
         <span className="btn-label">Comment ça marche</span>
-      </button>
+      </Link>
 
       <TailorModal open={tailorOpen} onClose={() => setTailorOpen(false)} />
-      <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
     </div>
   );
 }

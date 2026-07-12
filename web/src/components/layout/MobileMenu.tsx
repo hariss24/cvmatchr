@@ -42,7 +42,7 @@ export default function MobileMenu({
           <button type="button" className="form-btn-mini" onClick={onClose} aria-label="Fermer le menu">✕</button>
         </div>
 
-        <button type="button" className="mobile-menu__item btn-nav-outline-orange" onClick={act(onNewCv)}>
+        <button type="button" className="mobile-menu__item" onClick={act(onNewCv)}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
           Nouveau CV
         </button>
@@ -52,7 +52,7 @@ export default function MobileMenu({
           Assistant IA
         </button>
 
-        <Link href="/jobs" className="mobile-menu__item btn-nav-outline-blue" onClick={onClose}>
+        <Link href="/jobs" className="mobile-menu__item" onClick={onClose}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
           Offres
         </Link>
@@ -65,6 +65,11 @@ export default function MobileMenu({
         <Link href="/profil" className="mobile-menu__item" onClick={onClose}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
           Mes infos
+        </Link>
+
+        <Link href="/help" className="mobile-menu__item" onClick={onClose}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+          Comment ça marche
         </Link>
 
         <button type="button" className="mobile-menu__item" onClick={onToggleTheme}>

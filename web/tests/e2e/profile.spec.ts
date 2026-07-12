@@ -4,7 +4,7 @@ test.describe("Profil - Mes informations", () => {
   test("sauvegarde les informations et pré-remplit les nouveaux CV", async ({ page }) => {
     // 1. Aller sur l'accueil puis la page profil
     await page.goto("/");
-    await page.click("button[aria-label='Mes informations']");
+    await page.click("a[href='/profil']");
     
     // 2. Remplir quelques champs
     await page.fill("input[placeholder='Prénom *']", "Jean");
@@ -34,14 +34,12 @@ test.describe("Profil - Mes informations", () => {
     await expect(editor.locator(".form-field:has-text('Téléphone') input")).toHaveValue("0601020304");
     await expect(editor.locator(".form-field:has-text('Ville, Pays') input")).toHaveValue("Paris");
     
-    // 6. Aller sur l'onglet Lettre et vérifier l'identité
+    // 6. La page Lettre s'ouvre avec le profil chargé (l'identité de l'en-tête
+    // vient de resolveLetterIdentity, couvert par les tests unitaires). Ici on
+    // vérifie juste que la lettre est constructible : le bouton « Créer ma lettre »
+    // n'est actif que si l'identité a bien été résolue.
     await page.goto("/pack");
-    
-    // Variables de la lettre
-    const vars = page.locator(".pack-vars");
-    // La variable Prénom et Nom devraient être remplies, mais elles ne sont pas dans des inputs de la lettre pour l'utilisateur final. 
-    // Cependant on peut voir que la lettre générée contient "Jean Dupont" à la fin par exemple, ou dans l'en-tête.
-    // L'en-tête de la lettre (objet etc.) on peut juste vérifier que le preview n'est pas cassé.
     await expect(page.locator(".pack-page")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Créer ma lettre/ })).toBeEnabled();
   });
 });
