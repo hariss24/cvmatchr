@@ -2,7 +2,8 @@ import React from "react";
 import { Document, Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import type { Resume, ExperienceItem, EducationItem, ProjectItem, VolunteerItem } from "@/lib/resume/schema";
 import { AtsBoost } from "../AtsBoost";
-import { px, t, ThemeContext, defaultTheme, TimelineItem, Bullets, SkillText } from "./primitives";
+import { px, t, ThemeContext, defaultTheme, TimelineItem, Bullets, SkillText, GenericSections } from "./primitives";
+import { buildSections } from "@/lib/resume/sections";
 
 const s = StyleSheet.create({
   page: {
@@ -84,6 +85,16 @@ const s = StyleSheet.create({
   langLevel: { color: defaultTheme.body },
 });
 
+/** Sections que Kakuna met en page lui-même ; le reste passe par `GenericSections`. */
+const KAKUNA_HANDLED = new Set([
+  "summary", "experience", "education", "skills",
+  "projects", "certifications", "volunteer", "languages", "interests",
+]);
+
+function KakunaTitle({ children }: { children: string }) {
+  return <KakunaSectionTitle>{children.toUpperCase()}</KakunaSectionTitle>;
+}
+
 export function KakunaSectionTitle({ children }: { children: string }) {
   const theme = React.useContext(ThemeContext);
   return (
@@ -115,6 +126,7 @@ export function KakunaTemplate({
   const volunteer = d.volunteer.filter((v) => v && (v.title || v.organization || v.bullets.length));
   const langs = d.languages.filter((l) => l && t(l.name));
   const interests = d.interests.filter((x) => t(x));
+  const extra = buildSections(d).filter((sec) => !KAKUNA_HANDLED.has(sec.id));
 
   const contacts = [d.location, d.email, d.phone, d.linkedin].filter((c) => t(c));
 
@@ -286,6 +298,8 @@ export function KakunaTemplate({
               ) : null}
             </View>
           ) : null}
+
+          <GenericSections sections={extra} Title={KakunaTitle} wrapperStyle={s.section} />
 
           <AtsBoost keywords={atsKeywords} />
         </Page>

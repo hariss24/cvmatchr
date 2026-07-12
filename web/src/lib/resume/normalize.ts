@@ -122,6 +122,15 @@ export function normalizeResume(input: unknown): Resume {
     };
   });
 
+  // Une section libre sans titre n'est pas affichable : on la jette, comme une
+  // langue sans nom. Idem si elle n'a aucune ligne exploitable.
+  const customSections = asArray(d.customSections)
+    .map((raw) => {
+      const c = asRecord(raw);
+      return { title: s(c.title), items: cleanList(c.items).slice(0, 20) };
+    })
+    .filter((c) => c.title && c.items.length);
+
   const coerced = {
     name: s(d.name),
     title: s(d.title),
@@ -141,6 +150,7 @@ export function normalizeResume(input: unknown): Resume {
     projects: projects.slice(0, 20),
     certifications: cleanList(d.certifications).slice(0, 40),
     volunteer: volunteer.slice(0, 20),
+    customSections: customSections.slice(0, 10),
   };
 
   // Garantie finale de forme via Zod (les défauts comblent un éventuel champ manquant).
@@ -189,7 +199,7 @@ export function preservePhoto(incoming: Resume, base: Resume | null | undefined)
 
 /**
  * Anti-wipe du tailoring (port de `tailor_resume`, l.756-771) :
- *  - projects/certifications/volunteer : restaurés depuis la base si l'IA les a vidés ;
+ *  - projects/certifications/volunteer/customSections : restaurés depuis la base si l'IA les a vidés ;
  *  - languages/interests : TOUJOURS restaurés depuis la base (aucun niveau ne les modifie) ;
  *  - lève une erreur si la base avait un cœur (nom ou expériences) et que la réponse est vide.
  *
@@ -203,6 +213,8 @@ export function mergeTailored(base: Resume, tailored: Resume): Resume {
   if (result.certifications.length === 0 && base.certifications.length > 0)
     result.certifications = base.certifications;
   if (result.volunteer.length === 0 && base.volunteer.length > 0) result.volunteer = base.volunteer;
+  if (result.customSections.length === 0 && base.customSections.length > 0)
+    result.customSections = base.customSections;
 
   // Toujours restaurés depuis la base (aucun niveau d'adaptation ne les modifie).
   if (base.languages.length > 0) result.languages = base.languages;

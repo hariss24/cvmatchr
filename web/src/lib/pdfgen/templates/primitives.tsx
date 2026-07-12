@@ -1,5 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "@react-pdf/renderer";
+import type { Style } from "@react-pdf/types";
+import type { ResumeSection } from "@/lib/resume/sections";
 
 export const px = (n: number): number => n * 0.75;
 export const t = (v: unknown): string => (v == null ? "" : String(v)).trim();
@@ -112,6 +114,60 @@ export function Bullets({ items, color }: { items: string[], color?: string }) {
 export function SectionTitle({ children }: { children: string }) {
   const theme = React.useContext(ThemeContext);
   return <Text style={[s.sectionTitle, { color: theme.accent }]}>{children}</Text>;
+}
+
+/**
+ * Rend les sections qu'un modèle ne stylise pas lui-même.
+ *
+ * C'est le filet qui rend la perte de données impossible : un modèle déclare les
+ * sections qu'il prend en charge, TOUT le reste (y compris les sections libres créées
+ * par l'IA à l'import) passe ici et s'affiche quand même. Ajouter un champ au CV
+ * n'oblige donc plus à toucher aux 4 modèles.
+ */
+export function GenericSections({
+  sections,
+  Title,
+  wrapperStyle,
+}: {
+  sections: ResumeSection[];
+  Title: React.ComponentType<{ children: string }>;
+  wrapperStyle?: Style;
+}) {
+  if (!sections.length) return null;
+  return (
+    <>
+      {sections.map((sec) => (
+        <View key={sec.id} style={wrapperStyle} wrap={false}>
+          <Title>{sec.title}</Title>
+          {sec.kind === "text" ? <Text style={{ textAlign: "justify" }}>{sec.text}</Text> : null}
+          {sec.kind === "list" ? <Bullets items={sec.items} /> : null}
+          {sec.kind === "languages" ? (
+            <Bullets items={sec.items.map((l) => (t(l.level) ? `${l.name} : ${l.level}` : l.name))} />
+          ) : null}
+          {sec.kind === "timeline"
+            ? sec.items.map((e, i) => (
+                <TimelineItem
+                  key={i}
+                  last={i === sec.items.length - 1}
+                  title={e.title}
+                  date={e.date}
+                  hideGutter={true}
+                  subtitleParts={[
+                    { text: e.subtitle, bold: true },
+                    ...e.meta.map((m) => ({ text: m, muted: true })),
+                  ]}
+                >
+                  {t(e.description) ? (
+                    <Text style={{ marginTop: px(3) }}>{e.description}</Text>
+                  ) : null}
+                  <Bullets items={e.bullets} />
+                </TimelineItem>
+              ))
+            : null}
+        </View>
+      ))}
+    </>
+  );
 }
 
 export function SkillText({ skill }: { skill: string }) {

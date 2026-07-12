@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Revue qualité des implémentations Gemini soldée (lint vert, profil nettoyé, undo/redo testé). Suite possible : câbler une vraie adresse postale sur l'en-tête de lettre si souhaité.
+**Prochaine étape suggérée :** Architecture « zéro perte » à l'import livrée (extraction cloisonnée, sections libres, modèles qui s'adaptent au CV). Reste à faire : le réordonnancement manuel des sections dans le formulaire (flèches monter/descendre).
 
 ---
 
@@ -40,6 +40,54 @@
 ---
 
 ## Journal
+
+### 2026-07-12 : Import « zéro perte » — les modèles s'adaptent au CV, plus l'inverse
+
+**Symptôme signalé.** Un CV importé avec des rubriques « Hard skills » et « Soft skills »
+voyait les deux fusionnées dans le seul champ `skills`.
+
+**Cause racine (1) — dérive du schéma IA.** `RESUME_SCHEMA_DESC` (`lib/ai/prompts.ts`) est la
+fiche de schéma envoyée à l'IA. C'est une copie manuelle de `resumeSchema` (Zod), et elle avait
+dérivé : ni `softSkills` ni `tools` n'y figuraient, alors que ces champs existaient partout
+ailleurs (schéma, `normalizeResume`, `FormEditor`, modèle Marine). L'IA ne peut pas remplir une
+case dont on ne lui parle pas → elle entassait tout dans `skills`. La fiche étant partagée par
+4 systèmes (`SYSTEM_PDF_TO_RESUME`, `SYSTEM_TEXT_TO_RESUME`, les 2 bases de tailoring), la
+dérive les dégradait tous d'un coup.
+
+**Cause racine (2), bien plus grave — les modèles avalaient des données.** Chaque modèle PDF
+listait en dur les champs qu'il voulait bien rendre et ignorait le reste **en silence** :
+Marine ne rendait ni `skills`, ni `projects`, ni `certifications`, ni `volunteer` ; Sobre,
+Kakuna et Graphique ignoraient `softSkills` et `tools`. Le défaut du système était « je jette ».
+
+**Correctifs.**
+- Fiche IA resynchronisée (`softSkills`, `tools`, `customSections`) + règles de tri explicites
+  (technique / savoir-être / outils) et interdiction de renommer ou supprimer une rubrique pour
+  la faire rentrer de force dans une case.
+- Nouveau champ `customSections` (`{title, items[]}`) : l'IA crée elle-même les rubriques qu'elle
+  ne sait pas classer (« Publications », « Distinctions »…). Éditable dans le formulaire,
+  protégé de l'effacement par `mergeTailored`.
+- **Renversement de responsabilité** (`lib/resume/sections.ts`) : le CV produit désormais sa
+  liste de sections (`buildSections`), exhaustive. Un modèle déclare seulement les sections
+  qu'il stylise (`*_HANDLED`) ; **tout le reste est rendu par `GenericSections`**. Le défaut
+  devient « j'affiche ». Une section inconnue traverse la chaîne sans qu'aucun code ne la
+  connaisse.
+
+**Garde-fous (le vrai livrable — la classe de bug devient impossible à réintroduire).**
+- `prompts.test.ts` : la liste des champs attendus dans la fiche IA est **dérivée de
+  `resumeSchema.shape`**, plus écrite à la main (c'est justement la liste manuelle qui avait
+  laissé passer le bug). Vérifié en rouge/vert.
+- `ResumeDocument.test.tsx` : rend réellement les 4 modèles avec un CV **entièrement rempli**
+  (+ 2 sections inventées), relit le texte du PDF produit et exige que **chaque valeur** y
+  figure. Vérifié en rouge/vert (un modèle qui laisse tomber un champ fait échouer les tests).
+
+**Au passage.** `tests/e2e/import-text.spec.ts` lisait le store sans attendre la fin de l'import
+(course) : il passait par chance. Ancré sur le toast de succès.
+
+**Vérifications.** eslint 0 erreur (1 warning `<img>` préexistant) · tsc 0 · vitest 219/219 ·
+playwright 37/37.
+
+**Reste à faire.** Réordonnancement manuel des sections (flèches monter/descendre dans le
+formulaire) — validé avec l'utilisateur, pas encore implémenté.
 
 ### 2026-07-12 : Revue qualité des implémentations Gemini (profil, undo/redo, page Aide)
 - **Quoi :** Audit de qualité (pas seulement « les tests passent ») du travail Gemini committé (profil) et non committé (undo/redo, page Aide FAQ, refonte TopBar). Constat : `eslint` cassé (7 erreurs) alors que chaque rapport WORK_HISTORY affirmait « 0 erreur », et undo/redo annoncé « testé » sans aucun test. Corrections : (1) lint remis à 0 erreur — 6 apostrophes/guillemets non échappés dans `help/page.tsx`, `any` typé en `DocumentSnapshot` dans `useGlobalUndoRedo.ts`, import mort `toast` retiré de `useAutoDraft.ts`, dépendance `busy` superflue retirée du `useCallback` de `TopBar.tsx` ; (2) profil : champs `adresse`/`codePostal` retirés (collectés mais jamais appliqués — le schéma `Resume` n'a pas ces champs, `sender_address` de la lettre vient de `cv.location`) ; (3) tests : nouveau `historyStore.test.ts` (9 tests couvrant push/undo/redo/pause/clear + branche future effacée) ; `profile.spec.ts` assaini (variable morte `vars` retirée, pseudo-vérif lettre remplacée par un vrai contrôle « Créer ma lettre » activé).

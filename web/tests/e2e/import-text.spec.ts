@@ -28,6 +28,10 @@ test("l'import texte remplit le formulaire et l'aperçu depuis un CV JSON", asyn
   // Confirmation « L'import remplacera le document actuel » (uiConfirm).
   await page.locator(".ui-dialog").getByRole("button", { name: "OK" }).click();
 
+  // L'import est asynchrone (appel réseau + setJson) : sans ce point d'ancrage, on lirait
+  // le store avant qu'il ne soit rempli et on verrait encore le CV par défaut.
+  await expect(page.locator(".ui-toast--success")).toContainText("CV importé");
+
   // Le CV extrait apparaît dans le store
   const json = await page.evaluate(() => {
     const store = (window as unknown as { useDocStore: { getState: () => { json: { name: string, title: string } } } }).useDocStore.getState();

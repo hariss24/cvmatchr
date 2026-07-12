@@ -180,13 +180,48 @@ export const RESUME_SCHEMA_DESC =
   '"location": "...", "date": "...", "bullets": ["...", "..."]}],\n' +
   '  "education": [{"title": "...", "school": "...", "location": "...", "date": "..."}],\n' +
   '  "skills": ["...", "..."],\n' +
+  '  "softSkills": ["...", "..."],\n' +
+  '  "tools": ["...", "..."],\n' +
   '  "languages": [{"name": "...", "level": "..."}],\n' +
   '  "interests": ["...", "..."],\n' +
   '  "projects": [{"title": "...", "date": "...", "description": "..."}],\n' +
   '  "certifications": ["...", "..."],\n' +
   '  "volunteer": [{"title": "...", "organization": "...", "location": "...", ' +
-  '"date": "...", "bullets": ["...", "..."]}]\n' +
+  '"date": "...", "bullets": ["...", "..."]}],\n' +
+  '  "customSections": [{"title": "...", "items": ["...", "..."]}]\n' +
   "}";
+
+/**
+ * Règles de tri des trois listes de compétences + du fourre-tout `customSections`.
+ * Sans elles, l'IA entasse tout dans `skills` (elle n'a aucune raison de deviner la
+ * frontière) et n'utilise jamais les sections libres. Partagé par toutes les
+ * extractions (PDF, texte) — c'est là que se jouait le bug « Soft skills → Skills ».
+ */
+export const SECTION_ROUTING_RULES =
+  "RÉPARTITION DES COMPÉTENCES — respecte scrupuleusement les trois listes distinctes :\n" +
+  "- 'skills' = compétences techniques ou métier (savoir-faire). Ex : 'Gestion de projet', " +
+  "'Comptabilité analytique', 'Développement web'. C'est là que vont les « hard skills ».\n" +
+  "- 'softSkills' = qualités humaines et comportementales (savoir-être). Ex : 'Esprit d'équipe', " +
+  "'Rigueur', 'Communication', 'Autonomie'.\n" +
+  "- 'tools' = logiciels, technologies et outils nommés. Ex : 'Excel', 'Photoshop', 'Python', 'SAP'.\n" +
+  "Si le CV sépare explicitement ces rubriques (« Hard skills » / « Soft skills » / « Outils »), " +
+  "RESPECTE cette séparation : ne fusionne JAMAIS plusieurs rubriques dans une seule liste. " +
+  "Si le CV ne propose qu'une rubrique « Compétences » indifférenciée, répartis chaque élément " +
+  "dans la liste qui lui correspond selon sa nature.\n\n" +
+  "SECTIONS LIBRES ('customSections') — filet de sécurité anti-perte :\n" +
+  "- Toute rubrique du CV qui ne correspond à AUCUN champ standard ci-dessus va dans " +
+  "'customSections', sous la forme {\"title\": <le titre EXACT tel qu'écrit dans le CV>, " +
+  '"items": [<une chaîne par ligne/puce de la rubrique>]}. ' +
+  "Ex : « Publications », « Distinctions », « Références », « Brevets ».\n" +
+  "- RÈGLE INVERSE, TOUT AUSSI IMPORTANTE : n'utilise 'customSections' QUE en dernier recours. " +
+  "Si un champ standard convient (expériences, formation, compétences, soft skills, outils, langues, " +
+  "centres d'intérêt, projets, certifications, bénévolat), utilise-le — n'y verse jamais du contenu " +
+  "qui a déjà sa case.\n" +
+  "- INTERDICTION ABSOLUE : ne supprime, ne renomme et ne déforme JAMAIS une rubrique pour la " +
+  "faire entrer de force dans un champ existant. Si elle ne rentre nulle part, crée-la en section " +
+  "libre — c'est précisément à ça que sert 'customSections'. Le CV de l'utilisateur n'a pas à se " +
+  "plier au format de l'application : c'est l'application qui s'adapte au CV.\n" +
+  "- Objectif : AUCUNE information du CV d'origine ne doit être perdue à l'extraction.\n";
 
 export const RESUME_TAILOR_RULES: Record<TailorLevel, string> = {
   peu:
@@ -257,6 +292,10 @@ export const SYSTEM_TAILOR_RESUME_BASE =
   "et ne recopie pas les phrases ou expressions exactes de l'offre. Le 'summary' doit rester " +
   "GÉNÉRIQUE et sobre : il décrit le profil du candidat orienté vers ce TYPE de métier, pas une " +
   "candidature à une offre précise. Évite l'effet 'CV taillé sur mesure'.\n" +
+  "- CLOISONNEMENT DES SECTIONS : 'skills' (technique), 'softSkills' (savoir-être) et 'tools' " +
+  "(logiciels) sont trois listes DISTINCTES : ne les fusionne jamais, ne déplace pas un élément " +
+  "de l'une vers l'autre. 'customSections' (sections libres du candidat) doit être renvoyé tel " +
+  "quel : n'en supprime aucune, ne renomme aucun titre.\n" +
   "- LONGUEUR : le 'summary' (Résumé / A propos) ne doit JAMAIS dépasser 350 caractères.\n\n";
 
 export const SYSTEM_TAILOR_RESUME_BASE_INVENT =
@@ -284,6 +323,10 @@ export const SYSTEM_TAILOR_RESUME_BASE_INVENT =
   "et ne recopie pas les phrases ou expressions exactes de l'offre. Le 'summary' doit rester " +
   "GÉNÉRIQUE et sobre : il décrit le profil du candidat orienté vers ce TYPE de métier, pas une " +
   "candidature à une offre précise. Évite l'effet 'CV taillé sur mesure'.\n" +
+  "- CLOISONNEMENT DES SECTIONS : 'skills' (technique), 'softSkills' (savoir-être) et 'tools' " +
+  "(logiciels) sont trois listes DISTINCTES : ne les fusionne jamais, ne déplace pas un élément " +
+  "de l'une vers l'autre. 'customSections' (sections libres du candidat) doit être renvoyé tel " +
+  "quel : n'en supprime aucune, ne renomme aucun titre.\n" +
   "- LONGUEUR : le 'summary' (Résumé / A propos) ne doit JAMAIS dépasser 350 caractères.\n" +
   "- LONGUEUR GLOBALE STRICTE (1 PAGE MAX) : Le texte JSON généré doit IMPÉRATIVEMENT être concis " +
   "pour tenir sur une seule page (idéalement moins de 2500 caractères au total). Le CV d'entrée " +
@@ -443,7 +486,8 @@ export const SYSTEM_PDF_TO_RESUME =
   "- 'date' = la période telle qu'écrite (ex : 'Jan 2024 - Présent', '2020 - 2022').\n" +
   '- Si une information est absente, mets une chaîne vide "" (ou une liste vide).\n' +
   "- N'inclus PAS de photo.\n" +
-  "- JSON PUR : aucune balise markdown, aucun ```json, aucun texte avant ou après le JSON.";
+  "- JSON PUR : aucune balise markdown, aucun ```json, aucun texte avant ou après le JSON.\n\n" +
+  SECTION_ROUTING_RULES;
 
 // ---- extraction texte → CV JSON (parallèle de SYSTEM_PDF_TO_RESUME) ----------
 
@@ -463,7 +507,8 @@ export const SYSTEM_TEXT_TO_RESUME =
   "- 'date' = la période telle qu'écrite (ex : 'Jan 2024 - Présent', '2020 - 2022').\n" +
   '- Si une information est absente, mets une chaîne vide "" (ou une liste vide).\n' +
   "- N'inclus PAS de photo.\n" +
-  "- JSON PUR : aucune balise markdown, aucun ```json, aucun texte avant ou après le JSON.";
+  "- JSON PUR : aucune balise markdown, aucun ```json, aucun texte avant ou après le JSON.\n\n" +
+  SECTION_ROUTING_RULES;
 
 
 export const SYSTEM_TEXT_TO_LETTER =

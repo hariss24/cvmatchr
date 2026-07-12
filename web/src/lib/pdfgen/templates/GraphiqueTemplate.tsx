@@ -2,7 +2,18 @@ import React from "react";
 import { Document, Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import type { Resume, ExperienceItem, EducationItem, ProjectItem, VolunteerItem } from "@/lib/resume/schema";
 import { AtsBoost } from "../AtsBoost";
-import { px, t, ThemeContext, defaultTheme, TimelineItem, Bullets, SectionTitle, SkillText } from "./primitives";
+import { px, t, ThemeContext, defaultTheme, TimelineItem, Bullets, SectionTitle, SkillText, GenericSections } from "./primitives";
+import { buildSections } from "@/lib/resume/sections";
+
+/** Sections que Graphique met en page lui-même ; le reste passe par `GenericSections`. */
+const GRAPHIQUE_HANDLED = new Set([
+  "summary", "experience", "education", "skills",
+  "projects", "certifications", "volunteer", "languages", "interests",
+]);
+
+function GraphiqueTitle({ children }: { children: string }) {
+  return <SectionTitle>{children.toUpperCase()}</SectionTitle>;
+}
 
 const s = StyleSheet.create({
   page: {
@@ -83,6 +94,7 @@ export function GraphiqueTemplate({
   const volunteer = d.volunteer.filter((v) => v && (v.title || v.organization || v.bullets.length));
   const langs = d.languages.filter((l) => l && t(l.name));
   const interests = d.interests.filter((x) => t(x));
+  const extra = buildSections(d).filter((sec) => !GRAPHIQUE_HANDLED.has(sec.id));
 
   return (
     <ThemeContext.Provider value={defaultTheme}>
@@ -244,6 +256,8 @@ export function GraphiqueTemplate({
               ) : null}
             </View>
           ) : null}
+
+          <GenericSections sections={extra} Title={GraphiqueTitle} wrapperStyle={s.section} />
 
           <AtsBoost keywords={atsKeywords} />
         </Page>

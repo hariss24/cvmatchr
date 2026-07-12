@@ -44,6 +44,37 @@ describe("normalizeResume", () => {
     const r = normalizeResume({ languages: [{ name: "", level: "Natif" }, { name: "FR" }] });
     expect(r.languages).toEqual([{ name: "FR", level: "" }]);
   });
+
+  it("garde les trois listes de compétences séparées", () => {
+    const r = normalizeResume({
+      skills: ["Gestion de projet"],
+      softSkills: ["Rigueur"],
+      tools: ["Excel"],
+    });
+    expect(r.skills).toEqual(["Gestion de projet"]);
+    expect(r.softSkills).toEqual(["Rigueur"]);
+    expect(r.tools).toEqual(["Excel"]);
+  });
+
+  it("conserve les sections libres avec leur titre", () => {
+    const r = normalizeResume({
+      customSections: [{ title: "Publications", items: ["Article X, 2024", "Article Y"] }],
+    });
+    expect(r.customSections).toEqual([
+      { title: "Publications", items: ["Article X, 2024", "Article Y"] },
+    ]);
+  });
+
+  it("jette les sections libres sans titre ou sans contenu", () => {
+    const r = normalizeResume({
+      customSections: [
+        { title: "", items: ["orphelin"] },
+        { title: "Vide", items: [] },
+        { title: "Distinctions", items: ["Prix Z"] },
+      ],
+    });
+    expect(r.customSections).toEqual([{ title: "Distinctions", items: ["Prix Z"] }]);
+  });
 });
 
 describe("normalizeLetter", () => {
@@ -85,6 +116,7 @@ describe("mergeTailored (anti-wipe)", () => {
     certifications: ["AWS"],
     projects: [{ title: "P1", date: "2024", description: "x" }],
     volunteer: [{ title: "Croix-Rouge", bullets: [] }],
+    customSections: [{ title: "Publications", items: ["Article X"] }],
   });
 
   it("restaure languages/interests même si l'IA les renvoie", () => {
@@ -99,12 +131,13 @@ describe("mergeTailored (anti-wipe)", () => {
     expect(merged.interests).toEqual(["Lecture"]);
   });
 
-  it("restaure projects/certifications/volunteer si l'IA les vide", () => {
+  it("restaure projects/certifications/volunteer/customSections si l'IA les vide", () => {
     const tailored = normalizeResume({ name: "Alice", experience: [{ title: "Dev" }] });
     const merged = mergeTailored(base, tailored);
     expect(merged.certifications).toEqual(["AWS"]);
     expect(merged.projects).toHaveLength(1);
     expect(merged.volunteer).toHaveLength(1);
+    expect(merged.customSections).toEqual([{ title: "Publications", items: ["Article X"] }]);
   });
 
   it("lève si la réponse IA vide un CV qui avait un cœur", () => {

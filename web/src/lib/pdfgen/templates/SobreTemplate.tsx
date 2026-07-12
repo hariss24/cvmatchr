@@ -2,7 +2,8 @@ import React from "react";
 import { Document, Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import type { Resume, ExperienceItem, EducationItem, ProjectItem, VolunteerItem } from "@/lib/resume/schema";
 import { AtsBoost } from "../AtsBoost";
-import { px, t, ThemeContext, PdfTheme, TimelineItem, Bullets, SkillText } from "./primitives";
+import { px, t, ThemeContext, PdfTheme, TimelineItem, Bullets, SkillText, GenericSections } from "./primitives";
+import { buildSections } from "@/lib/resume/sections";
 
 const theme: PdfTheme = {
   accent: "#c9c6c1", // La couleur de personnalisation par défaut du template sobre
@@ -125,6 +126,16 @@ const s = StyleSheet.create({
   },
 });
 
+/** Sections que Sobre met en page lui-même ; le reste passe par `GenericSections`. */
+const SOBRE_HANDLED = new Set([
+  "summary", "experience", "education", "skills",
+  "projects", "certifications", "volunteer", "languages", "interests",
+]);
+
+function SobreTitle({ children }: { children: string }) {
+  return <Text style={s.sectionTitle}>{children.toUpperCase()}</Text>;
+}
+
 export function SobreTemplate({
   resume,
   atsKeywords,
@@ -148,6 +159,9 @@ export function SobreTemplate({
   const volunteer = d.volunteer.filter((v) => v && (v.title || v.organization || v.bullets.length));
   const langs = d.languages.filter((l) => l && t(l.name));
   const interests = d.interests.filter((x) => t(x));
+  // Tout ce que ce modèle ne stylise pas lui-même (soft skills, outils, sections libres…)
+  // est rendu génériquement plus bas : aucune donnée du CV ne peut être avalée.
+  const extra = buildSections(d).filter((sec) => !SOBRE_HANDLED.has(sec.id));
 
   return (
     <ThemeContext.Provider value={theme}>
@@ -333,6 +347,8 @@ export function SobreTemplate({
               </View>
             </View>
           ) : null}
+
+          <GenericSections sections={extra} Title={SobreTitle} wrapperStyle={s.section} />
 
           <AtsBoost keywords={atsKeywords} />
         </Page>

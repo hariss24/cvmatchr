@@ -8,6 +8,7 @@ import type {
   LanguageItem,
   ProjectItem,
   VolunteerItem,
+  CustomSection,
 } from "@/lib/resume/schema";
 
 /**
@@ -136,6 +137,10 @@ export default function FormEditor({ onImportPdf }: { onImportPdf?: () => void }
           addLabel="+ Ajouter un centre d'intérêt"
           items={cv.interests}
           onChange={(v) => update({ interests: v })}
+        />
+        <CustomSectionsSection
+          items={cv.customSections ?? []}
+          onChange={(v) => update({ customSections: v })}
         />
     </div>
   );
@@ -272,6 +277,7 @@ const EMPTY_PROJECT: ProjectItem = { title: "", date: "", description: "" };
 const EMPTY_VOLUNTEER: VolunteerItem = {
   title: "", organization: "", location: "", date: "", bullets: [],
 };
+const EMPTY_CUSTOM_SECTION: CustomSection = { title: "", items: [] };
 
 function ExperienceSection({
   items,
@@ -407,6 +413,61 @@ function ProjectsSection({
       ))}
       <button type="button" className="form-btn-add" onClick={() => onChange([...items, { ...EMPTY_PROJECT }])}>
         + Ajouter un projet
+      </button>
+    </section>
+  );
+}
+
+/**
+ * Sections libres : rubriques du CV qui n'entrent dans aucune case standard
+ * (« Publications », « Distinctions »…). Le titre est saisi par l'utilisateur —
+ * c'est ce qui distingue ce bloc des autres sections, dont le titre est figé.
+ */
+function CustomSectionsSection({
+  items,
+  onChange,
+}: {
+  items: CustomSection[];
+  onChange: (items: CustomSection[]) => void;
+}) {
+  const patch = (i: number, p: Partial<CustomSection>) =>
+    onChange(replaceAt(items, i, { ...items[i], ...p }));
+  return (
+    <section className="form-section">
+      <h3 className="form-section__title">Sections libres</h3>
+      {items.map((c, i) => (
+        <ItemCard key={i} onRemove={() => onChange(removeAt(items, i))}>
+          <Field
+            label="Titre de la section"
+            value={c.title}
+            onChange={(v) => patch(i, { title: v })}
+          />
+          <div className="form-field">
+            <label className="form-label">Contenu</label>
+            <textarea
+              className="form-textarea form-bullets"
+              rows={4}
+              placeholder="Une ligne par élément."
+              value={c.items.join("\n")}
+              onChange={(e) => patch(i, { items: e.target.value.split("\n") })}
+              onBlur={(e) =>
+                patch(i, {
+                  items: e.target.value
+                    .split("\n")
+                    .map((l) => l.trim())
+                    .filter((l) => l !== ""),
+                })
+              }
+            />
+          </div>
+        </ItemCard>
+      ))}
+      <button
+        type="button"
+        className="form-btn-add"
+        onClick={() => onChange([...items, { ...EMPTY_CUSTOM_SECTION }])}
+      >
+        + Ajouter une section
       </button>
     </section>
   );

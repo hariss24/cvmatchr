@@ -2,7 +2,8 @@ import React from "react";
 import { Document, Page, View, Text, Image, StyleSheet, Svg, Path, Circle } from "@react-pdf/renderer";
 import type { Resume, ExperienceItem, EducationItem } from "@/lib/resume/schema";
 import { AtsBoost } from "../AtsBoost";
-import { px, t, ThemeContext, PdfTheme, TimelineItem, Bullets } from "./primitives";
+import { px, t, ThemeContext, PdfTheme, TimelineItem, Bullets, GenericSections } from "./primitives";
+import { buildSections } from "@/lib/resume/sections";
 
 const theme: PdfTheme = {
   accent: "#26485a", // teal-navy des titres (nom du poste, titres de section)
@@ -214,6 +215,15 @@ function SideList({ items }: { items: string[] }) {
   );
 }
 
+/** Sections que Marine met en page lui-même (barre latérale + colonne principale). */
+const MARINE_HANDLED = new Set([
+  "summary", "experience", "education", "softSkills", "tools", "languages", "interests",
+]);
+
+function MarineTitle({ children }: { children: string }) {
+  return <Text style={s.mainSectionTitle}>{children}</Text>;
+}
+
 export function MarineTemplate({
   resume,
   atsKeywords,
@@ -229,6 +239,10 @@ export function MarineTemplate({
   const tools = (d.tools ?? []).filter((x) => t(x));
   const langs = d.languages.filter((l) => l && t(l.name));
   const interests = d.interests.filter((x) => t(x)).join(", ");
+  // Marine ne stylise que la barre latérale + profil/expériences/formation. Compétences,
+  // projets, certifications, bénévolat et sections libres passaient jusqu'ici à la trappe :
+  // ils sont désormais rendus génériquement dans la colonne principale.
+  const extra = buildSections(d).filter((sec) => !MARINE_HANDLED.has(sec.id));
 
   return (
     <ThemeContext.Provider value={theme}>
@@ -335,6 +349,8 @@ export function MarineTemplate({
                   ))}
                 </View>
               ) : null}
+
+              <GenericSections sections={extra} Title={MarineTitle} wrapperStyle={s.mainSection} />
             </View>
 
           <AtsBoost keywords={atsKeywords} />

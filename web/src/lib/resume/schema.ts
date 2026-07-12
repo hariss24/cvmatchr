@@ -49,6 +49,17 @@ export const volunteerItemSchema = z.object({
   bullets: z.array(z.string()).default([]),
 });
 
+/**
+ * Section libre : rattrape toute rubrique du CV source qui ne correspond à aucun
+ * champ standard (« Publications », « Distinctions », « Références »…). Forme
+ * volontairement minimale — un titre + des lignes — pour se brancher tel quel sur
+ * `StringListSection` (formulaire) et `SectionTitle` + `Bullets` (PDF).
+ */
+export const customSectionSchema = z.object({
+  title: z.string().default(""),
+  items: z.array(z.string()).default([]),
+});
+
 export const resumeSchema = z.object({
   name: z.string().default(""),
   title: z.string().default(""),
@@ -68,6 +79,7 @@ export const resumeSchema = z.object({
   projects: z.array(projectItemSchema).default([]),
   certifications: z.array(z.string()).default([]),
   volunteer: z.array(volunteerItemSchema).default([]),
+  customSections: z.array(customSectionSchema).default([]),
 });
 
 export const letterSchema = z.object({
@@ -90,6 +102,7 @@ export type EducationItem = z.infer<typeof educationItemSchema>;
 export type LanguageItem = z.infer<typeof languageItemSchema>;
 export type ProjectItem = z.infer<typeof projectItemSchema>;
 export type VolunteerItem = z.infer<typeof volunteerItemSchema>;
+export type CustomSection = z.infer<typeof customSectionSchema>;
 export type Resume = z.infer<typeof resumeSchema>;
 export type Letter = z.infer<typeof letterSchema>;
 
@@ -99,7 +112,7 @@ export type DocType = "CV" | "Lettre" | "Maître";
 export const RESUME_TOP_KEYS = [
   "name", "title", "location", "email", "phone", "linkedin", "summary",
   "experience", "education", "skills", "softSkills", "tools", "languages", "interests",
-  "projects", "certifications", "volunteer",
+  "projects", "certifications", "volunteer", "customSections",
 ] as const;
 
 /** Port fidèle de `DEFAULT_RESUME` (resume-form.js, l.20-51). */
@@ -151,6 +164,7 @@ export const DEFAULT_RESUME: Resume = {
   projects: [],
   certifications: [],
   volunteer: [],
+  customSections: [],
 };
 
 /** Port fidèle de `DEFAULT_LETTER` (resume-form.js, l.54-67). */

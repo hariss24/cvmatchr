@@ -7,10 +7,13 @@ import {
   RESUME_TAILOR_RULES,
   RESUME_SCHEMA_DESC,
   SYSTEM_TAILOR_RESUME_BASE_INVENT,
+  SYSTEM_PDF_TO_RESUME,
+  SYSTEM_TEXT_TO_RESUME,
   tailorResumeSystem,
   tailorHtmlSystem,
   type TailorLevel,
 } from "./prompts";
+import { resumeSchema } from "@/lib/resume/schema";
 
 const LEVELS: TailorLevel[] = ["peu", "adapte", "hyper", "sur-mesure"];
 
@@ -21,9 +24,30 @@ describe("prompts — invariants métier", () => {
     }
   });
 
-  it("le schéma JSON décrit toutes les clés du CV", () => {
-    for (const key of ["experience", "education", "skills", "languages", "interests", "volunteer"]) {
-      expect(RESUME_SCHEMA_DESC).toContain(`"${key}"`);
+  // GARDE-FOU ANTI-DÉRIVE — ne pas remplacer par une liste écrite à la main.
+  //
+  // `RESUME_SCHEMA_DESC` est une copie manuelle du schéma Zod : c'est la fiche envoyée
+  // à l'IA. Si un champ existe dans le modèle mais pas dans la fiche, l'IA ignore son
+  // existence et déverse son contenu ailleurs — silencieusement. C'est exactement ce
+  // qui est arrivé à `softSkills` et `tools` : le CV importé voyait ses soft skills
+  // fusionnés dans `skills`. La liste ci-dessous est donc DÉRIVÉE du schéma, jamais
+  // recopiée : ajouter un champ au CV sans l'ajouter à la fiche fait échouer ce test.
+  it("la fiche IA décrit toutes les clés du schéma CV (garde-fou anti-dérive)", () => {
+    // `photo` est le seul champ volontairement absent : la base64 n'est jamais envoyée à l'IA.
+    const keys = Object.keys(resumeSchema.shape).filter((k) => k !== "photo");
+    for (const key of keys) {
+      expect(RESUME_SCHEMA_DESC, `champ « ${key} » absent de RESUME_SCHEMA_DESC`).toContain(
+        `"${key}"`,
+      );
+    }
+  });
+
+  it("les extractions imposent des listes de compétences cloisonnées", () => {
+    for (const system of [SYSTEM_PDF_TO_RESUME, SYSTEM_TEXT_TO_RESUME]) {
+      expect(system).toContain("softSkills");
+      expect(system).toContain("tools");
+      expect(system).toContain("customSections");
+      expect(system).toContain("ne fusionne JAMAIS");
     }
   });
 
