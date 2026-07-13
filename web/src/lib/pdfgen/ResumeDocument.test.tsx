@@ -130,6 +130,34 @@ describe("ResumeDocument (template graphique)", () => {
     },
   );
 
+  // GARDE-FOU « MASQUER N'EST PAS SUPPRIMER » — les deux moitiés du contrat.
+  //
+  // Masquer doit retirer la section du PDF (sinon le bouton ne sert à rien) ET laisser son
+  // contenu intact dans le CV (sinon c'est une suppression déguisée, et l'utilisateur perd
+  // son travail sans l'avoir demandé). On vérifie les deux.
+  it.each(TEMPLATE_IDS)(
+    "retire du PDF une section masquée, sans toucher à son contenu (modèle %s)",
+    async (templateId: PdfTemplateId) => {
+      const masque = resumeSchema.parse({
+        ...FULL_RESUME,
+        hiddenSections: ["skills", "custom:0"], // Compétences + « Publications »
+      });
+      const buf = await renderToBuffer(<ResumeDocument resume={masque} templateId={templateId} />);
+      const pdf = (await extractPdfText(new Uint8Array(buf))).join("\n").toLowerCase();
+
+      expect(pdf, `${templateId} : la section masquée est encore rendue`).not.toContain("competencetest");
+      expect(pdf, `${templateId} : la section libre masquée est encore rendue`).not.toContain("publicationtest");
+
+      // Le reste du CV est toujours là : masquer une section n'en emporte pas d'autres.
+      expect(pdf).toContain("postetest");
+      expect(pdf).toContain("distinctiontest");
+
+      // Et surtout : le contenu masqué n'a pas été effacé du CV.
+      expect(masque.skills).toEqual(["CompetenceTest"]);
+      expect(masque.customSections[0].items).toEqual(["PublicationTest"]);
+    },
+  );
+
   // GARDE-FOU « ORDRE » — le CV commande la mise en page, pas l'inverse.
   //
   // `sectionOrder` vient soit de l'IA (qui recopie l'ordre du CV importé), soit des flèches

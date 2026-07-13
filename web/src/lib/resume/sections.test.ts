@@ -68,6 +68,28 @@ describe("buildSections", () => {
   });
 });
 
+describe("buildSections — masquage", () => {
+  const cv = resumeSchema.parse({ ...FULL, hiddenSections: ["skills", "custom:0"] });
+
+  it("retire les sections masquées du rendu", () => {
+    const ids = buildSections(cv).map((s) => s.id);
+    expect(ids).not.toContain("skills");
+    expect(ids).not.toContain("custom:0");
+    expect(ids).toContain("experience");
+  });
+
+  it("les garde listées pour le formulaire, sinon on ne pourrait plus les réafficher", () => {
+    expect(buildSections(cv, { includeHidden: true }).map((s) => s.id)).toEqual(
+      buildSections(FULL).map((s) => s.id),
+    );
+  });
+
+  it("masquer n'efface rien : le contenu reste dans le CV", () => {
+    expect(cv.skills).toEqual(["Python"]);
+    expect(cv.customSections[0]).toEqual({ title: "Publications", items: ["Article X"] });
+  });
+});
+
 describe("buildContacts", () => {
   it("expose les coordonnées standard et les infos libres", () => {
     const cv = resumeSchema.parse({

@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Architecture « zéro perte » terminée : extraction cloisonnée, sections libres, infos personnelles libres (permis/portfolio/mobilité…), ordre des sections piloté par le CV et réordonnable à la main. Les 4 modèles itèrent désormais sur les sections du CV — plus aucune liste en dur. Rien en attente sur ce chantier ; à valider sur un vrai CV importé.
+**Prochaine étape suggérée :** Architecture « zéro perte » terminée : extraction cloisonnée, sections libres, infos personnelles libres (permis/portfolio/mobilité…), ordre des sections piloté par le CV, réordonnable et masquable à la main (l'œil masque sans effacer). Les 4 modèles itèrent sur les sections du CV — plus aucune liste en dur. Rien en attente sur ce chantier ; à valider sur un vrai CV importé.
 
 ---
 
@@ -130,6 +130,34 @@ mais seulement s'ils restent voisins — la mise en page suit l'ordre, jamais l'
 **Vérifications.** eslint 0 erreur (1 warning `<img>` préexistant) · tsc 0 · vitest 234/234 ·
 playwright 37/37 · contrôle visuel des 4 modèles dans l'aperçu (mise en page inchangée ;
 Marine affiche enfin Compétences) et des flèches en direct.
+
+### 2026-07-13 : Retirer une section sans la perdre (l'œil)
+
+**Demande.** « Comment supprimer la section Compétences ? » — la seule façon était de vider ses
+lignes une à une, donc de détruire le contenu. Une croix « supprimer » avait été envisagée.
+
+**Décision (validée avec l'utilisateur).** Un **œil masquer / réafficher** plutôt qu'une croix.
+Retirer une section d'un CV, c'est presque toujours *pour une candidature donnée*, pas pour
+toujours ; et une suppression destructive contredirait frontalement la promesse « zéro perte »
+sur laquelle tout le reste est bâti. Pour vraiment effacer, on vide la section elle-même.
+
+**Implémentation.** `hiddenSections: string[]` sur `resumeSchema`. `buildSections()` les écarte
+du rendu ; le formulaire l'appelle avec `{ includeHidden: true }` — sinon une section masquée
+disparaîtrait de la liste et deviendrait impossible à ramener. Ligne barrée + œil grisé.
+Champ **jamais envoyé à l'IA** (c'est une préférence d'affichage, pas du contenu) : il est donc
+exclu de `RESUME_SCHEMA_DESC`, et `mergeTailored` le recopie TOUJOURS depuis la base — sans
+quoi une adaptation à une offre ferait silencieusement réapparaître les sections masquées.
+
+**Garde-fous.**
+- `ResumeDocument.test.tsx` : les deux moitiés du contrat sur les 4 modèles — la section masquée
+  sort bien du PDF **et** son contenu est toujours dans le CV (sinon c'est une suppression
+  déguisée). Vérifié en rouge/vert (sabotage du filtre → 5 échecs).
+- `prompts.test.ts` : l'exclusion de `hiddenSections` de la fiche IA est **nommée et justifiée**
+  dans une liste explicite — une exclusion tacite recréerait exactement le trou d'origine.
+- `normalize.test.ts` : le masquage survit à une adaptation IA.
+
+**Vérifications.** eslint 0 erreur · tsc 0 · vitest 242/242 · playwright 37/37 · masquage et
+retour en arrière testés en direct dans l'aperçu (Compétences revient avec ses 6 lignes).
 
 ### 2026-07-12 : Revue qualité des implémentations Gemini (profil, undo/redo, page Aide)
 - **Quoi :** Audit de qualité (pas seulement « les tests passent ») du travail Gemini committé (profil) et non committé (undo/redo, page Aide FAQ, refonte TopBar). Constat : `eslint` cassé (7 erreurs) alors que chaque rapport WORK_HISTORY affirmait « 0 erreur », et undo/redo annoncé « testé » sans aucun test. Corrections : (1) lint remis à 0 erreur — 6 apostrophes/guillemets non échappés dans `help/page.tsx`, `any` typé en `DocumentSnapshot` dans `useGlobalUndoRedo.ts`, import mort `toast` retiré de `useAutoDraft.ts`, dépendance `busy` superflue retirée du `useCallback` de `TopBar.tsx` ; (2) profil : champs `adresse`/`codePostal` retirés (collectés mais jamais appliqués — le schéma `Resume` n'a pas ces champs, `sender_address` de la lettre vient de `cv.location`) ; (3) tests : nouveau `historyStore.test.ts` (9 tests couvrant push/undo/redo/pause/clear + branche future effacée) ; `profile.spec.ts` assaini (variable morte `vars` retirée, pseudo-vérif lettre remplacée par un vrai contrôle « Créer ma lettre » activé).

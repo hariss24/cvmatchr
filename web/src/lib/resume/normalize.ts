@@ -163,6 +163,7 @@ export function normalizeResume(input: unknown): Resume {
     // Aucun filtrage sur les identifiants : `buildSections` ignore ceux qui ne correspondent
     // à rien, et une section absente de la liste se range à la fin plutôt que de disparaître.
     sectionOrder: cleanList(d.sectionOrder).slice(0, 40),
+    hiddenSections: cleanList(d.hiddenSections).slice(0, 40),
   };
 
   // Garantie finale de forme via Zod (les défauts comblent un éventuel champ manquant).
@@ -230,9 +231,11 @@ export function mergeTailored(base: Resume, tailored: Resume): Resume {
     result.customSections = base.customSections;
   if (result.customFields.length === 0 && base.customFields.length > 0)
     result.customFields = base.customFields;
-  // L'ordre des sections est une préférence de mise en page, pas du contenu : une adaptation
-  // à une offre n'a aucune raison de le changer, et surtout aucune de le perdre.
+  // L'ordre et le masquage sont des préférences de mise en page, pas du contenu : une
+  // adaptation à une offre n'a aucune raison de les changer, et surtout aucune de les perdre.
+  // `hiddenSections` n'est même jamais envoyé à l'IA — on le recopie donc toujours.
   if (base.sectionOrder.length > 0) result.sectionOrder = base.sectionOrder;
+  result.hiddenSections = base.hiddenSections;
 
   // Toujours restaurés depuis la base (aucun niveau d'adaptation ne les modifie).
   if (base.languages.length > 0) result.languages = base.languages;

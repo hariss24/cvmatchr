@@ -107,10 +107,17 @@ function entry(p: Partial<TimelineEntry>): TimelineEntry {
 
 /**
  * Sections d'un CV, dans l'ordre voulu (`resume.sectionOrder`, sinon canonique), SANS les
- * sections vides. L'identité (nom, titre, coordonnées, photo) n'en fait pas partie : c'est
- * l'en-tête, rendu à part par chaque modèle (cf. `buildContacts`).
+ * sections vides ni les sections masquées. L'identité (nom, titre, coordonnées, photo) n'en
+ * fait pas partie : c'est l'en-tête, rendu à part par chaque modèle (cf. `buildContacts`).
+ *
+ * `includeHidden` : le formulaire en a besoin pour proposer de RÉAFFICHER une section
+ * masquée. Masquer n'efface rien — le contenu reste dans le CV, il ne sort simplement pas
+ * au rendu.
  */
-export function buildSections(resume: Resume): ResumeSection[] {
+export function buildSections(
+  resume: Resume,
+  { includeHidden = false }: { includeHidden?: boolean } = {},
+): ResumeSection[] {
   const d = resume;
   const out: ResumeSection[] = [];
 
@@ -192,5 +199,8 @@ export function buildSections(resume: Resume): ResumeSection[] {
     }
   });
 
-  return applyOrder(out, resume.sectionOrder ?? []);
+  const hidden = new Set(resume.hiddenSections ?? []);
+  const shown = includeHidden ? out : out.filter((sec) => !hidden.has(sec.id));
+
+  return applyOrder(shown, resume.sectionOrder ?? []);
 }

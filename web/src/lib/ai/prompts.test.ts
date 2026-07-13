@@ -33,8 +33,15 @@ describe("prompts — invariants métier", () => {
   // fusionnés dans `skills`. La liste ci-dessous est donc DÉRIVÉE du schéma, jamais
   // recopiée : ajouter un champ au CV sans l'ajouter à la fiche fait échouer ce test.
   it("la fiche IA décrit toutes les clés du schéma CV (garde-fou anti-dérive)", () => {
-    // `photo` est le seul champ volontairement absent : la base64 n'est jamais envoyée à l'IA.
-    const keys = Object.keys(resumeSchema.shape).filter((k) => k !== "photo");
+    // Les SEULS champs volontairement absents de la fiche, chacun pour une raison précise.
+    // Toute autre omission est une dérive et doit faire échouer ce test.
+    const HORS_FICHE = new Set([
+      "photo", //          base64 : jamais envoyée à l'IA (coût, inutile).
+      "hiddenSections", // préférence d'affichage de l'utilisateur, pas du contenu de CV :
+      //                   l'IA n'a rien à en dire, et `mergeTailored` la recopie toujours
+      //                   depuis la base pour qu'une adaptation ne puisse pas la perdre.
+    ]);
+    const keys = Object.keys(resumeSchema.shape).filter((k) => !HORS_FICHE.has(k));
     for (const key of keys) {
       expect(RESUME_SCHEMA_DESC, `champ « ${key} » absent de RESUME_SCHEMA_DESC`).toContain(
         `"${key}"`,

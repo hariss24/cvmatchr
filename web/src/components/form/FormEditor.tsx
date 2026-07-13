@@ -100,7 +100,7 @@ export default function FormEditor({ onImportPdf }: { onImportPdf?: () => void }
           onChange={(v) => update({ customFields: v })}
         />
 
-        <SectionOrderSection cv={cv} onChange={(v) => update({ sectionOrder: v })} />
+        <SectionOrderSection cv={cv} onChange={update} />
 
         <section className="form-section">
           <h3 className="form-section__title">À propos</h3>
@@ -344,56 +344,105 @@ function CustomFieldsSection({
   );
 }
 
+/** Œil ouvert / barré — masquer ou réafficher une section. */
+function EyeIcon({ off }: { off: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+      {off ? <line x1="3" y1="21" x2="21" y2="3" /> : null}
+    </svg>
+  );
+}
+
 /**
- * Ordre des sections. La liste est DÉRIVÉE du CV (`buildSections`) et non écrite en dur :
- * une rubrique relevée à l'import — même inconnue de l'application — apparaît donc ici
- * d'elle-même, et devient déplaçable sans qu'une ligne de code la mentionne.
+ * Ordre et visibilité des sections. La liste est DÉRIVÉE du CV (`buildSections`) et non
+ * écrite en dur : une rubrique relevée à l'import — même inconnue de l'application —
+ * apparaît donc ici d'elle-même, déplaçable et masquable sans qu'une ligne de code la
+ * mentionne.
+ *
+ * MASQUER N'EST PAS SUPPRIMER : la section sort du PDF, son contenu reste dans le CV et un
+ * second clic la ramène intacte. C'est ce qui permet d'adapter un CV à une offre sans rien
+ * perdre — la promesse de toute l'app. Pour vraiment effacer, on vide la section elle-même.
  *
  * Chaque déplacement réécrit la liste complète des identifiants présents : `sectionOrder`
  * reste ainsi toujours aligné sur le contenu réel du CV.
  */
-function SectionOrderSection({ cv, onChange }: { cv: Resume; onChange: (order: string[]) => void }) {
-  const sections = buildSections(cv);
+function SectionOrderSection({
+  cv,
+  onChange,
+}: {
+  cv: Resume;
+  onChange: (patch: Partial<Resume>) => void;
+}) {
+  // `includeHidden` : une section masquée doit rester listée, sinon on ne pourrait plus la
+  // faire revenir.
+  const sections = buildSections(cv, { includeHidden: true });
   if (sections.length < 2) return null;
+
+  const hidden = new Set(cv.hiddenSections ?? []);
 
   const move = (i: number, dir: -1 | 1) => {
     const ids = sections.map((sec) => sec.id);
     const j = i + dir;
     if (j < 0 || j >= ids.length) return;
     [ids[i], ids[j]] = [ids[j], ids[i]];
-    onChange(ids);
+    onChange({ sectionOrder: ids });
   };
+
+  const toggle = (id: string) =>
+    onChange({
+      hiddenSections: hidden.has(id)
+        ? (cv.hiddenSections ?? []).filter((x) => x !== id)
+        : [...(cv.hiddenSections ?? []), id],
+    });
 
   return (
     <section className="form-section">
       <h3 className="form-section__title">Ordre des sections</h3>
       <p className="form-hint">
-        L&apos;ordre du CV importé est conservé. Réorganisez-le comme vous voulez : le modèle suit.
+        L&apos;ordre du CV importé est conservé. Réorganisez-le comme vous voulez : le modèle
+        suit. L&apos;œil retire une section du CV sans effacer son contenu.
       </p>
       <ul className="form-order">
-        {sections.map((sec, i) => (
-          <li key={sec.id} className="form-order__row">
-            <span className="form-order__label">{sec.title}</span>
-            <button
-              type="button"
-              className="form-btn-mini"
-              aria-label={`Monter « ${sec.title} »`}
-              disabled={i === 0}
-              onClick={() => move(i, -1)}
+        {sections.map((sec, i) => {
+          const off = hidden.has(sec.id);
+          return (
+            <li
+              key={sec.id}
+              className={`form-order__row${off ? " form-order__row--hidden" : ""}`}
             >
-              ↑
-            </button>
-            <button
-              type="button"
-              className="form-btn-mini"
-              aria-label={`Descendre « ${sec.title} »`}
-              disabled={i === sections.length - 1}
-              onClick={() => move(i, 1)}
-            >
-              ↓
-            </button>
-          </li>
-        ))}
+              <span className="form-order__label">{sec.title}</span>
+              <button
+                type="button"
+                className="form-btn-mini form-btn-icon-only form-order__eye"
+                aria-label={off ? `Réafficher « ${sec.title} »` : `Masquer « ${sec.title} »`}
+                aria-pressed={off}
+                onClick={() => toggle(sec.id)}
+              >
+                <EyeIcon off={off} />
+              </button>
+              <button
+                type="button"
+                className="form-btn-mini"
+                aria-label={`Monter « ${sec.title} »`}
+                disabled={i === 0}
+                onClick={() => move(i, -1)}
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                className="form-btn-mini"
+                aria-label={`Descendre « ${sec.title} »`}
+                disabled={i === sections.length - 1}
+                onClick={() => move(i, 1)}
+              >
+                ↓
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

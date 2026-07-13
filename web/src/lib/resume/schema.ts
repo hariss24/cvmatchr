@@ -99,6 +99,13 @@ export const resumeSchema = z.object({
    * source, et l'utilisateur le réordonne à la main dans le formulaire.
    */
   sectionOrder: z.array(z.string()).default([]),
+  /**
+   * Sections masquées, par identifiant. Masquer n'est PAS supprimer : la section
+   * disparaît du PDF mais son contenu reste intact dans le CV, et un clic la ramène.
+   * Sert à adapter un CV à une offre sans rien perdre. Jamais envoyé à l'IA : c'est une
+   * préférence d'affichage de l'utilisateur, pas du contenu.
+   */
+  hiddenSections: z.array(z.string()).default([]),
 });
 
 export const letterSchema = z.object({
@@ -132,7 +139,8 @@ export type DocType = "CV" | "Lettre" | "Maître";
 export const RESUME_TOP_KEYS = [
   "name", "title", "location", "email", "phone", "linkedin", "summary",
   "experience", "education", "skills", "softSkills", "tools", "languages", "interests",
-  "projects", "certifications", "volunteer", "customSections", "customFields", "sectionOrder",
+  "projects", "certifications", "volunteer", "customSections", "customFields",
+  "sectionOrder", "hiddenSections",
 ] as const;
 
 /** Port fidèle de `DEFAULT_RESUME` (resume-form.js, l.20-51). */
@@ -187,6 +195,7 @@ export const DEFAULT_RESUME: Resume = {
   customSections: [],
   customFields: [],
   sectionOrder: [],
+  hiddenSections: [],
 };
 
 /** Port fidèle de `DEFAULT_LETTER` (resume-form.js, l.54-67). */

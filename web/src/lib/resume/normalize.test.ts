@@ -144,6 +144,7 @@ describe("mergeTailored (anti-wipe)", () => {
     customSections: [{ title: "Publications", items: ["Article X"] }],
     customFields: [{ label: "Permis", value: "B" }],
     sectionOrder: ["education", "experience"],
+    hiddenSections: ["interests"],
   });
 
   it("restaure languages/interests même si l'IA les renvoie", () => {
@@ -172,6 +173,14 @@ describe("mergeTailored (anti-wipe)", () => {
     const merged = mergeTailored(base, tailored);
     expect(merged.customFields).toEqual([{ label: "Permis", value: "B" }]);
     expect(merged.sectionOrder).toEqual(["education", "experience"]);
+  });
+
+  // `hiddenSections` n'est jamais envoyé à l'IA : elle ne peut donc que l'omettre. Sans ce
+  // report, une adaptation à une offre ferait silencieusement réapparaître les sections que
+  // l'utilisateur avait masquées.
+  it("reporte toujours le masquage choisi par l'utilisateur", () => {
+    const tailored = normalizeResume({ name: "Alice", experience: [{ title: "Dev" }] });
+    expect(mergeTailored(base, tailored).hiddenSections).toEqual(["interests"]);
   });
 
   it("lève si la réponse IA vide un CV qui avait un cœur", () => {
