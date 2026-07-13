@@ -9,6 +9,8 @@ import {
   SYSTEM_TAILOR_RESUME_BASE_INVENT,
   SYSTEM_PDF_TO_RESUME,
   SYSTEM_TEXT_TO_RESUME,
+  SYSTEM_EDITOR_CHAT,
+  HUMAN_TONE_RULE,
   tailorResumeSystem,
   tailorHtmlSystem,
   type TailorLevel,
@@ -170,5 +172,47 @@ describe('prompts — adapt letter / extract meta', () => {
     expect(SYSTEM_EXTRACT_META).toContain('JSON PUR');
     expect(SYSTEM_EXTRACT_META).toContain('"company":');
     expect(SYSTEM_EXTRACT_META).toContain('"role":');
+  });
+});
+
+describe("prompts — tonalité humaine", () => {
+  // Le style est une exigence produit, pas un détail cosmétique : un texte qui « sent l'IA »
+  // fait éliminer la candidature. La règle doit donc être présente partout où le modèle
+  // RÉDIGE — et nulle part où il se contente d'EXTRAIRE, sinon il réécrirait le CV importé
+  // au lieu de le recopier fidèlement (ce qui ruinerait l'architecture « zéro perte »).
+  it("les prompts qui rédigent portent la règle de tonalité", () => {
+    for (const level of LEVELS) {
+      expect(tailorResumeSystem(level), level).toContain("TONALITÉ");
+    }
+    expect(SYSTEM_EDITOR_CHAT).toContain("TONALITÉ");
+    expect(SYSTEM_ADAPT_LETTER).toContain("TONALITÉ");
+  });
+
+  it("les prompts d'extraction ne portent PAS la règle de tonalité", () => {
+    expect(SYSTEM_PDF_TO_RESUME).not.toContain("TONALITÉ");
+    expect(SYSTEM_TEXT_TO_RESUME).not.toContain("TONALITÉ");
+    expect(SYSTEM_TEXT_TO_LETTER).not.toContain("TONALITÉ");
+    expect(SYSTEM_EXTRACT_META).not.toContain("TONALITÉ");
+  });
+
+  it("la règle proscrit les clichés de candidature et les tics d'IA", () => {
+    expect(HUMAN_TONE_RULE).toContain("fort de mon expérience");
+    expect(HUMAN_TONE_RULE).toContain("force de proposition");
+    expect(HUMAN_TONE_RULE).toContain("participe présent");
+  });
+
+  it("la règle épargne les listes du candidat (compétences, savoir-être…)", () => {
+    expect(HUMAN_TONE_RULE).toContain("PÉRIMÈTRE");
+    expect(HUMAN_TONE_RULE).toContain("ne les réécris pas au nom du style");
+  });
+
+  // La règle bannit le tiret cadratin en prose, mais le format des compétences l'impose.
+  // L'exception doit rester ALLUSIVE : citer « Mot clé — Description » ferait fuiter ce
+  // format dans le niveau « subtil », qui interdit justement de reformater les compétences.
+  it("la règle épargne le tiret cadratin des formats imposés, sans citer lequel", () => {
+    expect(HUMAN_TONE_RULE).toContain("SEULE EXCEPTION");
+    expect(HUMAN_TONE_RULE).not.toContain("Mot clé — Description");
+    expect(tailorResumeSystem("peu")).not.toContain("Mot clé — Description");
+    expect(tailorResumeSystem("adapte")).toContain("Mot clé — Description");
   });
 });

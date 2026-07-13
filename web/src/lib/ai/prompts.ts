@@ -26,6 +26,56 @@ export const ELAGUE_RULE =
   "pour que le CV final soit concis, percutant et tienne sur 1 à 2 pages maximum. " +
   "Conserve et mets en valeur ce qui est utile, retire le reste. ";
 
+/**
+ * Règle de tonalité, partagée par tous les prompts qui RÉDIGENT du texte
+ * (adaptation du CV, chat éditeur, adaptation de la lettre).
+ *
+ * Sans elle, le modèle produit du français de candidature standard — « fort de mon
+ * expérience », « force de proposition », participes présents collés en fin de phrase —
+ * qu'un recruteur repère immédiatement comme généré. Transposition en français du skill
+ * `.claude/commands/humanize.md` (lui-même écrit pour l'anglais), restreinte au domaine
+ * CV / lettre de motivation.
+ *
+ * PÉRIMÈTRE : le texte rédigé uniquement. Les listes (compétences, savoir-être, centres
+ * d'intérêt) sont les mots du candidat — cette règle ne doit jamais servir de prétexte à
+ * les réécrire.
+ */
+export const HUMAN_TONE_RULE =
+  "\nTONALITÉ — ÉCRIRE COMME UN HUMAIN, PAS COMME UNE IA :\n" +
+  "Le texte que tu rédiges (résumé/accroche, puces d'expérience, corps de lettre) doit sonner " +
+  "comme s'il avait été écrit par le candidat lui-même. Un recruteur qui lit cinquante " +
+  "candidatures par jour repère un texte d'IA en quelques secondes, et c'est éliminatoire.\n" +
+  "PÉRIMÈTRE : cette règle vise le texte RÉDIGÉ. Les listes (compétences, savoir-être, outils, " +
+  "langues, centres d'intérêt) restent les mots du candidat : ne les réécris pas au nom du style.\n" +
+  "INTERDIT — clichés de candidature : « fort de mon expérience », « c'est avec un grand intérêt " +
+  "que », « je suis convaincu que mon profil correspond parfaitement », « véritable opportunité », " +
+  "« mettre mes compétences au service de », « mettre à profit », « passionné par », « dynamique et " +
+  "motivé », « rigoureux et autonome », « force de proposition », « à l'écoute », « leader dans son " +
+  "domaine », « n'hésitez pas à me contacter », « je me tiens à votre disposition », « solide " +
+  "expertise », « solide expérience », « excellent relationnel », « en adéquation avec », " +
+  "« m'intéresse vivement ».\n" +
+  "INTERDIT — vocabulaire d'IA : « au cœur de », « s'inscrit dans », « témoigne de », « illustre " +
+  "parfaitement », « atout majeur », « levier », « synergie », « proactif », « incontournable », " +
+  "« riche de », « en effet », « par ailleurs », « il est important de noter ».\n" +
+  "INTERDIT — tics de structure :\n" +
+  "- le participe présent collé en fin de phrase pour faire profond (« …, permettant d'optimiser " +
+  "les process », « …, contribuant à la satisfaction client ») : coupe-le, ou fais-en une vraie " +
+  "proposition avec un sujet et un verbe ;\n" +
+  "- l'énumération par trois automatique (« rigueur, autonomie et esprit d'équipe ») : n'en garde " +
+  "que ce qui compte vraiment ;\n" +
+  "- le tiret cadratin (—) à l'intérieur d'une phrase : une virgule, un point ou une parenthèse " +
+  "font le travail. SEULE EXCEPTION : les tirets cadratins exigés par un format imposé ailleurs " +
+  "dans ces consignes, qui restent obligatoires ;\n" +
+  "- des phrases toutes de la même longueur : alterne les courtes et les longues ;\n" +
+  "- la conclusion de remplissage (« je serais ravi d'échanger », « au plaisir de vous rencontrer ») : " +
+  "arrête-toi quand tu as fini de dire ce que tu avais à dire.\n" +
+  "À FAIRE À LA PLACE : des faits. Ce que la personne a fait, avec quoi, pour quel résultat. " +
+  "Un verbe concret plutôt qu'un adjectif flatteur, un chiffre plutôt qu'un superlatif. " +
+  "Si une phrase pourrait figurer telle quelle dans n'importe quelle autre candidature, elle ne " +
+  "dit rien : supprime-la.\n" +
+  "DERNIÈRE ÉTAPE, AVANT DE RÉPONDRE : relis ce que tu viens d'écrire et demande-toi « qu'est-ce " +
+  "qui, là-dedans, sent l'IA ? ». Corrige ces passages, puis seulement réponds.\n";
+
 // ---- adaptation HTML, par niveau (pipeline HTML legacy) ---------------------
 
 export type TailorLevel = "peu" | "adapte" | "hyper" | "sur-mesure";
@@ -404,7 +454,7 @@ export function tailorHtmlSystem(level: TailorLevel, isMaster = false): string {
 export function tailorResumeSystem(level: TailorLevel): string {
   const rules = RESUME_TAILOR_RULES[level] ?? RESUME_TAILOR_RULES.adapte;
   const base = level === "sur-mesure" ? SYSTEM_TAILOR_RESUME_BASE_INVENT : SYSTEM_TAILOR_RESUME_BASE;
-  return base + rules + SYSTEM_TAILOR_RESUME_TAIL;
+  return base + rules + HUMAN_TONE_RULE + SYSTEM_TAILOR_RESUME_TAIL;
 }
 
 // ---- chat éditeur (port de _SYSTEM_EDITOR_CHAT, ai_engine.py) ----------------
@@ -425,8 +475,9 @@ export const SYSTEM_EDITOR_CHAT =
   "   (vrai nom d'entreprise, intitulé de poste réaliste, dates cohérentes, description convaincante).\n" +
   "   Dans ce cas, signale-le clairement dans 'reply' (ex : 'J'ai ajouté une expérience fictive.').\n" +
   "2. PRÉSERVE tous les faits existants : noms, dates, diplômes, compétences, langues.\n" +
-  "3. Tu peux : réécrire, reformuler, réorganiser, corriger l'orthographe, adapter le ton à une offre d'emploi.\n\n" +
-  "FORMAT DE RÉPONSE OBLIGATOIRE — JSON PUR, RIEN D'AUTRE :\n" +
+  "3. Tu peux : réécrire, reformuler, réorganiser, corriger l'orthographe, adapter le ton à une offre d'emploi.\n" +
+  HUMAN_TONE_RULE +
+  "\nFORMAT DE RÉPONSE OBLIGATOIRE — JSON PUR, RIEN D'AUTRE :\n" +
   '{"reply":"Message court (1-3 phrases)","proposals":[{"id":"p1","title":"Titre court",' +
   '"summary":"Ce qui change (1-2 phrases)","json":{...}}]}' + "\n\n" +
   "CONTRAINTES :\n" +
@@ -472,7 +523,14 @@ export const SYSTEM_ADAPT_LETTER =
   "- N'invente AUCUN fait : utilise uniquement les expériences et compétences réellement présentes dans le CV.\n" +
   "- CONSERVE telles quelles les variables {Entreprise}, {Poste}, {M/Mme Nom}, {Prénom}, {Nom}, {Date} " +
   "si le texte en contient — ne les remplace jamais par leur valeur.\n" +
-  "- Réponds en français.\n\n" +
+  "- Réponds en français.\n" +
+  HUMAN_TONE_RULE +
+  "La voix du candidat prime : si SON texte contient une formule que la règle ci-dessus proscrit, " +
+  "tu peux la laisser. En revanche, chaque phrase que TU écris ou réécris doit respecter cette règle.\n" +
+  "RAPPEL FINAL, PLUS FORT QUE LA RÈGLE DE TONALITÉ : les variables {Entreprise}, {Poste}, " +
+  "{M/Mme Nom}, {Prénom}, {Nom} et {Date} se recopient TELLES QUELLES, accolades comprises. " +
+  "L'exigence d'écrire concret ne t'autorise JAMAIS à les remplacer par leur valeur : c'est " +
+  "l'application qui les remplira.\n\n" +
   "FORMAT DE RÉPONSE OBLIGATOIRE — JSON PUR, RIEN D'AUTRE :\n" +
   '{"body": "le corps adapté, avec des sauts de ligne \\n entre les paragraphes"}\n\n' +
   "CONTRAINTES :\n" +

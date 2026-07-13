@@ -41,6 +41,41 @@
 
 ## Journal
 
+### 2026-07-13 : Tonalité de l'IA — du texte qui ne sent plus l'IA
+
+- **Quoi :** nouvelle règle partagée `HUMAN_TONE_RULE` (`web/src/lib/ai/prompts.ts`),
+  injectée dans les **trois** prompts qui rédigent du texte : adaptation du CV
+  (`tailorResumeSystem`, tous niveaux), chat éditeur (`SYSTEM_EDITOR_CHAT`) et
+  adaptation de la lettre (`SYSTEM_ADAPT_LETTER`). Elle proscrit les clichés de
+  candidature (« fort de mon expérience », « mettre à profit », « force de
+  proposition »…), le vocabulaire d'IA, le participe présent collé en fin de phrase,
+  l'énumération par trois, le tiret cadratin en prose et la conclusion de remplissage.
+- **Pourquoi :** un texte qui « sent l'IA » fait éliminer la candidature. Le prompt de
+  lettre disait même « CONSERVE le ton » sans jamais définir lequel.
+- **Périmètre volontairement restreint :** la règle ne vise que le texte RÉDIGÉ
+  (résumé, puces, corps de lettre). Les listes (compétences, savoir-être, langues,
+  centres d'intérêt) sont les mots du candidat : la règle interdit explicitement de les
+  réécrire au nom du style. Les prompts d'**extraction** ne la portent pas — sinon ils
+  réécriraient le CV importé au lieu de le recopier (architecture « zéro perte »).
+- **Deux pièges rencontrés, tous deux corrigés :**
+  1. la règle bannit le tiret cadratin, mais les compétences imposent le format
+     `Mot clé — Description`. Citer ce format dans la règle le faisait fuiter dans le
+     niveau « subtil », qui interdit justement de reformater les compétences (attrapé
+     par un test existant). L'exception reste donc **allusive** ;
+  2. l'exigence d'écrire concret poussait le modèle à remplacer les variables
+     `{Poste}` / `{Entreprise}` par leur valeur (tenues 1 fois sur 3). Corrigé par un
+     rappel final placé après la règle, explicitement « plus fort que la règle de
+     tonalité » → 3/3.
+- **Fichiers touchés :** `web/src/lib/ai/prompts.ts`, `web/src/lib/ai/prompts.test.ts`.
+- **Résultat vérifs :** A/B réel contre Gemini (fichiers de test temporaires, supprimés
+  depuis). Lettre, 3 tirages : 3, 4 et 2 clichés **avant** la règle → **0, 0, 0 après**,
+  variables tenues 3/3. CV adapté : schéma valide, `softSkills`/`languages`/`interests`
+  intacts, format `Mot clé — Description` conservé, « 400 k€ » préservé, « fort de »
+  disparu du résumé. `npm test` : 247 tests, 37 fichiers, verts. `npm run lint` : 0 erreur.
+- **Commit :** voir ci-dessous (`feat(ia)`).
+
+---
+
 ### 2026-07-13 : `main` redevient la branche de référence (GitHub + Vercel)
 
 - **Quoi :** fusion en fast-forward de `feature/refonte-ui-nextjs` dans `main`
