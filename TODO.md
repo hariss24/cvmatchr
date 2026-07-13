@@ -19,9 +19,26 @@ Suivi des fonctionnalités de l'application (version Next.js).
 - [x] Éditeur de profil avec preview PDF en temps réel (React PDF)
 - [x] Historique local des CVs (IndexedDB via Dexie)
 - [x] Toast notifications (uiStore)
+- [x] Annuler / Rétablir (Ctrl+Z / Ctrl+Shift+Z) — historique global du CV
+- [x] Page Aide / FAQ (« Comment ça marche »)
+- [x] TopBar minimaliste façon SaaS (3 zones)
+
+### CV & import
+- [x] Import « zéro perte » : sections libres, infos personnelles libres
+      (permis, portfolio, mobilité…), extraction cloisonnée
+- [x] Ordre des sections et en-tête pilotés par le CV — réordonnables à la main
+- [x] Masquer une section sans l'effacer (l'œil dans le formulaire)
+- [x] Les 4 modèles itèrent sur les sections du CV (plus aucune liste en dur)
+
+### Lettre & offres
+- [x] Pack candidature : page dédiée `/pack`, plus de modal qui redemande l'offre
+      (l'offre déjà fournie est réutilisée telle quelle)
+- [x] Éditeur à étiquettes (VariableEditor) pour le corps de la lettre
+- [x] Profil « Mes informations » — pré-remplissage CV et lettre
+- [x] Onglet **Offres** : recherche France Travail, pré-filtre et scoring des annonces
 
 ### Architecture Next.js
-- [x] Déploiement Vercel
+- [x] Déploiement Vercel (production sur `main` depuis le 13/07)
 - [x] Refonte totale de la génération PDF : passage de Playwright/HTML à React PDF (génération pure client)
 - [x] Suppression de l'ancien backend Python/Flask
 
@@ -29,18 +46,10 @@ Suivi des fonctionnalités de l'application (version Next.js).
 
 ## 🔵 Priorité haute — à faire
 
-- [ ] **Nettoyage et stabilisation globale**
-  Vérifier l'intégrité de bout en bout de l'application post-migration.
-
-- [ ] **Annuler / Rétablir (Ctrl+Z / Ctrl+Shift+Z)**
-  Permettre de revenir en arrière (Ctrl+Z) et de rétablir (Ctrl+Shift+Z) les
-  modifications du CV, pour récupérer après une fausse manipulation ou une
-  adaptation IA ratée.
-
-- [ ] **Supprimer la modal de re-saisie de l'offre pour le Pack candidature**
-  Le clic sur « Créer le pack candidature » ouvre une modal qui redemande la
-  description du poste — la supprimer et réutiliser directement l'offre déjà
-  fournie.
+- [ ] **Validation de bout en bout sur un vrai CV**
+      Tout le chantier « zéro perte » est terminé côté code, mais reste à
+      éprouver sur un CV réellement importé (rubriques inhabituelles, ordre,
+      sections masquées, rendu dans les 4 modèles).
 
 ---
 
@@ -62,4 +71,4 @@ Suivi des fonctionnalités de l'application (version Next.js).
 
 ---
 
-*Dernière mise à jour : 7 juillet 2026*
+*Dernière mise à jour : 13 juillet 2026*
