@@ -12,6 +12,10 @@ Suivi des fonctionnalités de l'application (version Next.js).
 - [x] Restriction du chat IA au périmètre CV/lettre de motivation uniquement
 - [x] Règle anti-détection : interdiction de citer l'entreprise cible
 - [x] Modèle Gemini intégré via Vercel AI SDK
+- [x] **Bug lettre : le nom dans la formule de politesse** — le chat ne recevait aucune définition
+      des champs d'une lettre (le CV, si). Corrigé par `LETTER_FIELDS_RULE` : rôle explicite des
+      12 champs, `signoff` ne contient jamais de nom. Vérifié : 1 tirage fautif sur 3 avant,
+      0 sur 6 après.
 - [x] **Tonalité de l'IA** — règle `HUMAN_TONE_RULE` (`web/src/lib/ai/prompts.ts`) injectée dans
       les trois prompts qui rédigent (adaptation CV, chat éditeur, adaptation de la lettre) :
       clichés de candidature, vocabulaire d'IA, participe présent en fin de phrase et
@@ -59,11 +63,6 @@ Suivi des fonctionnalités de l'application (version Next.js).
 - [ ] **Vider les champs entreprise et nom de poste quand on supprime ou crée un nouveau CV**
   Quand l'utilisateur clique sur supprimer ou créer un nouveau CV, vider les champs entreprise
   et nom de poste.
-
-- [ ] **Bug lettre de motivation IA**
-  Quand une lettre est générée via le chat IA à partir d'une description de poste, l'IA met
-  « Hariss HAFEJI » dans la case « formule de politesse » et « Prénom Nom » dans la case
-  « signature ». Les deux champs sont inversés / mal remplis.
 
 - [ ] **Validation de bout en bout sur un vrai CV**
   Le chantier « zéro perte » est terminé côté code, mais reste à éprouver sur un CV réellement

@@ -11,11 +11,12 @@ import {
   SYSTEM_TEXT_TO_RESUME,
   SYSTEM_EDITOR_CHAT,
   HUMAN_TONE_RULE,
+  LETTER_FIELDS_RULE,
   tailorResumeSystem,
   tailorHtmlSystem,
   type TailorLevel,
 } from "./prompts";
-import { resumeSchema } from "@/lib/resume/schema";
+import { resumeSchema, letterSchema } from "@/lib/resume/schema";
 
 const LEVELS: TailorLevel[] = ["peu", "adapte", "hyper", "sur-mesure"];
 
@@ -214,5 +215,29 @@ describe("prompts — tonalité humaine", () => {
     expect(HUMAN_TONE_RULE).not.toContain("Mot clé — Description");
     expect(tailorResumeSystem("peu")).not.toContain("Mot clé — Description");
     expect(tailorResumeSystem("adapte")).toContain("Mot clé — Description");
+  });
+});
+
+describe("prompts — champs d'une lettre", () => {
+  // Le chat recevait la lettre sans AUCUNE définition de ses champs (« respecte le même
+  // schéma que l'entrée »), là où le CV a droit à RESUME_SCHEMA_DESC. Le modèle devait
+  // deviner : il écrivait le nom du candidat dans la formule de politesse ~1 fois sur 3.
+  // 'signoff' et 'signature' alimentent deux blocs distincts du PDF (LetterDocument) :
+  // les confondre affiche le nom à la place de la politesse.
+  it("le chat éditeur définit le rôle de chaque champ de lettre", () => {
+    expect(SYSTEM_EDITOR_CHAT).toContain("RÔLE DE CHAQUE CHAMP D'UNE LETTRE");
+    expect(SYSTEM_EDITOR_CHAT).toContain("'signoff'");
+    expect(SYSTEM_EDITOR_CHAT).toContain("'signature'");
+  });
+
+  it("le chat interdit explicitement le nom dans la formule de politesse", () => {
+    expect(LETTER_FIELDS_RULE).toContain("ce champ ne contient jamais de nom");
+    expect(LETTER_FIELDS_RULE).toContain("Recopie la valeur de 'sender_name'");
+  });
+
+  it("les champs décrits au chat correspondent au schéma réel de la lettre", () => {
+    for (const cle of Object.keys(letterSchema.shape)) {
+      expect(LETTER_FIELDS_RULE, cle).toContain(`'${cle}'`);
+    }
   });
 });

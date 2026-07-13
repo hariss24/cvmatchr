@@ -459,9 +459,35 @@ export function tailorResumeSystem(level: TailorLevel): string {
 
 // ---- chat éditeur (port de _SYSTEM_EDITOR_CHAT, ai_engine.py) ----------------
 
+/**
+ * Rôle de chaque champ d'une lettre. Le CV a droit à `RESUME_SCHEMA_DESC` ; la lettre,
+ * elle, n'avait AUCUNE définition — le chat se contentait de « respecte le même schéma
+ * que l'entrée ». Le modèle devait donc deviner ce que `signoff` et `signature` veulent
+ * dire, et écrivait le nom du candidat dans la formule de politesse environ une fois sur
+ * trois. Ces champs alimentent des blocs distincts du PDF (`LetterDocument`) : les
+ * confondre affiche le nom à la place de la politesse.
+ */
+export const LETTER_FIELDS_RULE =
+  "\nRÔLE DE CHAQUE CHAMP D'UNE LETTRE (à respecter à la lettre — ne confonds JAMAIS deux champs) :\n" +
+  "- 'sender_name' / 'sender_address' / 'sender_contact' : identité et coordonnées du CANDIDAT.\n" +
+  "- 'recipient_name' / 'recipient_service' / 'recipient_address' : coordonnées de l'ENTREPRISE.\n" +
+  "- 'date' : le lieu et la date d'envoi. Ex : « Lyon, le 13/07/2026 ».\n" +
+  "- 'subject' : l'objet de la lettre. Une ligne, ex : « Candidature au poste de Chargé de projet ».\n" +
+  "- 'greeting' : la formule d'APPEL, et rien d'autre. Ex : « Madame, Monsieur, ».\n" +
+  "- 'body' : le CORPS de la lettre, uniquement. Il ne contient NI la formule d'appel, NI la " +
+  "formule de politesse, NI le nom du candidat : ces trois éléments ont leur propre champ.\n" +
+  "- 'signoff' : la formule de POLITESSE finale, et RIEN D'AUTRE. Ex : « Veuillez agréer, Madame, " +
+  "Monsieur, l'expression de mes salutations distinguées. » ou « Cordialement, ». " +
+  "INTERDICTION ABSOLUE d'y écrire le nom du candidat : ce champ ne contient jamais de nom.\n" +
+  "- 'signature' : le NOM du candidat, et rien d'autre. Recopie la valeur de 'sender_name'. " +
+  "Ne le laisse jamais vide et n'y laisse jamais un texte générique du type « Prénom Nom » : " +
+  "si 'sender_name' porte un vrai nom, c'est celui-là qu'il faut mettre.\n";
+
 export const SYSTEM_EDITOR_CHAT =
   "Tu es un assistant UNIQUEMENT dédié à l'amélioration de CV et lettres de motivation.\n" +
-  "Tu reçois le JSON actuel du document, ainsi qu'une demande de l'utilisateur.\n\n" +
+  "Tu reçois le JSON actuel du document, ainsi qu'une demande de l'utilisateur.\n" +
+  LETTER_FIELDS_RULE +
+  "\n" +
   "PÉRIMÈTRE STRICT — REFUS IMMÉDIAT HORS PÉRIMÈTRE :\n" +
   "- Tu traites UNIQUEMENT les demandes portant sur le contenu du CV/lettre affiché.\n" +
   "- Toute demande hors sujet (cuisine, code, culture générale, jeux, traduction indépendante du CV,\n" +

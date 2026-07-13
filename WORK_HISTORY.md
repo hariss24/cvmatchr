@@ -41,6 +41,34 @@
 
 ## Journal
 
+### 2026-07-13 : Le nom du candidat atterrissait dans la formule de politesse
+
+- **Symptôme signalé.** Lettre générée via le chat IA à partir d'une offre : « Hariss
+  HAFEJI » se retrouvait dans le champ *formule de politesse* (`signoff`) et « Prénom
+  Nom » dans la *signature*.
+- **Cause racine.** `SYSTEM_EDITOR_CHAT` ne décrivait AUCUN champ de lettre. Le CV a droit
+  à `RESUME_SCHEMA_DESC` (fiche détaillée) ; la lettre n'avait que « respecte le même
+  schéma que l'entrée ». Le modèle devait donc deviner ce que `signoff` et `signature`
+  veulent dire — et se trompait par intermittence. Ce n'était pas une inversion de code :
+  `LetterDocument` lit bien deux blocs distincts, c'est le contenu qui arrivait faux.
+  Le « Prénom Nom » vient de `normalizeLetter`, qui comble tout champ vide avec
+  `DEFAULT_LETTER` : quand l'IA laissait `signature` vide, l'app y réinjectait son propre
+  placeholder.
+- **Correctif.** Nouvelle constante `LETTER_FIELDS_RULE` (`web/src/lib/ai/prompts.ts`)
+  injectée dans `SYSTEM_EDITOR_CHAT` : rôle explicite de chacun des 12 champs, avec deux
+  interdits nommés — `signoff` ne contient JAMAIS de nom, `signature` recopie
+  `sender_name` et ne reste jamais sur un texte générique.
+- **Fichiers touchés :** `web/src/lib/ai/prompts.ts`, `web/src/lib/ai/prompts.test.ts`.
+- **Résultat vérifs :** reproduction réelle contre Gemini (fichier temporaire, supprimé
+  depuis). AVANT : 1 tirage fautif sur 3 (`signoff = "Hariss HAFEJI"`). APRÈS : **0 fautif
+  sur 6**, `signoff` = formule de politesse, `signature` = le vrai nom. Test permanent
+  ajouté, DÉRIVÉ de `letterSchema` (même garde-fou anti-dérive que pour le CV) : il a
+  d'ailleurs immédiatement attrapé un champ oublié dans la fiche (`date`).
+  `npm test` : 250 tests verts. `npm run lint` : 0 erreur.
+- **Commit :** voir ci-dessous (`fix(ia)`).
+
+---
+
 ### 2026-07-13 : Tonalité de l'IA — du texte qui ne sent plus l'IA
 
 - **Quoi :** nouvelle règle partagée `HUMAN_TONE_RULE` (`web/src/lib/ai/prompts.ts`),
