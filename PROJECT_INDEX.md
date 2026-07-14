@@ -137,7 +137,7 @@ l'import PDF). Modèle Gemini par défaut : `gemini-3.1-flash-lite` (réglable v
 | `tailor-resume` | Adapte un CV structuré (JSON) à une offre — pipeline principal |
 | `tailor` | Adaptation HTML → HTML (mode expert, streaming SSE) |
 | `editor-chat` | Chat de l'éditeur : réponses + propositions de modification (`propose/preview/apply`) |
-| `ats-score` | Score ATS piloté par l'IA (mots-clés attendus par l'offre) |
+| `ats-score` | Analyse ATS : l'IA extrait les **exigences** de l'offre et dit lesquelles le CV prouve (elle ne calcule aucun score) |
 | `adapt-letter` | Adapte le corps du modèle de lettre de l'utilisateur à une offre (IA optionnelle du Pack) |
 | `extract-meta` | Extrait entreprise + poste d'une offre (préremplissage barre meta / nommage PDF) |
 | `pdf-to-resume` | Importe un CV depuis un PDF (rendu en images côté client via `pdf.js`, puis vision IA) |
@@ -146,12 +146,28 @@ l'import PDF). Modèle Gemini par défaut : `gemini-3.1-flash-lite` (réglable v
 | `extract-job` | « Extracteur magique d'offre » : scrape et nettoie une URL d'offre (LinkedIn, WTTJ…) via `src/lib/scraper/` |
 | `status` | Statut de configuration IA (clé serveur présente ou non) |
 
-**Score ATS local (sans IA)** : `src/lib/ats/score.ts` — analyse statistique
-côté client (mots-clés, stop-words français, sections détectées), indépendante
-du score ATS piloté par l'IA.
+**Système ATS** (`src/lib/ats/`, panneau `components/modals/AtsPanel.tsx`) :
+
+- `resumeText.ts` — sérialise le CV (`docStore.json`) en texte, zone par zone, en
+  excluant les sections masquées (absentes du PDF, donc invisibles pour un vrai ATS).
+- `engine.ts` — le moteur de score, **unique et partagé** par les deux chemins. Le score
+  global agrège 4 axes pondérés : **Mots-clés 40 %, Structure 25 %, Impact 20 %,
+  Adéquation 15 %**. Un terme de l'offre n'est retenu comme *exigence* que s'il est un
+  savoir-faire identifiable (lexique, composé, acronyme isolé), martelé par l'offre
+  (≥ 3 occurrences), ou présent dans l'intitulé du poste — sans quoi le dénominateur se
+  remplit de baratin RH.
+- Deux chemins, **un seul calcul** : « Score ATS » (local, gratuit, instantané) déduit les
+  exigences par pondération statistique ; « Analyser avec l'IA » les fait extraire par
+  l'IA (sémantique, synonymes, indispensable vs souhaité) **mais le score reste calculé
+  par le moteur** — donc reproductible d'un appel à l'autre.
+
+⚠️ **Ne jamais rebrancher l'ATS sur `docStore.html`** : ce champ est un vestige de
+l'ancien pipeline HTML, remis à `""` par `setJson`. C'est ce qui donnait un score de 0 et
+listait la présentation de l'entreprise en « mots-clés absents » (corrigé le 14/07).
 
 **White-fonting** : mots-clés manquants injectés en texte transparent 1px à
-l'export (`docStore.atsBoost`), pour le score ATS des plateformes de recrutement.
+l'export (`docStore.atsBoost` → `pdfgen/AtsBoost.tsx`), pour le score ATS des
+plateformes de recrutement.
 
 ---
 

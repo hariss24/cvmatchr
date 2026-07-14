@@ -458,6 +458,38 @@ button.ghost:active { box-shadow: var(--neu-inset); transform: translateY(1px); 
 .ats-ai-btn:disabled { opacity: 0.5; cursor: default; }
 .ats-boost-btn.active { color: var(--orange-text); box-shadow: var(--neu-inset); }
 
+/* ---- Rapport ATS : les 4 axes pondérés ---- */
+.ats-axes { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.ats-axis { display: flex; flex-direction: column; gap: 4px; }
+.ats-axis-head { display: flex; align-items: baseline; gap: 8px; }
+.ats-axis-label { font-size: 12px; font-weight: 700; color: var(--text); }
+.ats-axis-weight { font-size: 11px; color: var(--muted); margin-right: auto; }
+.ats-axis-score { font-size: 13px; font-weight: 800; }
+.ats-axis-score.ats-ok { color: var(--success); }
+.ats-axis-score.ats-mid { color: #f5a623; }
+.ats-axis-score.ats-low { color: var(--error); }
+.ats-axis-bar { height: 6px; border-radius: 999px; background: var(--bg); box-shadow: var(--neu-inset); overflow: hidden; }
+.ats-axis-fill { height: 100%; border-radius: 999px; transition: width 300ms ease; }
+.ats-axis-fill.ats-ok { background: var(--success); }
+.ats-axis-fill.ats-mid { background: #f5a623; }
+.ats-axis-fill.ats-low { background: var(--error); }
+.ats-axis-hint { font-size: 11px; color: var(--muted); margin: 0; line-height: 1.4; }
+
+/* ---- Rapport ATS : corrections prioritaires ---- */
+.ats-priorities { list-style: none; display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; }
+.ats-priority { background: var(--bg); border-radius: 10px; padding: 10px 12px; box-shadow: var(--neu-raised-sm); }
+.ats-priority-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.ats-priority-title { font-size: 12px; font-weight: 700; color: var(--text); }
+.ats-priority-zone {
+  font-size: 10px; font-weight: 600; color: var(--orange-text); margin-left: auto;
+  padding: 2px 8px; border-radius: 999px; box-shadow: var(--neu-inset); white-space: nowrap;
+}
+.ats-priority-text { font-size: 11px; color: var(--muted); margin: 0 0 3px; line-height: 1.45; }
+.ats-priority-example {
+  font-size: 11px; color: var(--text); margin: 4px 0 0; line-height: 1.45;
+  padding: 6px 8px; border-radius: 8px; box-shadow: var(--neu-inset); font-style: italic;
+}
+
 /* ---- Modale d'adaptation 2 colonnes (porté de static/css/main.css) ---- */
 .ui-dialog__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .ui-dialog__close {

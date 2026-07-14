@@ -41,6 +41,49 @@
 
 ## Journal
 
+### 2026-07-14 : Le système ATS était branché sur un CV vide — refonte du moteur
+
+- **Symptôme signalé.** Le panneau ATS affichait **score 0**, « 0 mot-clé présent · 20
+  absents », **toutes** les sections marquées ✗, et listait comme « mots-clés absents » la
+  présentation de l'entreprise (*propos, accueil, universite, paris, dauphine-psl,
+  selective, neanmoins, soucieuse…*). Le bouton « Analyser avec l'IA » échouait aussi.
+- **Cause racine (reproduite avant tout correctif).** `AtsPanel` analysait
+  `docStore.html` — vestige du pipeline HTML d'avant la migration React PDF, que `setJson`
+  remet à `""` à chaque modification. L'ATS comparait donc une **chaîne vide** à l'offre :
+  0 mot trouvé → score 0, et `missing` renvoyait les 20 premiers mots de l'annonce. Un test
+  de reproduction jetable a sorti la liste **identique mot pour mot** à celle de la capture.
+  Même champ vide envoyé à `/api/ats-score` → 400 « CV et offre requis », d'où le bouton IA
+  cassé. Le prompt IA, lui, était bon : il n'était jamais atteint.
+- **Second défaut, de conception.** Même alimenté correctement, l'ancien score valait
+  `mots trouvés ÷ TOUS les mots de l'offre` : « python » pesait autant que « néanmoins ».
+  Un CV parfaitement adapté plafonnait à **22/100** (mesuré). Un sac de mots ne peut pas
+  distinguer une compétence d'un mot de décor — d'où la refonte plutôt qu'un réglage.
+- **Quoi.**
+  - `lib/ats/resumeText.ts` (neuf) — sérialise `docStore.json` en texte par zones, en
+    excluant les sections masquées (absentes du PDF, donc d'un vrai ATS). Détection des
+    sections lue dans les données, au lieu de regex sur des `<h1>` qui n'existent plus.
+  - `lib/ats/engine.ts` (neuf, remplace `score.ts`) — score sur **4 axes pondérés**
+    (Mots-clés 40 %, Structure 25 %, Impact 20 %, Adéquation 15 %), verdict, conseils par
+    axe. Un terme n'est retenu comme *exigence* que s'il est un savoir-faire identifiable,
+    martelé par l'offre (≥ 3 occurrences) ou présent dans l'intitulé du poste.
+  - `/api/ats-score` + `SYSTEM_ATS_SCORE` — **l'IA n'attribue plus le score**. Elle extrait
+    les exigences (hard/nice), dit lesquelles le CV *prouve* (synonymes compris) et rédige
+    les corrections prioritaires ; le moteur fait l'arithmétique. Résultat reproductible.
+  - `AtsPanel` — refondu en rapport : score + verdict, 4 jauges, corrections prioritaires
+    avec la rubrique où les appliquer, exigences couvertes/à combler, sections.
+- **Fichiers touchés :** `web/src/lib/ats/{resumeText,engine}.ts` (+ tests), suppression de
+  `web/src/lib/ats/score.ts` (+ test), `web/src/app/api/ats-score/route.ts` (+ test),
+  `web/src/lib/ai/prompts.ts`, `web/src/components/modals/AtsPanel.tsx`,
+  `web/src/lib/pdfgen/AtsBoost.tsx` (commentaire), `web/src/app/globals.css`,
+  `web/tests/e2e/ats.spec.ts`, `PROJECT_INDEX.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` OK · `npx vitest run` **256 tests / 38 fichiers
+  verts** · `npm run lint` 0 erreur (1 warning préexistant, `FormEditor` `<img>`) ·
+  `npx playwright test tests/e2e/ats.spec.ts` **2/2 verts**. Validation externe : sur
+  l'offre Dauphine réelle, le moteur sort **82/100 « Bon, à optimiser »** et pointe
+  *google-ads, crm, email-marketing, meta-ads* comme manquants — **le même diagnostic**
+  qu'un analyseur ATS du marché testé en parallèle (70/100, mêmes 4 manques).
+- **Commit :** à faire.
+
 ### 2026-07-13 : Le nom du candidat atterrissait dans la formule de politesse
 
 - **Symptôme signalé.** Lettre générée via le chat IA à partir d'une offre : « Hariss

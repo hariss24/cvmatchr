@@ -3,22 +3,36 @@
 import { useState } from "react";
 import { useDocStore } from "@/state/docStore";
 import { postJson } from "@/lib/ai/client";
-import { analyzeAts, type AtsAnalysis } from "@/lib/ats/score";
+import type { Resume } from "@/lib/resume/schema";
+import { resumeToText } from "@/lib/ats/resumeText";
+import {
+  analyzeResumeAts,
+  analyzeWithRequirements,
+  type AtsReport,
+  type Priority,
+  type Requirement,
+} from "@/lib/ats/engine";
 import { toast } from "@/state/uiStore";
 
 /**
- * Panneau Score ATS inline (intégré au modal d'adaptation, plus en modal séparé).
- * Analyse statistique locale instantanée + analyse IA serveur optionnelle, sur l'offre
- * partagée avec l'adaptation. Port de `_renderAts` / `_runAtsAI` (static/js/app.js).
+ * Rapport ATS : score global pondéré, 4 axes, corrections prioritaires, mots-clés, sections.
+ *
+ * Deux chemins, un seul moteur de calcul (`lib/ats/engine.ts`) :
+ *  - « Score ATS » : instantané, gratuit, exigences déduites de l'offre par pondération ;
+ *  - « Analyser avec l'IA » : l'IA extrait les exigences et repère les synonymes, le score
+ *    reste calculé par le moteur — donc reproductible.
+ *
+ * ⚠️ Le CV vient de `docStore.json`. NE JAMAIS repasser par `docStore.html` : ce champ est
+ * un vestige de l'ancien pipeline HTML, toujours vide depuis la migration React PDF — c'est
+ * ce qui donnait un score de 0 et listait le baratin de l'offre en « mots-clés absents ».
  */
 
 const scoreClass = (s: number) => (s >= 70 ? "ats-ok" : s >= 45 ? "ats-mid" : "ats-low");
 
-type AiResult = {
-  score: number;
-  matched_skills: string[];
-  missing_hard_skills: string[];
-  missing_nice_to_have: string[];
+type AiResponse = {
+  job_title: string;
+  requirements: Requirement[];
+  priorities: Priority[];
 };
 
 function Pills({ items, kind }: { items: string[]; kind: string }) {
@@ -34,40 +48,94 @@ function Pills({ items, kind }: { items: string[]; kind: string }) {
   );
 }
 
-export default function AtsPanel({ jobDesc }: { jobDesc: string }) {
-  const [local, setLocal] = useState<AtsAnalysis | null>(null);
-  const [ai, setAi] = useState<AiResult | null>(null);
-  const [busy, setBusy] = useState(false);
-  // Mots-clés absents de la dernière analyse, candidats au booster invisible.
-  const [missingKeywords, setMissingKeywords] = useState<string[]>([]);
-  const atsBoost = useDocStore((s) => s.atsBoost);
+function Axes({ axes }: { axes: AtsReport["axes"] }) {
+  return (
+    <div className="ats-axes">
+      {axes.map((a) => (
+        <div key={a.key} className="ats-axis">
+          <div className="ats-axis-head">
+            <span className="ats-axis-label">{a.label}</span>
+            <span className="ats-axis-weight">Poids {a.weight} %</span>
+            <span className={`ats-axis-score ${scoreClass(a.score)}`}>{a.score}</span>
+          </div>
+          <div className="ats-axis-bar">
+            <div className={`ats-axis-fill ${scoreClass(a.score)}`} style={{ width: `${a.score}%` }} />
+          </div>
+          <p className="ats-axis-hint">{a.hint}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
 
-  const runLocal = () => {
+function Priorities({ items }: { items: Priority[] }) {
+  if (!items.length) return null;
+  return (
+    <>
+      <div className="ats-keywords-title">Corrections prioritaires</div>
+      <ol className="ats-priorities">
+        {items.map((p, i) => (
+          <li key={i} className="ats-priority">
+            <div className="ats-priority-head">
+              <span className="ats-priority-title">{p.title}</span>
+              {p.zone ? <span className="ats-priority-zone">{p.zone}</span> : null}
+            </div>
+            {p.problem ? <p className="ats-priority-text">{p.problem}</p> : null}
+            {p.fix ? <p className="ats-priority-text">{p.fix}</p> : null}
+            {p.example ? <p className="ats-priority-example">{p.example}</p> : null}
+          </li>
+        ))}
+      </ol>
+    </>
+  );
+}
+
+export default function AtsPanel({ jobDesc }: { jobDesc: string }) {
+  const [report, setReport] = useState<AtsReport | null>(null);
+  const [priorities, setPriorities] = useState<Priority[]>([]);
+  const [byAi, setByAi] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const atsBoost = useDocStore((s) => s.atsBoost);
+  const docType = useDocStore((s) => s.docType);
+
+  const isCv = docType !== "Lettre";
+
+  /** Le CV et l'offre, ou null si l'analyse n'a pas de sens (lettre, offre vide). */
+  const inputs = (): { resume: Resume; desc: string; role: string } | null => {
     const desc = jobDesc.trim();
     if (!desc) {
       toast("Colle d'abord une offre d'emploi.", "error");
-      return;
+      return null;
     }
-    setAi(null);
-    const result = analyzeAts(useDocStore.getState().html, desc);
-    setLocal(result);
-    setMissingKeywords(result.boostKeywords);
+    if (!isCv) {
+      toast("L'analyse ATS ne s'applique qu'à un CV.", "error");
+      return null;
+    }
+    const { json, role } = useDocStore.getState();
+    return { resume: json as Resume, desc, role };
+  };
+
+  const runLocal = () => {
+    const input = inputs();
+    if (!input) return;
+    setPriorities([]);
+    setByAi(false);
+    setReport(analyzeResumeAts(input.resume, input.desc, input.role));
   };
 
   const runAi = async () => {
-    const desc = jobDesc.trim();
-    if (!desc) {
-      toast("Colle d'abord une offre d'emploi.", "error");
-      return;
-    }
+    const input = inputs();
+    if (!input) return;
     setBusy(true);
     try {
-      const res = await postJson<AiResult>("/api/ats-score", {
-        cv_html: useDocStore.getState().html,
-        job_desc: desc,
+      const res = await postJson<AiResponse>("/api/ats-score", {
+        resume_text: resumeToText(input.resume),
+        job_desc: input.desc,
+        role: input.role,
       });
-      setAi(res);
-      setMissingKeywords([...res.missing_hard_skills, ...res.missing_nice_to_have]);
+      setReport(analyzeWithRequirements(input.resume, res.requirements, input.role || res.job_title));
+      setPriorities(res.priorities);
+      setByAi(true);
     } catch (err) {
       toast(err instanceof Error ? err.message : "Échec de l'analyse IA.", "error");
     } finally {
@@ -75,11 +143,13 @@ export default function AtsPanel({ jobDesc }: { jobDesc: string }) {
     }
   };
 
-  // Active/désactive l'injection invisible des mots-clés absents (port de `_toggleAtsBoost`).
+  // Injecte (ou retire) les mots-clés absents en texte invisible dans le PDF exporté.
   const toggleBoost = () => {
-    const { setAtsBoost } = useDocStore.getState();
     const next = !atsBoost.enabled;
-    setAtsBoost({ enabled: next, keywords: next ? missingKeywords : [] });
+    useDocStore.getState().setAtsBoost({
+      enabled: next,
+      keywords: next ? (report?.boostKeywords ?? []) : [],
+    });
     toast(
       next
         ? "🧲 Booster actif — mots-clés injectés invisiblement dans le CV."
@@ -99,24 +169,37 @@ export default function AtsPanel({ jobDesc }: { jobDesc: string }) {
         </button>
       </div>
 
-      {local && !ai ? (
+      {report ? (
         <div className="ats-result">
+          {byAi ? <div className="ats-ai-badge">✨ Analyse IA</div> : null}
+
           <div className="ats-score-row">
-            <div className={`ats-score-circle ${scoreClass(local.score)}`}>{local.score}</div>
+            <div className={`ats-score-circle ${scoreClass(report.score)}`}>{report.score}</div>
             <div className="ats-score-label">
-              Score ATS estimé
+              {report.verdict}
               <span>
-                {local.matched.length} mots-clés présents · {local.missing.length} absents
+                {report.matched.length} exigence{report.matched.length > 1 ? "s" : ""} couverte
+                {report.matched.length > 1 ? "s" : ""} · {report.missing.length} à combler
               </span>
             </div>
           </div>
-          {local.matched.length ? <div className="ats-keywords-title">Mots-clés présents</div> : null}
-          <Pills items={local.matched} kind="match" />
-          {local.missing.length ? <div className="ats-keywords-title">Mots-clés absents</div> : null}
-          <Pills items={local.missing} kind="missing" />
+
+          <Axes axes={report.axes} />
+          <Priorities items={priorities} />
+
+          {report.missing.length ? (
+            <div className="ats-keywords-title">Exigences à combler</div>
+          ) : null}
+          <Pills items={report.missing.map((k) => k.term)} kind="missing" />
+
+          {report.matched.length ? (
+            <div className="ats-keywords-title">Exigences couvertes</div>
+          ) : null}
+          <Pills items={report.matched.map((k) => k.term)} kind="match" />
+
           <div className="ats-keywords-title">Sections détectées</div>
           <div className="ats-sections">
-            {Object.entries(local.sections).map(([name, ok]) => (
+            {Object.entries(report.sections).map(([name, ok]) => (
               <span key={name} className={`ats-section-badge ${ok ? "found" : "missing"}`}>
                 {ok ? "✓" : "✗"} {name}
               </span>
@@ -125,29 +208,7 @@ export default function AtsPanel({ jobDesc }: { jobDesc: string }) {
         </div>
       ) : null}
 
-      {ai ? (
-        <div className="ats-result">
-          <div className="ats-ai-badge">✨ Analyse IA</div>
-          <div className="ats-score-row">
-            <div className={`ats-score-circle ${scoreClass(ai.score)}`}>{ai.score}</div>
-            <div className="ats-score-label">Adéquation CV / offre</div>
-          </div>
-          {ai.missing_hard_skills.length ? (
-            <div className="ats-keywords-title">⚠️ Compétences clés manquantes</div>
-          ) : null}
-          <Pills items={ai.missing_hard_skills} kind="missing" />
-          {ai.missing_nice_to_have.length ? (
-            <div className="ats-keywords-title">Atouts bonus manquants</div>
-          ) : null}
-          <Pills items={ai.missing_nice_to_have} kind="bonus" />
-          {ai.matched_skills.length ? (
-            <div className="ats-keywords-title">Compétences présentes</div>
-          ) : null}
-          <Pills items={ai.matched_skills} kind="match" />
-        </div>
-      ) : null}
-
-      {missingKeywords.length ? (
+      {report?.boostKeywords.length ? (
         <button
           type="button"
           className={`ats-ai-btn ats-boost-btn${atsBoost.enabled ? " active" : ""}`}

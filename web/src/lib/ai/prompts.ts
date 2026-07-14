@@ -512,28 +512,44 @@ export const SYSTEM_EDITOR_CHAT =
   "- 'json' = document JSON COMPLET (pas un extrait), respectant le même schéma que l'entrée.\n" +
   "- JSON PUR : aucune balise markdown, aucun ```json, aucun texte avant ou après le JSON.";
 
-// ---- score ATS (port de _SYSTEM_ATS_SCORE, ai_engine.py) --------------------
+// ---- score ATS ---------------------------------------------------------------
 
+/**
+ * L'IA N'ATTRIBUE PAS le score : elle extrait les exigences de l'offre et pointe celles
+ * qui sont réellement prouvées dans le CV (c'est là qu'elle est forte : sémantique,
+ * synonymes, distinction indispensable/souhaité). Le calcul du score est fait par
+ * `lib/ats/engine.ts`, pour être reproductible d'un appel à l'autre.
+ */
 export const SYSTEM_ATS_SCORE =
-  "Tu es un moteur d'analyse ATS (Applicant Tracking System) expert en recrutement.\n" +
-  "Tu reçois le HTML d'un CV et le texte d'une offre d'emploi.\n\n" +
+  "Tu es un analyste ATS (Applicant Tracking System) expert en recrutement.\n" +
+  "Tu reçois le TEXTE d'un CV et le texte d'une offre d'emploi.\n\n" +
   "TÂCHE :\n" +
-  "1. Extrais de l'OFFRE les vraies exigences, en distinguant :\n" +
-  "   - hard skills REQUIS (compétences techniques/métier indispensables) ;\n" +
-  "   - compétences 'nice-to-have' (souhaitées mais non bloquantes).\n" +
-  "   Ignore le bruit RH (ambiance, avantages, culture, soft skills génériques).\n" +
-  "2. Vérifie lesquelles sont réellement présentes dans le CV (synonymes et " +
-  "variantes acceptés : 'JS' = 'JavaScript', 'CI/CD' = 'intégration continue', etc.).\n" +
-  "3. Calcule un score d'adéquation 0-100 : pondère fortement les hard skills requis " +
-  "présents, faiblement les nice-to-have.\n\n" +
+  "1. Extrais de l'OFFRE ses exigences réelles, en distinguant :\n" +
+  "   - kind='hard' : compétence, outil ou savoir-faire INDISPENSABLE au poste ;\n" +
+  "   - kind='nice' : compétence SOUHAITÉE mais non bloquante.\n" +
+  "   Ignore le bruit : présentation de l'entreprise, culture, avantages, localisation,\n" +
+  "   diversité, soft skills génériques (« rigoureux », « dynamique », « autonome »).\n" +
+  "   Un mot qui n'est pas une compétence évaluable n'est PAS une exigence.\n" +
+  "2. Pour chaque exigence, dis si le CV la PROUVE (present=true/false).\n" +
+  "   Accepte synonymes et variantes : « JS » = « JavaScript », « CI/CD » = « intégration\n" +
+  "   continue », « GA4 » = « Google Analytics ». Une compétence seulement citée dans une\n" +
+  "   liste de mots-clés, sans aucune expérience/formation/projet qui l'illustre, compte\n" +
+  "   comme present=false : un recruteur veut la preuve, pas la mention.\n" +
+  "   'evidence' = l'extrait EXACT du CV qui la prouve (vide si present=false).\n" +
+  "3. Rédige 1 à 3 corrections PRIORITAIRES, les plus rentables d'abord.\n\n" +
   "FORMAT DE RÉPONSE OBLIGATOIRE — JSON PUR, RIEN D'AUTRE :\n" +
-  '{"score": 0-100, "matched_skills": ["..."], ' +
-  '"missing_hard_skills": ["..."], "missing_nice_to_have": ["..."]}\n\n' +
+  '{"job_title": "intitulé du poste tel que compris",\n' +
+  ' "requirements": [{"term": "...", "kind": "hard|nice", "present": true|false, "evidence": "..."}],\n' +
+  ' "priorities": [{"title": "...", "problem": "...", "fix": "...", "example": "...", "zone": "..."}]}\n\n' +
   "CONTRAINTES :\n" +
-  "- 'matched_skills' : compétences de l'offre RÉELLEMENT trouvées dans le CV.\n" +
-  "- 'missing_hard_skills' : hard skills REQUIS absents du CV (les plus importants à combler).\n" +
-  "- 'missing_nice_to_have' : compétences souhaitées absentes du CV.\n" +
-  "- Chaque compétence = libellé court (1-4 mots), sans phrase.\n" +
+  "- 'term' : libellé court (1-4 mots), tel qu'un recruteur l'écrirait. Pas de phrase.\n" +
+  "- 15 à 25 exigences maximum, les plus discriminantes. Pas de doublon.\n" +
+  "- 'title' : l'action à faire, à l'impératif (« Prouvez le CRM dans une expérience »).\n" +
+  "- 'problem' : ce qui cloche aujourd'hui, factuel, sans flatterie.\n" +
+  "- 'fix' : comment corriger, concrètement.\n" +
+  "- 'example' : une ligne de CV prête à adapter. N'INVENTE AUCUNE expérience que le\n" +
+  "  candidat n'a pas : propose une formulation à partir de ce qu'il a déjà.\n" +
+  "- 'zone' : où la placer — « Expériences », « Compétences », « Accroche », « Formation ».\n" +
   "- JSON PUR : aucune balise markdown, aucun ```json, aucun texte avant ou après le JSON.";
 
 // ---- adaptation du modèle de lettre à une offre ------------------------------
