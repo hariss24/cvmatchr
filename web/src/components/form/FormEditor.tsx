@@ -2,6 +2,7 @@
 
 import { useDocStore } from "@/state/docStore";
 import { buildSections } from "@/lib/resume/sections";
+import { SortableList, DragHandle, useSortableItem, moveItem } from "./Sortable";
 import type {
   Resume,
   ExperienceItem,
@@ -193,19 +194,33 @@ function Field({
   );
 }
 
-/** En-tête d'un item de liste avec bouton de suppression. */
-function ItemCard({ onRemove, children }: { onRemove: () => void; children: React.ReactNode }) {
+/** Carte d'un élément de liste : poignée à gauche, contenu, bouton de suppression. */
+function ItemCard({
+  index,
+  onRemove,
+  children,
+}: {
+  index: number;
+  onRemove: () => void;
+  children: React.ReactNode;
+}) {
+  const { ref, style, handleProps } = useSortableItem(index);
   return (
-    <div className="form-item">
-      <button
-        type="button"
-        className="form-btn-mini form-item__remove"
-        aria-label="Supprimer l'élément"
-        onClick={onRemove}
-      >
-        ✕
-      </button>
-      {children}
+    <div ref={ref} style={style} className="form-item">
+      <div className="form-item__gutter">
+        <DragHandle {...handleProps} />
+      </div>
+      <div className="form-item__body">
+        <button
+          type="button"
+          className="form-btn-mini form-item__remove"
+          aria-label="Supprimer l'élément"
+          onClick={onRemove}
+        >
+          ✕
+        </button>
+        {children}
+      </div>
     </div>
   );
 }
@@ -460,18 +475,23 @@ function ExperienceSection({
   return (
     <section className="form-section">
       <h3 className="form-section__title">Expériences</h3>
-      {items.map((e, i) => (
-        <ItemCard key={i} onRemove={() => onChange(removeAt(items, i))}>
-          <div className="form-grid">
-            <Field label="Poste" value={e.title} onChange={(v) => patch(i, { title: v })} />
-            <Field label="Entreprise" value={e.company} onChange={(v) => patch(i, { company: v })} />
-            <Field label="Contrat" value={e.contract} onChange={(v) => patch(i, { contract: v })} />
-            <Field label="Lieu" value={e.location} onChange={(v) => patch(i, { location: v })} />
-            <Field label="Date" value={e.date} onChange={(v) => patch(i, { date: v })} />
-          </div>
-          <BulletsEditor bullets={e.bullets} onChange={(b) => patch(i, { bullets: b })} />
-        </ItemCard>
-      ))}
+      <SortableList
+        count={items.length}
+        onMove={(from, to) => onChange(moveItem(items, from, to))}
+      >
+        {items.map((e, i) => (
+          <ItemCard key={i} index={i} onRemove={() => onChange(removeAt(items, i))}>
+            <div className="form-grid">
+              <Field label="Poste" value={e.title} onChange={(v) => patch(i, { title: v })} />
+              <Field label="Entreprise" value={e.company} onChange={(v) => patch(i, { company: v })} />
+              <Field label="Contrat" value={e.contract} onChange={(v) => patch(i, { contract: v })} />
+              <Field label="Lieu" value={e.location} onChange={(v) => patch(i, { location: v })} />
+              <Field label="Date" value={e.date} onChange={(v) => patch(i, { date: v })} />
+            </div>
+            <BulletsEditor bullets={e.bullets} onChange={(b) => patch(i, { bullets: b })} />
+          </ItemCard>
+        ))}
+      </SortableList>
       <button type="button" className="form-btn-add" onClick={() => onChange([...items, { ...EMPTY_EXPERIENCE }])}>
         + Ajouter une expérience
       </button>
@@ -491,16 +511,21 @@ function EducationSection({
   return (
     <section className="form-section">
       <h3 className="form-section__title">Formations</h3>
-      {items.map((e, i) => (
-        <ItemCard key={i} onRemove={() => onChange(removeAt(items, i))}>
-          <div className="form-grid">
-            <Field label="Diplôme" value={e.title} onChange={(v) => patch(i, { title: v })} />
-            <Field label="Établissement" value={e.school} onChange={(v) => patch(i, { school: v })} />
-            <Field label="Lieu" value={e.location} onChange={(v) => patch(i, { location: v })} />
-            <Field label="Date" value={e.date} onChange={(v) => patch(i, { date: v })} />
-          </div>
-        </ItemCard>
-      ))}
+      <SortableList
+        count={items.length}
+        onMove={(from, to) => onChange(moveItem(items, from, to))}
+      >
+        {items.map((e, i) => (
+          <ItemCard key={i} index={i} onRemove={() => onChange(removeAt(items, i))}>
+            <div className="form-grid">
+              <Field label="Diplôme" value={e.title} onChange={(v) => patch(i, { title: v })} />
+              <Field label="Établissement" value={e.school} onChange={(v) => patch(i, { school: v })} />
+              <Field label="Lieu" value={e.location} onChange={(v) => patch(i, { location: v })} />
+              <Field label="Date" value={e.date} onChange={(v) => patch(i, { date: v })} />
+            </div>
+          </ItemCard>
+        ))}
+      </SortableList>
       <button type="button" className="form-btn-add" onClick={() => onChange([...items, { ...EMPTY_EDUCATION }])}>
         + Ajouter une formation
       </button>
@@ -563,23 +588,28 @@ function ProjectsSection({
   return (
     <section className="form-section">
       <h3 className="form-section__title">Projets</h3>
-      {items.map((p, i) => (
-        <ItemCard key={i} onRemove={() => onChange(removeAt(items, i))}>
-          <div className="form-grid">
-            <Field label="Titre" value={p.title} onChange={(v) => patch(i, { title: v })} />
-            <Field label="Date" value={p.date} onChange={(v) => patch(i, { date: v })} />
-          </div>
-          <div className="form-field">
-            <label className="form-label">Description</label>
-            <textarea
-              className="form-textarea"
-              rows={2}
-              value={p.description}
-              onChange={(e) => patch(i, { description: e.target.value })}
-            />
-          </div>
-        </ItemCard>
-      ))}
+      <SortableList
+        count={items.length}
+        onMove={(from, to) => onChange(moveItem(items, from, to))}
+      >
+        {items.map((p, i) => (
+          <ItemCard key={i} index={i} onRemove={() => onChange(removeAt(items, i))}>
+            <div className="form-grid">
+              <Field label="Titre" value={p.title} onChange={(v) => patch(i, { title: v })} />
+              <Field label="Date" value={p.date} onChange={(v) => patch(i, { date: v })} />
+            </div>
+            <div className="form-field">
+              <label className="form-label">Description</label>
+              <textarea
+                className="form-textarea"
+                rows={2}
+                value={p.description}
+                onChange={(e) => patch(i, { description: e.target.value })}
+              />
+            </div>
+          </ItemCard>
+        ))}
+      </SortableList>
       <button type="button" className="form-btn-add" onClick={() => onChange([...items, { ...EMPTY_PROJECT }])}>
         + Ajouter un projet
       </button>
@@ -604,33 +634,38 @@ function CustomSectionsSection({
   return (
     <section className="form-section">
       <h3 className="form-section__title">Sections libres</h3>
-      {items.map((c, i) => (
-        <ItemCard key={i} onRemove={() => onChange(removeAt(items, i))}>
-          <Field
-            label="Titre de la section"
-            value={c.title}
-            onChange={(v) => patch(i, { title: v })}
-          />
-          <div className="form-field">
-            <label className="form-label">Contenu</label>
-            <textarea
-              className="form-textarea form-bullets"
-              rows={4}
-              placeholder="Une ligne par élément."
-              value={c.items.join("\n")}
-              onChange={(e) => patch(i, { items: e.target.value.split("\n") })}
-              onBlur={(e) =>
-                patch(i, {
-                  items: e.target.value
-                    .split("\n")
-                    .map((l) => l.trim())
-                    .filter((l) => l !== ""),
-                })
-              }
+      <SortableList
+        count={items.length}
+        onMove={(from, to) => onChange(moveItem(items, from, to))}
+      >
+        {items.map((c, i) => (
+          <ItemCard key={i} index={i} onRemove={() => onChange(removeAt(items, i))}>
+            <Field
+              label="Titre de la section"
+              value={c.title}
+              onChange={(v) => patch(i, { title: v })}
             />
-          </div>
-        </ItemCard>
-      ))}
+            <div className="form-field">
+              <label className="form-label">Contenu</label>
+              <textarea
+                className="form-textarea form-bullets"
+                rows={4}
+                placeholder="Une ligne par élément."
+                value={c.items.join("\n")}
+                onChange={(e) => patch(i, { items: e.target.value.split("\n") })}
+                onBlur={(e) =>
+                  patch(i, {
+                    items: e.target.value
+                      .split("\n")
+                      .map((l) => l.trim())
+                      .filter((l) => l !== ""),
+                  })
+                }
+              />
+            </div>
+          </ItemCard>
+        ))}
+      </SortableList>
       <button
         type="button"
         className="form-btn-add"
@@ -654,17 +689,22 @@ function VolunteerSection({
   return (
     <section className="form-section">
       <h3 className="form-section__title">Bénévolat</h3>
-      {items.map((v, i) => (
-        <ItemCard key={i} onRemove={() => onChange(removeAt(items, i))}>
-          <div className="form-grid">
-            <Field label="Rôle" value={v.title} onChange={(val) => patch(i, { title: val })} />
-            <Field label="Organisation" value={v.organization} onChange={(val) => patch(i, { organization: val })} />
-            <Field label="Lieu" value={v.location} onChange={(val) => patch(i, { location: val })} />
-            <Field label="Date" value={v.date} onChange={(val) => patch(i, { date: val })} />
-          </div>
-          <BulletsEditor bullets={v.bullets} onChange={(b) => patch(i, { bullets: b })} />
-        </ItemCard>
-      ))}
+      <SortableList
+        count={items.length}
+        onMove={(from, to) => onChange(moveItem(items, from, to))}
+      >
+        {items.map((v, i) => (
+          <ItemCard key={i} index={i} onRemove={() => onChange(removeAt(items, i))}>
+            <div className="form-grid">
+              <Field label="Rôle" value={v.title} onChange={(val) => patch(i, { title: val })} />
+              <Field label="Organisation" value={v.organization} onChange={(val) => patch(i, { organization: val })} />
+              <Field label="Lieu" value={v.location} onChange={(val) => patch(i, { location: val })} />
+              <Field label="Date" value={v.date} onChange={(val) => patch(i, { date: val })} />
+            </div>
+            <BulletsEditor bullets={v.bullets} onChange={(b) => patch(i, { bullets: b })} />
+          </ItemCard>
+        ))}
+      </SortableList>
       <button type="button" className="form-btn-add" onClick={() => onChange([...items, { ...EMPTY_VOLUNTEER }])}>
         + Ajouter une mission
       </button>

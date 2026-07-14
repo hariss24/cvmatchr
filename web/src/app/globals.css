@@ -698,12 +698,33 @@ button.ghost:active { box-shadow: var(--neu-inset); transform: translateY(1px); 
 }
 .form-row { display: flex; gap: 8px; align-items: center; }
 .form-row .form-input { flex: 1; }
+/* Carte d'un élément de liste : gouttière de saisie à gauche, contenu à droite. */
 .form-item {
-  position: relative; display: flex; flex-direction: column; gap: 10px;
-  padding: 40px 12px 12px; border-radius: 12px; background: var(--bg);
+  display: flex; gap: 8px; align-items: stretch;
+  padding: 12px; border-radius: 12px; background: var(--bg);
   box-shadow: var(--neu-inset); margin-bottom: 4px;
 }
-.form-item__remove { position: absolute; top: 10px; right: 10px; z-index: 1; }
+.form-item__gutter { display: flex; align-items: flex-start; }
+.form-item__body {
+  position: relative; flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 10px; padding-top: 28px;
+}
+.form-item__remove { position: absolute; top: 0; right: 0; z-index: 1; }
+
+/* Poignée de glisser-déposer. `touch-action: none` est ce qui rend le glissement possible au
+   doigt ICI et nulle part ailleurs : le reste de la carte continue de faire défiler la page. */
+.drag-handle {
+  background: var(--bg); color: var(--muted); border: none; border-radius: 8px;
+  padding: 8px 5px; cursor: grab; box-shadow: var(--neu-raised-sm);
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0; touch-action: none; transition: box-shadow 120ms, color 120ms;
+}
+.drag-handle:hover { color: var(--orange-text); box-shadow: var(--neu-raised); }
+.drag-handle:active { cursor: grabbing; box-shadow: var(--neu-inset); }
+.drag-handle:focus-visible {
+  outline: none; box-shadow: var(--neu-inset), 0 0 0 2px rgba(232,93,4,0.25);
+}
+.drag-handle svg { width: 10px; height: 16px; }
 .form-bullets { min-height: 110px; line-height: 1.5; }
 .form-btn-mini {
   background: var(--bg); color: var(--text); border: none; border-radius: 8px;
@@ -1247,6 +1268,7 @@ button.go:disabled {
     min-height: 44px;
   }
   .form-btn-mini { padding: 12px; min-height: 44px; }
+  .drag-handle { min-height: 44px; min-width: 32px; }
   .form-btn-mini svg { width: 16px; height: 16px; }
   .tab { padding: 12px 16px; font-size: 12px; min-height: 44px; }
   .btn-snapshots { width: 44px; height: 44px; }
