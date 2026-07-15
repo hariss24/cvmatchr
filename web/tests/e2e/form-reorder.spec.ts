@@ -55,14 +55,22 @@ test("clavier : une expérience remonte d'un cran", async ({ page }) => {
   const cards = section(page, "Expériences").locator(".form-item");
   await expect(cards).toHaveCount(2);
 
-  // Saisir la 2e carte, la monter, déposer. dnd-kit mesure les positions sur une frame
-  // d'animation après l'activation : sans un court délai entre les touches, l'ArrowUp
-  // arrive avant que la mesure soit prête et ne produit aucun déplacement.
+  // dnd-kit ne mesure les zones cibles qu'une frame APRÈS la saisie : un ArrowUp envoyé trop
+  // tôt ne trouve aucune cible et le curseur reste sur la carte elle-même. Plutôt qu'un délai
+  // fixe, on s'appuie sur deux signaux que dnd-kit publie lui-même :
+  //  - `opacity: 0.4` (posé par `useSortableItem`, Sortable.tsx) confirme la carte saisie ;
+  //  - la région d'annonce accessibilité (`DndLiveRegion-*`, rendue dans le DndContext de la
+  //    section) nomme la zone survolée. « area 1 » = la carte du haut, l'état `over` que lira la
+  //    dépose. On répète ArrowUp jusqu'à ce que ce survol soit confirmé : déterministe sur le
+  //    résultat, et sans effet une fois la carte en haut.
+  const liveRegion = section(page, "Expériences").locator('[id^="DndLiveRegion"]');
   await cards.nth(1).locator(".drag-handle").focus();
   await page.keyboard.press("Space");
-  await page.waitForTimeout(300);
-  await page.keyboard.press("ArrowUp");
-  await page.waitForTimeout(300);
+  await expect(cards.nth(1)).toHaveCSS("opacity", "0.4");
+  await expect(async () => {
+    await page.keyboard.press("ArrowUp");
+    await expect(liveRegion).toContainText("droppable area 1");
+  }).toPass({ timeout: 5000 });
   await page.keyboard.press("Space");
 
   const experience = (await readList(page, "experience")) as { title: string }[];
