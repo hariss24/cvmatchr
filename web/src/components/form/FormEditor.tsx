@@ -225,6 +225,30 @@ function ItemCard({
   );
 }
 
+/** Ligne d'un élément simple : poignée, contenu, bouton de suppression. Pendant d'`ItemCard`. */
+function RowCard({
+  index,
+  onRemove,
+  removeLabel,
+  children,
+}: {
+  index: number;
+  onRemove: () => void;
+  removeLabel: string;
+  children: React.ReactNode;
+}) {
+  const { ref, style, handleProps } = useSortableItem(index);
+  return (
+    <div ref={ref} style={style} className="form-row">
+      <DragHandle {...handleProps} />
+      {children}
+      <button type="button" className="form-btn-mini" aria-label={removeLabel} onClick={onRemove}>
+        ✕
+      </button>
+    </div>
+  );
+}
+
 // ---- Sections « liste de chaînes » (compétences, certifications, intérêts) ----
 
 function StringListSection({
@@ -241,23 +265,25 @@ function StringListSection({
   return (
     <section className="form-section">
       <h3 className="form-section__title">{title}</h3>
-      {items.map((value, i) => (
-        <div key={i} className="form-row">
-          <input
-            className="form-input"
-            value={value}
-            onChange={(e) => onChange(replaceAt(items, i, e.target.value))}
-          />
-          <button
-            type="button"
-            className="form-btn-mini"
-            aria-label="Supprimer"
-            onClick={() => onChange(removeAt(items, i))}
+      <SortableList
+        count={items.length}
+        onMove={(from, to) => onChange(moveItem(items, from, to))}
+      >
+        {items.map((value, i) => (
+          <RowCard
+            key={i}
+            index={i}
+            removeLabel="Supprimer"
+            onRemove={() => onChange(removeAt(items, i))}
           >
-            ✕
-          </button>
-        </div>
-      ))}
+            <input
+              className="form-input"
+              value={value}
+              onChange={(e) => onChange(replaceAt(items, i, e.target.value))}
+            />
+          </RowCard>
+        ))}
+      </SortableList>
       <button type="button" className="form-btn-add" onClick={() => onChange([...items, ""])}>
         {addLabel}
       </button>
@@ -324,30 +350,32 @@ function CustomFieldsSection({
       <p className="form-hint">
         Tout ce qui n&apos;a pas de case : permis, âge, mobilité, portfolio, disponibilité…
       </p>
-      {items.map((f, i) => (
-        <div key={i} className="form-row">
-          <input
-            className="form-input"
-            placeholder="Intitulé (ex : Permis)"
-            value={f.label}
-            onChange={(e) => patch(i, { label: e.target.value })}
-          />
-          <input
-            className="form-input"
-            placeholder="Valeur (ex : B, véhiculé)"
-            value={f.value}
-            onChange={(e) => patch(i, { value: e.target.value })}
-          />
-          <button
-            type="button"
-            className="form-btn-mini"
-            aria-label="Supprimer l'information"
-            onClick={() => onChange(removeAt(items, i))}
+      <SortableList
+        count={items.length}
+        onMove={(from, to) => onChange(moveItem(items, from, to))}
+      >
+        {items.map((f, i) => (
+          <RowCard
+            key={i}
+            index={i}
+            removeLabel="Supprimer l'information"
+            onRemove={() => onChange(removeAt(items, i))}
           >
-            ✕
-          </button>
-        </div>
-      ))}
+            <input
+              className="form-input"
+              placeholder="Intitulé (ex : Permis)"
+              value={f.label}
+              onChange={(e) => patch(i, { label: e.target.value })}
+            />
+            <input
+              className="form-input"
+              placeholder="Valeur (ex : B, véhiculé)"
+              value={f.value}
+              onChange={(e) => patch(i, { value: e.target.value })}
+            />
+          </RowCard>
+        ))}
+      </SortableList>
       <button
         type="button"
         className="form-btn-add"
@@ -545,30 +573,32 @@ function LanguagesSection({
   return (
     <section className="form-section">
       <h3 className="form-section__title">Langues</h3>
-      {items.map((l, i) => (
-        <div key={i} className="form-row">
-          <input
-            className="form-input"
-            placeholder="Langue"
-            value={l.name}
-            onChange={(e) => patch(i, { name: e.target.value })}
-          />
-          <input
-            className="form-input"
-            placeholder="Niveau"
-            value={l.level}
-            onChange={(e) => patch(i, { level: e.target.value })}
-          />
-          <button
-            type="button"
-            className="form-btn-mini"
-            aria-label="Supprimer la langue"
-            onClick={() => onChange(removeAt(items, i))}
+      <SortableList
+        count={items.length}
+        onMove={(from, to) => onChange(moveItem(items, from, to))}
+      >
+        {items.map((l, i) => (
+          <RowCard
+            key={i}
+            index={i}
+            removeLabel="Supprimer la langue"
+            onRemove={() => onChange(removeAt(items, i))}
           >
-            ✕
-          </button>
-        </div>
-      ))}
+            <input
+              className="form-input"
+              placeholder="Langue"
+              value={l.name}
+              onChange={(e) => patch(i, { name: e.target.value })}
+            />
+            <input
+              className="form-input"
+              placeholder="Niveau"
+              value={l.level}
+              onChange={(e) => patch(i, { level: e.target.value })}
+            />
+          </RowCard>
+        ))}
+      </SortableList>
       <button type="button" className="form-btn-add" onClick={() => onChange([...items, { ...EMPTY_LANGUAGE }])}>
         + Ajouter une langue
       </button>

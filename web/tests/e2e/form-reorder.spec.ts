@@ -76,3 +76,33 @@ test("clavier : une expérience remonte d'un cran", async ({ page }) => {
   const experience = (await readList(page, "experience")) as { title: string }[];
   expect(experience.map((e) => e.title)).toEqual(["Beta", "Alpha"]);
 });
+
+test("souris : une compétence remonte d'un cran", async ({ page }) => {
+  await page.goto("/");
+  await seed(page, { skills: ["Python", "TypeScript"] });
+
+  const rows = section(page, "Compétences").locator(".form-row");
+  await expect(rows).toHaveCount(2);
+  await rows.nth(0).scrollIntoViewIfNeeded();
+
+  const from = await rows.nth(1).locator(".drag-handle").boundingBox();
+  const to = await rows.nth(0).locator(".drag-handle").boundingBox();
+  if (!from || !to) throw new Error("poignée introuvable");
+
+  // dnd-kit ignore un saut instantané : il faut des déplacements intermédiaires, et un premier
+  // mouvement supérieur à la distance d'activation (4 px).
+  const liveRegion = section(page, "Compétences").locator('[id^="DndLiveRegion"]');
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2 - 10, { steps: 5 });
+  await expect(rows.nth(1)).toHaveCSS("opacity", "0.4");
+  // dnd-kit ne mesure les zones cibles qu'une frame APRÈS le début du glissement : on répète le
+  // mouvement vers la cible jusqu'à ce que la région d'annonce accessibilité confirme le survol.
+  await expect(async () => {
+    await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2 - 4, { steps: 10 });
+    await expect(liveRegion).toContainText("droppable area 1");
+  }).toPass({ timeout: 5000 });
+  await page.mouse.up();
+
+  expect(await readList(page, "skills")).toEqual(["TypeScript", "Python"]);
+});
