@@ -38,6 +38,12 @@ Suivi des fonctionnalités de l'application (version Next.js).
 - [x] Ordre des sections et en-tête pilotés par le CV — flèches ↑/↓ pour réordonner les sections
 - [x] Masquer une section sans l'effacer (l'œil dans le formulaire)
 - [x] Les 4 modèles itèrent sur les sections du CV (plus aucune liste en dur)
+- [x] **Réordonner les éléments à l'intérieur d'une section** — glisser-déposer (dnd-kit) sur les
+      12 listes du formulaire : expériences, formations, projets, bénévolat, sections libres,
+      compétences, soft skills, outils, certifications, centres d'intérêt, langues, infos
+      complémentaires. Poignée en gouttière gauche, pilotable au clavier ; sur mobile, `touch-action`
+      n'est neutralisé que sur la poignée (le reste de la carte laisse défiler la page). Le bloc
+      « Ordre des sections », lui, garde ses flèches ↑/↓.
 
 ### Lettre & offres
 - [x] Pack candidature : page dédiée `/pack`, plus de modal qui redemande l'offre
@@ -54,11 +60,6 @@ Suivi des fonctionnalités de l'application (version Next.js).
 ---
 
 ## 🔵 Priorité haute — à faire
-
-- [ ] **Déplacement haut/bas DANS les sections du formulaire**
-  Les flèches ↑/↓ existent déjà pour réordonner les **sections** entre elles, mais pas pour
-  déplacer les éléments **à l'intérieur** d'une section : expériences, formations, compétences,
-  centres d'intérêt. C'est ce qu'il reste à faire.
 
 - [ ] **Vider les champs entreprise et nom de poste quand on supprime ou crée un nouveau CV**
   Quand l'utilisateur clique sur supprimer ou créer un nouveau CV, vider les champs entreprise
@@ -88,4 +89,4 @@ Suivi des fonctionnalités de l'application (version Next.js).
 
 ---
 
-*Dernière mise à jour : 13 juillet 2026*
+*Dernière mise à jour : 15 juillet 2026*

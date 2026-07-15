@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Architecture « zéro perte » terminée : extraction cloisonnée, sections libres, infos personnelles libres (permis/portfolio/mobilité…), ordre des sections piloté par le CV, réordonnable et masquable à la main (l'œil masque sans effacer). Les 4 modèles itèrent sur les sections du CV — plus aucune liste en dur. Rien en attente sur ce chantier ; à valider sur un vrai CV importé.
+**Prochaine étape suggérée :** Glisser-déposer des éléments à l'intérieur des sections du formulaire terminé (dnd-kit, 12 listes, branche `feat/form-drag-drop` — à fusionner). Restent en priorité haute dans `TODO.md` : vider les champs entreprise/poste à la création/suppression d'un CV, et la validation de bout en bout sur un vrai CV importé.
 
 ---
 
@@ -40,6 +40,46 @@
 ---
 
 ## Journal
+
+### 2026-07-15 : Glisser-déposer des éléments à l'intérieur des sections du formulaire
+
+- **Besoin.** Les flèches ↑/↓ réordonnaient déjà les **sections** entre elles, mais rien ne
+  permettait de déplacer les éléments **à l'intérieur** d'une section. Or l'ordre des expériences
+  est ce qu'on ajuste le plus souvent en adaptant un CV à une offre.
+- **Décision.** Aller directement au glisser-déposer (dnd-kit) plutôt que d'ajouter des flèches
+  jetables — c'est le geste voulu au bout du compte. Choix de l'utilisateur, assumé.
+- **Architecture.** Toute la mécanique dnd-kit est isolée dans un seul fichier neuf,
+  `web/src/components/form/Sortable.tsx`, qui expose `SortableList`, `useSortableItem`,
+  `DragHandle` et `moveItem` (ré-export d'`arrayMove`). `FormEditor.tsx` n'importe **que** ça, il
+  ne voit jamais dnd-kit — le jour où l'on change de bibliothèque, c'est ce fichier et lui seul
+  qu'on réécrit. Deux composants de présentation : `ItemCard` (5 sections en cartes) et un nouveau
+  `RowCard` (7 listes en ligne). Chaque section entoure sa liste d'un `SortableList` et repart par
+  son `onChange` existant → aperçu PDF et Annuler/Rétablir gratuits (une entrée d'historique par
+  dépose).
+- **Périmètre : 12 listes.** Expériences, formations, projets, bénévolat, sections libres,
+  compétences, soft skills, outils, certifications, centres d'intérêt, langues, infos
+  complémentaires. **Hors périmètre, assumé :** le bloc « Ordre des sections » garde ses flèches
+  ↑/↓ ; les puces « Réalisations » restent une zone de texte (collage multi-lignes préservé).
+- **Identité des éléments.** Les listes du CV n'ont pas d'`id` (une compétence est une chaîne, deux
+  peuvent être identiques) : on utilise l'indice **décalé de 1**, car dnd-kit traite l'identifiant
+  `0` comme absent. Aucun champ ajouté au schéma.
+- **Mobile (exigence explicite).** Le drag ne doit pas entrer en conflit avec le défilement :
+  `touch-action: none` est posé sur `.drag-handle` **et uniquement là**, et les listeners dnd-kit
+  ne sont sur la poignée que. Vérifié dans l'app en émulation mobile : `touch-action` calculé =
+  `none` sur la poignée, `auto` sur la carte et les champs → on glisse depuis la poignée, on défile
+  partout ailleurs. Poignée à 44 px de haut en mobile (cible tactile).
+- **Piège de test consigné.** dnd-kit ne mesure les zones cibles qu'une frame **après** la saisie :
+  une touche/mouvement envoyé trop tôt ne déplace rien. Les tests e2e n'utilisent aucun
+  `waitForTimeout` — ils répètent le geste jusqu'à ce que la région d'annonce accessibilité
+  (`DndLiveRegion-*`) confirme le survol de la cible (déterministe sur le résultat).
+- **Fichiers :** `web/src/components/form/Sortable.tsx` (neuf), `web/src/components/form/FormEditor.tsx`,
+  `web/src/app/globals.css`, `web/tests/e2e/form-reorder.spec.ts` (neuf, clavier + souris),
+  `web/package.json` (+ `@dnd-kit/core|sortable|modifiers|utilities`).
+- **Vérifs :** `npx eslint` 0 erreur (1 warning préexistant `<img>`) · `npx vitest run` **256/256** ·
+  `npm run build` compile (23 pages) · `npx playwright test` **39/39** (dont clavier + souris, en
+  `--repeat-each=3` stables) · preuve tactile ci-dessus.
+- **Commits :** `74c6010` (cartes) · `baada6d` (test clavier déterministe) · `289cbcd` (listes en
+  ligne) · + doc. Branche `feat/form-drag-drop`.
 
 ### 2026-07-14 : Le système ATS était branché sur un CV vide — refonte du moteur
 
