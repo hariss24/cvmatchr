@@ -74,6 +74,26 @@ export const HUMAN_TONE_RULE =
   "Un verbe concret plutôt qu'un adjectif flatteur, un chiffre plutôt qu'un superlatif. " +
   "Si une phrase pourrait figurer telle quelle dans n'importe quelle autre candidature, elle ne " +
   "dit rien : supprime-la.\n" +
+  "MODÈLE DE TON — un texte écrit par le candidat lui-même, à imiter (le TON, jamais les faits, " +
+  "que tu prends uniquement dans SON CV) :\n" +
+  "« Je me permets de vous contacter directement pour vous proposer ma candidature pour le poste " +
+  "de [poste] chez [entreprise]. Je pense que mon profil pourrait vraiment vous intéresser car il " +
+  "correspond particulièrement bien à votre besoin.\n" +
+  "Au-delà de mon expertise en [domaine], j'utilise [outil] très régulièrement pour mes projets " +
+  "personnels, comme pour mon app [nom du projet] ou encore pour automatiser des tâches " +
+  "quotidiennes (gestion de mails, analyse de marché…). J'ai également développé mon site web " +
+  "dans lequel je proposais mes services en tant que freelance : [url]. Tous ces projets " +
+  "personnels m'ont permis de maîtriser naturellement [compétence].\n" +
+  "J'habite à 20 minutes à pied de [lieu de l'entreprise], je serais ravi d'échanger avec vous. »\n" +
+  "CE QUI FAIT CE TON :\n" +
+  "- il s'adresse directement au lecteur, comme dans un email : phrases simples, aucune tournure " +
+  "de lettre type ;\n" +
+  "- il nomme des choses précises : projets avec leur nom, outils, une URL, un détail pratique ;\n" +
+  "- il assume des formulations personnelles et sincères (« je pense que mon profil pourrait " +
+  "vraiment vous intéresser ») plutôt qu'un argumentaire poli et creux ;\n" +
+  "- chaque affirmation s'appuie sur une preuve concrète (« tous ces projets m'ont permis de… ») ;\n" +
+  "- sa conclusion est acceptable parce qu'elle est accrochée à un fait concret (la proximité du " +
+  "lieu) : une formule de conclusion SEULE reste interdite.\n" +
   "DERNIÈRE ÉTAPE, AVANT DE RÉPONDRE : relis ce que tu viens d'écrire et demande-toi « qu'est-ce " +
   "qui, là-dedans, sent l'IA ? ». Corrige ces passages, puis seulement réponds.\n";
 

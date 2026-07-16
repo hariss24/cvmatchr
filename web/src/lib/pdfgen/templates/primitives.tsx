@@ -13,6 +13,8 @@ export interface PdfTheme {
   accent: string;
   ink: string;
   body: string;
+  /** Informations secondaires (dates, lieux) ; gris par défaut, à éclaircir sur fond sombre. */
+  muted?: string;
 }
 
 export const defaultTheme: PdfTheme = {
@@ -80,12 +82,12 @@ export function TimelineItem({
       <View style={s.tlBody}>
         <View style={s.tlHead}>
           <Text style={[s.tlTitle, { color: theme.ink }]}>{title}</Text>
-          {t(date) ? <Text style={s.tlDate}>{date}</Text> : null}
+          {t(date) ? <Text style={[s.tlDate, { color: theme.muted ?? "#888" }]}>{date}</Text> : null}
         </View>
         {parts.length ? (
           <Text style={s.tlSubtitleRow}>
             {parts.map((p, i) => (
-              <Text key={i} style={p.bold ? [s.tlSubtitle, { color: theme.ink }] : p.muted ? { color: "#787673" } : {}}>
+              <Text key={i} style={p.bold ? [s.tlSubtitle, { color: theme.ink }] : p.muted ? { color: theme.muted ?? MUTED } : {}}>
                 {i > 0 ? " — " : ""}
                 {p.text}
               </Text>

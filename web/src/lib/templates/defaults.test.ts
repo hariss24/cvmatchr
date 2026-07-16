@@ -10,8 +10,8 @@ describe("modèle de départ", () => {
 
   it("le corps mentionne l'entreprise, le poste et un repli sur la formule d'appel", () => {
     const t = DEFAULT_TEMPLATES[0];
-    expect(t.letterBody).toContain("{Entreprise}");
-    expect(t.letterBody).toContain("{Poste}");
+    expect(t.letterBody).toContain("{Entreprise|vous}");
+    expect(t.letterBody).toContain("{Poste|membre de votre équipe}");
     expect(t.letterBody).toContain("{M/Mme Nom|Madame, Monsieur}");
   });
 });
@@ -29,7 +29,7 @@ describe("buildLetterFromTemplate", () => {
     expect(letter.recipient_name).toBe("ACME");
     expect(letter.subject).toContain("Chef de projet");
     // Le corps porte tout : formule d'appel (repli), texte et signature.
-    expect(letter.body).toContain("Bonjour Madame, Monsieur,");
+    expect(letter.body).toContain("Madame, Monsieur,");
     expect(letter.body).toContain("ACME");
     expect(letter.body).not.toContain("{Entreprise}");
     expect(letter.body).toContain("Hariss Tahet".split(" ")[0]);

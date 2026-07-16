@@ -21,6 +21,15 @@ contient les avertissements spécifiques à cette version de Next.js. Le contrat
 d'exécution générique pour agents (règles non négociables, protocole de
 vérification) est dans `.agents/rules/cadrage.md`.
 
+## Pièges critiques (à lire avant toute modification)
+
+- **`docStore.html` = `""` dans le pipeline JSON/react-pdf** (seul chemin actif
+  depuis la migration) : ne jamais tester `if (!html)` ni dédupliquer sur `html`/`css`
+  sans vérifier `htmlSource`. A causé deux bugs (ATS 14/07, snapshots 16/07).
+- **`uiAlert`/`uiConfirm`/`uiPrompt`** (dans `src/state/uiStore.ts`) : ne jamais
+  utiliser les natifs `alert`/`confirm`/`prompt` — ils sont remplacés par ces
+  équivalents asynchrones.
+
 ## Guidelines Karpathy (obligatoires pour tout travail de code)
 
 1. **Think Before Coding** — pose tes hypothèses explicitement. Si c'est ambigu, demande avant d'agir.
@@ -33,6 +42,13 @@ vérification) est dans `.agents/rules/cadrage.md`.
 Une tâche n'est terminée que si les commandes de vérification ont réellement
 tourné et que leur sortie a été lue (voir section 12 de `PROJECT_INDEX.md` pour
 la liste). Jamais de « ça devrait marcher ».
+
+## Données de test (Fixtures)
+
+Pour tout test d'adéquation (ATS, mots-clés, ciblage) ou test de génération, utilise par défaut les fichiers suivants (sauf demande contraire) :
+- **CV de base** : `web/tests/fixtures/base_resume.json`
+- **Offre d'emploi de test** : `web/tests/fixtures/job_sharkninja.txt`
+Ces fichiers doivent servir de référence pour valider les comportements liés à l'ATS ou à l'IA.
 
 ## Commandes essentielles
 

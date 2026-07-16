@@ -41,6 +41,30 @@
 
 ## Journal
 
+### 2026-07-16 : icônes détectées par contenu dans le bloc Contact (Marine)
+
+- **Besoin.** Les coordonnées libres (« GitHub », « Permis », « Portfolio »…) sortaient
+  toutes avec un point médian dans la barre latérale de Marine ; l'utilisateur voulait de
+  vrais logos détectés d'après le contenu du champ, sans SVG dessinés à la main.
+- **Fait (`lib/pdfgen/templates/contactIcons.tsx`, nouveau).** Bibliothèque d'icônes à
+  chemins réels : logos de marques via le paquet npm `simple-icons` (CC0 — GitHub, GitLab,
+  X, Stack Overflow, Behance, Dribbble, Instagram, YouTube, Medium), LinkedIn repris de
+  Bootstrap Icons (retiré de simple-icons pour raisons de marque), voiture et globe repris
+  de Material Icons. `detectContactIcon(label, value)` teste des règles regex ordonnées sur
+  `label + valeur` (les marques AVANT le repli « lien » → globe) ; `ContactIcon` rend le
+  chemin en react-pdf.
+- **Branchement (`MarineTemplate.tsx`).** Les champs fixes (ville/email/téléphone) gardent
+  leur icône ; le champ LinkedIn natif et tous les champs libres passent par la détection ;
+  repli sur le point médian si rien ne matche. L'ancien `LinkIcon` générique est supprimé.
+  Les autres templates rendent le contact en texte pur : non touchés.
+- **Itération 2 (même jour).** Le repli des champs non reconnus n'est plus le point
+  médian mais un maillon de chaîne (Bootstrap Icons « link-45deg ») ; `detectContactIcon`
+  retourne donc toujours un id (`"link"` par défaut) et `DotIcon` disparaît de Marine.
+  Détections ajoutées : Malt, WhatsApp, Telegram, Discord, disponibilité → calendrier,
+  et email/téléphone dans les champs libres (Material « mail »/« call »/« event »).
+- **Vérifié.** 262 tests verts (`contactIcons.test.ts`, 7 cas), lint propre, contrôle
+  visuel dans l'aperçu : logos LinkedIn/GitHub, voiture « Permis », maillon « Mobilité ».
+
 ### 2026-07-16 : 4 correctifs (snapshots, Ctrl+Z lettre, tic IA, tip aide)
 
 - **Besoin.** Quatre retours utilisateur groupés : snapshots qui ne marchent pas, Ctrl+Z

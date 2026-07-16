@@ -10,13 +10,15 @@ import AtsPanel from "./AtsPanel";
 import { useRouter } from "next/navigation";
 import DiffModal from "./DiffModal";
 import { loadMasterResume } from "@/lib/storage/master";
-import type { Resume } from "@/lib/resume/schema";
+import type { Resume, Letter } from "@/lib/resume/schema";
 import type { TailorLevel } from "@/lib/ai/prompts";
 import { toast } from "@/state/uiStore";
 import { useEscapeClose } from "@/lib/useEscapeClose";
 
 /**
- * Modale d'adaptation IA d'un CV à une offre (4 niveaux). Port de `_tailorResumeFields` (app.js).
+ * Modale d'adaptation IA à une offre. CV : 4 niveaux, port de `_tailorResumeFields` (app.js).
+ * Lettre (docType « Lettre ») : adapte le corps de la lettre via `/api/adapt-letter`
+ * (UI réduite : pas de niveaux, ni CV Maître, ni panneau ATS).
  *
  * Disposition 2 colonnes (comme l'original Flask) :
  *  - gauche : extraction d'offre + texte de l'offre ;
@@ -51,6 +53,7 @@ export default function TailorModal({
   const [busy, setBusy] = useState(false);
   const [diffOpen, setDiffOpen] = useState(false);
   const tailorBefore = useDocStore((s) => s.tailorBefore);
+  const isLetter = useDocStore((s) => s.docType) === "Lettre";
 
   // Consommer l'offre en attente une fois lue (setter zustand, pas un setState React).
   useEffect(() => {
@@ -61,15 +64,61 @@ export default function TailorModal({
 
   if (!open) return null;
 
-  const run = async () => {
-    const { docType, json, setJson } = useDocStore.getState();
-    if (docType !== "CV" && docType !== "Maître") {
-      toast("L'adaptation IA ne s'applique qu'aux CV.", "error");
+  // Préremplissage de la barre meta (nommage PDF/historique) — champs vides uniquement.
+  const prefillMeta = (desc: string) => {
+    const { company, role, setCompany, setRole } = useDocStore.getState();
+    if (company.trim() && role.trim()) return;
+    void fetchJobMeta(desc).then((meta) => {
+      if (!meta) return;
+      const s = useDocStore.getState();
+      if (!s.company.trim() && meta.company) setCompany(meta.company);
+      if (!s.role.trim() && meta.role) setRole(meta.role);
+    });
+  };
+
+  // Adaptation du corps de la lettre courante à l'offre (même flux que la page Pack).
+  const runLetter = async (desc: string) => {
+    const { json, setJson, company, role } = useDocStore.getState();
+    const letter = json as Letter;
+    if (!letter.body.trim()) {
+      toast("Le corps de la lettre est vide — rédige-le d'abord.", "error");
       return;
     }
+    setBusy(true);
+    try {
+      // Le CV Maître sert de source de faits à l'IA (photo jamais envoyée).
+      const master = await loadMasterResume();
+      const { body } = await postJson<{ body: string }>("/api/adapt-letter", {
+        letter_body: letter.body,
+        job_desc: desc,
+        cv_json: master ? { ...master, photo: "" } : {},
+        company: company.trim(),
+        role: role.trim(),
+      });
+      if (!body.trim()) throw new Error("Le corps adapté reçu est vide — lettre conservée.");
+      setJson({ ...letter, body });
+      toast("Lettre adaptée à l'offre.", "success");
+      prefillMeta(desc);
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Échec de l'adaptation.", "error");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const run = async () => {
+    const { docType, json, setJson } = useDocStore.getState();
     const desc = jobDesc.trim();
     if (!desc) {
       toast("Colle d'abord une offre d'emploi.", "error");
+      return;
+    }
+    if (docType === "Lettre") {
+      await runLetter(desc);
+      return;
+    }
+    if (docType !== "CV" && docType !== "Maître") {
+      toast("L'adaptation IA ne s'applique qu'aux CV et aux lettres.", "error");
       return;
     }
 
@@ -102,16 +151,7 @@ export default function TailorModal({
         "success",
       );
 
-      // Préremplissage de la barre meta (nommage PDF/historique) — champs vides uniquement.
-      const { company, role, setCompany, setRole } = useDocStore.getState();
-      if (!company.trim() || !role.trim()) {
-        void fetchJobMeta(desc).then((meta) => {
-          if (!meta) return;
-          const s = useDocStore.getState();
-          if (!s.company.trim() && meta.company) setCompany(meta.company);
-          if (!s.role.trim() && meta.role) setRole(meta.role);
-        });
-      }
+      prefillMeta(desc);
     } catch (err) {
       toast(err instanceof Error ? err.message : "Échec de l'adaptation.", "error");
     } finally {
@@ -125,7 +165,7 @@ export default function TailorModal({
         className="ui-dialog tailor-modal-content"
         role="dialog"
         aria-modal="true"
-        aria-label="Adapter le CV à une offre"
+        aria-label={isLetter ? "Adapter la lettre à une offre" : "Adapter le CV à une offre"}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="ui-dialog__head">
@@ -154,6 +194,7 @@ export default function TailorModal({
 
           {/* Colonne droite : paramètres & actions */}
           <div className="tailor-col-right">
+            {!isLetter && (
             <div className="tailor-settings-box">
               <div className="level-selector" role="radiogroup" aria-label="Niveau d'adaptation">
                 <span className="level-label">Niveau d&apos;adaptation</span>
@@ -184,38 +225,43 @@ export default function TailorModal({
                 <span>Utiliser le CV Maître comme base <em>(si disponible)</em></span>
               </label>
             </div>
+            )}
 
             <div className="tailor-actions-box">
               <div className="tailor-action-group">
                 <button type="button" className="tailor-btn tailor-btn-block" onClick={run} disabled={busy}>
-                  {busy ? "Adaptation…" : "Adapter le CV"}
+                  {busy ? "Adaptation…" : isLetter ? "Adapter la lettre" : "Adapter le CV"}
                 </button>
-                {tailorBefore ? (
+                {!isLetter && tailorBefore ? (
                   <button type="button" className="form-btn-mini" onClick={() => setDiffOpen(true)} disabled={busy}>
                     Voir les modifications
                   </button>
                 ) : null}
               </div>
 
-              <div className="tailor-divider" />
+              {!isLetter && (
+                <>
+                  <div className="tailor-divider" />
 
-              <div className="tailor-action-group">
-                <button
-                  type="button"
-                  className="tailor-btn tailor-btn-block pack-btn-variant"
-                  onClick={() => {
-                    useDocStore.getState().setPendingJobDesc(jobDesc);
-                    onClose();
-                    router.push("/pack");
-                  }}
-                  disabled={busy}
-                >
-                  Créer une lettre de motivation
-                </button>
-              </div>
+                  <div className="tailor-action-group">
+                    <button
+                      type="button"
+                      className="tailor-btn tailor-btn-block pack-btn-variant"
+                      onClick={() => {
+                        useDocStore.getState().setPendingJobDesc(jobDesc);
+                        onClose();
+                        router.push("/pack");
+                      }}
+                      disabled={busy}
+                    >
+                      Créer une lettre de motivation
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
 
-            <AtsPanel jobDesc={jobDesc} />
+            {!isLetter && <AtsPanel jobDesc={jobDesc} />}
           </div>
         </div>
 

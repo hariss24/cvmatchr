@@ -289,7 +289,9 @@ export default function EditorPane() {
       ) : tab === "import" ? (
         <div className="import-pane">
           <p className="import-hint">
-            Importe un CV existant : l&apos;IA en extrait les données pour remplir le formulaire.
+            {isResumeType
+              ? "Importe un CV existant : l'IA en extrait les données pour remplir le formulaire."
+              : "Importe une lettre de motivation existante : l'IA en extrait les données pour remplir le formulaire."}
           </p>
           <div className="import-pane-actions">
             <button type="button" className="form-btn-add" onClick={() => setImportTextOpen(true)}>

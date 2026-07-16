@@ -18,11 +18,21 @@ export const DEFAULT_TEMPLATES: MailTemplate[] = [
     name: "Candidature",
     letterSubject: "Candidature spontanée – {Poste} – {Prénom} {Nom}",
     letterBody:
-      "Bonjour {M/Mme Nom|Madame, Monsieur},\n\n" +
-      "Je me permets de vous adresser ma candidature spontanée pour un poste de {Poste} au sein de {Entreprise}.\n\n" +
-      "Motivé à l'idée de m'investir durablement, je suis convaincu que mon profil et mon engagement peuvent contribuer concrètement à vos projets.\n\n" +
-      "Vous trouverez mon CV en pièce jointe. Je reste à votre entière disposition pour en échanger.\n\n" +
-      "Bien cordialement,\n{Prénom} {Nom}",
+      "{M/Mme Nom|Madame, Monsieur},\n\n" +
+      "Diplômé d'un Master 2 en e-commerce et habitué à mener des projets web de bout en bout, " +
+      "je me décrirais comme un vrai couteau suisse du web. Curieux de nature, j'aime comprendre " +
+      "les dessous techniques d'un site autant que les leviers stratégiques qui le font grandir.\n\n" +
+      "Aujourd'hui, c'est chez {Entreprise|vous} que je souhaite mettre cette polyvalence et cette " +
+      "culture web au service de projets concrets, en tant que {Poste|membre de votre équipe}. " +
+      "Ce qui m'anime, c'est d'accompagner une organisation dans sa croissance digitale, en mêlant " +
+      "technique et stratégie pour donner du sens à chaque action. J'aime les environnements où la " +
+      "curiosité est une force, où on apprend sans cesse et où chaque projet est une nouvelle " +
+      "aventure à construire.\n\n" +
+      "Je serais ravi d'échanger avec vous pour me présenter plus concrètement et vous expliquer " +
+      "comment je pourrais contribuer à vos projets.\n\n" +
+      "En vous remerciant pour votre temps et votre attention, je vous prie d'agréer mes salutations " +
+      "les plus sincères.\n\n" +
+      "{Prénom} {Nom}",
     updatedAt: 0,
   },
 ];

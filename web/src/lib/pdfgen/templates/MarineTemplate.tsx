@@ -1,8 +1,9 @@
 import React from "react";
-import { Document, Page, View, Text, Image, StyleSheet, Svg, Path, Circle } from "@react-pdf/renderer";
+import { Document, Page, View, Text, Image, StyleSheet, Svg, Path } from "@react-pdf/renderer";
 import type { Resume } from "@/lib/resume/schema";
 import { AtsBoost } from "../AtsBoost";
 import { px, t, ThemeContext, PdfTheme, SectionContent } from "./primitives";
+import { ContactIcon, detectContactIcon } from "./contactIcons";
 import { buildSections, buildContacts, contactText, type ResumeSection } from "@/lib/resume/sections";
 
 const theme: PdfTheme = {
@@ -172,34 +173,11 @@ function PhoneIcon() {
   );
 }
 
-function LinkIcon() {
-  return (
-    <Svg viewBox="0 0 24 24" style={{ width: "100%", height: px(11) }}>
-      <Circle cx="12" cy="12" r="9" stroke={SIDEBAR_INK} strokeWidth={1.6} fill="none" />
-      <Path
-        d="M9.5 8.5a3.2 3.2 0 0 1 4.5 0l.5.5a3.2 3.2 0 0 1 0 4.5l-1.5 1.5M14.5 15.5a3.2 3.2 0 0 1-4.5 0l-.5-.5a3.2 3.2 0 0 1 0-4.5l1.5-1.5"
-        stroke={SIDEBAR_INK}
-        strokeWidth={1.4}
-        fill="none"
-      />
-    </Svg>
-  );
-}
-
-/** Puce neutre : icône des coordonnées libres (permis, portfolio, mobilité…), qui n'en ont pas. */
-function DotIcon() {
-  return (
-    <Svg viewBox="0 0 24 24" style={{ width: "100%", height: px(11) }}>
-      <Circle cx="12" cy="12" r="4" fill={SIDEBAR_INK} />
-    </Svg>
-  );
-}
-
+/** Champs à icône fixe ; les autres (linkedin, champs libres) passent par la détection. */
 const CONTACT_ICONS: Record<string, React.ComponentType> = {
   location: PinIcon,
   email: MailIcon,
   phone: PhoneIcon,
-  linkedin: LinkIcon,
 };
 
 function SideList({ items }: { items: string[] }) {
@@ -215,8 +193,9 @@ function SideList({ items }: { items: string[] }) {
   );
 }
 
-/** Sections que Marine place dans sa barre latérale. Tout le reste va en colonne principale. */
-const MARINE_SIDEBAR = new Set(["softSkills", "tools", "languages", "interests"]);
+/** Sections que Marine place dans sa barre latérale, dans cet ordre. Tout le reste va en colonne principale. */
+const MARINE_SIDEBAR_ORDER = ["softSkills", "tools", "languages", "interests", "projects"];
+const MARINE_SIDEBAR = new Set(MARINE_SIDEBAR_ORDER);
 
 /** Marine nomme l'accroche « Profil » ; les autres sections gardent le titre porté par le CV. */
 const MARINE_TITLES: Record<string, string> = { summary: "Profil" };
@@ -249,7 +228,13 @@ function MarineSide({ section }: { section: ResumeSection }) {
       <SideList items={section.items} />
     );
   }
-  return <SectionContent section={section} hideGutter color={SIDEBAR_INK} />;
+  // Les timelines (projets…) tirent leurs couleurs du thème : on fournit un thème
+  // clair local, sinon titres et sous-titres sortent en encre sombre sur fond navy.
+  return (
+    <ThemeContext.Provider value={{ ...theme, ink: "#fff", body: SIDEBAR_INK, muted: "#c8d3da" }}>
+      <SectionContent section={section} hideGutter color={SIDEBAR_INK} />
+    </ThemeContext.Provider>
+  );
 }
 
 export function MarineTemplate({
@@ -267,7 +252,9 @@ export function MarineTemplate({
   // (barre latérale ou colonne principale) et du style. Compétences, projets,
   // certifications, bénévolat et sections libres — jadis avalés — remontent d'eux-mêmes.
   const sections = buildSections(d);
-  const sideSections = sections.filter((sec) => MARINE_SIDEBAR.has(sec.id));
+  const sideSections = sections
+    .filter((sec) => MARINE_SIDEBAR.has(sec.id))
+    .sort((a, b) => MARINE_SIDEBAR_ORDER.indexOf(a.id) - MARINE_SIDEBAR_ORDER.indexOf(b.id));
   const mainSections = sections.filter((sec) => !MARINE_SIDEBAR.has(sec.id));
 
   return (
@@ -282,11 +269,15 @@ export function MarineTemplate({
               <View style={s.sideSection}>
                 <Text style={s.sideTitle}>Contact</Text>
                 {contacts.map((c) => {
-                  const Icon = CONTACT_ICONS[c.id] ?? DotIcon;
+                  const Fixed = CONTACT_ICONS[c.id];
                   return (
                     <View key={c.id} style={s.contactRow}>
                       <View style={s.contactIcon}>
-                        <Icon />
+                        {Fixed ? (
+                          <Fixed />
+                        ) : (
+                          <ContactIcon icon={detectContactIcon(c.label, c.value)} color={SIDEBAR_INK} />
+                        )}
                       </View>
                       <Text style={s.contactText}>{contactText(c)}</Text>
                     </View>

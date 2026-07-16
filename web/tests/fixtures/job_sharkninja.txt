@@ -1,0 +1,85 @@
+SharkNinja is a global product design and technology company, with a diversified portfolio of 5-star rated lifestyle solutions that positively impact people’s lives in homes around the world. Powered by two trusted, global brands, Shark and Ninja, the company has a proven track record of bringing disruptive innovation to market and developing one consumer product after another has allowed SharkNinja to enter multiple product categories, driving significant growth and market share gains. Headquartered in Needham, Massachusetts with more than 4,100 associates, the company’s products are sold at key retailers, online and offline, and through distributors around the world.
+
+AI at SharkNinja 
+
+At SharkNinja, we’re building an AI-native culture. We’re not waiting for the future; we’re creating it. Our people are expected to experiment boldly, adopt new tools, and continuously raise what’s possible to create meaningful impact for our consumers. If you believe the best way to do your job hasn’t been invented yet, you’ll fit right in.
+
+Role Overview
+
+The SEO Manager sits at the intersection of content strategy and product visibility, working across traditional and AI search to ensure SharkNinja shows up wherever customers are looking. This is a hands-on, delivery-focused role responsible for improving organic visibility and revenue. The SEO Manager works closely with content, trading, product, and performance teams to make SEO a given, not an afterthought, using data to prove its value and translating performance into clear, actionable recommendations that connect directly to business outcomes.
+
+Key Responsibilities
+
+Traditional SEO
+
+Facilitate the implementation of our SEO strategy in the UK, recognising market specific nuances 
+Optimise on-page elements, including optimising website content, meta tags, headers and internal linking structure 
+Own the organic blog and informational content roadmap to build topical authority 
+Identify content gaps through competitor analysis and search demand data 
+Brief and work alongside copywriters and compliance teams to ensure content meets search intent and is legally sound 
+Collaborate with the PR team and agencies to ensure we have a best-in-class link acquisition strategy 
+Support DTC campaigns by aligning search strategy with copywriters, creative, and performance teams to maximise discoverability and impact 
+Work alongside the Performance Marketing team to support the Paid Media leads in maximising cross-channel budget efficiencies 
+Stay up to date with search engine algorithm changes and adapt strategies accordingly to maintain or improve rankings 
+Advocate SEO best practices and the benefits of SEO to the wider team 
+
+Merchandising SEO
+
+Conduct out in-depth, localised keyword research to identify opportunities for existing categories, products and NPD 
+Optimise core category and product pages to increase organic visibility and revenue 
+Identify and address cannibalisation across pages and products 
+Work with product teams and merchandisers to align on category structure and naming conventions 
+Report on weekly and monthly performance against forecast and KPI’s 
+Take a data-driven approach and continuously look for ways to optimise SEO performance, and where relevant, automate 
+
+AI Search & Future Readiness
+
+Structure product and category page content to win featured snippets, People Also Ask boxes, and AI Overviews 
+Identify and optimise for question-based search patterns across all page types 
+Monitor AI Overview appearances in Google Search Console and third-party tools 
+Track where brand and product names appear (or don't appear) in AI-generated responses across Google, ChatGPT, Perplexity, and similar tools, flagging gaps and opportunities 
+Stay current with emerging Generative Engine Optimisation (GEO) best practices and contribute to an internal testing framework 
+Develop guardrails to ensure any AI informed content meets Google’s guidelines 
+
+Essential
+
+Skills & Experience
+
+Hands-on SEO experience in an ecommerce or content-led environment 
+An in-depth knowledge of content SEO best practice 
+Confident use of Google Search Console & SEMrush 
+Solid understanding of on-page optimisation and keyword research 
+Familiarity with AEO practices: featured snippet targeting, People Also Ask, FAQ schemas 
+Strong written communication skills - able to brief and edit content clearly 
+
+Desirable
+
+Exposure to GEO principles and AI visibility monitoring tools 
+Experience working across large product catalogues or multi-category sites 
+Strong understanding of Salesforce Commerce Cloud or enterprise ecommerce platforms 
+Experience managing agency/vendor relationships 
+Awareness of how LLMs surface and cite content - and curiosity to experiment in this space 
+
+Our Culture
+
+At SharkNinja, we don’t just raise the bar—we push past it every single day. Our Outrageously Extraordinary mindset drives us to tackle the impossible, push boundaries, and deliver results that others only dream of. If you thrive on breaking out of your swim lane, you’ll be right at home.
+
+What We Offer
+
+We offer competitive health insurance, retirement plans, paid time off, employee stock purchase options, wellness programs, SharkNinja product discounts, and more. We empower your personal and professional growth with high impact Learning Programs featuring bold voices redefining what’s possible. When you join, you’re not just part of a company—you’re part of an outrageously extraordinary community. Together, we won’t just launch products—we’ll disrupt entire markets.
+
+At SharkNinja, Diversity, Equity, and Inclusion are vital to our global success. Valuing each unique voice and blending all of our diverse skills strengthens SharkNinja’s innovation every day. We support ALL associates in bringing their authentic selves to work, making an impact, and having the opportunity for career acceleration. With help from our leadership, associates, and our community, we aim to have equity be a key component of the SharkNinja DNA.
+
+Learn More About Us
+
+ Life At SharkNinja
+
+Outrageously Extraordinary
+
+SharkNinja Candidate Privacy Notice
+
+For candidates based in all regions, please refer to this Candidate Privacy Notice. 
+For candidates based in China, please refer to this Candidate Privacy Notice. 
+For candidates based in Vietnam, please refer to this Candidate Privacy Notice. 
+
+We do not discriminate on the basis of race, religion, color, national origin, sex, gender, gender expression, sexual orientation, age, marital status, veteran status, disability, or any other class protected by legislation, and local law. SharkNinja will consider reasonable accommodations consistent with legislation, and local law. If you require a reasonable accommodation to participate in the job application or interview process, please contact SharkNinja People & Culture at accommodations@sharkninja.com

@@ -25,7 +25,7 @@ export default function ActionsBar() {
     () => typeof window !== "undefined" && Boolean(useDocStore.getState().pendingJobDesc),
   );
 
-  const canTailor = docType === "CV" || docType === "Maître";
+  const canTailor = docType === "CV" || docType === "Maître" || docType === "Lettre";
 
   // Snapshot « avant adaptation » quand une offre arrive (écriture externe, pas de setState).
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function ActionsBar() {
         <button
           type="button"
           className="btn-nav btn-orange"
-          title="Importer une offre & adapter le CV avec l'IA"
+          title={`Importer une offre & adapter ${docType === "Lettre" ? "la lettre" : "le CV"} avec l'IA`}
           aria-label="Adapter à une offre"
           onClick={() => { takeSnapshot("Avant adaptation"); setTailorOpen(true); }}
         >

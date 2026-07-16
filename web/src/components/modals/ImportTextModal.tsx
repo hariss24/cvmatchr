@@ -25,6 +25,8 @@ export default function ImportTextModal({
 }) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
+  const isLetter = useDocStore((s) => s.docType) === "Lettre";
+  const docLabel = isLetter ? "ta lettre" : "ton CV";
 
   useEscapeClose(open && !busy, onClose);
 
@@ -33,7 +35,7 @@ export default function ImportTextModal({
   const run = async () => {
     const content = text.trim();
     if (!content) {
-      toast("Colle d'abord le contenu de ton CV.", "error");
+      toast(`Colle d'abord le contenu de ${docLabel}.`, "error");
       return;
     }
     if (
@@ -91,13 +93,13 @@ export default function ImportTextModal({
           </button>
         </div>
         <p className="import-hint">
-          Colle le contenu brut de ton CV (ou ta lettre) : l&apos;IA en extrait les données.
+          Colle le contenu brut de {docLabel} : l&apos;IA en extrait les données.
         </p>
 
         <textarea
           className="form-textarea"
           rows={10}
-          placeholder="Colle ici le texte de ton CV…"
+          placeholder={`Colle ici le texte de ${docLabel}…`}
           value={text}
           onChange={(e) => setText(e.target.value)}
           disabled={busy}

@@ -325,13 +325,14 @@ export async function markJobSeen(id: string) {
 // ---------------------------------------------------------------------------
 
 /**
- * Seed le modèle de départ. Migration unique `pack-templates-v2` : la refonte
- * « lettre seule » remplace les anciens modèles (email + multi-modèles) une fois,
- * puis on préserve les éditions de l'utilisateur (on ne réécrase plus ensuite).
+ * Seed le modèle de départ. Migration unique `pack-templates-v3` (v2 : refonte
+ * « lettre seule » ; v3 : lettre personnelle « couteau suisse du web ») : chaque
+ * bump remplace les modèles une fois, puis on préserve les éditions de
+ * l'utilisateur (on ne réécrase plus ensuite).
  */
 export async function ensureDefaultTemplates() {
   try {
-    const KEY = "pack-templates-v2";
+    const KEY = "pack-templates-v3";
     const migrated = typeof localStorage !== "undefined" && localStorage.getItem(KEY);
     if (!migrated) {
       await db.templates.clear();

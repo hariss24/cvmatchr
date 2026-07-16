@@ -1,0 +1,138 @@
+{
+  "name": "Hariss Hafeji",
+  "title": "Webmaster & Consultant Digital",
+  "location": "Paris, 75012, France",
+  "email": "hafejihariss@gmail.com",
+  "phone": "+33 7 66 05 22 07",
+  "linkedin": "",
+  "photo": "(photo gérée par le formulaire)",
+  "summary": "Formé à la production web CMS (Drupal, WordPress) en environnement pluridisciplinaire, j'allie rigueur éditoriale, maîtrise du SEO et de l'UX. Expert en gestion web et en vulgarisation de sujets techniques, je sais traduire des enjeux métiers en supports de communication impactants pour booster votre présence digitale.",
+  "experience": [
+    {
+      "title": "Webmaster PO",
+      "company": "Nickel",
+      "contract": "Stage",
+      "location": "Charenton-le-Pont, France",
+      "date": "05/2025 – 10/2025",
+      "bullets": [
+        "Administration et animation éditoriale via CMS (Drupal) : conception de landing pages responsives, gestion multilingue, gestion de projet agile et respect de la conformité bancaire.",
+        "Mise en place de la stratégie SEO / GEO globale : audit technique, maillage interne et optimisation sémantique (IA).",
+        "Optimisation UI/UX, architecture de l'information et normes RGAA (résultat : +70% de clics/trafic vers le parcours d'onboarding).",
+        "Analyse et suivi KPI pour piloter les ajustements (trafic, acquisition, conversion)."
+      ]
+    },
+    {
+      "title": "Consultant digital",
+      "company": "AB Digital",
+      "contract": "Stage",
+      "location": "Télétravail, France",
+      "date": "10/2024 – 12/2024",
+      "bullets": [
+        "Webmastering (WordPress) et pilotage de la stratégie de contenu globale : intégration de contenus et création de fiches Google My Business.",
+        "Déploiement de stratégies d'acquisition multicanales via SEO & SEA.",
+        "Conception UI/UX : réalisation de maquettes, wireframes et prototypes respectant les standards responsive.",
+        "Pilotage de la performance : suivi des KPIs et reportings d'optimisation."
+      ]
+    },
+    {
+      "title": "Chargé de communication digitale",
+      "company": "CPR Asset Management",
+      "contract": "Stage",
+      "location": "Paris, France",
+      "date": "02/2024 – 07/2024",
+      "bullets": [
+        "Animation éditoriale et réseaux sociaux (LinkedIn, X).",
+        "Gestion et harmonisation des contenus digitaux dans le cadre d'une migration et refonte technique.",
+        "Analyse des performances web (KPIs : Piano, Looker, GSC) et recommandations d'optimisation.",
+        "Gestion documentaire et contribution aux actions de fidélisation via CRM Actito.",
+        "+300% d'impressions et clics organiques suite aux travaux de restructuration."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "title": "Master 2, AEI Commerce électronique",
+      "school": "Université Paris 12 (UPEC)",
+      "location": "Créteil, France",
+      "date": "09/2023 – 10/2025"
+    },
+    {
+      "title": "Licence, Économie et Gestion",
+      "school": "Université Paris Cité",
+      "location": "Paris, France",
+      "date": "09/2019 – 07/2022"
+    }
+  ],
+  "skills": [
+    "Gestion Web — Maîtrise de l'intégration HTML/CSS et des CMS (Drupal, WordPress).",
+    "Design UI/UX — Création de maquettes, refonte, wireframes et respect du responsive design.",
+    "Gestion de projet — Recueil des besoins, rédaction de spécifications, recette fonctionnelle et gestion agile.",
+    "Acquisition & SEO/GEO — Déploiement de stratégies d'acquisition multicanales, audit technique et optimisation sémantique.",
+    "Accessibilité — Application des normes RGAA et optimisation de la performance web.",
+    "Veille et Analyse — Analyse de données du trafic web et suivi KPI."
+  ],
+  "softSkills": [
+    "Communication digitale",
+    "Esprit d'équipe",
+    "Rigueur éditoriale",
+    "Capacité d'adaptation",
+    "Esprit d'analyse et de synthèse",
+    "Autonomie",
+    "Créativité",
+    "Gestion de projet"
+  ],
+  "tools": [
+    "CMS (Drupal, WordPress, headless)",
+    "HTML/CSS",
+    "IA (Claude Code, Codex, Gemini..)",
+    "Analytique (Piano, GA4, GSC, Looker Studio)",
+    "Design (Figma, Canva, Photoshop)"
+  ],
+  "languages": [
+    {
+      "name": "Français",
+      "level": "Natif"
+    },
+    {
+      "name": "Anglais",
+      "level": "Courant"
+    },
+    {
+      "name": "Allemand",
+      "level": "Intermédiaire"
+    }
+  ],
+  "interests": [
+    "Photographie (Fujifilm)",
+    "Culture pop (cinéma, jeux-vidéos, manga)",
+    "DIY & décoration d'intérieur"
+  ],
+  "projects": [
+    {
+      "title": "CV Tailor — Générateur de CV",
+      "date": "2024",
+      "description": "Adapte automatiquement un CV à une offre d'emploi grâce à l'IA : analyse ATS, réécriture ciblée et recherche de postes adaptés."
+    }
+  ],
+  "certifications": [],
+  "volunteer": [],
+  "customSections": [],
+  "customFields": [
+    {
+      "label": "GitHub",
+      "value": "github.com/hariss24"
+    }
+  ],
+  "sectionOrder": [
+    "summary",
+    "experience",
+    "education",
+    "skills",
+    "softSkills",
+    "tools",
+    "languages",
+    "interests",
+    "projects"
+  ],
+  "hiddenSections": []
+}
