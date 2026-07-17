@@ -1301,6 +1301,8 @@ button.go:disabled {
 }
 .pdf-preview--zoom { align-items: flex-start; }
 .pdf-preview--zoom .pdf-preview__page { max-width: none; }
+.pdf-preview { cursor: grab; user-select: none; }
+.pdf-preview.is-panning { cursor: grabbing; }
 .pdf-preview-loading {
   display: flex;
   align-items: center;

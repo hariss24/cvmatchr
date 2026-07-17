@@ -19,6 +19,35 @@ export default function PdfPreview({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Outil « main » : glisser à la souris pour déplacer l'aperçu (scroll du conteneur).
+  // Souris uniquement — au tactile, le défilement natif fait déjà le travail.
+  const panRef = useRef<{ x: number; y: number; left: number; top: number } | null>(null);
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse" || e.button !== 0) return;
+    const el = containerRef.current;
+    if (!el) return;
+    panRef.current = { x: e.clientX, y: e.clientY, left: el.scrollLeft, top: el.scrollTop };
+    el.setPointerCapture(e.pointerId);
+    el.classList.add("is-panning");
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const pan = panRef.current;
+    const el = containerRef.current;
+    if (!pan || !el) return;
+    el.scrollLeft = pan.left - (e.clientX - pan.x);
+    el.scrollTop = pan.top - (e.clientY - pan.y);
+  };
+
+  const endPan = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = containerRef.current;
+    if (!panRef.current || !el) return;
+    panRef.current = null;
+    el.classList.remove("is-panning");
+    el.releasePointerCapture(e.pointerId);
+  };
+
   useEffect(() => {
     let cancelled = false;
 
@@ -58,5 +87,15 @@ export default function PdfPreview({
     };
   }, [blob, onPages]);
 
-  return <div ref={containerRef} className={`pdf-preview${zoom ? " pdf-preview--zoom" : ""}`} data-testid="pdf-preview" />;
+  return (
+    <div
+      ref={containerRef}
+      className={`pdf-preview${zoom ? " pdf-preview--zoom" : ""}`}
+      data-testid="pdf-preview"
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endPan}
+      onPointerCancel={endPan}
+    />
+  );
 }
