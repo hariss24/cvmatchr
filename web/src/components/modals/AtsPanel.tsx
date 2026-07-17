@@ -18,9 +18,7 @@ import { toast } from "@/state/uiStore";
  * Rapport ATS : score global pondéré, 4 axes, corrections prioritaires, mots-clés, sections.
  *
  * Deux chemins, un seul moteur de calcul (`lib/ats/engine.ts`) :
- *  - « Score ATS » : instantané, gratuit, exigences déduites de l'offre par pondération ;
- *  - « Analyser avec l'IA » : l'IA extrait les exigences et repère les synonymes, le score
- *    reste calculé par le moteur — donc reproductible.
+ *  - IA d'abord, moteur local en secours en cas d'échec.
  *
  * ⚠️ Le CV vient de `docStore.json`. NE JAMAIS repasser par `docStore.html` : ce champ est
  * un vestige de l'ancien pipeline HTML, toujours vide depuis la migration React PDF — c'est
@@ -115,13 +113,7 @@ export default function AtsPanel({ jobDesc }: { jobDesc: string }) {
     return { resume: json as Resume, desc, role };
   };
 
-  const runLocal = () => {
-    const input = inputs();
-    if (!input) return;
-    setPriorities([]);
-    setByAi(false);
-    setReport(analyzeResumeAts(input.resume, input.desc, input.role));
-  };
+
 
   const runAi = async () => {
     const input = inputs();
@@ -136,8 +128,11 @@ export default function AtsPanel({ jobDesc }: { jobDesc: string }) {
       setReport(analyzeWithRequirements(input.resume, res.requirements, input.role || res.job_title));
       setPriorities(res.priorities);
       setByAi(true);
-    } catch (err) {
-      toast(err instanceof Error ? err.message : "Échec de l'analyse IA.", "error");
+    } catch {
+      setReport(analyzeResumeAts(input.resume, input.desc, input.role));
+      setPriorities([]);
+      setByAi(false);
+      toast("Analyse IA indisponible — score algorithmique local affiché.", "info");
     } finally {
       setBusy(false);
     }
@@ -161,11 +156,8 @@ export default function AtsPanel({ jobDesc }: { jobDesc: string }) {
   return (
     <div className="ats-panel">
       <div className="ats-actions">
-        <button type="button" className="ats-action-btn" onClick={runLocal} disabled={busy}>
-          Score ATS
-        </button>
         <button type="button" className="ats-action-btn" onClick={runAi} disabled={busy}>
-          {busy ? "Analyse IA…" : "Analyser avec l'IA"}
+          {busy ? "Analyse IA…" : "Analyse ATS"}
         </button>
       </div>
 
