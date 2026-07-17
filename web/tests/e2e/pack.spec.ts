@@ -42,8 +42,8 @@ test("la lettre se construit depuis le modèle unique, sans IA ni email", async 
   });
   expect(inserted.body).toContain("ACME");
   expect(inserted.body).not.toContain("{Entreprise}");
-  // Contact vide → repli propre « Bonjour Madame, Monsieur, » dans le corps.
-  expect(inserted.body).toContain("Bonjour Madame, Monsieur,");
+  // Contact vide → repli propre « Madame, Monsieur, » dans le corps.
+  expect(inserted.body).toContain("Madame, Monsieur,");
   expect(inserted.subject).toContain("Développeur Web");
 });
 

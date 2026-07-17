@@ -27,7 +27,7 @@ test("adapter à une offre met à jour l'aperçu", async ({ page }) => {
     .locator("#job-desc-input")
     .fill("Développeur Frontend React / TypeScript");
   await page
-    .locator(".tailor-modal-content")
+    .getByRole("dialog")
     .getByRole("button", { name: "Adapter le CV" })
     .click();
 
@@ -37,19 +37,19 @@ test("adapter à une offre met à jour l'aperçu", async ({ page }) => {
     return store.json.name === "Profil Adapté IA";
   }, { timeout: 10000 });
   await expect(page.locator(".pdf-preview")).toBeVisible();
-  await page.locator(".tailor-modal-content").getByRole("button", { name: "Fermer" }).click();
-  await expect(page.locator(".tailor-modal-content")).toHaveCount(0);
+  await page.getByRole("dialog").getByRole("button", { name: "Fermer" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
 });
 
-test("le niveau d'adaptation est un segmented control : les 4 cellules ont un contenant", async ({ page }) => {
+test("le niveau d'adaptation est un segmented control : les 3 cellules ont un contenant", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Adapter à une offre" }).click();
 
-  const cells = page.locator(".level-segment .level-btn");
-  await expect(cells).toHaveCount(4);
+  const cells = page.locator(".tailor-level-list .tailor-level-item");
+  await expect(cells).toHaveCount(3);
 
   // Aucune cellule n'est un texte nu : toutes ont un fond et une ombre.
-  for (let i = 0; i < 4; i += 1) {
+  for (let i = 0; i < 3; i += 1) {
     const bg = await cells.nth(i).evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(bg).not.toBe("rgba(0, 0, 0, 0)");
     const shadow = await cells.nth(i).evaluate((el) => getComputedStyle(el).boxShadow);
@@ -57,6 +57,6 @@ test("le niveau d'adaptation est un segmented control : les 4 cellules ont un co
   }
 
   // Seule la cellule sélectionnée est en relief (« Adapté » par défaut).
-  await expect(page.locator(".level-btn.active")).toHaveCount(1);
-  await expect(page.locator(".level-btn.active")).toHaveText("Adapté");
+  await expect(page.locator(".tailor-level-item.active")).toHaveCount(1);
+  await expect(page.locator(".tailor-level-item.active .tailor-level-title")).toHaveText("Adapté");
 });

@@ -36,12 +36,12 @@ test("l'ATS affiche un score local, puis un rapport IA basé sur les exigences",
   await page.locator("#job-desc-input").fill("Développeur React TypeScript Docker Kubernetes");
 
   // Analyse locale : score + les 4 axes pondérés.
-  await page.getByRole("button", { name: "Score ATS", exact: true }).click();
+  await page.getByRole("button", { name: "Analyse ATS", exact: true }).click();
   await expect(page.locator(".ats-score-circle")).toBeVisible();
   await expect(page.locator(".ats-axis")).toHaveCount(4);
 
   // Analyse IA : badge, exigence manquante et correction prioritaire.
-  await page.getByRole("button", { name: /Analyser avec l'IA/ }).click();
+  await page.getByRole("button", { name: /Analyse ATS/ }).click();
   await expect(page.getByText("✨ Analyse IA")).toBeVisible();
   await expect(page.locator(".ats-pill.missing", { hasText: "Kubernetes" })).toBeVisible();
   await expect(page.locator(".ats-pill.match", { hasText: "React" })).toBeVisible();
