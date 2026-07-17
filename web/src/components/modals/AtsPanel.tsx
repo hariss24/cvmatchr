@@ -17,8 +17,9 @@ import { toast } from "@/state/uiStore";
 /**
  * Rapport ATS : score global pondéré, 4 axes, corrections prioritaires, mots-clés, sections.
  *
- * Deux chemins, un seul moteur de calcul (`lib/ats/engine.ts`) :
- *  - IA d'abord, moteur local en secours en cas d'échec.
+ * Un seul bouton : l'IA extrait les exigences de l'offre (`/api/ats-score`), le score reste
+ * calculé par le moteur local (`lib/ats/engine.ts`) — reproductible. Si l'appel IA échoue
+ * (clé absente, quota, réseau), on retombe sur l'analyse 100 % locale avec un toast.
  *
  * ⚠️ Le CV vient de `docStore.json`. NE JAMAIS repasser par `docStore.html` : ce champ est
  * un vestige de l'ancien pipeline HTML, toujours vide depuis la migration React PDF — c'est
@@ -112,8 +113,6 @@ export default function AtsPanel({ jobDesc }: { jobDesc: string }) {
     const { json, role } = useDocStore.getState();
     return { resume: json as Resume, desc, role };
   };
-
-
 
   const runAi = async () => {
     const input = inputs();
