@@ -114,4 +114,73 @@ describe("scraper", () => {
     const calledUrls = vi.mocked(global.fetch).mock.calls.map((c) => String(c[0]));
     expect(calledUrls.some((u) => u.includes("127.0.0.1"))).toBe(false);
   });
+
+  describe("fallback microservice Camoufox", () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+    });
+
+    it("utilise le microservice si le fetch direct est bloqué, sans appeler Jina", async () => {
+      vi.stubEnv("SCRAPER_URL", "http://127.0.0.1:8765");
+      vi.mocked(global.fetch).mockImplementation(async (url) => {
+        if (url.toString().startsWith("http://127.0.0.1:8765/scrape")) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({ text: "Texte extrait par Camoufox", title: "Offre LinkedIn" }),
+          } as any;
+        }
+        if (url.toString().startsWith("https://r.jina.ai/")) {
+          throw new Error("Jina ne doit pas être appelé");
+        }
+        return { ok: false, status: 403 } as any;
+      });
+
+      const res = await scrapeJobText("https://example.com/blocked");
+      expect(res.text).toBe("Texte extrait par Camoufox");
+      expect(res.title).toBe("Offre LinkedIn");
+      const calledUrls = vi.mocked(global.fetch).mock.calls.map((c) => String(c[0]));
+      expect(calledUrls.some((u) => u.startsWith("https://r.jina.ai/"))).toBe(false);
+    });
+
+    it("retombe sur Jina si le microservice est en échec", async () => {
+      vi.stubEnv("SCRAPER_URL", "http://127.0.0.1:8765");
+      vi.mocked(global.fetch).mockImplementation(async (url) => {
+        if (url.toString().startsWith("http://127.0.0.1:8765/scrape")) {
+          return { ok: false, status: 502 } as any;
+        }
+        if (url.toString().startsWith("https://r.jina.ai/")) {
+          return {
+            ok: true,
+            status: 200,
+            text: async () => "Texte extrait par Jina",
+          } as any;
+        }
+        return { ok: false, status: 403 } as any;
+      });
+
+      const res = await scrapeJobText("https://example.com/blocked");
+      expect(res.text).toBe("Texte extrait par Jina");
+    });
+
+    it("retombe sur Jina si le microservice est injoignable (service éteint)", async () => {
+      vi.stubEnv("SCRAPER_URL", "http://127.0.0.1:8765");
+      vi.mocked(global.fetch).mockImplementation(async (url) => {
+        if (url.toString().startsWith("http://127.0.0.1:8765/scrape")) {
+          throw new Error("ECONNREFUSED");
+        }
+        if (url.toString().startsWith("https://r.jina.ai/")) {
+          return {
+            ok: true,
+            status: 200,
+            text: async () => "Texte extrait par Jina",
+          } as any;
+        }
+        return { ok: false, status: 403 } as any;
+      });
+
+      const res = await scrapeJobText("https://example.com/blocked");
+      expect(res.text).toBe("Texte extrait par Jina");
+    });
+  });
 });

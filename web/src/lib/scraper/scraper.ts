@@ -107,7 +107,35 @@ export async function scrapeJobText(url: string): Promise<{ text: string; title:
     }
   }
 
-  // 3. Fallback to Jina AI if blocked or poor extraction
+  // 3. Fallback microservice Camoufox (navigateur furtif local) si configuré.
+  if ((isBlocked || !text) && process.env.SCRAPER_URL) {
+    try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (process.env.SCRAPER_TOKEN) {
+        headers["Authorization"] = `Bearer ${process.env.SCRAPER_TOKEN}`;
+      }
+      const res = await fetch(`${process.env.SCRAPER_URL}/scrape`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ url: safeUrl }),
+        // Lancement du navigateur + pages lourdes : timeout volontairement long.
+        signal: AbortSignal.timeout(60000),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { text?: string; title?: string };
+        if (data.text && data.text.trim().length > 0) {
+          text = data.text;
+          title = title || data.title || "";
+          isBlocked = false;
+        }
+      }
+    } catch {
+      // Service éteint ou en échec : on retombe sur Jina.
+      console.error("Microservice Camoufox indisponible, fallback Jina.");
+    }
+  }
+
+  // 4. Fallback to Jina AI if blocked or poor extraction
   if (isBlocked || !text) {
     try {
       const jinaRes = await fetch(`https://r.jina.ai/${safeUrl}`, {
@@ -134,7 +162,7 @@ export async function scrapeJobText(url: string): Promise<{ text: string; title:
     }
   }
 
-  // 4. Truncate
+  // 5. Truncate
   if (text.length > EXTRACT_MAX_CHARS) {
     text = text.substring(0, EXTRACT_MAX_CHARS) + "... [TRONQUÉ]";
   }
