@@ -77,21 +77,20 @@ export default function TopBar() {
 
   const onConvert = useCallback(async () => {
     if (isConverting.current) return;
-    const { html, css, atsBoost, company, role, includeDate } = useDocStore.getState();
+    const { html, css, company, role, includeDate } = useDocStore.getState();
     const name = personNameFor(docType, json);
-    const boostKeywords = atsBoost.enabled ? atsBoost.keywords : [];
+
     const filename = buildFilename(name, docType, company, role, includeDate);
     isConverting.current = true;
     setBusy(true);
     try {
       let blob: Blob;
       if (docType === "Lettre") {
-        blob = await generateLetterPdfBlob(json as Letter, boostKeywords);
+        blob = await generateLetterPdfBlob(json as Letter);
       } else {
         blob = await generateResumePdfBlob(
           json as Resume,
-          templateId as import("@/lib/pdfgen/ResumeDocument").PdfTemplateId,
-          boostKeywords
+          templateId as import("@/lib/pdfgen/ResumeDocument").PdfTemplateId
         );
       }
       const url = URL.createObjectURL(blob);

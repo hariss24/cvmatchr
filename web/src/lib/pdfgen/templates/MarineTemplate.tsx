@@ -1,7 +1,7 @@
 import React from "react";
 import { Document, Page, View, Text, Image, StyleSheet, Svg, Path } from "@react-pdf/renderer";
 import type { Resume } from "@/lib/resume/schema";
-import { AtsBoost } from "../AtsBoost";
+
 import { px, t, ThemeContext, PdfTheme, SectionContent } from "./primitives";
 import { ContactIcon, detectContactIcon } from "./contactIcons";
 import { buildSections, buildContacts, contactText, type ResumeSection } from "@/lib/resume/sections";
@@ -239,10 +239,10 @@ function MarineSide({ section }: { section: ResumeSection }) {
 
 export function MarineTemplate({
   resume,
-  atsKeywords,
+
 }: {
   resume: Resume;
-  atsKeywords?: string[];
+
 }) {
   const d = resume;
 
@@ -308,7 +308,7 @@ export function MarineTemplate({
             ))}
           </View>
 
-          <AtsBoost keywords={atsKeywords} />
+
         </Page>
       </Document>
     </ThemeContext.Provider>

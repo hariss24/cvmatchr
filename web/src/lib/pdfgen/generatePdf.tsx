@@ -11,24 +11,22 @@ import type { PdfTemplateId } from "./ResumeDocument";
 export async function generateResumePdfBlob(
   resume: Resume,
   templateId: PdfTemplateId,
-  atsKeywords: string[],
 ): Promise<Blob> {
   const [{ pdf }, { ResumeDocument }] = await Promise.all([
     import("@react-pdf/renderer"),
     import("./ResumeDocument"),
   ]);
   return pdf(
-    <ResumeDocument resume={resume} templateId={templateId} atsKeywords={atsKeywords} />,
+    <ResumeDocument resume={resume} templateId={templateId} />,
   ).toBlob();
 }
 
 export async function generateLetterPdfBlob(
   letter: import("@/lib/resume/schema").Letter,
-  atsKeywords: string[]
 ): Promise<Blob> {
   const [{ pdf }, { LetterDocument }] = await Promise.all([
     import("@react-pdf/renderer"),
     import("./LetterDocument"),
   ]);
-  return pdf(<LetterDocument letter={letter} atsKeywords={atsKeywords} />).toBlob();
+  return pdf(<LetterDocument letter={letter} />).toBlob();
 }

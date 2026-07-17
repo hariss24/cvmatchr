@@ -10,23 +10,23 @@ export type PdfTemplateId = "graphique" | "sobre" | "moderne" | "classique" | "m
 export function ResumeDocument({
   resume,
   templateId,
-  atsKeywords,
+
 }: {
   resume: Resume;
   templateId: PdfTemplateId;
-  atsKeywords?: string[];
+
 }) {
   registerPdfFonts();
 
   switch (templateId) {
     case "sobre":
-      return <SobreTemplate resume={resume} atsKeywords={atsKeywords} />;
+      return <SobreTemplate resume={resume} />;
     case "kakuna":
-      return <KakunaTemplate resume={resume} atsKeywords={atsKeywords} />;
+      return <KakunaTemplate resume={resume} />;
     case "marine":
-      return <MarineTemplate resume={resume} atsKeywords={atsKeywords} />;
+      return <MarineTemplate resume={resume} />;
     case "graphique":
     default:
-      return <GraphiqueTemplate resume={resume} atsKeywords={atsKeywords} />;
+      return <GraphiqueTemplate resume={resume} />;
   }
 }

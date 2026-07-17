@@ -94,7 +94,7 @@ export default function AtsPanel({ jobDesc }: { jobDesc: string }) {
   const [priorities, setPriorities] = useState<Priority[]>([]);
   const [byAi, setByAi] = useState(false);
   const [busy, setBusy] = useState(false);
-  const atsBoost = useDocStore((s) => s.atsBoost);
+
   const docType = useDocStore((s) => s.docType);
 
   const isCv = docType !== "Lettre";
@@ -137,20 +137,7 @@ export default function AtsPanel({ jobDesc }: { jobDesc: string }) {
     }
   };
 
-  // Injecte (ou retire) les mots-clés absents en texte invisible dans le PDF exporté.
-  const toggleBoost = () => {
-    const next = !atsBoost.enabled;
-    useDocStore.getState().setAtsBoost({
-      enabled: next,
-      keywords: next ? (report?.boostKeywords ?? []) : [],
-    });
-    toast(
-      next
-        ? "🧲 Booster actif — mots-clés injectés invisiblement dans le CV."
-        : "Booster désactivé.",
-      next ? "success" : "info",
-    );
-  };
+
 
   return (
     <div className="ats-panel">
@@ -199,16 +186,7 @@ export default function AtsPanel({ jobDesc }: { jobDesc: string }) {
         </div>
       ) : null}
 
-      {report?.boostKeywords.length ? (
-        <button
-          type="button"
-          className={`ats-ai-btn ats-boost-btn${atsBoost.enabled ? " active" : ""}`}
-          onClick={toggleBoost}
-          disabled={busy}
-        >
-          🧲 Booster ATS invisible{atsBoost.enabled ? " ✓" : ""}
-        </button>
-      ) : null}
+
     </div>
   );
 }

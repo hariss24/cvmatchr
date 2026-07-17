@@ -48,25 +48,4 @@ test("l'ATS affiche un score local, puis un rapport IA basé sur les exigences",
   await expect(page.getByText("Prouvez Kubernetes dans une expérience")).toBeVisible();
 });
 
-test("le booster ATS injecte des mots-clés invisibles dans l'aperçu", async ({ page }) => {
-  await page.goto("/");
-  await page.getByRole("button", { name: "Adapter à une offre" }).click();
-  await page.locator("#job-desc-input").fill("Kubernetes Docker Terraform Golang Rust");
-  await page.getByRole("button", { name: "Score ATS", exact: true }).click();
 
-  // Aucun boost au départ.
-  let atsBoost = await page.evaluate(() => {
-    const store = (window as unknown as { useDocStore: { getState: () => { atsBoost: { enabled: boolean; keywords: string[] } } } }).useDocStore.getState();
-    return store.atsBoost;
-  });
-  expect(atsBoost.enabled).toBe(false);
-
-  // Activation du booster → le state change.
-  await page.getByRole("button", { name: /Booster ATS invisible/ }).click();
-  atsBoost = await page.evaluate(() => {
-    const store = (window as unknown as { useDocStore: { getState: () => { atsBoost: { enabled: boolean; keywords: string[] } } } }).useDocStore.getState();
-    return store.atsBoost;
-  });
-  expect(atsBoost.enabled).toBe(true);
-  expect(atsBoost.keywords.length).toBeGreaterThan(0);
-});

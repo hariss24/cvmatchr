@@ -37,8 +37,7 @@ export type Doc = {
   htmlSource: boolean;
   /** Aperçu transitoire (proposition du chat IA) : si non null, l'aperçu l'affiche au lieu du document. */
   previewOverride: DocData | null;
-  /** Booster ATS invisible : mots-clés absents injectés en texte 1px à l'aperçu et à l'export. */
-  atsBoost: { enabled: boolean; keywords: string[] };
+
   /** État HTML/CSS avant adaptation (Tailor) pour le DiffModal. */
   tailorBefore: { json: DocData; templateId: TemplateId | null } | null;
   /** Offre en attente (depuis l'onglet Offres) : pré-remplit `TailorModal` à l'ouverture. */
@@ -66,7 +65,7 @@ export type DocStore = Doc & {
   setDocType: (docType: DocType) => void;
   setTemplate: (templateId: TemplateId) => void;
   setPreviewOverride: (previewOverride: DocData | null) => void;
-  setAtsBoost: (atsBoost: { enabled: boolean; keywords: string[] }) => void;
+
   setTailorBefore: (state: { json: DocData; templateId: TemplateId | null } | null) => void;
   setPendingJobDesc: (v: string | null) => void;
 
@@ -85,7 +84,7 @@ export const useDocStore = create<DocStore>((set) => ({
   css: TEMPLATES[INITIAL_TEMPLATE].css,
   htmlSource: false,
   previewOverride: null,
-  atsBoost: { enabled: false, keywords: [] },
+
   tailorBefore: null,
   pendingJobDesc: null,
 
@@ -99,7 +98,7 @@ export const useDocStore = create<DocStore>((set) => ({
   setCompany: (company) => set({ company }),
   setRole: (role) => set({ role }),
   setPreviewOverride: (previewOverride) => set({ previewOverride }),
-  setAtsBoost: (atsBoost) => set({ atsBoost }),
+
   setTailorBefore: (tailorBefore) => set({ tailorBefore }),
   setPendingJobDesc: (pendingJobDesc) => set({ pendingJobDesc }),
 

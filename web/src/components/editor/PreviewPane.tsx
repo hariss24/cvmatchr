@@ -17,7 +17,7 @@ export default function PreviewPane() {
   const docType = useDocStore((s) => s.docType);
   const templateId = useDocStore((s) => s.templateId);
   const previewOverride = useDocStore((s) => s.previewOverride);
-  const atsBoost = useDocStore((s) => s.atsBoost);
+
 
   const [pages, setPages] = useState(1);
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
@@ -32,16 +32,15 @@ export default function PreviewPane() {
     const id = setTimeout(async () => {
       try {
         const jsonToRender = isPreview ? previewOverride : json;
-        const boostKeywords = atsBoost.enabled ? atsBoost.keywords : [];
+
         let blob: Blob;
         
         if (docType === "Lettre") {
-          blob = await generateLetterPdfBlob(jsonToRender as Letter, boostKeywords);
+          blob = await generateLetterPdfBlob(jsonToRender as Letter);
         } else {
           blob = await generateResumePdfBlob(
             jsonToRender as Resume,
-            templateId as import("@/lib/pdfgen/ResumeDocument").PdfTemplateId,
-            boostKeywords
+            templateId as import("@/lib/pdfgen/ResumeDocument").PdfTemplateId
           );
         }
         
@@ -51,7 +50,7 @@ export default function PreviewPane() {
       }
     }, 500);
     return () => clearTimeout(id);
-  }, [json, docType, templateId, previewOverride, isPreview, atsBoost]);
+  }, [json, docType, templateId, previewOverride, isPreview]);
 
   const onPdfPages = useCallback((n: number) => setPages(Math.max(1, n)), []);
 

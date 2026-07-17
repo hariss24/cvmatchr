@@ -53,8 +53,8 @@ export default function HistoryList() {
       toast("Génération du PDF...", "info");
       const blob =
         entry.doc_type === "Lettre"
-          ? await generateLetterPdfBlob(entry.json as Letter, [])
-          : await generateResumePdfBlob(entry.json as Resume, (entry.templateId ?? "sobre") as PdfTemplateId, []);
+          ? await generateLetterPdfBlob(entry.json as Letter)
+          : await generateResumePdfBlob(entry.json as Resume, (entry.templateId ?? "sobre") as PdfTemplateId);
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
       setTimeout(() => URL.revokeObjectURL(url), 60000);

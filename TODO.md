@@ -61,6 +61,10 @@ Suivi des fonctionnalités de l'application (version Next.js).
 
 ## 🔵 Priorité haute — à faire
 
+- [ ] **Trouver une solution pour extraire les offres d'emploi via linkedin et indeed, qui bloquent les bots. ** 
+
+- [ ] **Mettre des ancres pour que le document soit plus lisible et naviguable.** Par exemple dans le formulaire dans la section "ordre des sections" ou changer l'ordre des sections en table de matières, pour que chaque section soit accessible avec un ancre. Puis avoir un bouton pour remonter facilement. A brainstormer.
+
 - [x] **Vider les champs entreprise et nom de poste quand on supprime ou crée un nouveau CV**
   Quand l'utilisateur clique sur supprimer ou créer un nouveau CV, vider les champs entreprise
   et nom de poste. *(17/07 — `onNewCv` de la TopBar vide `company`/`role`.)*

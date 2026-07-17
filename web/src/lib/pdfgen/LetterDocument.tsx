@@ -1,7 +1,7 @@
 import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 import type { Letter } from "@/lib/resume/schema";
 import { registerPdfFonts } from "./fonts";
-import { AtsBoost } from "./AtsBoost";
+
 
 /**
  * Lettre de motivation en React PDF — port visuel de `renderLetter` (render.ts l.252-295) :
@@ -52,10 +52,10 @@ function Paragraphs({ text }: { text: string }) {
 
 export function LetterDocument({
   letter,
-  atsKeywords,
+
 }: {
   letter: Letter;
-  atsKeywords?: string[];
+
 }) {
   registerPdfFonts();
   const d = letter;
@@ -86,7 +86,7 @@ export function LetterDocument({
 
         {t(d.signature) ? <Text style={s.signature}>{d.signature}</Text> : null}
 
-        <AtsBoost keywords={atsKeywords} />
+
       </Page>
     </Document>
   );

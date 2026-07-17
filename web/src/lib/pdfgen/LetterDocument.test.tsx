@@ -4,8 +4,8 @@ import { letterSchema, DEFAULT_LETTER } from "@/lib/resume/schema";
 import { LetterDocument } from "./LetterDocument";
 import { extractPdfText } from "./extractText";
 
-async function textOf(letter = DEFAULT_LETTER, atsKeywords?: string[]): Promise<string> {
-  const buf = await renderToBuffer(<LetterDocument letter={letter} atsKeywords={atsKeywords} />);
+async function textOf(letter = DEFAULT_LETTER): Promise<string> {
+  const buf = await renderToBuffer(<LetterDocument letter={letter} />);
   expect(Buffer.from(buf.subarray(0, 5)).toString("latin1")).toBe("%PDF-");
   const pages = await extractPdfText(new Uint8Array(buf));
   return pages.join("\n");
@@ -34,12 +34,7 @@ describe("LetterDocument", () => {
     expect(text).toContain("Prénom Nom");
   });
 
-  it("intègre le booster ATS quand demandé", async () => {
-    const boosted = await textOf(DEFAULT_LETTER, ["scrum"]);
-    expect(boosted).toContain("scrum");
-    const plain = await textOf(DEFAULT_LETTER);
-    expect(plain).not.toContain("scrum");
-  });
+
 
   it("filtre les lignes vides du corps et tolère une lettre minimale", async () => {
     const text = await textOf(

@@ -16,7 +16,7 @@ export default function DiffModal({ open, onClose }: DiffModalProps) {
   const tailorBefore = useDocStore((s) => s.tailorBefore);
   const currentJson = useDocStore((s) => s.json);
   const currentTemplate = useDocStore((s) => s.templateId);
-  const atsBoost = useDocStore((s) => s.atsBoost);
+
 
   const [beforeBlob, setBeforeBlob] = useState<Blob | null>(null);
   const [afterBlob, setAfterBlob] = useState<Blob | null>(null);
@@ -24,20 +24,18 @@ export default function DiffModal({ open, onClose }: DiffModalProps) {
   useEffect(() => {
     if (!open || !tailorBefore) return;
 
-    const kw = atsBoost.enabled ? atsBoost.keywords : [];
+
 
     generateResumePdfBlob(
       tailorBefore.json as Resume,
       (tailorBefore.templateId || "sobre") as import("@/lib/pdfgen/ResumeDocument").PdfTemplateId,
-      kw
     ).then(setBeforeBlob).catch(console.error);
 
     generateResumePdfBlob(
       currentJson as Resume,
       currentTemplate as import("@/lib/pdfgen/ResumeDocument").PdfTemplateId,
-      kw
     ).then(setAfterBlob).catch(console.error);
-  }, [open, tailorBefore, currentJson, currentTemplate, atsBoost]);
+  }, [open, tailorBefore, currentJson, currentTemplate]);
 
   useEscapeClose(open && !!tailorBefore, onClose);
 

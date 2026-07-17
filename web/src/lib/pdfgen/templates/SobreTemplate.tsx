@@ -1,7 +1,7 @@
 import React from "react";
 import { Document, Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import type { Resume } from "@/lib/resume/schema";
-import { AtsBoost } from "../AtsBoost";
+
 import { px, t, ThemeContext, PdfTheme, SkillText, SectionContent } from "./primitives";
 import { buildSections, buildContacts, contactText, type ResumeSection } from "@/lib/resume/sections";
 
@@ -163,10 +163,10 @@ function SobreAside({ section }: { section: ResumeSection }) {
 
 export function SobreTemplate({
   resume,
-  atsKeywords,
+
 }: {
   resume: Resume;
-  atsKeywords?: string[];
+
 }) {
   const d = resume;
 
@@ -219,7 +219,7 @@ export function SobreTemplate({
             ),
           )}
 
-          <AtsBoost keywords={atsKeywords} />
+
         </Page>
       </Document>
     </ThemeContext.Provider>
