@@ -41,6 +41,18 @@
 
 ## Journal
 
+### 2026-07-17 : Mission 8 — CI et durcissement (SSRF et limites IA)
+
+- **Besoin.** Fusionner la CI pour n'avoir qu'un seul workflow, sécuriser davantage le scraper contre les vulnérabilités SSRF en traitant les redirections manuellement, limiter la longueur des entrées dans les prompts de l'IA (anti-abus tokens) et nettoyer les modèles PDF résiduels non implémentés.
+- **Correctif.** 
+  - CI : suppression de `ci.yml`, mise à jour de `web.yml` pour tracker uniquement `main` en Node 22.
+  - Scraper : refonte de la logique de `fetch` avec le paramètre `redirect: "manual"` et boucle sur les redirections (MAX_REDIRECTS=3) pour revalider systématiquement l'URL avec `validateUrlForScraping`. Ajout d'un test spécifique pour prouver que SSRF via 302 est bloqué.
+  - IA : clamp de 30 000 caractères par `slice(0, 30_000)` appliqué aux entrées `text`, `job_desc` et `letter_body` sur toutes les routes API (adapt-letter, editor-chat, extract-meta, text-to-letter, text-to-resume, tailor-resume).
+  - Nettoyage : suppression de `moderne`, `classique` et `minimal` dans `PdfTemplateId`.
+- **Fichiers touchés :** `.github/workflows/ci.yml` (supprimé), `.github/workflows/web.yml`, `web/src/lib/scraper/scraper.ts`, `web/src/lib/scraper/scraper.test.ts`, `web/src/app/api/tailor-resume/route.ts`, `web/src/app/api/adapt-letter/route.ts`, `web/src/app/api/extract-meta/route.ts`, `web/src/app/api/text-to-resume/route.ts`, `web/src/app/api/text-to-letter/route.ts`, `web/src/app/api/editor-chat/route.ts`, `web/src/lib/pdfgen/ResumeDocument.tsx`.
+- **Résultat vérifs :** `tsc --noEmit` OK, `npm run lint` 0 erreur, `npm test` 240/240 verts (incluant SSRF).
+- **Commit :** `chore: fusionne la CI, revalide les redirections du scraper (SSRF), borne les entrées IA`
+
 ### 2026-07-17 : Mission 7 — Retrait de l'écosystème HTML local (store et purge)
 
 - **Besoin.** Achever la migration vers React PDF (post-audit) en supprimant toutes les références au `html`, `css`, et `htmlSource` dans le store de l'application, les types de la base de données (IndexedDB), les modèles de CV, et les composants d'UI.

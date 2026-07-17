@@ -76,11 +76,8 @@ Il est retiré avant l'appel et restauré à la réception (`src/lib/ai/base64.t
 
 - **`src/state/docStore.ts`** (Zustand) : le document courant (CV ou Lettre) —
   `json` (source de vérité structurée), `templateId`, `company`/`role` (barre
-  meta), `previewOverride` (proposition du chat IA avant validation), `atsBoost`
-  (mots-clés injectés en 1px), `tailorBefore` (état pré-adaptation, pour le
-  `DiffModal`), `pendingJobDesc` (offre en attente depuis l'onglet Offres).
-  Contient aussi `html`/`css`/`htmlSource` : reliquat du **mode expert** (édition
-  HTML brute), toujours utilisé par `/api/tailor` — voir section 7.
+  meta), `previewOverride` (proposition du chat IA avant validation), `pendingJobDesc` 
+  (offre en attente depuis l'onglet Offres).
 - **`src/state/uiStore.ts`** : toasts, et les remplaçants de `alert/confirm/prompt`
   natifs (`uiAlert`, `uiConfirm`, `uiPrompt`) — **ne jamais utiliser les natifs**.
 - **`src/lib/storage/db.ts`** (Dexie, IndexedDB, tout est local au navigateur) :
@@ -94,26 +91,15 @@ Il est retiré avant l'appel et restauré à la réception (`src/lib/ai/base64.t
 
 ## 6. Génération PDF
 
-Deux moteurs coexistent, pour deux usages différents :
+Un seul moteur exclusif :
 
-1. **Pipeline JSON → React PDF (principal)** : `src/lib/pdfgen/generatePdf.tsx`
+1. **Pipeline JSON → React PDF** : `src/lib/pdfgen/generatePdf.tsx`
    génère un `Blob` PDF dans le navigateur via `ResumeDocument.tsx` /
    `LetterDocument.tsx` + les gabarits `src/lib/pdfgen/templates/*.tsx`
-   (`SobreTemplate`, `GraphiqueTemplate`, `KakunaTemplate`). L'aperçu affiche
+   (`SobreTemplate`, `GraphiqueTemplate`, `KakunaTemplate`, `MarineTemplate`). L'aperçu affiche
    ensuite ce blob page par page via `pdf.js` (`PdfPreview.tsx`).
-   Templates CV disponibles : **Sobre, Graphique, Kakuna** (`PdfTemplateId` expose
-   aussi `moderne`/`classique`/`minimal`, non implémentés — retombent sur Graphique).
+   Templates CV disponibles : **Sobre, Graphique, Kakuna, Marine**.
    La Lettre n'a qu'un seul gabarit.
-2. **Couche HTML/CSS legacy (parallèle au JSON)** : `docStore` garde `html`/`css`/
-   `htmlSource` en plus de `json`. Alimentée par `/api/tailor` (adaptation HTML en
-   streaming SSE, conservée intentionnellement en plus de `/api/tailor-resume` —
-   voir sa docstring), restaurée par `SnapshotsModal`/`HistoryList` (anciens
-   snapshots/entrées d'historique), lue par `AtsPanel` (analyse ATS locale) et
-   `DraftManager` (détection de changement pour l'auto-save). ⚠️ Dans
-   `EditorPane.tsx`, l'onglet « mode expert » édite en réalité du **JSON**
-   (Monaco) — le HTML brut n'est manipulable que via les flux ci-dessus. Cette
-   couche n'alimente **jamais** le PDF final (100 % `json` → react-pdf) ;
-   `htmlSource=true` bloque juste le formulaire pour ne pas écraser ces données.
 
 Point d'attention Windows/Turbopack : si un changement CSS ne s'affiche pas,
 supprimer `web/.next`, vérifier qu'aucun serveur ne traîne sur le port 3000, puis
@@ -135,7 +121,6 @@ l'import PDF). Modèle Gemini par défaut : `gemini-3.1-flash-lite` (réglable v
 | Route | Rôle |
 |---|---|
 | `tailor-resume` | Adapte un CV structuré (JSON) à une offre — pipeline principal |
-| `tailor` | Adaptation HTML → HTML (mode expert, streaming SSE) |
 | `editor-chat` | Chat de l'éditeur : réponses + propositions de modification (`propose/preview/apply`) |
 | `ats-score` | Analyse ATS : l'IA extrait les **exigences** de l'offre et dit lesquelles le CV prouve (elle ne calcule aucun score) |
 | `adapt-letter` | Adapte le corps du modèle de lettre de l'utilisateur à une offre (IA optionnelle du Pack) |
@@ -160,14 +145,6 @@ l'import PDF). Modèle Gemini par défaut : `gemini-3.1-flash-lite` (réglable v
   exigences par pondération statistique ; « Analyser avec l'IA » les fait extraire par
   l'IA (sémantique, synonymes, indispensable vs souhaité) **mais le score reste calculé
   par le moteur** — donc reproductible d'un appel à l'autre.
-
-⚠️ **Ne jamais rebrancher l'ATS sur `docStore.html`** : ce champ est un vestige de
-l'ancien pipeline HTML, remis à `""` par `setJson`. C'est ce qui donnait un score de 0 et
-listait la présentation de l'entreprise en « mots-clés absents » (corrigé le 14/07).
-
-**White-fonting** : mots-clés manquants injectés en texte transparent 1px à
-l'export (`docStore.atsBoost` → `pdfgen/AtsBoost.tsx`), pour le score ATS des
-plateformes de recrutement.
 
 ---
 
@@ -211,9 +188,12 @@ Sans variable définie → app ouverte (mode local). Rate-limiting basique par I
 ```
 app/
   page.tsx          # Éditeur principal (TopBar, MetaBar, EditorPane, PreviewPane, ActionsBar, DraftManager)
+  help/             # Page d'aide / FAQ
   history/          # Historique des CV/lettres générés
   jobs/             # Chasseur d'offres
   login/            # Écran de mot de passe (mode remote)
+  pack/             # Pack candidature (lettre de motivation / email)
+  profil/           # Profil du candidat (préremplissage)
 components/
   editor/           # EditorPane (formulaire ⇄ JSON), PreviewPane, PdfPreview (rendu canvas)
   form/             # FormEditor (CV), LetterForm
@@ -236,9 +216,6 @@ Modales de référence : `TailorModal.tsx`, `PackModal.tsx` (Pack candidature : 
 
 - **Photo base64** : jamais envoyée à une IA, jamais affichée brute dans un flux
   IA (strip/restore systématique, `lib/ai/base64.ts`).
-- **Deux moteurs de rendu coexistent** (section 6) : ne pas supposer que le
-  pipeline JSON/React-PDF est le seul chemin — `/api/tailor` (mode expert HTML)
-  est actif et alimente `html`/`css` dans `docStore`/`Snapshot`/`Draft`/`History`.
 - **Turbopack/Windows** : CSS parfois périmé en dev, purger `.next`.
 - **Quota Gemini** : erreurs 429 traduites en message utilisateur actionnable
   (proposer une clé personnelle via ⚙️ Paramètres).
