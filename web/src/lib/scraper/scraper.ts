@@ -3,15 +3,20 @@ import { validateUrlForScraping } from "./ssrf";
 
 const EXTRACT_MAX_CHARS = 15_000;
 
-// LinkedIn : les URL de l'interface connectée (/jobs/collections/, /jobs/search/…
-// avec ?currentJobId=<id>) sont derrière un mur de connexion. La même offre est
-// publique au format /jobs/view/<id> — on réécrit avant de scraper.
+// LinkedIn/Indeed : les URL de navigation (?currentJobId= / ?vjk=) affichent
+// l'offre dans un panneau JS ou derrière un mur de connexion — le scraping n'y
+// voit que la page d'accueil. La même offre a une page publique dédiée
+// (/jobs/view/<id>, /viewjob?jk=<id>) — on réécrit avant de scraper.
 function normalizeJobUrl(url: string): string {
   try {
     const u = new URL(url);
     if (u.hostname === "linkedin.com" || u.hostname.endsWith(".linkedin.com")) {
       const id = u.searchParams.get("currentJobId");
       if (id && /^\d+$/.test(id)) return `https://www.linkedin.com/jobs/view/${id}`;
+    }
+    if (u.hostname === "indeed.com" || u.hostname.endsWith(".indeed.com")) {
+      const id = u.searchParams.get("vjk");
+      if (id && /^[0-9a-f]+$/i.test(id)) return `https://${u.hostname}/viewjob?jk=${id}`;
     }
   } catch {
     // URL invalide : laissée telle quelle, la validation SSRF la rejettera.

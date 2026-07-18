@@ -109,6 +109,23 @@ describe("scraper", () => {
     expect(calledUrls[0]).toBe("https://www.linkedin.com/jobs/view/4433125093");
   });
 
+  it("réécrit les URL Indeed « ?vjk= » en URL publique /viewjob?jk=", async () => {
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => `
+        <html><head><title>Offre</title></head>
+        <body><div class="job-description">
+          Description complète de l'offre. ${"pad".repeat(100)}
+        </div></body></html>
+      `,
+    } as any);
+
+    await scrapeJobText("https://fr.indeed.com/?vjk=32cd9f9758698f36");
+    const calledUrls = vi.mocked(global.fetch).mock.calls.map((c) => String(c[0]));
+    expect(calledUrls[0]).toBe("https://fr.indeed.com/viewjob?jk=32cd9f9758698f36");
+  });
+
   it("refuse une redirection vers une IP privée (SSRF via 302)", async () => {
     // La validation SSRF rejette les URL privées (simulation du comportement réel).
     vi.spyOn(ssrf, "validateUrlForScraping").mockImplementation(async (url) => {
