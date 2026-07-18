@@ -31,7 +31,7 @@ test("la lettre se construit depuis le modèle unique, sans IA ni email", async 
   await modal.getByPlaceholder("Poste visé").fill("Développeur Web");
   await modal.getByRole("button", { name: /Créer ma lettre/ }).click();
 
-  await expect(page.locator("#doc_type")).toHaveValue("Lettre");
+  await expect(page.getByRole("radio", { name: "Lettre", exact: true })).toHaveAttribute("aria-checked", "true");
   const inserted = await page.evaluate(() => {
     const store = (
       window as unknown as {

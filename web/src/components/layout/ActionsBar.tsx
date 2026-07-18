@@ -45,7 +45,7 @@ export default function ActionsBar() {
   };
 
   return (
-    <div className="actions">
+    <div className="actions actions--dock">
       {canTailor ? (
         <button
           type="button"
@@ -64,6 +64,8 @@ export default function ActionsBar() {
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
         <span className="btn-label">Effacer</span>
       </button>
+
+      <span className="actions-divider" aria-hidden="true" />
 
       <Link
         href="/help"

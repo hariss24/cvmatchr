@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useDocStore } from "@/state/docStore";
 import { postJson } from "@/lib/ai/client";
@@ -61,7 +61,130 @@ export default function TailorModal({
     if (useDocStore.getState().pendingJobDesc) useDocStore.getState().setPendingJobDesc(null);
   }, []);
 
-  useEscapeClose(open && !busy && !diffOpen, onClose);
+  // ---- Bottom sheet à ressort (design « Refonte Atelier ») ----
+  const sheetRef = useRef<HTMLDivElement | null>(null);
+  const scrimRef = useRef<HTMLDivElement | null>(null);
+  // Physique hors React : position y (px depuis la position ouverte), vitesse, drag.
+  const phys = useRef({
+    y: 100000, v: 0, raf: 0,
+    dragging: false, startY: 0, startSheet: 0,
+    hist: [] as { t: number; y: number }[],
+  });
+
+  const sheetHeight = useCallback(() => {
+    const el = sheetRef.current;
+    return el ? el.offsetHeight + 30 : Math.min(640, window.innerHeight * 0.86);
+  }, []);
+
+  const apply = useCallback(() => {
+    const p = phys.current;
+    const el = sheetRef.current;
+    if (!el) return;
+    const H = sheetHeight();
+    const y = Math.min(p.y, H + 10);
+    el.style.transform = `translate(-50%, ${y}px)`;
+    const scrim = scrimRef.current;
+    if (scrim) {
+      const prog = Math.max(0, Math.min(1, 1 - y / H));
+      scrim.style.opacity = String(prog);
+      scrim.style.pointerEvents = prog > 0.05 ? "auto" : "none";
+    }
+  }, [sheetHeight]);
+
+  // Ressort à 2 paramètres (damping ratio + response) — cf. Designing Fluid Interfaces.
+  const spring = useCallback((target: number, v0: number, zeta: number, resp: number, done?: () => void) => {
+    const p = phys.current;
+    cancelAnimationFrame(p.raf);
+    const k = Math.pow((2 * Math.PI) / resp, 2);
+    const c = 2 * zeta * Math.sqrt(k);
+    p.v = v0;
+    let last = performance.now();
+    const step = (now: number) => {
+      const dt = Math.min((now - last) / 1000, 1 / 30);
+      last = now;
+      const a = -k * (p.y - target) - c * p.v;
+      p.v += a * dt;
+      p.y += p.v * dt;
+      apply();
+      if (Math.abs(p.y - target) < 0.5 && Math.abs(p.v) < 20) {
+        p.y = target; p.v = 0; apply();
+        done?.();
+        return;
+      }
+      p.raf = requestAnimationFrame(step);
+    };
+    p.raf = requestAnimationFrame(step);
+  }, [apply]);
+
+  const reducedMotion = () =>
+    typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Fermeture animée : la sheet glisse hors écran, puis on démonte.
+  const requestClose = useCallback(() => {
+    if (busy) return;
+    const H = sheetHeight();
+    if (reducedMotion()) { onClose(); return; }
+    spring(H, phys.current.v, 1, 0.34, onClose);
+  }, [busy, onClose, sheetHeight, spring]);
+
+  // Ouverture : la sheet monte depuis le bas avec un léger rebond.
+  useEffect(() => {
+    if (!open) return;
+    const p = phys.current;
+    const H = sheetHeight();
+    p.y = H;
+    apply();
+    if (reducedMotion()) { p.y = 0; apply(); return; }
+    spring(0, 0, 0.8, 0.42);
+    return () => cancelAnimationFrame(p.raf);
+  }, [open, apply, spring, sheetHeight]);
+
+  // Amortissement caoutchouc au-delà de la position ouverte.
+  const rubber = (o: number) => {
+    const d = sheetHeight(), c = 0.55;
+    return (o * d * c) / (d + c * o);
+  };
+
+  const onGrabDown = (e: React.PointerEvent) => {
+    const p = phys.current;
+    p.dragging = true;
+    cancelAnimationFrame(p.raf);
+    e.currentTarget.setPointerCapture(e.pointerId);
+    p.startY = e.clientY;
+    p.startSheet = p.y;
+    p.hist = [{ t: e.timeStamp, y: p.y }];
+  };
+  const onGrabMove = (e: React.PointerEvent) => {
+    const p = phys.current;
+    if (!p.dragging) return;
+    let ny = p.startSheet + (e.clientY - p.startY);
+    if (ny < 0) ny = -rubber(-ny);
+    p.y = ny;
+    apply();
+    p.hist.push({ t: e.timeStamp, y: ny });
+    if (p.hist.length > 6) p.hist.shift();
+  };
+  const onGrabUp = () => {
+    const p = phys.current;
+    if (!p.dragging) return;
+    p.dragging = false;
+    let v = 0;
+    if (p.hist.length > 1) {
+      const a = p.hist[0], b = p.hist[p.hist.length - 1];
+      const dt = (b.t - a.t) / 1000;
+      if (dt > 0.001) v = (b.y - a.y) / dt;
+    }
+    const H = sheetHeight();
+    // Projection de momentum : où finirait la sheet si on la lâchait ?
+    const proj = p.y + ((v / 1000) * 0.998) / (1 - 0.998);
+    if (!busy && (proj > H * 0.42 || v > 900)) {
+      spring(H, v, 1, 0.34, onClose);
+    } else {
+      spring(0, v, 0.85, 0.36);
+    }
+  };
+
+  useEscapeClose(open && !busy && !diffOpen, requestClose);
 
   if (!open || typeof document === "undefined") return null;
 
@@ -185,133 +308,134 @@ export default function TailorModal({
   );
 
   const content = (
-    <div
-      className="ui-overlay ui-overlay--drawer-left"
-      role="presentation"
-      onClick={busy ? undefined : onClose}
-    >
+    <>
       <div
-        className={`ui-drawer ui-drawer--left ${isLetter ? "ui-drawer--md" : "ui-drawer--lg"}`}
+        ref={scrimRef}
+        className="sheet-scrim"
+        role="presentation"
+        onClick={busy ? undefined : requestClose}
+      />
+      <div
+        ref={sheetRef}
+        className="sheet"
         role="dialog"
         aria-modal="true"
         aria-label={isLetter ? "Adapter la lettre à une offre" : "Adapter le CV à une offre"}
-        onClick={(e) => e.stopPropagation()}
       >
-        <div className="ui-drawer__head">
-          <div>
-            <span className="ui-eyebrow">{isLetter ? "Lettre de motivation" : "CV"}</span>
-            <h2 className="ui-drawer__title">Adapter à une offre d&apos;emploi</h2>
-          </div>
-          <button type="button" className="ui-icon-btn" aria-label="Fermer" onClick={onClose} disabled={busy}>
-            &times;
-          </button>
-        </div>
-
-        <div className="ui-drawer__body">
-          {isLetter ? (
-            offerSection
-          ) : (
-            <div className="tailor-body-inner">
-              <div className="tailor-col-left">{offerSection}</div>
-              <div className="tailor-col-right">
-                <div className="tailor-settings-box">
-                  <div className="tailor-level-list" role="radiogroup" aria-label="Niveau d'adaptation">
-                    <span className="ui-eyebrow">Niveau d&apos;adaptation</span>
-                    {LEVELS.map((l) => (
-                      <button
-                        key={l.id}
-                        type="button"
-                        role="radio"
-                        aria-checked={level === l.id}
-                        className={`tailor-level-item${level === l.id ? " active" : ""}`}
-                        onClick={() => setLevel(l.id)}
-                        disabled={busy}
-                      >
-                        <div className="tailor-level-radio" />
-                        <div className="tailor-level-content">
-                          <span className="tailor-level-title">{l.label}</span>
-                          <span className="tailor-level-desc">{l.hint}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-
-                  <div 
-                    className="ui-switch-row" 
-                    onClick={() => { if (!busy) setUseMaster(!useMaster); }}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        if (!busy) setUseMaster(!useMaster);
-                      }
-                    }}
-                  >
-                    <div className="ui-switch-label">
-                      <span className="ui-switch-title">Utiliser le CV Maître</span>
-                      <span className="ui-switch-hint">Recommandé si disponible</span>
-                    </div>
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={useMaster}
-                      className="ui-switch"
-                      disabled={busy}
-                      tabIndex={-1}
-                    >
-                      <div className="ui-switch-knob" />
-                    </button>
-                  </div>
-                </div>
-                <AtsPanel jobDesc={jobDesc} />
+        <div
+          className="sheet__grab"
+          onPointerDown={onGrabDown}
+          onPointerMove={onGrabMove}
+          onPointerUp={onGrabUp}
+          onPointerCancel={onGrabUp}
+        >
+          <div className="sheet__handle" />
+          <div className="sheet__head">
+            <div>
+              <h2 className="sheet__title">Adapter à une offre</h2>
+              <div className="sheet__sub">
+                {isLetter
+                  ? "L'IA adapte le corps de ta lettre — ta voix reste la tienne."
+                  : "Un snapshot du CV est pris avant chaque adaptation."}
               </div>
             </div>
+            <button type="button" className="ui-icon-btn" aria-label="Fermer" onClick={requestClose} disabled={busy}>
+              &times;
+            </button>
+          </div>
+        </div>
+
+        <div className="sheet__body">
+          {offerSection}
+
+          {isLetter ? null : (
+            <>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <span className="form-label" style={{ textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  Niveau d&apos;adaptation
+                </span>
+                <div className="sheet-levels" role="radiogroup" aria-label="Niveau d'adaptation">
+                  {LEVELS.map((l) => (
+                    <button
+                      key={l.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={level === l.id}
+                      className={`sheet-level${level === l.id ? " active" : ""}`}
+                      onClick={() => setLevel(l.id)}
+                      disabled={busy}
+                    >
+                      <span className="sheet-level__head">
+                        <span className="sheet-level__radio"><span className="sheet-level__dot" /></span>
+                        <span className="sheet-level__title">{l.label}</span>
+                      </span>
+                      <span className="sheet-level__desc">{l.hint}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div
+                className="ui-switch-row"
+                onClick={() => { if (!busy) setUseMaster(!useMaster); }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    if (!busy) setUseMaster(!useMaster);
+                  }
+                }}
+              >
+                <div className="ui-switch-label">
+                  <span className="ui-switch-title">Utiliser le CV Maître</span>
+                  <span className="ui-switch-hint">Recommandé si disponible</span>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={useMaster}
+                  className="ui-switch"
+                  disabled={busy}
+                  tabIndex={-1}
+                >
+                  <div className="ui-switch-knob" />
+                </button>
+              </div>
+
+              <AtsPanel jobDesc={jobDesc} />
+            </>
           )}
         </div>
 
-        <div className="ui-drawer__foot">
-          {isLetter ? (
+        <div className="sheet__foot">
+          {adaptButton}
+          {isLetter ? null : (
             <>
-              {adaptButton}
-              <p className="ui-drawer__hint">
-                L&apos;IA adapte le corps de ta lettre à l&apos;offre — ta voix reste la tienne.
-              </p>
-            </>
-          ) : (
-            <>
-              <div className="tailor-action-group">
-                {adaptButton}
-                {tailorBefore ? (
-                  <button type="button" className="form-btn-mini" onClick={() => setDiffOpen(true)} disabled={busy}>
-                    Voir les modifications
-                  </button>
-                ) : null}
-              </div>
-
-              <div className="tailor-divider" />
-
-              <div className="tailor-action-group">
-                <button
-                  type="button"
-                  className="tailor-btn tailor-btn-block pack-btn-variant"
-                  onClick={() => {
-                    useDocStore.getState().setPendingJobDesc(jobDesc);
-                    onClose();
-                    router.push("/pack");
-                  }}
-                  disabled={busy}
-                >
-                  Créer une lettre de motivation
+              {tailorBefore ? (
+                <button type="button" className="form-btn-mini" onClick={() => setDiffOpen(true)} disabled={busy}>
+                  Voir les modifications
                 </button>
-              </div>
+              ) : null}
+              <button
+                type="button"
+                className="tailor-btn tailor-btn-block pack-btn-variant"
+                onClick={() => {
+                  useDocStore.getState().setPendingJobDesc(jobDesc);
+                  onClose();
+                  router.push("/pack");
+                }}
+                disabled={busy}
+              >
+                Créer une lettre de motivation
+              </button>
             </>
           )}
         </div>
 
         <DiffModal open={diffOpen} onClose={() => setDiffOpen(false)} />
       </div>
-    </div>
+    </>
   );
 
   return createPortal(content, document.body);

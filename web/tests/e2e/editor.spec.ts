@@ -41,8 +41,8 @@ test("saisir un nom met à jour l'aperçu", async ({ page }) => {
 test("basculer CV → Lettre change le document", async ({ page }) => {
   await page.goto("/");
 
-  // Le type de document se choisit dans la barre meta (#doc_type).
-  await page.locator("#doc_type").selectOption("Lettre");
+  // Le type de document se choisit dans la barre meta (contrôle segmenté).
+  await page.getByRole("radio", { name: "Lettre", exact: true }).click();
 
   // Vérifier le store et l'aperçu
   const docType = await page.evaluate(() => {

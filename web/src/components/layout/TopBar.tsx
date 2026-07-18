@@ -13,6 +13,7 @@ import { applyProfileToResume } from "@/lib/profile/profile";
 import { takeSnapshot } from "@/lib/storage/snapshots";
 import ChatPanel from "@/components/modals/ChatPanel";
 import MobileMenu from "@/components/layout/MobileMenu";
+import SegmentedNav from "@/components/layout/SegmentedNav";
 
 function slug(s: string): string {
   return s.trim()
@@ -144,22 +145,25 @@ export default function TopBar() {
       {/* ZONE GAUCHE : Logo + Nav */}
       <div className="topbar-left">
         <div className="logo-badge">
-          <div className="logo-icon"><div className="logo-icon-inner">T</div></div>
+          <div className="logo-icon--atelier">
+            <span className="logo-t">T</span>
+            <span className="logo-dash" />
+          </div>
           <div className="logo-text">
             <span className="logo-title">CV Tailor</span>
+            <span className="logo-sub">Atelier de candidatures</span>
           </div>
         </div>
-        <Link href="/jobs" className="topbar-nav-link mobile-hidden">Offres</Link>
-        <Link href="/history" className="topbar-nav-link mobile-hidden">Historique</Link>
       </div>
 
-      {/* ZONE CENTRE : Contexte */}
-      <div className="topbar-center">
-        <div className="topbar-pill" title="Nom du fichier PDF" suppressHydrationWarning>{filename}</div>
+      {/* ZONE CENTRE : navigation segmentée des trois écrans */}
+      <div className="topbar-center mobile-hidden">
+        <SegmentedNav />
       </div>
 
       {/* ZONE DROITE : Utilitaires + Actions */}
       <div className="topbar-right">
+        <div className="topbar-pill" title="Nom du fichier PDF" suppressHydrationWarning>{filename}</div>
         <button type="button" className="btn-nav mobile-hidden" onClick={openChat} title="Assistant IA">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" /></svg>
         </button>

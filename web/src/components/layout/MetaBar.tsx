@@ -11,8 +11,8 @@ const DOC_TYPE_LABELS: Record<DocType, string> = {
 };
 
 /**
- * Barre meta : Type de document + Entreprise + Poste.
- * Port de la `.meta` de l'app Flask (templates/index.html).
+ * Barre meta : Type de document (contrôle segmenté à curseur, design Atelier)
+ * + Entreprise + Poste + switch « date dans le nom du fichier ».
  */
 export default function MetaBar() {
   const docType = useDocStore((s) => s.docType);
@@ -24,21 +24,32 @@ export default function MetaBar() {
   const setRole = useDocStore((s) => s.setRole);
   const setIncludeDate = useDocStore((s) => s.setIncludeDate);
 
+  const typeIndex = Math.max(0, DOC_TYPES.indexOf(docType));
+
   return (
     <div className="meta">
-      <div className="field">
-        <label htmlFor="doc_type">Type</label>
-        <select
-          id="doc_type"
-          value={docType}
-          onChange={(e) => setDocType(e.target.value as DocType)}
+      <div className="field" style={{ flex: "0 0 auto" }}>
+        <label id="doc_type_label">Type</label>
+        <div
+          className="seg"
+          role="radiogroup"
+          aria-labelledby="doc_type_label"
+          style={{ "--seg-w": "88px", "--seg-index": typeIndex } as React.CSSProperties}
         >
-          {DOC_TYPES.map((t) => (
-            <option key={t} value={t}>
+          <span className="seg__knob" aria-hidden="true" />
+          {DOC_TYPES.map((t, i) => (
+            <button
+              key={t}
+              type="button"
+              role="radio"
+              aria-checked={i === typeIndex}
+              className={`seg__btn${i === typeIndex ? " active" : ""}`}
+              onClick={() => setDocType(t)}
+            >
               {DOC_TYPE_LABELS[t]}
-            </option>
+            </button>
           ))}
-        </select>
+        </div>
       </div>
       <div className="field">
         <label htmlFor="company">Entreprise</label>
@@ -61,17 +72,18 @@ export default function MetaBar() {
         />
       </div>
       <div className="field" style={{ flex: "0 0 auto" }}>
-        <label htmlFor="include_date">Nom PDF</label>
-        <label htmlFor="include_date" style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "13px", height: "37px" }}>
-          <input
-            type="checkbox"
-            id="include_date"
-            checked={includeDate}
-            onChange={(e) => setIncludeDate(e.target.checked)}
-            className="meta-checkbox"
-          />
-          + date
-        </label>
+        <label htmlFor="include_date">Date dans le nom du fichier</label>
+        <button
+          type="button"
+          id="include_date"
+          role="switch"
+          aria-checked={includeDate}
+          className="ui-switch"
+          style={{ marginTop: 6 }}
+          onClick={() => setIncludeDate(!includeDate)}
+        >
+          <div className="ui-switch-knob" />
+        </button>
       </div>
     </div>
   );

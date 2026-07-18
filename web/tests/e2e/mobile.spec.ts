@@ -52,14 +52,15 @@ test.describe("mobile", () => {
     // Le CTA « Adapter à une offre » est visible sans scroller (barre épinglée).
     await expect(page.getByRole("button", { name: "Adapter à une offre" })).toBeInViewport();
   });
-  test("le header de l'Historique tient dans l'écran (Retour et thème accessibles)", async ({ page }) => {
+  test("le header de l'Historique tient dans l'écran (navigation et thème accessibles)", async ({ page }) => {
     await page.goto("/history");
 
     // Toutes les actions du header sont entièrement visibles dans le viewport.
     for (const name of ["↑ Importer", "↓ Exporter"]) {
       await expect(page.getByRole("button", { name })).toBeInViewport({ ratio: 1 });
     }
-    await expect(page.getByRole("link", { name: "Retour" })).toBeInViewport({ ratio: 1 });
+    // La nav segmentée remplace le lien « Retour » : l'Éditeur reste accessible.
+    await expect(page.getByRole("link", { name: "Éditeur" })).toBeInViewport({ ratio: 1 });
     // Le switcher de thème n'apparaît pas sur mobile (il vit dans le menu ☰ de l'éditeur).
     await expect(page.locator("#btn-theme")).toBeHidden();
 
