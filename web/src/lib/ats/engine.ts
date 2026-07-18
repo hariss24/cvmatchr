@@ -61,6 +61,11 @@ const STOP_WORDS = new Set<string>([
   "must", "should", "can", "including", "such", "based", "environment",
   "opportunity", "culture", "office", "candidate", "profile", "contract",
   "level", "years", "months", "help", "build", "make", "grow", "ensure",
+  "skills", "requirements", "responsibilities", "qualifications", "preferred",
+  "required", "benefits", "salary", "location", "remote", "hybrid", "about",
+  "within", "across", "using", "also", "well", "most", "more", "other", "others",
+  "into", "per", "all", "new", "related", "relevant", "ideal", "proven",
+  "day", "days", "week", "weeks", "year", "time", "full", "part",
 ]);
 
 /** Expressions à souder AVANT le découpage en mots (sinon « Power BI » se perd en « power » + « bi »). */
@@ -130,7 +135,9 @@ const tokenize = (text: string): string[] =>
     .replace(/(\w)\/(\w)/g, "$1 $2")
     .split(/\s+/)
     .map((w) => w.replace(/^[-/.]+|[-/.]+$/g, ""))
-    .filter((w) => w.length >= 3 && !STOP_WORDS.has(w));
+    // Un nombre pur (code postal, tranche de salaire) n'est jamais une compétence —
+    // sans ce filtre, la règle « terme avec chiffre = savoir-faire » le retenait (×3).
+    .filter((w) => w.length >= 3 && !STOP_WORDS.has(w) && !/^\d+$/.test(w));
 
 /**
  * Acronymes isolés du texte source (SEO, CRM, SQL…). Les lignes majoritairement en

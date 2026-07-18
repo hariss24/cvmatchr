@@ -57,6 +57,19 @@ describe("extractJobKeywords", () => {
     for (const bruit of bruits) expect(termes).not.toContain(bruit);
   });
 
+  it("écarte les nombres purs (code postal, salaire) — bug constaté sur offre Indeed", () => {
+    // Reproduit l'offre réelle du 18/07 : « 75002 » et « 000 » sortaient en exigences.
+    const offre = `Webmaster / Intégrateur WordPress (H/F)
+      75002 Paris — De 28 000 € à 35 000 € par an.
+      Adresse : 75002 Paris. Le poste est basé à 75002 Paris.
+      Compétences : WordPress, PHP, SEO. WordPress et PHP au quotidien.`;
+    const termes = extractJobKeywords(offre, "Webmaster / Intégrateur WordPress").map((k) => k.term);
+    expect(termes).toContain("wordpress");
+    expect(termes).toContain("php");
+    expect(termes).toContain("seo");
+    for (const t of termes) expect(t).not.toMatch(/^\d+$/);
+  });
+
   it("retient un savoir-faire même cité une seule fois", () => {
     const kw2 = extractJobKeywords("Le candidat maîtrise Kubernetes.").map((k) => k.term);
     expect(kw2).toContain("kubernetes");
