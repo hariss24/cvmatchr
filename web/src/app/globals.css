@@ -1642,12 +1642,15 @@ button.go:disabled {
 
   /* -- Disposition mobile-first : Aperçu d'abord, Éditeur en tiroir -- */
   .split { flex-direction: column-reverse; display: flex; }
-  .editor-pane {
+  .pane.editor-pane {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     z-index: 100; background: var(--bg); transform: translateY(100%);
     transition: transform 300ms ease; padding-bottom: 80px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    animation: none;
   }
-  .editor-pane--open { transform: translateY(0); }
+  .pane.editor-pane.editor-pane--open { transform: translateY(0); }
   .editor-drawer-close {
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
     /* Sous l'overlay des modales (.ui-overlay = 100) : le FAB flotte au-dessus
