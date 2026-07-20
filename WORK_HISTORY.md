@@ -41,6 +41,20 @@
 
 ## Journal
 
+### 2026-07-20 : Sécurisation des données locales et avertissements
+- **Quoi.** Ajout de la persistance du stockage (`navigator.storage.persist()`) pour protéger la base IndexedDB contre l'éviction. Ajout d'une modale d'alerte proactive s'affichant une seule fois après 5 CV générés, et d'un encart d'avertissement persistant dans la section Paramètres > Gestion des données.
+- **Pourquoi.** Demande de l'utilisateur pour mitiger le risque de perte accidentelle de la mémoire locale et encourager l'exportation manuelle des données.
+- **Fichiers touchés :** `web/src/components/ui/UiHost.tsx`, `web/src/app/settings/page.tsx`.
+- **Résultat vérifs :** `npm run lint` 0 erreur (1 warning préexistant), `npx tsc --noEmit` OK.
+- **Commit :** `28aabce feat: sécurisation des données locales (persistance et avertissements)`
+
+### 2026-07-20 : Animations CSS Grid pour les accordéons
+- **Quoi.** Remplacement du rendu conditionnel React par une structure animée en CSS Grid pour les `FormSection` et `ItemCard`. 
+- **Pourquoi.** Pour ajouter des animations fluides d'ouverture/fermeture "façon Apple" sans recourir à JS ou des bibliothèques externes type framer-motion.
+- **Fichiers touchés :** `web/src/app/globals.css`, `web/src/components/form/FormEditor.tsx`, `web/src/lib/resume/sections.ts` (pour corriger un ordre de section qui cassait les tests).
+- **Résultat vérifs :** `tsc --noEmit` OK, `npm run lint` OK, `vitest` OK, `build` OK.
+- **Commit :** `dbc1502 feat: animate form accordions using css grid`
+
 ### 2026-07-20 : Formulaire dynamique synchronisé avec les sections
 - **Quoi.** Refonte de `FormEditor.tsx` pour itérer dynamiquement sur `cv.sectionOrder` (via un nouveau helper `getAllFormSections` dans `sections.ts`). Les contrôles (masquer, monter, descendre) ont été déplacés dans les en-têtes de chaque section au lieu d'être dans un composant séparé (`CustomSectionsSection`).
 - **Pourquoi.** Demande de l'utilisateur pour rapprocher l'expérience de `resume-matcher`, permettant de réordonner et masquer directement depuis les en-têtes de section, au lieu d'une section de configuration séparée en fin de formulaire.

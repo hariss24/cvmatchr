@@ -1456,6 +1456,201 @@ button.go:disabled {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+.scan-progress-bar {
+  height: 8px; border-radius: 999px; background: var(--bg);
+  box-shadow: var(--neu-inset); overflow: hidden;
+}
+.scan-progress-fill {
+  height: 100%; border-radius: 999px;
+  background: var(--cta-grad);
+  transition: width 200ms ease;
+}
+.scan-progress-text { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+.jobs-empty {
+  text-align: center; color: var(--muted); font-size: 14px;
+  padding: 48px 16px; font-weight: 500;
+}
+.jobs-config {
+  background: var(--bg); box-shadow: var(--neu-raised-sm); border-radius: 16px;
+  padding: 22px 24px; color: var(--text); font-size: 14px; line-height: 1.6;
+}
+.jobs-config-hint { color: var(--muted); font-size: 12.5px; margin-top: 8px; }
+.jobs-config code {
+  font-family: var(--font-code); font-size: 12px; color: var(--link);
+  background: var(--bg); box-shadow: var(--neu-inset); border-radius: 5px; padding: 1px 6px;
+}
+
+.jobs-list { display: flex; flex-direction: column; gap: 14px; }
+.job-card {
+  background: var(--bg); box-shadow: var(--neu-raised-sm); border-radius: 16px;
+  padding: 16px 20px; display: grid; grid-template-columns: 78px 1fr auto;
+  gap: 20px; align-items: center; transition: box-shadow 150ms;
+}
+.job-card:hover { box-shadow: var(--neu-raised); }
+
+.job-score {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 68px; height: 68px; border-radius: 50%;
+  background: var(--bg); box-shadow: var(--neu-inset);
+}
+.job-score-num { font-size: 22px; font-weight: 800; line-height: 1; }
+.job-score-max { font-size: 10px; color: var(--faint); font-weight: 600; margin-top: 2px; }
+.job-score-high .job-score-num { color: var(--apply-text); }
+.job-score-mid .job-score-num { color: var(--orange-text); }
+.job-score-low .job-score-num { color: var(--muted); }
+
+.job-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.job-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.job-new-badge {
+  display: inline-block; margin-right: 8px; padding: 1px 7px; border-radius: 999px;
+  background: var(--cta-grad); color: #fff; font-size: 11px; font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+  text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle;
+}
+.job-meta { font-size: 13px; color: var(--muted); font-weight: 500; }
+.job-date { font-size: 12px; color: var(--faint); font-weight: 500; }
+.job-commute { font-size: 12px; color: var(--faint); font-family: var(--font-code); }
+
+.job-actions { display: flex; gap: 8px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+
+/* « Pas intéressé » : action de retrait, volontairement hors de la hiérarchie
+   des boutons — un lien nu, sans coquille. */
+.job-dismiss-link {
+  background: none; border: none; box-shadow: none;
+  padding: 6px 4px; margin-left: 4px;
+  color: var(--muted); font-size: 12px; font-family: var(--font-ui);
+  cursor: pointer; transition: color 120ms;
+}
+.job-dismiss-link:hover { color: var(--error); text-decoration: underline; }
+
+@media (max-width: 768px) {
+  /* Score compact à côté du titre, boutons en grille pleine largeur à
+     hauteurs égales (Adapter/Voir à 50-50, Pas intéressé en dessous). */
+  .job-card { grid-template-columns: 56px 1fr; gap: 12px 14px; padding: 16px; }
+  .job-score { width: 56px; height: 56px; }
+  .job-score-num { font-size: 19px; }
+  .job-actions {
+    grid-column: 1 / -1;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    align-items: stretch;
+  }
+  /* Les vrais boutons se partagent la largeur ; le lien de retrait en est exclu. */
+  .job-actions > *:not(.job-dismiss-link) {
+    width: 100%; min-height: 44px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  /* « Voir l'offre » est seul sur sa ligne : il la prend en entier, plutôt que de
+     laisser une demi-colonne vide à sa droite. */
+  .job-actions > a.neu-btn-sm { grid-column: 1 / -1; }
+  /* Le lien passe seul sur sa ligne, centré, avec une cible tactile de 44 px. */
+  .job-dismiss-link {
+    grid-column: 1 / -1; justify-self: center;
+    min-height: 44px; margin-left: 0;
+  }
+}
+
+/* ---- Aide « Comment ça marche ? » ---- */
+.actions-help {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg); color: var(--text);
+  border: none; border-radius: 12px;
+  padding: 10px 14px; font-size: 13px; font-family: var(--font-ui); cursor: pointer;
+  box-shadow: var(--neu-raised-sm);
+}
+.actions-help:hover { box-shadow: var(--neu-raised); }
+.actions-help:active { box-shadow: var(--neu-inset); }
+
+.help-page { max-width: 800px; margin: 0 auto; overflow-y: auto; padding-bottom: 60px; }
+.help-container { display: flex; flex-direction: column; gap: 32px; padding-top: 20px; }
+.help-title { font-size: 24px; font-weight: 800; color: var(--text); margin-bottom: 12px; }
+.help-desc { font-size: 15px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
+
+/* ---- Accordéons FAQ ---- */
+.faq-accordion {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  box-shadow: var(--neu-raised-sm);
+  overflow: hidden;
+  transition: box-shadow 200ms;
+}
+.faq-accordion:hover { box-shadow: var(--neu-raised); }
+.faq-accordion[open] .faq-icon, .faq-accordion.is-open .faq-icon { transform: rotate(180deg); }
+.faq-accordion[open] .faq-summary, .faq-accordion.is-open .faq-summary { border-bottom: 1px solid var(--border); }
+
+.faq-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  cursor: pointer;
+  list-style: none; /* Cache la flèche native sur Firefox/Safari */
+  font-weight: 600;
+  color: var(--text);
+  user-select: none;
+}
+.faq-summary::-webkit-details-marker { display: none; /* Cache sur Chrome */ }
+.faq-icon {
+  color: var(--orange-text);
+  transition: transform 200ms ease;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+.faq-content {
+  padding: 16px 20px;
+  background: rgba(0, 0, 0, 0.02);
+}
+[data-theme="dark"] .faq-content { background: rgba(255, 255, 255, 0.02); }
+
+.help-section__title { margin: 0 0 6px; font-size: 14px; font-weight: 700; color: var(--text); }
+.help-section p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
+/* Le reset Tailwind supprime les puces : on les rétablit, les étapes sont une vraie séquence. */
+.help-steps { list-style: decimal; }
+.help-list { list-style: disc; }
+.help-steps, .help-list { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 4px; }
+.help-steps li, .help-list li { display: list-item; }
+.help-steps li, .help-list li { font-size: 13px; color: var(--muted); line-height: 1.45; }
+.help-section .go { margin-top: 10px; }
+
+/* ---- Encart de transparence de la notation (Offres) ---- */
+.scoring-info {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.scoring-info__summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--orange-text);
+}
+.scoring-info__body {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text);
+}
+.scoring-info__table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+}
+.scoring-info__table th,
+.scoring-info__table td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.scoring-info__table th {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 .scoring-info__threshold {
   color: var(--muted);
 }
@@ -1463,7 +1658,8 @@ button.go:disabled {
 /* ---- Aperçu PDF (moteur react-pdf, template Graphique) ---- */
 .pdf-preview {
   width: 100%;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -1811,25 +2007,26 @@ button.go:disabled {
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background: var(--primary);
+  background: var(--orange2);
   color: #fff;
   border: none;
   cursor: pointer;
-  flex-shrink: 0;
-  transition: opacity 0.2s;
+  transition: opacity 120ms;
 }
 .chat-send-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* 1. L'overlay ne doit plus assombrir l'écran mais reste pour capter le clic si on veut fermer */
-body:has(.chat-panel.open) .chat-overlay {
-  background: transparent;
-}
+/* 1. Sur mobile, l'overlay assombrit et intercepte les clics normalement. */
 
 /* 2. Sur écran desktop, on masque le formulaire pour laisser la place au PDF */
 @media (min-width: 1024px) {
+  body:has(.chat-panel.open) .chat-overlay {
+    background: transparent;
+    pointer-events: none;
+  }
+
   /* Transition pour le panneau éditeur */
   .editor-pane {
     transition: flex 300ms ease, opacity 300ms ease, margin 300ms ease, padding 300ms ease;
@@ -1844,9 +2041,15 @@ body:has(.chat-panel.open) .chat-overlay {
   }
 
   /* 3. Le PDF glisse à gauche et laisse la place au Chat à droite */
-  body:has(.chat-panel.open) .preview-pane {
-    flex: 1 1 100%;
+  body:has(.chat-panel.open) .preview-pane,
+  body:has(.chat-panel.open) .topbar,
+  body:has(.chat-panel.open) .meta,
+  body:has(.chat-panel.open) .actions {
     margin-right: 420px;
     transition: margin 220ms ease, flex 220ms ease;
+  }
+  
+  body:has(.chat-panel.open) .preview-pane {
+    flex: 1 1 100%;
   }
 }
