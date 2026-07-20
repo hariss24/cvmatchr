@@ -798,6 +798,63 @@ button.ghost:active { box-shadow: var(--neu-inset); transform: translateY(1px); 
 .proposal-title { font-size: 13px; font-weight: 700; color: var(--orange-text); }
 .proposal-summary { font-size: 12px; color: var(--text); }
 .proposal-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ---- Starter Prompt Marquee ---- */
+.chat-empty-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+.chat-empty-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+.marquee-container {
+  position: relative;
+  margin: 0 auto;
+  display: grid;
+  width: 100%;
+  max-width: 100%;
+  gap: 12px;
+  overflow: hidden;
+  padding: 4px 0;
+  /* Masque dégradé pour fondre les bords gauche/droit */
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+.marquee-row {
+  display: flex;
+  width: max-content;
+  gap: 12px;
+}
+.marquee-btn {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: var(--neu-raised-sm);
+  transition: box-shadow 150ms, transform 150ms, background 150ms;
+  white-space: nowrap;
+}
+.marquee-btn:hover {
+  background: rgba(0,0,0,0.02);
+  box-shadow: var(--neu-raised);
+  transform: translateY(-1px);
+}
+[data-theme="dark"] .marquee-btn:hover {
+  background: rgba(255,255,255,0.04);
+}
+.marquee-btn:active {
+  box-shadow: var(--neu-inset);
+  transform: translateY(0);
+}
 .proposal-btn {
   background: var(--bg); color: var(--text); border: none; border-radius: 8px;
   padding: 5px 10px; font-size: 12px; cursor: pointer; box-shadow: var(--neu-raised-sm);
@@ -1724,3 +1781,63 @@ button.go:disabled {
   .snap-actions { justify-content: flex-end; }
 }
 
+
+/* ---- Remplacement du bouton d'envoi et réorganisation du chat ---- */
+.chat-input-row {
+  display: flex; 
+  gap: 8px; 
+  align-items: center; 
+}
+.chat-input {
+  flex: 1;
+  resize: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  min-height: 40px;
+}
+.chat-input:focus {
+  border-color: var(--primary);
+}
+.chat-send-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+.chat-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 1. L'overlay ne doit plus assombrir l'écran mais reste pour capter le clic si on veut fermer */
+body:has(.chat-panel.open) .chat-overlay {
+  background: transparent;
+}
+
+/* 2. Sur écran desktop, on masque le formulaire pour laisser la place au PDF */
+@media (min-width: 1024px) {
+  body:has(.chat-panel.open) .editor-drawer {
+    display: none !important;
+  }
+
+  /* 3. Le PDF glisse à gauche et laisse la place au Chat à droite */
+  body:has(.chat-panel.open) .preview-pane {
+    flex: 1 1 100%;
+    margin-right: 420px;
+    transition: margin 220ms ease, flex 220ms ease;
+  }
+}

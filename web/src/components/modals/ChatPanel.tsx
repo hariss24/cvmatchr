@@ -5,6 +5,7 @@ import { useDocStore } from "@/state/docStore";
 import { postJson } from "@/lib/ai/client";
 import type { DocData } from "@/state/docStore";
 import type { Resume } from "@/lib/resume/schema";
+import StarterPromptMarquee from "@/components/modals/StarterPromptMarquee";
 
 /**
  * Panneau latéral « Assistant IA » : chat éditeur. Port de `_sendChat`/`_appendProposals` (app.js).
@@ -168,10 +169,21 @@ export default function ChatPanel({ open, onClose }: { open: boolean; onClose: (
 
         <div className="chat-messages" ref={listRef}>
           {items.length === 0 ? (
-            <p className="chat-empty">
-              Décris la modification souhaitée (mise en page, ton, contenu…). L&apos;IA propose des
-              variantes à prévisualiser avant de les appliquer.
-            </p>
+            <div className="chat-empty">
+              <div className="chat-empty-header">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#FBBF24" stroke="none"><path d="M10 6 Q 10 14 18 14 Q 10 14 10 22 Q 10 14 2 14 Q 10 14 10 6 Z M 18 1 Q 18 5 22 5 Q 18 5 18 9 Q 18 5 14 5 Q 18 5 18 1 Z" /></svg>
+                <h3>Que souhaitez-vous faire ?</h3>
+              </div>
+              <StarterPromptMarquee onSelect={(text) => {
+                setInput(text);
+                // On simule un submit
+                setTimeout(() => {
+                  if (document.getElementById('btn-send-chat')) {
+                    document.getElementById('btn-send-chat')?.click();
+                  }
+                }, 100);
+              }} />
+            </div>
           ) : null}
           {items.map((it, i) =>
             it.kind === "msg" ? (
@@ -239,8 +251,15 @@ export default function ChatPanel({ open, onClose }: { open: boolean; onClose: (
             }}
             disabled={busy}
           />
-          <button type="button" className="go" onClick={send} disabled={busy}>
-            {busy ? "…" : "Envoyer"}
+          <button id="btn-send-chat" type="button" className="chat-send-btn" onClick={send} disabled={busy} aria-label="Envoyer">
+            {busy ? (
+              <span className="chat-loading-dots">...</span>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            )}
           </button>
         </div>
       </aside>
