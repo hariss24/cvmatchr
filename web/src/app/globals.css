@@ -896,6 +896,7 @@ button.ghost:active { box-shadow: var(--neu-inset); transform: translateY(1px); 
 }
 .form-collapse-inner {
   overflow: hidden;
+  min-height: 0;
 }
 /* Titre de section posé directement sur le fond givré (design Atelier). */
 .form-section__title {
@@ -1325,8 +1326,8 @@ button.go:disabled {
   transition: box-shadow 200ms;
 }
 .faq-accordion:hover { box-shadow: var(--neu-raised); }
-.faq-accordion[open] .faq-icon { transform: rotate(180deg); }
-.faq-accordion[open] .faq-summary { border-bottom: 1px solid var(--border); }
+.faq-accordion[open] .faq-icon, .faq-accordion.is-open .faq-icon { transform: rotate(180deg); }
+.faq-accordion[open] .faq-summary, .faq-accordion.is-open .faq-summary { border-bottom: 1px solid var(--border); }
 
 .faq-summary {
   display: flex;
