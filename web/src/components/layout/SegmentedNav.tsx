@@ -15,13 +15,13 @@ const SCREENS = [
  */
 export default function SegmentedNav() {
   const pathname = usePathname();
-  const index = Math.max(0, SCREENS.findIndex(
+  const index = SCREENS.findIndex(
     (s) => (s.href === "/" ? pathname === "/" : pathname.startsWith(s.href)),
-  ));
+  );
 
   return (
-    <nav className="seg" aria-label="Navigation principale" style={{ "--seg-index": index } as React.CSSProperties}>
-      <span className="seg__knob" aria-hidden="true" />
+    <nav className="seg" aria-label="Navigation principale" style={{ "--seg-index": index >= 0 ? index : 0 } as React.CSSProperties}>
+      {index >= 0 && <span className="seg__knob" aria-hidden="true" />}
       {SCREENS.map((s, i) => (
         <Link key={s.href} href={s.href} className={`seg__btn${i === index ? " active" : ""}`} aria-current={i === index ? "page" : undefined}>
           {s.label}

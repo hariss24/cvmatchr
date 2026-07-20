@@ -3,6 +3,7 @@ import { useDocStore } from "@/state/docStore";
 import { saveDraft, loadDraft, loadProfile } from "@/lib/storage/db";
 import { applyProfileToResume } from "@/lib/profile/profile";
 import type { Resume } from "@/lib/resume/schema";
+import { useSettingsStore } from "@/state/settingsStore";
 
 export function useAutoDraft() {
   const isLoaded = useRef(false);
@@ -67,6 +68,9 @@ export function useAutoDraft() {
 
       // If we are just changing things, debounce save to DB
       clearTimeout(timeout);
+      const delay = useSettingsStore.getState().autosaveDelay;
+      if (delay === 0) return; // Autosave disabled
+
       timeout = setTimeout(() => {
         saveDraft({
           id: `draft-${state.docType}`,
@@ -76,7 +80,7 @@ export function useAutoDraft() {
           role: state.role,
           updatedAt: Date.now(),
         }).catch((e) => console.warn("Failed to save draft:", e));
-      }, 1000); // 1s debounce
+      }, delay);
     });
 
     return () => {

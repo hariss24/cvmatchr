@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useDocStore } from "@/state/docStore";
 import type { DocType } from "@/lib/resume/schema";
 
@@ -23,6 +24,12 @@ export default function MetaBar() {
   const setCompany = useDocStore((s) => s.setCompany);
   const setRole = useDocStore((s) => s.setRole);
   const setIncludeDate = useDocStore((s) => s.setIncludeDate);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && localStorage.getItem("pdfIncludeDate") === "true") {
+      setIncludeDate(true);
+    }
+  }, [setIncludeDate]);
 
   const typeIndex = Math.max(0, DOC_TYPES.indexOf(docType));
 

@@ -78,19 +78,19 @@ export default function TopBar() {
 
   const onConvert = useCallback(async () => {
     if (isConverting.current) return;
-    const { company, role, includeDate } = useDocStore.getState();
-    const name = personNameFor(docType, json);
+    const { company, role, includeDate, docType: currentDocType, json: currentJson } = useDocStore.getState();
+    const name = personNameFor(currentDocType, currentJson);
 
-    const filename = buildFilename(name, docType, company, role, includeDate);
+    const filename = buildFilename(name, currentDocType, company, role, includeDate);
     isConverting.current = true;
     setBusy(true);
     try {
       let blob: Blob;
-      if (docType === "Lettre") {
-        blob = await generateLetterPdfBlob(json as Letter);
+      if (currentDocType === "Lettre") {
+        blob = await generateLetterPdfBlob(currentJson as Letter);
       } else {
         blob = await generateResumePdfBlob(
-          json as Resume,
+          currentJson as Resume,
           templateId as import("@/lib/pdfgen/ResumeDocument").PdfTemplateId
         );
       }
@@ -105,7 +105,7 @@ export default function TopBar() {
       await saveHistoryEntry({
         id: crypto.randomUUID(),
         created_at: new Date().toISOString(),
-        doc_type: docType,
+        doc_type: currentDocType,
         company,
         role,
         job_desc: "",

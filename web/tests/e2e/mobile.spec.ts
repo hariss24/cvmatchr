@@ -14,13 +14,13 @@ test.describe("mobile", () => {
     await expect(page.locator(".topbar").getByRole("link", { name: "Offres" })).toBeHidden();
 
     // …mais dans le menu ☰.
-    await page.getByRole("button", { name: "Menu" }).click();
+    await page.locator(".topbar-burger").click();
     const menu = page.locator(".mobile-menu");
     await expect(menu).toBeVisible();
     await expect(menu.getByRole("link", { name: "Offres" })).toBeVisible();
     await expect(menu.getByRole("link", { name: "Historique" })).toBeVisible();
     await expect(menu.getByRole("button", { name: "Nouveau CV" })).toBeVisible();
-    await expect(menu.getByRole("button", { name: "Paramètres API" })).toBeVisible();
+    await expect(menu.getByRole("link", { name: "Paramètres & Dashboard" })).toBeVisible();
 
     // Navigation réelle depuis le menu.
     await menu.getByRole("link", { name: "Offres" }).click();

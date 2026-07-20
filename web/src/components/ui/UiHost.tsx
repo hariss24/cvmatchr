@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useUiStore } from "@/state/uiStore";
 import { useGlobalUndoRedo } from "@/lib/useGlobalUndoRedo";
+import { useSettingsStore } from "@/state/settingsStore";
 
 /**
  * Monte les dialogs et toasts applicatifs. À placer une fois dans le layout racine.
@@ -13,10 +14,69 @@ export default function UiHost() {
 
   return (
     <>
+      <ThemeHost />
       <DialogHost />
       <ToastHost />
     </>
   );
+}
+
+function ThemeHost() {
+  const accentColor = useSettingsStore((s) => s.accentColor);
+  const [theme, setTheme] = useState("light");
+
+  useEffect(() => {
+    // Observer for dark mode changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((m) => {
+        if (m.attributeName === "data-theme") {
+          setTheme(document.documentElement.getAttribute("data-theme") || "light");
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+    
+    const initialTheme = document.documentElement.getAttribute("data-theme") || "light";
+    const id = setTimeout(() => setTheme(initialTheme), 0);
+    return () => {
+      observer.disconnect();
+      clearTimeout(id);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (accentColor === "orange") {
+      document.documentElement.style.removeProperty("--orange");
+      document.documentElement.style.removeProperty("--orange2");
+      document.documentElement.style.removeProperty("--orange-hover");
+      document.documentElement.style.removeProperty("--orange-text");
+      document.documentElement.style.removeProperty("--on-orange");
+      document.documentElement.style.removeProperty("--link");
+      document.documentElement.style.removeProperty("--cta-grad");
+      return;
+    }
+
+    const palettes: Record<string, Record<string, Record<string, string>>> = {
+      blue: {
+        light: { "--orange": "#1565C0", "--orange2": "#1E88E5", "--orange-hover": "#0D47A1", "--orange-text": "#0D47A1", "--on-orange": "#FFFFFF", "--link": "#1565C0", "--cta-grad": "linear-gradient(180deg, #1E88E5, #1565C0)" },
+        dark:  { "--orange": "#42A5F5", "--orange2": "#64B5F6", "--orange-hover": "#1E88E5", "--orange-text": "#64B5F6", "--on-orange": "#0D47A1", "--link": "#64B5F6", "--cta-grad": "linear-gradient(180deg, #64B5F6, #42A5F5)" }
+      },
+      green: {
+        light: { "--orange": "#2E7D32", "--orange2": "#43A047", "--orange-hover": "#1B5E20", "--orange-text": "#1B5E20", "--on-orange": "#FFFFFF", "--link": "#2E7D32", "--cta-grad": "linear-gradient(180deg, #43A047, #2E7D32)" },
+        dark:  { "--orange": "#66BB6A", "--orange2": "#81C784", "--orange-hover": "#43A047", "--orange-text": "#81C784", "--on-orange": "#1B5E20", "--link": "#81C784", "--cta-grad": "linear-gradient(180deg, #81C784, #66BB6A)" }
+      },
+      purple: {
+        light: { "--orange": "#6A1B9A", "--orange2": "#8E24AA", "--orange-hover": "#4A148C", "--orange-text": "#4A148C", "--on-orange": "#FFFFFF", "--link": "#6A1B9A", "--cta-grad": "linear-gradient(180deg, #8E24AA, #6A1B9A)" },
+        dark:  { "--orange": "#AB47BC", "--orange2": "#BA68C8", "--orange-hover": "#8E24AA", "--orange-text": "#BA68C8", "--on-orange": "#4A148C", "--link": "#BA68C8", "--cta-grad": "linear-gradient(180deg, #BA68C8, #AB47BC)" }
+      }
+    };
+
+    const vars = palettes[accentColor]?.[theme] || {};
+    Object.entries(vars).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
+    
+  }, [accentColor, theme]);
+
+  return null;
 }
 
 function DialogHost() {

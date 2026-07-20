@@ -1,11 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import {
   isAnthropicKey,
-  requireKey,
+  requireActiveKey,
   hasServerKey,
   serverKeyPreview,
   streamCompletion,
 } from "./clients";
+import { useSettingsStore } from "@/state/settingsStore";
 
 const ORIGINAL = process.env.GEMINI_API_KEY;
 
@@ -25,20 +26,25 @@ describe("isAnthropicKey", () => {
   });
 });
 
-describe("requireKey", () => {
-  it("préfère la clé utilisateur", () => {
-    process.env.GEMINI_API_KEY = "server-key";
-    expect(requireKey("user-key")).toBe("user-key");
+describe("requireActiveKey", () => {
+  it("retourne la clé selon le modèle actif", () => {
+    useSettingsStore.setState({ activeModel: "claude-haiku-4-5-20251001", anthropicKey: "sk-ant-user" });
+    const res = requireActiveKey();
+    expect(res.key).toBe("sk-ant-user");
+    expect(res.provider).toBe("anthropic");
   });
 
-  it("retombe sur la clé serveur", () => {
+  it("retombe sur la clé serveur pour Gemini si pas de clé user", () => {
+    useSettingsStore.setState({ activeModel: "gemini-3.1-flash-lite", geminiKey: "" });
     process.env.GEMINI_API_KEY = "server-key";
-    expect(requireKey()).toBe("server-key");
-    expect(requireKey(null)).toBe("server-key");
+    const res = requireActiveKey();
+    expect(res.key).toBe("server-key");
+    expect(res.provider).toBe("gemini");
   });
 
   it("lève si aucune clé n'est disponible", () => {
-    expect(() => requireKey()).toThrow(/Aucune clé API/);
+    useSettingsStore.setState({ activeModel: "gemini-3.1-flash-lite", geminiKey: "" });
+    expect(() => requireActiveKey()).toThrow(/Clé Gemini requise/);
   });
 });
 
@@ -65,7 +71,8 @@ describe("streamCompletion (garde Anthropic + images)", () => {
   });
 
   it("lève sans clé", async () => {
+    useSettingsStore.setState({ activeModel: "gemini-3.1-flash-lite", geminiKey: "" });
     const gen = streamCompletion("prompt", "system");
-    await expect(gen.next()).rejects.toThrow(/Aucune clé API/);
+    await expect(gen.next()).rejects.toThrow(/Clé Gemini requise/);
   });
 });

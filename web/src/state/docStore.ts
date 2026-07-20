@@ -75,7 +75,7 @@ export const useDocStore = create<DocStore>((set) => ({
   tailorBefore: null,
   pendingJobDesc: null,
 
-  includeDate: typeof window !== "undefined" ? localStorage.getItem("pdfIncludeDate") === "true" : false,
+  includeDate: false,
 
   setJson: (json) => {
     set({ json });

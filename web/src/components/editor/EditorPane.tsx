@@ -6,9 +6,11 @@ import FormEditor from "@/components/form/FormEditor";
 import LetterForm from "@/components/form/LetterForm";
 import { useDocStore } from "@/state/docStore";
 import { TEMPLATE_IDS, type TemplateId } from "@/lib/resume/templates";
+import { useSettingsStore } from "@/state/settingsStore";
+import { saveDraft } from "@/lib/storage/db";
 import { normalizeResume, normalizeLetter } from "@/lib/resume/normalize";
 import { resumeToJsonResume } from "@/lib/resume/jsonResume";
-import { toast, uiPrompt, uiConfirm } from "@/state/uiStore";
+import { toast, uiPrompt } from "@/state/uiStore";
 import SnapshotsModal from "@/components/modals/SnapshotsModal";
 import ImportTextModal from "@/components/modals/ImportTextModal";
 import ImportPdfModal from "@/components/modals/ImportPdfModal";
@@ -42,6 +44,7 @@ export default function EditorPane() {
   const templateId = useDocStore((s) => s.templateId);
   const setJson = useDocStore((s) => s.setJson);
   const setTemplate = useDocStore((s) => s.setTemplate);
+  const autosaveDelay = useSettingsStore((s) => s.autosaveDelay);
 
   const isResumeType = docType !== "Lettre";
 
@@ -75,21 +78,43 @@ export default function EditorPane() {
     }
   };
 
-  // Indicateur de sauvegarde dynamique : « Enregistrement… » puis « ✓ Brouillon sauvegardé »
-  // (calqué sur le debounce de 1 s de useAutoDraft).
+  // Indicateur de sauvegarde dynamique
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
+    if (autosaveDelay === 0) {
+      const id = setTimeout(() => setSaveLabel("Non sauvegardé"), 0);
+      return () => clearTimeout(id);
+    }
     const unsub = useDocStore.subscribe((state, prev) => {
       if (state.json === prev.json) return;
       setSaveLabel("Enregistrement…");
       if (saveTimer.current) clearTimeout(saveTimer.current);
-      saveTimer.current = setTimeout(() => setSaveLabel("✓ Brouillon sauvegardé"), 1100);
+      saveTimer.current = setTimeout(() => setSaveLabel("✓ Brouillon sauvegardé"), autosaveDelay + 100);
     });
     return () => {
       unsub();
       if (saveTimer.current) clearTimeout(saveTimer.current);
     };
-  }, []);
+  }, [autosaveDelay]);
+
+  const onManualSave = async () => {
+    const state = useDocStore.getState();
+    setSaveLabel("Enregistrement…");
+    try {
+      await saveDraft({
+        id: `draft-${state.docType}`,
+        json: state.json,
+        templateId: state.templateId,
+        company: state.company,
+        role: state.role,
+        updatedAt: Date.now(),
+      });
+      setSaveLabel("✓ Sauvegardé");
+      setTimeout(() => setSaveLabel("Non sauvegardé"), 2000);
+    } catch {
+      setSaveLabel("Erreur de sauvegarde");
+    }
+  };
 
   useEffect(() => {
     const openSnapshots = () => setSnapshotsOpen(true);
@@ -190,20 +215,27 @@ export default function EditorPane() {
           ) : null}
         </div>
 
-        <span className="autosave" title={saveLabel.replace("✓ ", "")}>
-          {saveLabel.startsWith("✓") ? (
-            <>
-              <svg className="autosave-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                <polyline points="7 3 7 8 15 8"></polyline>
-              </svg>
-              <span className="autosave-label"> Brouillon sauvegardé</span>
-            </>
-          ) : (
-            saveLabel
-          )}
-        </span>
+        {autosaveDelay === 0 ? (
+          <button type="button" className="form-btn-mini" onClick={onManualSave} style={{ border: "none", background: "transparent", color: "var(--muted)", fontWeight: 600 }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14, marginRight: 4, display: "inline-block", verticalAlign: "middle" }}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            <span style={{ verticalAlign: "middle" }}>{saveLabel} (Sauver)</span>
+          </button>
+        ) : (
+          <span className="autosave" title={saveLabel.replace("✓ ", "")}>
+            {saveLabel.startsWith("✓") ? (
+              <>
+                <svg className="autosave-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                  <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                  <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                <span className="autosave-label"> Brouillon sauvegardé</span>
+              </>
+            ) : (
+              saveLabel
+            )}
+          </span>
+        )}
 
         <div className="actions-mini">
           <button type="button" className="form-btn-mini" title="Coller/Importer un document au format JSON" onClick={onPasteJson}>

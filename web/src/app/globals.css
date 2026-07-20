@@ -158,7 +158,7 @@ a:hover { text-decoration: underline; }
   flex: 1 1 0;
   min-width: 0;
 }
-.topbar-right { justify-content: flex-end; }
+.topbar-right { justify-content: flex-end; z-index: 10; }
 /* Nav réellement centrée par flex (left/right = flex:1 égaux) au lieu d'un
    position:absolute — sinon le groupe de droite chevauche la nav. */
 .topbar-center {

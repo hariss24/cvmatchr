@@ -1,20 +1,13 @@
 import { GoogleGenAI, type Part, type Schema } from "@google/genai";
 import Anthropic from "@anthropic-ai/sdk";
+import { useSettingsStore, type AiModel } from "@/state/settingsStore";
 
 /**
  * Clients IA (Gemini + Anthropic) avec complétion streaming et non-streaming.
- * Port de `ai_engine.py` (section clients).
- *
- * Sélection du backend selon la clé :
- * - clé `sk-ant-…` → Anthropic
- * - sinon          → Gemini
- *
- * La clé vient soit de l'appelant (clé utilisateur, header `X-Api-Key`), soit de
- * `GEMINI_API_KEY` (clé serveur). Anthropic ne supporte pas les images (conversion PDF).
  */
 
+// Legacy exports for backward compatibility (some components might use GEMINI_MODEL)
 export const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.1-flash-lite";
-const ANTHROPIC_MODEL = "claude-haiku-4-5-20251001";
 const ANTHROPIC_MAX_TOKENS = 8192;
 
 export type ChatRole = "user" | "assistant";
@@ -24,27 +17,57 @@ export function isAnthropicKey(key: string): boolean {
   return key.startsWith("sk-ant-");
 }
 
-/** True si une clé serveur Gemini est configurée. */
 export function hasServerKey(): boolean {
   return Boolean(process.env.GEMINI_API_KEY);
 }
 
-/** 4 premiers caractères de la clé serveur, pour l'affichage (jamais la clé entière). */
 export function serverKeyPreview(): string | null {
   const key = process.env.GEMINI_API_KEY || "";
   return key ? `${key.slice(0, 4)}…` : null;
 }
 
-/** Retourne la clé à utiliser (utilisateur sinon serveur), ou lève si aucune. */
-export function requireKey(apiKey?: string | null): string {
-  const key = apiKey || process.env.GEMINI_API_KEY || "";
-  if (!key) {
-    throw new Error(
-      "Aucune clé API configurée. Ajoutez GEMINI_API_KEY côté serveur " +
-        "ou une clé personnelle dans ⚙️ Paramètres.",
-    );
+export function requireActiveKey(overrideKey?: string | null): { key: string; provider: "gemini" | "anthropic"; model: AiModel } {
+  const { activeModel, geminiKey, anthropicKey } = useSettingsStore.getState();
+  
+  if (overrideKey) {
+    const provider = isAnthropicKey(overrideKey) ? "anthropic" : "gemini";
+    let model = activeModel;
+    if (provider === "anthropic" && !model.startsWith("claude-")) model = "claude-haiku-4-5-20251001";
+    if (provider === "gemini" && !model.startsWith("gemini-")) model = "gemini-3.1-flash-lite";
+    return { key: overrideKey, provider, model: model as AiModel };
   }
-  return key;
+
+  const provider = activeModel.startsWith("claude-") ? "anthropic" : "gemini";
+
+  if (provider === "anthropic") {
+    if (!anthropicKey) {
+      throw new Error("Clé Anthropic requise pour utiliser ce modèle. Ajoutez-la dans ⚙️ Paramètres.");
+    }
+    return { key: anthropicKey, provider, model: activeModel };
+  } else {
+    const key = geminiKey || process.env.GEMINI_API_KEY || "";
+    if (!key) {
+      throw new Error("Clé Gemini requise pour utiliser ce modèle. Ajoutez-la dans ⚙️ Paramètres.");
+    }
+    return { key, provider, model: activeModel };
+  }
+}
+
+export function buildSystemPrompt(baseSystem: string): string {
+  const { globalPrompt, language } = useSettingsStore.getState();
+  let finalSystem = baseSystem;
+
+  if (language === "en") {
+    finalSystem += "\n\nCRITICAL: You must generate the output in English.";
+  } else if (language === "fr") {
+    finalSystem += "\n\nCRITICAL: You must generate the output in French.";
+  }
+
+  if (globalPrompt.trim()) {
+    finalSystem += "\n\nUser Global Instructions (Must be followed strictly):\n" + globalPrompt.trim();
+  }
+
+  return finalSystem;
 }
 
 // ---- gestion du quota Gemini (port de _raise_for_gemini_quota) --------------
@@ -63,8 +86,8 @@ function rethrowGeminiError(err: unknown): never {
     const delay = parseRetryDelay(message);
     const hint = delay ? ` Réessayez dans ${delay}.` : " Réessayez dans quelques minutes.";
     throw new Error(
-      `Quota Gemini épuisé (${GEMINI_MODEL}).${hint} ` +
-        "Pour ne plus avoir cette limite, ajoutez votre propre clé dans ⚙️ Paramètres.",
+      `Quota Gemini épuisé. ${hint} ` +
+        "Pour ne plus avoir cette limite, configurez votre propre clé ou changez de modèle dans ⚙️ Paramètres.",
     );
   }
   throw err instanceof Error ? err : new Error(message);
@@ -82,18 +105,21 @@ export async function* streamCompletion(
   system: string,
   opts: { images?: Uint8Array[]; apiKey?: string | null } = {},
 ): AsyncGenerator<string> {
-  const key = requireKey(opts.apiKey);
-  const images = opts.images ?? [];
+  const { key, provider, model } = requireActiveKey(opts.apiKey);
 
-  if (isAnthropicKey(key)) {
+  const images = opts.images ?? [];
+  const finalSystem = buildSystemPrompt(system);
+  const { creativity } = useSettingsStore.getState();
+
+  if (provider === "anthropic") {
     if (images.length > 0) {
       throw new Error(
-        "La clé Anthropic ne supporte pas la conversion PDF. Utilisez une clé Gemini.",
+        "Le modèle Anthropic ne supporte pas la conversion PDF. Sélectionnez un modèle Gemini dans les Paramètres.",
       );
     }
-    yield* streamAnthropic(prompt, system, key);
+    yield* streamAnthropic(prompt, finalSystem, key, model, creativity);
   } else {
-    yield* streamGemini(prompt, system, images, key);
+    yield* streamGemini(prompt, finalSystem, images, key, model, creativity);
   }
 }
 
@@ -102,6 +128,8 @@ async function* streamGemini(
   system: string,
   images: Uint8Array[],
   key: string,
+  model: string,
+  temperature: number,
 ): AsyncGenerator<string> {
   const ai = new GoogleGenAI({ apiKey: key });
   const parts: Part[] = images.map((img) => ({
@@ -111,9 +139,9 @@ async function* streamGemini(
 
   try {
     const stream = await ai.models.generateContentStream({
-      model: GEMINI_MODEL,
+      model,
       contents: [{ role: "user", parts }],
-      config: { systemInstruction: system },
+      config: { systemInstruction: system, temperature },
     });
     for await (const chunk of stream) {
       if (chunk.text) yield chunk.text;
@@ -127,11 +155,14 @@ async function* streamAnthropic(
   prompt: string,
   system: string,
   key: string,
+  model: string,
+  temperature: number,
 ): AsyncGenerator<string> {
   const client = new Anthropic({ apiKey: key });
   const stream = client.messages.stream({
-    model: ANTHROPIC_MODEL,
+    model,
     max_tokens: ANTHROPIC_MAX_TOKENS,
+    temperature,
     system,
     messages: [{ role: "user", content: prompt }],
   });
@@ -153,16 +184,22 @@ export async function complete(
   system: string,
   apiKey?: string | null,
 ): Promise<string> {
-  const key = requireKey(apiKey);
-  return isAnthropicKey(key)
-    ? completeAnthropic(messages, system, key)
-    : completeGemini(messages, system, key);
+  const { key, provider, model } = requireActiveKey(apiKey);
+
+  const finalSystem = buildSystemPrompt(system);
+  const { creativity } = useSettingsStore.getState();
+
+  return provider === "anthropic"
+    ? completeAnthropic(messages, finalSystem, key, model, creativity)
+    : completeGemini(messages, finalSystem, key, model, creativity);
 }
 
 async function completeGemini(
   messages: ChatMessage[],
   system: string,
   key: string,
+  model: string,
+  temperature: number,
 ): Promise<string> {
   const ai = new GoogleGenAI({ apiKey: key });
   const contents = messages.map((m) => ({
@@ -172,9 +209,9 @@ async function completeGemini(
 
   try {
     const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
+      model,
       contents,
-      config: { systemInstruction: system },
+      config: { systemInstruction: system, temperature },
     });
     return response.text ?? "";
   } catch (err) {
@@ -183,8 +220,7 @@ async function completeGemini(
 }
 
 /**
- * Complétion Gemini à sortie JSON structurée (response schema). Utilisée pour le scoring d'offres.
- * Gemini uniquement (le schéma structuré n'est pas porté sur Anthropic). Renvoie le texte JSON brut.
+ * Complétion Gemini à sortie JSON structurée (response schema).
  */
 export async function completeJson(
   prompt: string,
@@ -192,17 +228,22 @@ export async function completeJson(
   schema: Schema,
   apiKey?: string | null,
 ): Promise<string> {
-  const key = requireKey(apiKey);
-  if (isAnthropicKey(key)) {
-    throw new Error("La notation d'offres nécessite une clé Gemini (sortie JSON structurée).");
+  const { key, provider, model } = requireActiveKey(apiKey);
+
+  if (provider === "anthropic") {
+    throw new Error("La fonctionnalité nécessite un modèle Gemini. Modifiez le modèle actif dans ⚙️ Paramètres.");
   }
   const ai = new GoogleGenAI({ apiKey: key });
+  const finalSystem = buildSystemPrompt(system);
+  const { creativity } = useSettingsStore.getState();
+
   try {
     const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
+      model,
       contents: prompt,
       config: {
-        systemInstruction: system,
+        systemInstruction: finalSystem,
+        temperature: creativity,
         responseMimeType: "application/json",
         responseSchema: schema,
       },
@@ -217,11 +258,14 @@ async function completeAnthropic(
   messages: ChatMessage[],
   system: string,
   key: string,
+  model: string,
+  temperature: number,
 ): Promise<string> {
   const client = new Anthropic({ apiKey: key });
   const response = await client.messages.create({
-    model: ANTHROPIC_MODEL,
+    model,
     max_tokens: ANTHROPIC_MAX_TOKENS,
+    temperature,
     system,
     messages: messages.map((m) => ({ role: m.role, content: m.content })),
   });

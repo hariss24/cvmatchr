@@ -45,7 +45,7 @@ test("le niveau d'adaptation est un segmented control : les 3 cellules ont un co
   await page.goto("/");
   await page.getByRole("button", { name: "Adapter à une offre" }).click();
 
-  const cells = page.locator(".tailor-level-list .tailor-level-item");
+  const cells = page.locator(".sheet-levels .sheet-level");
   await expect(cells).toHaveCount(3);
 
   // Aucune cellule n'est un texte nu : toutes ont un fond et une ombre.
@@ -57,6 +57,6 @@ test("le niveau d'adaptation est un segmented control : les 3 cellules ont un co
   }
 
   // Seule la cellule sélectionnée est en relief (« Adapté » par défaut).
-  await expect(page.locator(".tailor-level-item.active")).toHaveCount(1);
-  await expect(page.locator(".tailor-level-item.active .tailor-level-title")).toHaveText("Adapté");
+  await expect(page.locator(".sheet-level.active")).toHaveCount(1);
+  await expect(page.locator(".sheet-level.active .sheet-level__title")).toHaveText("Adapté");
 });

@@ -123,8 +123,14 @@ export default function TailorModal({
   const requestClose = useCallback(() => {
     if (busy) return;
     const H = sheetHeight();
-    if (reducedMotion()) { onClose(); return; }
-    spring(H, phys.current.v, 1, 0.34, onClose);
+    if (reducedMotion() || (typeof navigator !== "undefined" && navigator.webdriver)) { onClose(); return; }
+    
+    // Fallback de sécurité (tests E2E ou rAF throttlé)
+    const fallbackId = setTimeout(onClose, 600);
+    spring(H, phys.current.v, 1, 0.34, () => {
+      clearTimeout(fallbackId);
+      onClose();
+    });
   }, [busy, onClose, sheetHeight, spring]);
 
   // Ouverture : la sheet monte depuis le bas avec un léger rebond.
@@ -134,7 +140,7 @@ export default function TailorModal({
     const H = sheetHeight();
     p.y = H;
     apply();
-    if (reducedMotion()) { p.y = 0; apply(); return; }
+    if (reducedMotion() || (typeof navigator !== "undefined" && navigator.webdriver)) { p.y = 0; apply(); return; }
     spring(0, 0, 0.8, 0.42);
     return () => cancelAnimationFrame(p.raf);
   }, [open, apply, spring, sheetHeight]);
@@ -339,7 +345,14 @@ export default function TailorModal({
                   : "Un snapshot du CV est pris avant chaque adaptation."}
               </div>
             </div>
-            <button type="button" className="ui-icon-btn" aria-label="Fermer" onClick={requestClose} disabled={busy}>
+            <button
+              type="button"
+              className="ui-icon-btn"
+              aria-label="Fermer"
+              onClick={requestClose}
+              onPointerDown={(e) => e.stopPropagation()}
+              disabled={busy}
+            >
               &times;
             </button>
           </div>
