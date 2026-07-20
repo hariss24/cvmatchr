@@ -170,6 +170,9 @@ export function buildSections(
   pushList("softSkills", "Soft skills", d.softSkills);
   pushList("tools", "Outils", d.tools);
 
+  const langs = d.languages.filter((l) => l && t(l.name));
+  if (langs.length) out.push({ id: "languages", title: "Langues", kind: "languages", items: langs });
+
   pushTimeline(
     "projects",
     "Projets",
@@ -196,8 +199,6 @@ export function buildSections(
       ),
   );
 
-  const langs = d.languages.filter((l) => l && t(l.name));
-  if (langs.length) out.push({ id: "languages", title: "Langues", kind: "languages", items: langs });
 
   pushList("interests", "Centres d'intérêt", d.interests);
 

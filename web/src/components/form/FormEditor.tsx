@@ -100,7 +100,7 @@ export default function FormEditor({ onImportPdf }: { onImportPdf?: () => void }
       case "interests":
         return <StringListSection addLabel="+ Ajouter un centre d'intérêt" items={cv.interests ?? []} onChange={(v) => update({ interests: v })} />;
       default:
-        if (sec.isCustom) {
+        if (sec.isCustom && sec.index !== undefined) {
           const customIndex = sec.index;
           return (
             <SingleCustomSection
@@ -301,7 +301,11 @@ function FormSection({ title, controls, children }: { title: string; controls?: 
         </button>
         {controls && <div className="form-section__controls" style={{ display: "flex", gap: "4px" }}>{controls}</div>}
       </h3>
-      {open ? <div className="form-section__body">{children}</div> : null}
+      <div className={`form-collapse ${open ? "is-open" : ""}`} aria-hidden={!open}>
+        <div className="form-collapse-inner">
+          <div className="form-section__body">{children}</div>
+        </div>
+      </div>
     </section>
   );
 }
@@ -380,7 +384,11 @@ function ItemCard({
           ✕
         </button>
       </div>
-      {open ? <div className="form-item__body">{children}</div> : null}
+      <div className={`form-collapse ${open ? "is-open" : ""}`} aria-hidden={!open}>
+        <div className="form-collapse-inner">
+          <div className="form-item__body">{children}</div>
+        </div>
+      </div>
     </div>
   );
 }
