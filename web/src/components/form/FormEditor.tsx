@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useDocStore } from "@/state/docStore";
-import { buildSections } from "@/lib/resume/sections";
+import { getAllFormSections, type FormSectionInfo } from "@/lib/resume/sections";
 import { SortableList, DragHandle, useSortableItem, moveItem } from "./Sortable";
 import type {
   Resume,
@@ -48,6 +48,73 @@ export default function FormEditor({ onImportPdf }: { onImportPdf?: () => void }
     reader.readAsDataURL(file);
     // Réinitialise l'input pour permettre de re-sélectionner le même fichier après un retrait.
     e.target.value = "";
+  };
+
+  const orderedSections = getAllFormSections(cv);
+  const hidden = new Set(cv.hiddenSections ?? []);
+
+  const moveSection = (i: number, dir: -1 | 1) => {
+    const ids = orderedSections.map((sec) => sec.id);
+    const j = i + dir;
+    if (j < 0 || j >= ids.length) return;
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+    update({ sectionOrder: ids });
+  };
+
+  const toggleSection = (id: string) =>
+    update({
+      hiddenSections: hidden.has(id)
+        ? (cv.hiddenSections ?? []).filter((x) => x !== id)
+        : [...(cv.hiddenSections ?? []), id],
+    });
+
+  const renderSectionContent = (sec: FormSectionInfo) => {
+    switch (sec.id) {
+      case "summary":
+        return (
+          <textarea
+            className="form-textarea"
+            rows={4}
+            value={cv.summary}
+            onChange={(e) => update({ summary: e.target.value })}
+          />
+        );
+      case "experience":
+        return <ExperienceSection items={cv.experience ?? []} onChange={(v) => update({ experience: v })} />;
+      case "education":
+        return <EducationSection items={cv.education ?? []} onChange={(v) => update({ education: v })} />;
+      case "skills":
+        return <StringListSection addLabel="+ Ajouter une compétence" items={cv.skills ?? []} onChange={(v) => update({ skills: v })} />;
+      case "softSkills":
+        return <StringListSection addLabel="+ Ajouter un soft skill" items={cv.softSkills ?? []} onChange={(v) => update({ softSkills: v })} />;
+      case "tools":
+        return <StringListSection addLabel="+ Ajouter un outil" items={cv.tools ?? []} onChange={(v) => update({ tools: v })} />;
+      case "languages":
+        return <LanguagesSection items={cv.languages ?? []} onChange={(v) => update({ languages: v })} />;
+      case "projects":
+        return <ProjectsSection items={cv.projects ?? []} onChange={(v) => update({ projects: v })} />;
+      case "certifications":
+        return <StringListSection addLabel="+ Ajouter une certification" items={cv.certifications ?? []} onChange={(v) => update({ certifications: v })} />;
+      case "volunteer":
+        return <VolunteerSection items={cv.volunteer ?? []} onChange={(v) => update({ volunteer: v })} />;
+      case "interests":
+        return <StringListSection addLabel="+ Ajouter un centre d'intérêt" items={cv.interests ?? []} onChange={(v) => update({ interests: v })} />;
+      default:
+        if (sec.isCustom) {
+          const customIndex = sec.index;
+          return (
+            <SingleCustomSection
+              item={cv.customSections?.[customIndex] || { title: "", items: [] }}
+              onChange={(v) => {
+                const newCustoms = [...(cv.customSections ?? [])];
+                newCustoms[customIndex] = v;
+                update({ customSections: newCustoms });
+              }}
+            />
+          );
+        }
+        return null;
+    }
   };
 
   return (
@@ -101,56 +168,38 @@ export default function FormEditor({ onImportPdf }: { onImportPdf?: () => void }
           onChange={(v) => update({ customFields: v })}
         />
 
-        <SectionOrderSection cv={cv} onChange={update} />
+        {orderedSections.map((sec, i) => {
+          const isHidden = hidden.has(sec.id);
+          const controls = (
+            <SectionControls
+              title={sec.title}
+              isHidden={isHidden}
+              isFirst={i === 0}
+              isLast={i === orderedSections.length - 1}
+              onToggle={() => toggleSection(sec.id)}
+              onMoveUp={() => moveSection(i, -1)}
+              onMoveDown={() => moveSection(i, 1)}
+            />
+          );
+          
+          return (
+            <div key={sec.id} style={{ opacity: isHidden ? 0.5 : 1 }}>
+              <FormSection title={sec.title} controls={controls}>
+                {renderSectionContent(sec)}
+              </FormSection>
+            </div>
+          );
+        })}
 
-        <FormSection title="À propos">
-          <textarea
-            className="form-textarea"
-            rows={4}
-            value={cv.summary}
-            onChange={(e) => update({ summary: e.target.value })}
-          />
-        </FormSection>
-
-        <ExperienceSection items={cv.experience} onChange={(v) => update({ experience: v })} />
-        <EducationSection items={cv.education} onChange={(v) => update({ education: v })} />
-        <StringListSection
-          title="Compétences"
-          addLabel="+ Ajouter une compétence"
-          items={cv.skills}
-          onChange={(v) => update({ skills: v })}
-        />
-        <StringListSection
-          title="Soft skills"
-          addLabel="+ Ajouter un soft skill"
-          items={cv.softSkills ?? []}
-          onChange={(v) => update({ softSkills: v })}
-        />
-        <StringListSection
-          title="Outils"
-          addLabel="+ Ajouter un outil"
-          items={cv.tools ?? []}
-          onChange={(v) => update({ tools: v })}
-        />
-        <LanguagesSection items={cv.languages} onChange={(v) => update({ languages: v })} />
-        <ProjectsSection items={cv.projects} onChange={(v) => update({ projects: v })} />
-        <StringListSection
-          title="Certifications"
-          addLabel="+ Ajouter une certification"
-          items={cv.certifications}
-          onChange={(v) => update({ certifications: v })}
-        />
-        <VolunteerSection items={cv.volunteer} onChange={(v) => update({ volunteer: v })} />
-        <StringListSection
-          title="Centres d'intérêt"
-          addLabel="+ Ajouter un centre d'intérêt"
-          items={cv.interests}
-          onChange={(v) => update({ interests: v })}
-        />
-        <CustomSectionsSection
-          items={cv.customSections ?? []}
-          onChange={(v) => update({ customSections: v })}
-        />
+        <div className="form-add-custom mt-4" style={{ marginTop: "1rem" }}>
+          <button
+            type="button"
+            className="form-btn-add"
+            onClick={() => update({ customSections: [...(cv.customSections ?? []), { title: "", items: [] }] })}
+          >
+            + Ajouter une section libre
+          </button>
+        </div>
     </div>
   );
 }
@@ -362,19 +411,54 @@ function RowCard({
 
 // ---- Sections « liste de chaînes » (compétences, certifications, intérêts) ----
 
+function SingleCustomSection({
+  item,
+  onChange,
+}: {
+  item: CustomSection;
+  onChange: (item: CustomSection) => void;
+}) {
+  return (
+    <>
+      <Field
+        label="Titre de la section"
+        value={item.title}
+        onChange={(v) => onChange({ ...item, title: v })}
+      />
+      <div className="form-field">
+        <label className="form-label">Contenu</label>
+        <textarea
+          className="form-textarea form-bullets"
+          rows={4}
+          placeholder="Une ligne par élément."
+          value={item.items.join("\n")}
+          onChange={(e) => onChange({ ...item, items: e.target.value.split("\n") })}
+          onBlur={(e) =>
+            onChange({
+              ...item,
+              items: e.target.value
+                .split("\n")
+                .map((l) => l.trim())
+                .filter((l) => l !== ""),
+            })
+          }
+        />
+      </div>
+    </>
+  );
+}
+
 function StringListSection({
-  title,
   addLabel,
   items,
   onChange,
 }: {
-  title: string;
   addLabel: string;
   items: string[];
   onChange: (items: string[]) => void;
 }) {
   return (
-    <FormSection title={title}>
+    <>
       <SortableList
         count={items.length}
         onMove={(from, to) => onChange(moveItem(items, from, to))}
@@ -397,7 +481,7 @@ function StringListSection({
       <button type="button" className="form-btn-add" onClick={() => onChange([...items, ""])}>
         {addLabel}
       </button>
-    </FormSection>
+    </>
   );
 }
 
@@ -437,7 +521,7 @@ const EMPTY_PROJECT: ProjectItem = { title: "", date: "", description: "" };
 const EMPTY_VOLUNTEER: VolunteerItem = {
   title: "", organization: "", location: "", date: "", bullets: [],
 };
-const EMPTY_CUSTOM_SECTION: CustomSection = { title: "", items: [] };
+
 const EMPTY_CUSTOM_FIELD: CustomField = { label: "", value: "" };
 
 /**
@@ -507,97 +591,7 @@ function EyeIcon({ off }: { off: boolean }) {
   );
 }
 
-/**
- * Ordre et visibilité des sections. La liste est DÉRIVÉE du CV (`buildSections`) et non
- * écrite en dur : une rubrique relevée à l'import — même inconnue de l'application —
- * apparaît donc ici d'elle-même, déplaçable et masquable sans qu'une ligne de code la
- * mentionne.
- *
- * MASQUER N'EST PAS SUPPRIMER : la section sort du PDF, son contenu reste dans le CV et un
- * second clic la ramène intacte. C'est ce qui permet d'adapter un CV à une offre sans rien
- * perdre — la promesse de toute l'app. Pour vraiment effacer, on vide la section elle-même.
- *
- * Chaque déplacement réécrit la liste complète des identifiants présents : `sectionOrder`
- * reste ainsi toujours aligné sur le contenu réel du CV.
- */
-function SectionOrderSection({
-  cv,
-  onChange,
-}: {
-  cv: Resume;
-  onChange: (patch: Partial<Resume>) => void;
-}) {
-  // `includeHidden` : une section masquée doit rester listée, sinon on ne pourrait plus la
-  // faire revenir.
-  const sections = buildSections(cv, { includeHidden: true });
-  if (sections.length < 2) return null;
 
-  const hidden = new Set(cv.hiddenSections ?? []);
-
-  const move = (i: number, dir: -1 | 1) => {
-    const ids = sections.map((sec) => sec.id);
-    const j = i + dir;
-    if (j < 0 || j >= ids.length) return;
-    [ids[i], ids[j]] = [ids[j], ids[i]];
-    onChange({ sectionOrder: ids });
-  };
-
-  const toggle = (id: string) =>
-    onChange({
-      hiddenSections: hidden.has(id)
-        ? (cv.hiddenSections ?? []).filter((x) => x !== id)
-        : [...(cv.hiddenSections ?? []), id],
-    });
-
-  return (
-    <FormSection title="Ordre des sections">
-      <p className="form-hint">
-        L&apos;ordre du CV importé est conservé. Réorganisez-le comme vous voulez : le modèle
-        suit. L&apos;œil retire une section du CV sans effacer son contenu.
-      </p>
-      <ul className="form-order">
-        {sections.map((sec, i) => {
-          const off = hidden.has(sec.id);
-          return (
-            <li
-              key={sec.id}
-              className={`form-order__row${off ? " form-order__row--hidden" : ""}`}
-            >
-              <span className="form-order__label">{sec.title}</span>
-              <button
-                type="button"
-                className="form-btn-mini form-btn-icon-only form-order__eye"
-                aria-label={off ? `Réafficher « ${sec.title} »` : `Masquer « ${sec.title} »`}
-                aria-pressed={off}
-                onClick={() => toggle(sec.id)}
-              >
-                <EyeIcon off={off} />
-              </button>
-              <button
-                type="button"
-                className="form-btn-mini"
-                aria-label={`Monter « ${sec.title} »`}
-                disabled={i === 0}
-                onClick={() => move(i, -1)}
-              >
-                ↑
-              </button>
-              <button
-                type="button"
-                className="form-btn-mini"
-                aria-label={`Descendre « ${sec.title} »`}
-                disabled={i === sections.length - 1}
-                onClick={() => move(i, 1)}
-              >
-                ↓
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </FormSection>
-  );
-}
 
 function ExperienceSection({
   items,
@@ -609,7 +603,7 @@ function ExperienceSection({
   const patch = (i: number, p: Partial<ExperienceItem>) =>
     onChange(replaceAt(items, i, { ...items[i], ...p }));
   return (
-    <FormSection title="Expériences">
+    <>
       <SortableList
         count={items.length}
         onMove={(from, to) => onChange(moveItem(items, from, to))}
@@ -636,7 +630,7 @@ function ExperienceSection({
       <button type="button" className="form-btn-add" onClick={() => onChange([...items, { ...EMPTY_EXPERIENCE }])}>
         + Ajouter une expérience
       </button>
-    </FormSection>
+    </>
   );
 }
 
@@ -650,7 +644,7 @@ function EducationSection({
   const patch = (i: number, p: Partial<EducationItem>) =>
     onChange(replaceAt(items, i, { ...items[i], ...p }));
   return (
-    <FormSection title="Formations">
+    <>
       <SortableList
         count={items.length}
         onMove={(from, to) => onChange(moveItem(items, from, to))}
@@ -675,7 +669,7 @@ function EducationSection({
       <button type="button" className="form-btn-add" onClick={() => onChange([...items, { ...EMPTY_EDUCATION }])}>
         + Ajouter une formation
       </button>
-    </FormSection>
+    </>
   );
 }
 
@@ -689,7 +683,7 @@ function LanguagesSection({
   const patch = (i: number, p: Partial<LanguageItem>) =>
     onChange(replaceAt(items, i, { ...items[i], ...p }));
   return (
-    <FormSection title="Langues">
+    <>
       <SortableList
         count={items.length}
         onMove={(from, to) => onChange(moveItem(items, from, to))}
@@ -719,7 +713,7 @@ function LanguagesSection({
       <button type="button" className="form-btn-add" onClick={() => onChange([...items, { ...EMPTY_LANGUAGE }])}>
         + Ajouter une langue
       </button>
-    </FormSection>
+    </>
   );
 }
 
@@ -733,7 +727,7 @@ function ProjectsSection({
   const patch = (i: number, p: Partial<ProjectItem>) =>
     onChange(replaceAt(items, i, { ...items[i], ...p }));
   return (
-    <FormSection title="Projets">
+    <>
       <SortableList
         count={items.length}
         onMove={(from, to) => onChange(moveItem(items, from, to))}
@@ -757,7 +751,7 @@ function ProjectsSection({
                 rows={2}
                 value={p.description}
                 onChange={(e) => patch(i, { description: e.target.value })}
-              />
+              />
             </div>
           </ItemCard>
         ))}
@@ -765,72 +759,7 @@ function ProjectsSection({
       <button type="button" className="form-btn-add" onClick={() => onChange([...items, { ...EMPTY_PROJECT }])}>
         + Ajouter un projet
       </button>
-    </FormSection>
-  );
-}
-
-/**
- * Sections libres : rubriques du CV qui n'entrent dans aucune case standard
- * (« Publications », « Distinctions »…). Le titre est saisi par l'utilisateur —
- * c'est ce qui distingue ce bloc des autres sections, dont le titre est figé.
- */
-function CustomSectionsSection({
-  items,
-  onChange,
-}: {
-  items: CustomSection[];
-  onChange: (items: CustomSection[]) => void;
-}) {
-  const patch = (i: number, p: Partial<CustomSection>) =>
-    onChange(replaceAt(items, i, { ...items[i], ...p }));
-  return (
-    <FormSection title="Sections libres">
-      <SortableList
-        count={items.length}
-        onMove={(from, to) => onChange(moveItem(items, from, to))}
-      >
-        {items.map((c, i) => (
-          <ItemCard
-            key={i}
-            index={i}
-            title={`Section ${i + 1}`}
-            subtitle={c.title}
-            onRemove={() => onChange(removeAt(items, i))}
-          >
-            <Field
-              label="Titre de la section"
-              value={c.title}
-              onChange={(v) => patch(i, { title: v })}
-            />
-            <div className="form-field">
-              <label className="form-label">Contenu</label>
-              <textarea
-                className="form-textarea form-bullets"
-                rows={4}
-                placeholder="Une ligne par élément."
-                value={c.items.join("\n")}
-                onChange={(e) => patch(i, { items: e.target.value.split("\n") })}
-                onBlur={(e) =>
-                  patch(i, {
-                    items: e.target.value
-                      .split("\n")
-                      .map((l) => l.trim())
-                      .filter((l) => l !== ""),
-                  })
-                }
-              />
-            </div>
-          </ItemCard>
-        ))}
-      </SortableList>
-      <button
-        type="button"
-        className="form-btn-add"
-        onClick={() => onChange([...items, { ...EMPTY_CUSTOM_SECTION }])}
-      >
-        + Ajouter une section
-      </button>
-    </FormSection>
+    </>
   );
 }
 
@@ -844,7 +773,7 @@ function VolunteerSection({
   const patch = (i: number, p: Partial<VolunteerItem>) =>
     onChange(replaceAt(items, i, { ...items[i], ...p }));
   return (
-    <FormSection title="Bénévolat">
+    <>
       <SortableList
         count={items.length}
         onMove={(from, to) => onChange(moveItem(items, from, to))}
@@ -870,6 +799,6 @@ function VolunteerSection({
       <button type="button" className="form-btn-add" onClick={() => onChange([...items, { ...EMPTY_VOLUNTEER }])}>
         + Ajouter une mission
       </button>
-    </FormSection>
+    </>
   );
 }

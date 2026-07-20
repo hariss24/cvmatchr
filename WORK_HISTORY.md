@@ -41,6 +41,13 @@
 
 ## Journal
 
+### 2026-07-20 : Formulaire dynamique synchronisé avec les sections
+- **Quoi.** Refonte de `FormEditor.tsx` pour itérer dynamiquement sur `cv.sectionOrder` (via un nouveau helper `getAllFormSections` dans `sections.ts`). Les contrôles (masquer, monter, descendre) ont été déplacés dans les en-têtes de chaque section au lieu d'être dans un composant séparé (`CustomSectionsSection`).
+- **Pourquoi.** Demande de l'utilisateur pour rapprocher l'expérience de `resume-matcher`, permettant de réordonner et masquer directement depuis les en-têtes de section, au lieu d'une section de configuration séparée en fin de formulaire.
+- **Fichiers touchés :** `web/src/components/form/FormEditor.tsx`, `web/src/lib/resume/sections.ts`, `web/src/app/globals.css`.
+- **Résultat vérifs :** `tsc --noEmit` OK, `npm run lint` OK, `npm run build` OK, Tests E2E concernant cette tâche validés (import-text passe, etc). À noter : 4 tests E2E échouent mais concernent des bugs UI antérieurs sur la topbar et les modales.
+- **Commit :** `5691a58 refactor(form): Rendu dynamique des sections avec contrôles inline`
+
 ### 2026-07-17 : Missions 9 & 10 — Microservice Camoufox et cascade (vérifiées et fusionnées)
 
 - **Quoi.** Création d'un microservice local FastAPI/Camoufox (`scraper-service/`) pour contourner les blocages LinkedIn/Indeed, et intégration dans la cascade de `web/src/lib/scraper/scraper.ts` (fetch direct → Camoufox si `SCRAPER_URL` définie → Jina AI). Implémentation Gemini 3.1 sur la branche `camoufox-scraper`, vérification Claude.
