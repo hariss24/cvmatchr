@@ -6,10 +6,13 @@ import { listJobs, saveJob, saveExplored, markJobSeen, jobExists, setJobStatus, 
 import { useDocStore } from "@/state/docStore";
 import { toast } from "@/state/uiStore";
 import type { JobOffer } from "@/lib/jobs/francetravail";
+import { EMPTY_PROFILE, type JobSearchProfile } from "@/lib/jobs/profile";
+import { getJobProfile, saveJobProfile } from "@/lib/storage/db";
 import { relevance } from "@/lib/jobs/prefilter";
 import ScanProgress from "./ScanProgress";
 import JobCard from "./JobCard";
 import ScoringInfo from "./ScoringInfo";
+import { ProfileForm } from "./ProfileForm";
 
 /**
  * Orchestrateur du scan d'offres (piloté par le navigateur, cf. spec §4) :
@@ -30,6 +33,8 @@ export type JobsConfig = {
 
 export default function JobsView({ config }: { config: JobsConfig }) {
   const [jobs, setJobs] = useState<JobEntry[]>([]);
+  const [profile, setProfile] = useState<JobSearchProfile>(EMPTY_PROFILE);
+  const [showForm, setShowForm] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [progress, setProgress] = useState<ScanState>(ZERO);
   const [configMsg, setConfigMsg] = useState<string | null>(null);
@@ -40,13 +45,17 @@ export default function JobsView({ config }: { config: JobsConfig }) {
 
   useEffect(() => {
     listJobs("new").then(setJobs);
+    getJobProfile().then((p) => {
+      if (p) setProfile(p);
+      else setShowForm(true); // Forcer la saisie initiale
+    });
   }, []);
 
   async function reload() {
     setJobs(await listJobs("new"));
   }
 
-  async function scan() {
+  async function scan(p: JobSearchProfile = profile) {
     setScanning(true);
     setConfigMsg(null);
     setProgress({ ...ZERO, phase: "Recherche des offres…" });
@@ -54,7 +63,7 @@ export default function JobsView({ config }: { config: JobsConfig }) {
       const res = await fetch("/api/jobs/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: "{}",
+        body: JSON.stringify({ profile: p }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -89,7 +98,7 @@ export default function JobsView({ config }: { config: JobsConfig }) {
         const r = await fetch("/api/jobs/score", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ offer }),
+          body: JSON.stringify({ offer, profile: p }),
         });
         if (r.status === 429) {
           toast("Limite IA atteinte. Réessaie plus tard.", "error");
@@ -134,6 +143,13 @@ export default function JobsView({ config }: { config: JobsConfig }) {
       setScanning(false);
     }
   }
+
+  const handleSaveProfile = async (p: JobSearchProfile) => {
+    setProfile(p);
+    setShowForm(false);
+    await saveJobProfile(p);
+    scan(p);
+  };
 
   async function adapt(job: JobEntry) {
     await markJobSeen(job.id);
@@ -185,12 +201,26 @@ export default function JobsView({ config }: { config: JobsConfig }) {
   return (
     <div className="jobs-view">
       <ScoringInfo criteria={config.criteria} minScore={config.minScore} />
+
+      <div style={{ marginBottom: 16 }}>
+        <button className="ui-button" onClick={() => setShowForm(!showForm)} style={{ marginBottom: showForm ? 16 : 0, background: "transparent", color: "var(--text)", border: "1px solid var(--border)" }}>
+          {showForm ? "Masquer les critères" : "Modifier mes critères de recherche"}
+        </button>
+        {showForm && (
+          <ProfileForm
+            initial={profile}
+            onSave={handleSaveProfile}
+            onCancel={() => setShowForm(false)}
+          />
+        )}
+      </div>
+
       <div className="jobs-toolbar">
         <button
           type="button"
           className="tailor-btn"
-          onClick={scan}
-          disabled={scanning}
+          onClick={() => scan()}
+          disabled={scanning || showForm}
           data-testid="jobs-scan"
         >
           {scanning ? "Recherche en cours…" : "Chercher des offres"}
