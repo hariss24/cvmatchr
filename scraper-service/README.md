@@ -1,6 +1,6 @@
 # scraper-service — extraction d'offres via Camoufox
 
-Micro-service local appelé par CV Tailor (`web/`) quand le fetch direct est
+Micro-service local appelé par CVMatchr (`web/`) quand le fetch direct est
 bloqué (LinkedIn, Indeed…). Voir la spec :
 `docs/superpowers/specs/2026-07-17-camoufox-scraper-design.md`.
 

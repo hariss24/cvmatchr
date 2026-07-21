@@ -27,7 +27,7 @@ export default function UiHost() {
           const count = await db.history.count();
           if (count >= 5) {
             await uiAlert(
-              "Vous utilisez activement CV Tailor, bravo ! 🎉\n\nN'oubliez pas que toutes vos données (CV, offres, historique) sont stockées UNIQUEMENT sur ce navigateur. Pensez à aller dans les Paramètres pour exporter une sauvegarde de temps en temps.",
+              "Vous utilisez activement CVMatchr, bravo ! 🎉\n\nN'oubliez pas que toutes vos données (CV, offres, historique) sont stockées UNIQUEMENT sur ce navigateur. Pensez à aller dans les Paramètres pour exporter une sauvegarde de temps en temps.",
               "Sauvegarde Recommandée"
             );
             localStorage.setItem("backup_warning_seen", "true");

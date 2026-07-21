@@ -3,7 +3,7 @@ import SegmentedNav from "@/components/layout/SegmentedNav";
 import { resolveProfile } from "@/lib/jobs/resolveProfile";
 
 export const metadata = {
-  title: "Offres — CV Tailor",
+  title: "Offres — CVMatchr",
 };
 
 export default function JobsPage() {

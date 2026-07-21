@@ -10,7 +10,7 @@ test.describe("Page d'aide et FAQ", () => {
     
     // 3. Vérifier qu'on est sur la page d'aide
     await expect(page).toHaveURL(/.*\/help/);
-    await expect(page.locator("h1")).toContainText("Comment fonctionne CV Tailor ?");
+    await expect(page.locator("h1")).toContainText("Comment fonctionne CVMatchr ?");
     
     // 4. Vérifier la présence du texte sur le fonctionnement local
     await expect(page.locator("text=100% privé")).toBeVisible();

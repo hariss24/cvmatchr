@@ -1,12 +1,12 @@
-# CV Tailor
+# CVMatchr
 
 > Adaptez votre CV et votre Lettre de Motivation aux offres d'emploi grâce à l'IA.
 
-**[🌐 Voir l'application en ligne (Vercel)](https://cv-tailor-drab-rho.vercel.app)**
+**[🌐 Voir l'application en ligne](https://cvmatchr.fr)**
 
 ---
 
-**CV Tailor** est une application web qui vous aide à adapter vos candidatures (CV et lettres de motivation) à des offres d'emploi spécifiques en utilisant l'intelligence artificielle (Gemini ou Anthropic). Elle intègre un éditeur en direct, plusieurs templates d'export PDF, et un chasseur d'offres intégré avec analyse sémantique.
+**CVMatchr** est une application web qui vous aide à adapter vos candidatures (CV et lettres de motivation) à des offres d'emploi spécifiques en utilisant l'intelligence artificielle (Gemini ou Anthropic). Elle intègre un éditeur en direct, plusieurs templates d'export PDF, et un chasseur d'offres intégré avec analyse sémantique.
 
 ## Fonctionnalités Principales
 
@@ -39,8 +39,8 @@ Tout le code de l'application est situé dans le sous-dossier `web/`.
 
 ### 1. Cloner et installer
 ```bash
-git clone https://github.com/votre-username/cv-tailor.git
-cd cv-tailor/web
+git clone https://github.com/votre-username/cvmatchr.git
+cd cvmatchr/web
 npm install
 ```
 

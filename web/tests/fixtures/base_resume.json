@@ -109,7 +109,7 @@
   ],
   "projects": [
     {
-      "title": "CV Tailor — Générateur de CV",
+      "title": "CVMatchr — Générateur de CV",
       "date": "2024",
       "description": "Adapte automatiquement un CV à une offre d'emploi grâce à l'IA : analyse ATS, réécriture ciblée et recherche de postes adaptés."
     }

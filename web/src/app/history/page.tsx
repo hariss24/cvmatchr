@@ -3,7 +3,7 @@ import HistoryActions from "@/components/history/HistoryActions";
 import SegmentedNav from "@/components/layout/SegmentedNav";
 
 export const metadata = {
-  title: "Historique — CV Tailor",
+  title: "Historique — CVMatchr",
 };
 
 export default function HistoryPage() {

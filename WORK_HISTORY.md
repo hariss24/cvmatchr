@@ -1,4 +1,4 @@
-# 📜 WORK_HISTORY.md — Historique de travail (cv-tailor)
+# 📜 WORK_HISTORY.md — Historique de travail (CVMatchr)
 
 > Journal court et à jour de ce qui a été fait, pour qu'une nouvelle session sache
 > d'où on part sans relire tout l'historique git ni l'archive complète. **Toute

@@ -1,7 +1,7 @@
 import PackView from "@/components/pack/PackView";
 
 export const metadata = {
-  title: "Lettre de motivation — CV Tailor",
+  title: "Lettre de motivation — CVMatchr",
 };
 
 export default function PackPage() {

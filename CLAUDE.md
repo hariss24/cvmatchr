@@ -1,4 +1,4 @@
-# 🤖 CLAUDE.md — cv-tailor
+# 🤖 CLAUDE.md — CVMatchr
 
 > **🗺️ Commence par `PROJECT_INDEX.md`** (racine) : architecture, modèle de
 > données, fonctionnalités, routes API, pièges connus. Ne commence aucune

@@ -1,4 +1,4 @@
-# TODO — CV Tailor
+# TODO — CVMatchr
 
 Suivi des fonctionnalités de l'application (version Next.js).
 

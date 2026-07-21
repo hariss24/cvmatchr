@@ -1,4 +1,4 @@
-# CADRAGE STRICT — Exécution d'un plan sur cv-tailor (contrat générique)
+# CADRAGE STRICT — Exécution d'un plan sur CVMatchr (contrat générique)
 
 > Tu es un agent d'exécution. Ce document est un CONTRAT permanent, valable pour
 > N'IMPORTE QUEL plan qu'on te confie. Tu n'as pas le droit d'improviser, de

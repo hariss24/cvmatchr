@@ -14,7 +14,7 @@ test("la page charge sans erreur console", async ({ page }) => {
   page.on("pageerror", (err) => errors.push(err.message));
 
   await page.goto("/");
-  await expect(page.getByText("CV Tailor")).toBeVisible();
+  await expect(page.getByText("CVMatchr")).toBeVisible();
   // Laisse le rendu/aperçu initial se stabiliser (sobre est PDF par défaut).
   await expect(page.getByTestId("pdf-preview").locator("canvas").first()).toBeVisible({ timeout: 15000 });
 

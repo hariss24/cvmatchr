@@ -34,7 +34,7 @@ export default function HelpPage() {
         <div className="logo-badge">
           <div className="logo-icon"><div className="logo-icon-inner">T</div></div>
           <div className="logo-text">
-            <span className="logo-title">CV Tailor</span>
+            <span className="logo-title">CVMatchr</span>
           </div>
         </div>
         <div style={{ width: 100 }} className="mobile-hidden"></div>
@@ -42,9 +42,9 @@ export default function HelpPage() {
 
       <main className="help-container">
         <section className="help-section help-section--hero">
-          <h1 className="help-title">Comment fonctionne CV Tailor ?</h1>
+          <h1 className="help-title">Comment fonctionne CVMatchr ?</h1>
           <p className="help-desc">
-            CV Tailor est conçu pour être simple, rapide, et <strong>100% privé</strong>. 
+            CVMatchr est conçu pour être simple, rapide, et <strong>100% privé</strong>. 
             Contrairement à la majorité des applications web, <strong>aucune de vos données personnelles n&apos;est envoyée sur un serveur distant</strong>.
             Vos CVs, lettres, et informations de profil sont stockés directement dans le stockage local de votre navigateur (IndexedDB).
           </p>
@@ -82,13 +82,13 @@ export default function HelpPage() {
 
           <FaqAccordion question="Puis-je modifier la couleur ou le design du CV ?">
             <p>
-              Non, et c&apos;est volontaire. Le design de CV Tailor a été méticuleusement pensé pour être sobre, ultra-lisible, et parfaitement optimisé pour passer les logiciels de tri de CV automatiques (ATS). L&apos;objectif est que tu te concentres à 100% sur ton contenu, sans perdre de temps sur la mise en page.
+              Non, et c&apos;est volontaire. Le design de CVMatchr a été méticuleusement pensé pour être sobre, ultra-lisible, et parfaitement optimisé pour passer les logiciels de tri de CV automatiques (ATS). L&apos;objectif est que tu te concentres à 100% sur ton contenu, sans perdre de temps sur la mise en page.
             </p>
           </FaqAccordion>
 
           <FaqAccordion question="Si je change d'ordinateur, est-ce que je retrouve mes CV ?">
             <p>
-              Étant donné que CV Tailor respecte totalement ta vie privée et stocke tout directement dans ton navigateur localement, tes données ne sont pas synchronisées sur un serveur. Si tu changes de machine ou de navigateur, tu devras réimporter ton CV existant (en PDF ou en texte).
+              Étant donné que CVMatchr respecte totalement ta vie privée et stocke tout directement dans ton navigateur localement, tes données ne sont pas synchronisées sur un serveur. Si tu changes de machine ou de navigateur, tu devras réimporter ton CV existant (en PDF ou en texte).
             </p>
           </FaqAccordion>
 
@@ -98,7 +98,7 @@ export default function HelpPage() {
             </p>
           </FaqAccordion>
 
-          <FaqAccordion question="Puis-je utiliser CV Tailor sur mon téléphone ?">
+          <FaqAccordion question="Puis-je utiliser CVMatchr sur mon téléphone ?">
             <p>
               Bien que l&apos;application soit accessible sur mobile pour dépanner (lire un document ou consulter ses offres), <strong>nous conseillons fortement de l&apos;utiliser sur un ordinateur (PC/Mac)</strong>. L&apos;édition d&apos;un CV ou d&apos;une lettre et la prévisualisation PDF nécessitent un écran large pour une expérience optimale et un confort visuel maximal.
             </p>

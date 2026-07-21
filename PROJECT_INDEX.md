@@ -1,4 +1,4 @@
-# 🗺️ PROJECT_INDEX.md — CV Tailor
+# 🗺️ PROJECT_INDEX.md — CVMatchr
 
 Carte du dépôt. À lire avant toute modification pour ne pas redécouvrir à l'aveugle
 ce qui existe déjà. Pour les règles de comportement (Karpathy, vérifications,
@@ -8,7 +8,7 @@ interdictions), voir `CLAUDE.md` (racine) et `web/CLAUDE.md`.
 
 ## 1. Vue d'ensemble
 
-CV Tailor est une app web mono-utilisateur qui aide à adapter un CV et une lettre
+CVMatchr est une app web mono-utilisateur qui aide à adapter un CV et une lettre
 de motivation à une offre d'emploi précise, avec l'aide d'une IA (Gemini par
 défaut, Anthropic en option), puis à exporter le résultat en PDF. Elle intègre
 aussi un chasseur d'offres (France Travail) qui note automatiquement chaque offre

@@ -146,11 +146,11 @@ export default function TopBar() {
       <div className="topbar-left">
         <div className="logo-badge">
           <div className="logo-icon--atelier">
-            <span className="logo-t">T</span>
+            <span className="logo-t">C</span>
             <span className="logo-dash" />
           </div>
           <div className="logo-text">
-            <span className="logo-title">CV Tailor</span>
+            <span className="logo-title">CVMatchr</span>
             <span className="logo-sub mobile-hidden">Atelier de candidatures</span>
           </div>
         </div>

@@ -17,7 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CV Tailor",
+  title: "CVMatchr",
   description: "Éditeur de CV avec aperçu live, conversion PDF et adaptation IA.",
 };
 
