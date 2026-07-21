@@ -4,6 +4,7 @@ import type { DocType } from "@/lib/resume/schema";
 import type { TemplateId } from "@/lib/resume/templates";
 import { DEFAULT_TEMPLATES, type MailTemplate } from "@/lib/templates/defaults";
 import type { UserProfile } from "@/lib/profile/profile";
+import type { JobSearchProfile } from "@/lib/jobs/profile";
 
 // ---------------------------------------------------------------------------
 // TYPES
@@ -72,6 +73,7 @@ export class AppDatabase extends Dexie {
   jobs!: Table<JobEntry, string>;      // Primary key: id
   templates!: Table<MailTemplate, string>; // Primary key: id
   profile!: Table<UserProfile, string>; // Primary key: id (singleton "me")
+  jobProfile!: Table<{ id: string; profile: JobSearchProfile }, string>; // Primary key: id (singleton "me")
 
   constructor() {
     // Nouveau nom pour éviter les collisions si on lance sur le même port que Flask
@@ -120,6 +122,11 @@ export class AppDatabase extends Dexie {
       await tx.table("snapshots").filter((s) => s.json == null).delete();
       await tx.table("history").filter((h) => h.json == null).delete();
       await tx.table("drafts").filter((d) => d.json == null).delete();
+    });
+
+    // v7 : profil de recherche d'offres paramétrable (singleton id="me").
+    this.version(7).stores({
+      jobProfile: "id",
     });
   }
 }
@@ -394,5 +401,26 @@ export async function saveProfile(p: UserProfile): Promise<void> {
     await db.profile.put({ ...p, id: "me", updatedAt: Date.now() });
   } catch (e) {
     console.warn("saveProfile error:", e);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// JOB PROFILE API (critères de recherche paramétrables)
+// ---------------------------------------------------------------------------
+
+export async function getJobProfile(): Promise<JobSearchProfile | null> {
+  try {
+    return (await db.jobProfile.get("me"))?.profile ?? null;
+  } catch (e) {
+    console.warn("getJobProfile error:", e);
+    return null;
+  }
+}
+
+export async function saveJobProfile(profile: JobSearchProfile): Promise<void> {
+  try {
+    await db.jobProfile.put({ id: "me", profile });
+  } catch (e) {
+    console.warn("saveJobProfile error:", e);
   }
 }
