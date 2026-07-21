@@ -71,13 +71,36 @@ export async function fetchOffers(
   const minDate = new Date(now.getTime() - profile.maxAgeDays * 24 * 60 * 60 * 1000);
   const params = new URLSearchParams({
     motsCles: keyword,
-    region: profile.region,
     typeContrat: profile.contractTypes.join(","),
     natureContrat: "E1",
     minCreationDate: isoSeconds(minDate),
     maxCreationDate: isoSeconds(now),
     range: "0-99",
   });
+
+  // Géographie (conditionnelle selon la portée choisie).
+  const loc = profile.location;
+  if (loc.code) {
+    if (loc.kind === "commune") {
+      params.set("commune", loc.code);
+      params.set("distance", String(loc.radiusKm));
+    } else if (loc.kind === "departement") {
+      params.set("departement", loc.code);
+    } else {
+      params.set("region", loc.code);
+    }
+  }
+
+  if (profile.debutantAccepte) params.set("experienceExige", "D");
+  if (profile.experienceLevel) params.set("experience", profile.experienceLevel);
+  if (profile.qualification) params.set("qualification", profile.qualification);
+  if (profile.tempsPlein) params.set("tempsPlein", profile.tempsPlein);
+  if (profile.romeCodes.length) params.set("codeROME", profile.romeCodes.join(","));
+  if (profile.salaireMin != null) {
+    params.set("salaireMin", String(profile.salaireMin));
+    params.set("periodeSalaire", profile.periodeSalaire);
+  }
+
   const res = await fetch(`${SEARCH_URL}?${params}`, {
     headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
   });
