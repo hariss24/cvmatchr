@@ -901,9 +901,15 @@ button.ghost:active { box-shadow: var(--neu-inset); transform: translateY(1px); 
   flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   text-align: right; font-size: 11px; color: var(--success); text-transform: none; letter-spacing: 0;
 }
-/* Icône « brouillon sauvegardé » : reste seule et lisible en mobile (le libellé
-   .autosave-label est masqué), au lieu d'une coche nue sans contexte. */
-.autosave-icon { width: 13px; height: 13px; vertical-align: -2px; flex-shrink: 0; }
+/* Indicateur « Enregistré » : point vert clignotant en permanence. En mobile le
+   libellé .autosave-label est masqué (media query plus bas) → seul le point reste. */
+.autosave-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--success); vertical-align: middle; margin-right: 6px;
+  animation: autosave-blink 1.4s ease-in-out infinite;
+}
+@keyframes autosave-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+@media (prefers-reduced-motion: reduce) { .autosave-dot { animation: none; } }
 .tab--expert { display: inline-flex; align-items: center; gap: 5px; }
 .expert-tabs { display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; }
 .expert-divider { width: 1px; height: 16px; background: var(--faint); margin: 0 4px; }
