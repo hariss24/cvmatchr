@@ -17,4 +17,15 @@ describe("relevance", () => {
     const offer = { title: "Chargé SEO", jobText: "" };
     expect(relevance(offer, ["SEO"])).toBe(2);
   });
+
+  it("matche un intitulé multi-mots mot à mot (pas la phrase entière)", () => {
+    const offer = { title: "Développeur Web Senior", jobText: "React et Node." };
+    // "developpeur"→titre(+2), "web"→titre(+2) ; "de" (≤2) ignoré
+    expect(relevance(offer, ["Développeur web"])).toBe(4);
+  });
+
+  it("ignore les accents (offre accentuée, mot-clé sans accent)", () => {
+    const offer = { title: "Chargé de communication", jobText: "" };
+    expect(relevance(offer, ["communication"])).toBe(2);
+  });
 });

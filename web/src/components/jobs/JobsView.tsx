@@ -98,6 +98,14 @@ export default function JobsView() {
         .map((x) => x.o)
         .slice(0, p.aiShortlist);
 
+      // Ne pas laisser un « 0 offre » muet : le pré-tri a pu tout écarter (cf. audit B7).
+      if (fresh.length > 0 && toScore.length === 0) {
+        toast(
+          `${fresh.length} offre(s) trouvée(s), mais aucune n'a passé le pré-tri par mots-clés. Élargis tes postes ou renseigne des compétences.`,
+          "info",
+        );
+      }
+
       let scored = 0;
       let retained = 0;
       setProgress({ phase: "Notation des offres…", found: toScore.length, scored, retained });

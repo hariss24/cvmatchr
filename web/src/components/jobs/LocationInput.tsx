@@ -17,29 +17,37 @@ export function LocationInput({
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abort = useRef<AbortController | null>(null);
 
   function onType(next: string) {
     setQuery(next);
-    if (!next) onChange({ kind: "commune", code: "", label: "", radiusKm: value.radiusKm });
+    // Dès que le texte s'écarte du lieu validé, on invalide le code retenu :
+    // sinon une recherche partirait en silence sur l'ancienne commune (cf. audit B3).
+    if (value.code && next !== value.label) {
+      onChange({ kind: "commune", code: "", label: "", radiusKm: value.radiusKm });
+    }
     if (timer.current) clearTimeout(timer.current);
     if (next.trim().length < 2 || next === value.label) {
       setSuggestions([]);
       return;
     }
     timer.current = setTimeout(async () => {
+      abort.current?.abort(); // annule la requête précédente (évite les réponses hors ordre)
+      const ctrl = new AbortController();
+      abort.current = ctrl;
       try {
-        const res = await fetch(`/api/jobs/locations?q=${encodeURIComponent(next)}`);
+        const res = await fetch(`/api/jobs/locations?q=${encodeURIComponent(next)}`, { signal: ctrl.signal });
         const data = await res.json();
         setSuggestions(data.results ?? []);
         setOpen(true);
       } catch {
-        setSuggestions([]);
+        if (!ctrl.signal.aborted) setSuggestions([]);
       }
     }, 250);
   }
 
   function pick(s: Suggestion) {
-    onChange({ kind: s.kind, code: s.code, label: s.label, radiusKm: value.radiusKm || 10 });
+    onChange({ kind: s.kind, code: s.code, label: s.label, radiusKm: value.radiusKm ?? 10 });
     setQuery(s.label);
     setSuggestions([]);
     setOpen(false);
@@ -65,7 +73,7 @@ export function LocationInput({
               <li key={`${s.kind}-${s.code}`}>
                 <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => pick(s)}>
                   <span>{s.label}</span>
-                  <span className="loc-kind">{s.kind === "commune" ? "Commune" : "Région"}</span>
+                  <span className="loc-kind">{s.kind === "commune" ? "Commune" : s.kind === "departement" ? "Département" : "Région"}</span>
                 </button>
               </li>
             ))}

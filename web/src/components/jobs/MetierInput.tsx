@@ -5,9 +5,25 @@ import { useRef, useState } from "react";
 type Suggestion = { label: string; rome: string };
 
 /**
+ * Terme court dérivé d'une appellation ROME : retire le doublon masculin/féminin
+ * pour garder un mot-clé efficace côté `motsCles` (recherche plein-texte FT).
+ *   « Développeur / Développeuse web »            → « Développeur web »
+ *   « Chargé / Chargée de communication »         → « Chargé de communication »
+ *   « Webmaster » (appellation neutre, sans « / ») → inchangé
+ * Une phrase ROME complète (« … / conceptrice de site web ») ne matche presque aucune offre.
+ */
+function shortTerm(label: string): string {
+  const parts = label.split(" / ");
+  if (parts.length < 2) return label.trim();
+  const masc = parts[0].trim();
+  const complement = parts[1].trim().split(/\s+/).slice(1).join(" ").replace(/^[-–]\s*/, "");
+  return complement ? `${masc} ${complement}` : masc;
+}
+
+/**
  * Champ « Poste(s) recherché(s) » : tags libres + autocomplétion sur les appellations
- * officielles ROME (France Travail). Choisir une suggestion ajoute l'intitulé officiel ;
- * la saisie libre (Entrée) reste possible pour un mot-clé hors référentiel.
+ * officielles ROME (France Travail). Cliquer une suggestion ajoute un TERME COURT dérivé
+ * de l'appellation (cf. `shortTerm`) ; la saisie libre (Entrée) ajoute le texte tapé tel quel.
  */
 export function MetierInput({
   values,
@@ -20,10 +36,11 @@ export function MetierInput({
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abort = useRef<AbortController | null>(null);
 
   function add(label: string) {
     const t = label.trim();
-    if (t && !values.includes(t)) onChange([...values, t]);
+    if (t && !values.some((v) => v.toLowerCase() === t.toLowerCase())) onChange([...values, t]);
     setDraft("");
     setSuggestions([]);
     setOpen(false);
@@ -37,13 +54,16 @@ export function MetierInput({
       return;
     }
     timer.current = setTimeout(async () => {
+      abort.current?.abort(); // annule la requête précédente (évite les réponses hors ordre)
+      const ctrl = new AbortController();
+      abort.current = ctrl;
       try {
-        const res = await fetch(`/api/jobs/metiers?q=${encodeURIComponent(next)}`);
+        const res = await fetch(`/api/jobs/metiers?q=${encodeURIComponent(next)}`, { signal: ctrl.signal });
         const data = await res.json();
         setSuggestions(data.results ?? []);
         setOpen(true);
       } catch {
-        setSuggestions([]);
+        if (!ctrl.signal.aborted) setSuggestions([]);
       }
     }, 220);
   }
@@ -84,7 +104,7 @@ export function MetierInput({
           <ul className="loc-suggestions" role="listbox">
             {suggestions.map((s) => (
               <li key={`${s.rome}-${s.label}`}>
-                <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => add(s.label)}>
+                <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => add(shortTerm(s.label))}>
                   <span>{s.label}</span>
                   <span className="loc-kind">{s.rome}</span>
                 </button>
