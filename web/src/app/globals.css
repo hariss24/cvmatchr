@@ -267,11 +267,21 @@ a.btn-nav, a.btn-nav:hover { text-decoration: none; color: var(--text); }
 }
 .user-menu-dropdown button:hover, .user-menu-dropdown a:hover { box-shadow: var(--neu-inset); text-decoration: none; color: var(--text); }
 
-/* Étincelle IA : légère rotation continue pour signaler discrètement que
-   l'icône est cliquable, sans texte pour l'expliquer. */
-.ai-sparkle-icon { animation: ai-sparkle-spin 7s linear infinite; transform-origin: 50% 50%; }
-@keyframes ai-sparkle-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .ai-sparkle-icon { animation: none; } }
+/* Étincelle IA : les deux étoiles scintillent en léger décalage (comme des
+   éclats de lumière), avec une lueur chaude qui pulse sur le bouton lui-même —
+   signale discrètement que l'icône est cliquable, sans texte pour l'expliquer. */
+.ai-star {
+  transform-box: fill-box; transform-origin: 50% 50%;
+  animation: ai-star-twinkle 3.2s ease-in-out infinite;
+}
+.ai-star--big { animation-delay: 0s; }
+.ai-star--small { animation-delay: 1.4s; }
+@keyframes ai-star-twinkle {
+  0%, 100% { opacity: 0.55; transform: scale(0.82); filter: drop-shadow(0 0 0 rgba(251,191,36,0)); }
+  35% { opacity: 1; transform: scale(1.12); filter: drop-shadow(0 0 3px rgba(251,191,36,0.85)); }
+  70% { opacity: 0.7; transform: scale(0.92); filter: drop-shadow(0 0 0 rgba(251,191,36,0)); }
+}
+@media (prefers-reduced-motion: reduce) { .ai-star { animation: none; } }
 
 /* Toggle thème : bouton icône carré (soleil en clair, lune en sombre) —
    même gabarit que les autres icônes de la barre, plus de pavé coulissant. */

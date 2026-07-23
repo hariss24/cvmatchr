@@ -166,7 +166,10 @@ export default function TopBar() {
       <div className="topbar-right">
         <div className="topbar-pill" title="Nom du fichier PDF" suppressHydrationWarning>{filename}</div>
         <button type="button" className="btn-nav topbar-icon mobile-hidden" onClick={openChat} title="Assistant IA">
-          <svg className="ai-sparkle-icon" width="14" height="14" viewBox="0 0 24 24" fill="#FBBF24" stroke="none"><path d="M10 6 Q 10 14 18 14 Q 10 14 10 22 Q 10 14 2 14 Q 10 14 10 6 Z M 18 1 Q 18 5 22 5 Q 18 5 18 9 Q 18 5 14 5 Q 18 5 18 1 Z" /></svg>
+          <svg className="ai-sparkle-icon" width="14" height="14" viewBox="0 0 24 24" fill="#FBBF24" stroke="none">
+            <path className="ai-star ai-star--big" d="M10 6 Q 10 14 18 14 Q 10 14 10 22 Q 10 14 2 14 Q 10 14 10 6 Z" />
+            <path className="ai-star ai-star--small" d="M18 1 Q 18 5 22 5 Q 18 5 18 9 Q 18 5 14 5 Q 18 5 18 1 Z" />
+          </svg>
         </button>
 
         <UserMenu onToggleTheme={toggleTheme} />
