@@ -438,7 +438,7 @@ export default function TailorModal({
                 }}
               >
                 <div className="ui-switch-label">
-                  <span className="ui-switch-title">Utiliser le CV Maître</span>
+                  <span className="ui-switch-title">Utiliser le CV Principal</span>
                   <span className="ui-switch-hint">Recommandé si disponible</span>
                 </div>
                 <button

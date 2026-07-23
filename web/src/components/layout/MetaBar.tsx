@@ -8,7 +8,7 @@ const DOC_TYPES: DocType[] = ["CV", "Lettre", "Maître"];
 const DOC_TYPE_LABELS: Record<DocType, string> = {
   CV: "CV",
   Lettre: "Lettre",
-  Maître: "CV Maître",
+  Maître: "CV Principal",
 };
 
 /**

@@ -66,17 +66,17 @@ export default function HelpPage() {
             </ol>
           </FaqAccordion>
 
-          <FaqAccordion question="Qu'est-ce que le « CV Maître » ?">
+          <FaqAccordion question="Qu'est-ce que le « CV Principal » ?">
             <p>
-              C&apos;est ton CV le plus complet (contenant toute ton expérience sans limite de pages). 
-              Quand tu adaptes à une offre, l&apos;IA y pioche et élague le superflu pour tenir sur une page. 
-              Tu l&apos;actives en cochant « Utiliser le CV Maître » dans la fenêtre d&apos;adaptation.
+              C&apos;est ton CV le plus complet (contenant toute ton expérience sans limite de pages).
+              Quand tu adaptes à une offre, l&apos;IA y pioche et élague le superflu pour tenir sur une page.
+              Tu l&apos;actives en cochant « Utiliser le CV Principal » dans la fenêtre d&apos;adaptation.
             </p>
           </FaqAccordion>
 
           <FaqAccordion question="Comment l'IA choisit-elle ce qu'elle garde dans mon CV ?">
             <p>
-              Lorsque tu fournis une offre d&apos;emploi, l&apos;IA analyse les mots-clés et les compétences requises. Elle puise ensuite dans ton « CV Maître » pour ne conserver et ne mettre en valeur que les expériences directement pertinentes pour ce poste, tout en s&apos;assurant que le résultat final tienne sur une seule page.
+              Lorsque tu fournis une offre d&apos;emploi, l&apos;IA analyse les mots-clés et les compétences requises. Elle puise ensuite dans ton « CV Principal » pour ne conserver et ne mettre en valeur que les expériences directement pertinentes pour ce poste, tout en s&apos;assurant que le résultat final tienne sur une seule page.
             </p>
           </FaqAccordion>
 
