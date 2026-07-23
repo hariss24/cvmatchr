@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useDocStore } from "@/state/docStore";
 import { getAllFormSections, type FormSectionInfo } from "@/lib/resume/sections";
+import { isTwoColumn } from "@/lib/resume/templates";
 import { SortableList, DragHandle, useSortableItem, moveItem } from "./Sortable";
 import type {
   Resume,
@@ -26,6 +27,7 @@ export default function FormEditor({ onImportPdf }: { onImportPdf?: () => void }
   const docType = useDocStore((s) => s.docType);
   const json = useDocStore((s) => s.json);
   const setJson = useDocStore((s) => s.setJson);
+  const templateId = useDocStore((s) => s.templateId);
 
   // Le formulaire structuré couvre tous les types « CV » (CV, CV Maître).
   // Seule la Lettre a son propre formulaire (routé en amont par EditorPane).
@@ -52,6 +54,24 @@ export default function FormEditor({ onImportPdf }: { onImportPdf?: () => void }
 
   const orderedSections = getAllFormSections(cv);
   const hidden = new Set(cv.hiddenSections ?? []);
+  const isTwoCol = isTwoColumn(templateId);
+
+  // Renommer une section depuis l'en-tête. Base → table `sectionTitles` (vide = titre
+  // canonique restauré) ; section libre → son propre `customSections[i].title`.
+  const renameSection = (sec: FormSectionInfo, newTitle: string) => {
+    const title = newTitle.trim();
+    if (sec.isCustom && sec.index !== undefined) {
+      const arr = [...(cv.customSections ?? [])];
+      if (!arr[sec.index]) return;
+      arr[sec.index] = { ...arr[sec.index], title };
+      update({ customSections: arr });
+    } else {
+      const map = { ...(cv.sectionTitles ?? {}) };
+      if (title) map[sec.id] = title;
+      else delete map[sec.id];
+      update({ sectionTitles: map });
+    }
+  };
 
   const moveSection = (i: number, dir: -1 | 1) => {
     const ids = orderedSections.map((sec) => sec.id);
@@ -105,6 +125,7 @@ export default function FormEditor({ onImportPdf }: { onImportPdf?: () => void }
           return (
             <SingleCustomSection
               item={cv.customSections?.[customIndex] || { title: "", items: [] }}
+              showColumn={isTwoCol}
               onChange={(v) => {
                 const newCustoms = [...(cv.customSections ?? [])];
                 newCustoms[customIndex] = v;
@@ -184,7 +205,11 @@ export default function FormEditor({ onImportPdf }: { onImportPdf?: () => void }
           
           return (
             <div key={sec.id} style={{ opacity: isHidden ? 0.5 : 1 }}>
-              <FormSection title={sec.title} controls={controls}>
+              <FormSection
+                title={sec.title}
+                controls={controls}
+                onRename={(newTitle) => renameSection(sec, newTitle)}
+              >
                 {renderSectionContent(sec)}
               </FormSection>
             </div>
@@ -214,6 +239,20 @@ function removeAt<T>(list: T[], i: number): T[] {
 }
 
 // ---- Accordéon ----
+
+/** Crayon « renommer » (icône seule, dans l'en-tête de section). */
+function PencilIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+      style={{ width: 15, height: 15 }}
+    >
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+    </svg>
+  );
+}
 
 /** Chevron d'accordéon : pointe à droite fermé, vers le bas ouvert. */
 function Chevron({ open }: { open: boolean }) {
@@ -284,22 +323,68 @@ function SectionControls({
   );
 }
 
-function FormSection({ title, controls, children }: { title: string; controls?: React.ReactNode; children: React.ReactNode }) {
+function FormSection({
+  title,
+  controls,
+  onRename,
+  children,
+}: {
+  title: string;
+  controls?: React.ReactNode;
+  onRename?: (title: string) => void;
+  children: React.ReactNode;
+}) {
   const [open, setOpen] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(title);
+
+  const startEdit = () => { setDraft(title); setEditing(true); };
+  const commit = () => { setEditing(false); onRename?.(draft); };
+
   return (
     <section className={`form-section${open ? "" : " form-section--collapsed"}`}>
       <h3 className="form-section__title">
-        <button
-          type="button"
-          className="form-section__header"
-          aria-expanded={open}
-          onClick={() => setOpen((o) => !o)}
-          style={{ flex: 1 }}
-        >
-          <Chevron open={open} />
-          <span>{title}</span>
-        </button>
-        {controls && <div className="form-section__controls" style={{ display: "flex", gap: "4px" }}>{controls}</div>}
+        {editing ? (
+          <input
+            className="form-input form-section__rename"
+            value={draft}
+            autoFocus
+            aria-label="Nouveau nom de la section"
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") { e.preventDefault(); commit(); }
+              else if (e.key === "Escape") { e.preventDefault(); setEditing(false); }
+            }}
+            onBlur={commit}
+          />
+        ) : (
+          <button
+            type="button"
+            className="form-section__header"
+            aria-expanded={open}
+            onClick={() => setOpen((o) => !o)}
+            style={{ flex: 1 }}
+          >
+            <Chevron open={open} />
+            <span>{title}</span>
+          </button>
+        )}
+        {(onRename || controls) && (
+          <div className="form-section__controls" style={{ display: "flex", gap: "4px" }}>
+            {onRename && !editing ? (
+              <button
+                type="button"
+                className="form-btn-mini form-btn-icon-only"
+                aria-label={`Renommer « ${title} »`}
+                title="Renommer"
+                onClick={startEdit}
+              >
+                <PencilIcon />
+              </button>
+            ) : null}
+            {controls}
+          </div>
+        )}
       </h3>
       <div className={`form-collapse ${open ? "is-open" : ""}`} aria-hidden={!open}>
         <div className="form-collapse-inner">
@@ -422,17 +507,38 @@ function RowCard({
 function SingleCustomSection({
   item,
   onChange,
+  showColumn,
 }: {
   item: CustomSection;
   onChange: (item: CustomSection) => void;
+  showColumn?: boolean;
 }) {
+  const column = item.column ?? "main";
   return (
     <>
-      <Field
-        label="Titre de la section"
-        value={item.title}
-        onChange={(v) => onChange({ ...item, title: v })}
-      />
+      {showColumn ? (
+        <div className="form-field">
+          <label className="form-label">Colonne (modèle deux-colonnes)</label>
+          <div className="form-colseg" role="group" aria-label="Colonne de la section">
+            <button
+              type="button"
+              className={`form-colseg__btn${column === "main" ? " is-active" : ""}`}
+              aria-pressed={column === "main"}
+              onClick={() => onChange({ ...item, column: "main" })}
+            >
+              Principale
+            </button>
+            <button
+              type="button"
+              className={`form-colseg__btn${column === "sidebar" ? " is-active" : ""}`}
+              aria-pressed={column === "sidebar"}
+              onClick={() => onChange({ ...item, column: "sidebar" })}
+            >
+              Latérale
+            </button>
+          </div>
+        </div>
+      ) : null}
       <div className="form-field">
         <label className="form-label">Contenu</label>
         <textarea

@@ -100,6 +100,24 @@ describe("normalizeResume", () => {
     const r = normalizeResume({ sectionOrder: ["education", "experience", "custom:0"] });
     expect(r.sectionOrder).toEqual(["education", "experience", "custom:0"]);
   });
+
+  it("préserve la colonne d'une section libre (placement deux-colonnes)", () => {
+    const r = normalizeResume({
+      customSections: [
+        { title: "Publications", items: ["X"], column: "sidebar" },
+        { title: "Distinctions", items: ["Z"], column: "n'importe quoi" },
+      ],
+    });
+    expect(r.customSections[0].column).toBe("sidebar");
+    expect(r.customSections[1].column).toBeUndefined(); // valeur invalide → ignorée
+  });
+
+  it("préserve les titres personnalisés et jette les valeurs vides", () => {
+    const r = normalizeResume({
+      sectionTitles: { summary: "Mon profil", skills: "  ", education: 42 },
+    });
+    expect(r.sectionTitles).toEqual({ summary: "Mon profil", education: "42" });
+  });
 });
 
 describe("normalizeLetter", () => {
@@ -181,6 +199,30 @@ describe("mergeTailored (anti-wipe)", () => {
   it("reporte toujours le masquage choisi par l'utilisateur", () => {
     const tailored = normalizeResume({ name: "Alice", experience: [{ title: "Dev" }] });
     expect(mergeTailored(base, tailored).hiddenSections).toEqual(["interests"]);
+  });
+
+  // Titres personnalisés et colonnes : préférences d'affichage jamais émises par l'IA.
+  it("reporte toujours les titres personnalisés des sections", () => {
+    const withTitles = normalizeResume({ ...base, sectionTitles: { summary: "Profil", skills: "Expertise" } });
+    const tailored = normalizeResume({ name: "Alice", experience: [{ title: "Dev" }], sectionTitles: {} });
+    expect(mergeTailored(withTitles, tailored).sectionTitles).toEqual({ summary: "Profil", skills: "Expertise" });
+  });
+
+  it("restaure la colonne des sections libres par index, même quand l'IA réécrit leur contenu", () => {
+    const withCol = normalizeResume({
+      name: "Alice",
+      experience: [{ title: "Dev", bullets: ["a"] }],
+      customSections: [{ title: "Publications", items: ["Article X"], column: "sidebar" }],
+    });
+    // L'IA renvoie la section adaptée mais SANS colonne (elle ne la connaît pas).
+    const tailored = normalizeResume({
+      name: "Alice",
+      experience: [{ title: "Dev" }],
+      customSections: [{ title: "Publications", items: ["Article X adapté"] }],
+    });
+    const merged = mergeTailored(withCol, tailored);
+    expect(merged.customSections[0].items).toEqual(["Article X adapté"]); // contenu adapté conservé
+    expect(merged.customSections[0].column).toBe("sidebar"); // placement restauré
   });
 
   it("lève si la réponse IA vide un CV qui avait un cœur", () => {

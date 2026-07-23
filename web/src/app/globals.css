@@ -2361,3 +2361,40 @@ button.go:disabled {
   .diffx-overlay, .diffx-seg__knob, .diffx-spinner, .diffx-trigger, .diffx-trigger__arrow { animation: none; transition: none; }
 }
 
+/* ============================================================
+   Renommage de section (crayon → champ inline) + choix de colonne
+   des sections libres (modèles deux-colonnes).
+   ============================================================ */
+
+/* Champ de renommage inline dans l'en-tête de section (remplace le titre cliquable). */
+.form-section__rename {
+  flex: 1;
+  font-weight: 700;
+  font-size: inherit;
+}
+
+/* Contrôle segmenté « Principale / Latérale » d'une section libre. */
+.form-colseg {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--seg-track);
+  box-shadow: var(--neu-inset);
+}
+.form-colseg__btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  transition: color 140ms;
+}
+.form-colseg__btn.is-active {
+  color: var(--text);
+  background: var(--seg-knob);
+  box-shadow: var(--seg-knob-shadow);
+}
+

@@ -34,6 +34,8 @@ describe("prompts — invariants métier", () => {
       "hiddenSections", // préférence d'affichage de l'utilisateur, pas du contenu de CV :
       //                   l'IA n'a rien à en dire, et `mergeTailored` la recopie toujours
       //                   depuis la base pour qu'une adaptation ne puisse pas la perdre.
+      "sectionTitles", // titres personnalisés des sections : même statut que hiddenSections
+      //                  (préférence d'affichage, restaurée par `mergeTailored`, hors IA).
     ]);
     const keys = Object.keys(resumeSchema.shape).filter((k) => !HORS_FICHE.has(k));
     for (const key of keys) {

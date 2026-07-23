@@ -24,11 +24,14 @@ export interface TimelineEntry {
   description: string;
 }
 
+/** Colonne cible dans un modèle deux-colonnes ; portée par les sections libres uniquement. */
+export type SectionColumn = "main" | "sidebar";
+
 export type ResumeSection =
-  | { id: string; title: string; kind: "text"; text: string }
-  | { id: string; title: string; kind: "list"; items: string[] }
-  | { id: string; title: string; kind: "timeline"; items: TimelineEntry[] }
-  | { id: string; title: string; kind: "languages"; items: LanguageItem[] };
+  | { id: string; title: string; column?: SectionColumn; kind: "text"; text: string }
+  | { id: string; title: string; column?: SectionColumn; kind: "list"; items: string[] }
+  | { id: string; title: string; column?: SectionColumn; kind: "timeline"; items: TimelineEntry[] }
+  | { id: string; title: string; column?: SectionColumn; kind: "languages"; items: LanguageItem[] };
 
 /**
  * Identifiants canoniques des sections « connues », dans leur ordre par défaut.
@@ -53,6 +56,37 @@ export const ALL_BASE_SECTIONS = [
 export const SECTION_IDS = ALL_BASE_SECTIONS.map(s => s.id);
 
 const t = (v: unknown): string => (v == null ? "" : String(v)).trim();
+
+/**
+ * Titre effectif d'une section de base : titre personnalisé de l'utilisateur
+ * (`resume.sectionTitles[id]`) s'il existe, sinon le titre canonique du modèle.
+ * Les sections libres n'utilisent PAS cette table — leur titre est `customSections[i].title`.
+ */
+export function sectionTitle(resume: Resume, id: string, fallback: string): string {
+  return t(resume.sectionTitles?.[id]) || fallback;
+}
+
+/**
+ * Répartit des sections en deux colonnes pour un modèle à barre latérale — réutilisable
+ * par tout template `columns: 2`. `baseSidebar` = ids des sections de BASE que le modèle
+ * place en barre latérale, dans l'ordre de priorité. Les sections libres suivent leur
+ * propre choix `column` (défaut : colonne principale) et se rangent après les sections
+ * de base dans la barre latérale.
+ */
+export function splitColumns(
+  sections: ResumeSection[],
+  baseSidebar: readonly string[],
+): { side: ResumeSection[]; main: ResumeSection[] } {
+  const baseSet = new Set(baseSidebar);
+  const rank = new Map(baseSidebar.map((id, i) => [id, i]));
+  const inSide = (sec: ResumeSection) =>
+    sec.column === "sidebar" || (sec.column == null && baseSet.has(sec.id));
+  const side = sections
+    .filter(inSide)
+    .sort((a, b) => (rank.get(a.id) ?? Infinity) - (rank.get(b.id) ?? Infinity));
+  const main = sections.filter((sec) => !inSide(sec));
+  return { side, main };
+}
 
 /** Coordonnée d'en-tête. `custom:<i>` = champ libre (« Permis », « Portfolio »…). */
 export interface ContactEntry {
@@ -140,11 +174,11 @@ export function buildSections(
     if (items.length) out.push({ id, title, kind: "timeline", items });
   };
 
-  if (t(d.summary)) out.push({ id: "summary", title: "À propos", kind: "text", text: d.summary });
+  if (t(d.summary)) out.push({ id: "summary", title: sectionTitle(d, "summary", "À propos"), kind: "text", text: d.summary });
 
   pushTimeline(
     "experience",
-    "Expériences",
+    sectionTitle(d, "experience", "Expériences"),
     d.experience
       .filter((e) => e && (e.title || e.company || e.bullets.length))
       .map((e) =>
@@ -160,32 +194,32 @@ export function buildSections(
 
   pushTimeline(
     "education",
-    "Formations",
+    sectionTitle(d, "education", "Formations"),
     d.education
       .filter((e) => e && (e.title || e.school))
       .map((e) => entry({ title: e.title, subtitle: e.school, meta: [e.location], date: e.date })),
   );
 
-  pushList("skills", "Compétences", d.skills);
-  pushList("softSkills", "Soft skills", d.softSkills);
-  pushList("tools", "Outils", d.tools);
+  pushList("skills", sectionTitle(d, "skills", "Compétences"), d.skills);
+  pushList("softSkills", sectionTitle(d, "softSkills", "Soft skills"), d.softSkills);
+  pushList("tools", sectionTitle(d, "tools", "Outils"), d.tools);
 
   const langs = d.languages.filter((l) => l && t(l.name));
-  if (langs.length) out.push({ id: "languages", title: "Langues", kind: "languages", items: langs });
+  if (langs.length) out.push({ id: "languages", title: sectionTitle(d, "languages", "Langues"), kind: "languages", items: langs });
 
   pushTimeline(
     "projects",
-    "Projets",
+    sectionTitle(d, "projects", "Projets"),
     d.projects
       .filter((p) => p && (p.title || p.description))
       .map((p) => entry({ title: p.title, date: p.date, description: p.description })),
   );
 
-  pushList("certifications", "Certifications", d.certifications);
+  pushList("certifications", sectionTitle(d, "certifications", "Certifications"), d.certifications);
 
   pushTimeline(
     "volunteer",
-    "Bénévolat",
+    sectionTitle(d, "volunteer", "Bénévolat"),
     d.volunteer
       .filter((v) => v && (v.title || v.organization || v.bullets.length))
       .map((v) =>
@@ -200,14 +234,14 @@ export function buildSections(
   );
 
 
-  pushList("interests", "Centres d'intérêt", d.interests);
+  pushList("interests", sectionTitle(d, "interests", "Centres d'intérêt"), d.interests);
 
   // Sections libres : titre choisi par l'utilisateur (ou relevé du CV importé par l'IA).
-  // Aucun code ne les connaît — c'est le but.
+  // Aucun code ne les connaît — c'est le but. `column` ne sert qu'aux modèles deux-colonnes.
   (d.customSections ?? []).forEach((c, i) => {
     const items = (c.items ?? []).filter((x) => t(x));
     if (t(c.title) && items.length) {
-      out.push({ id: `custom:${i}`, title: c.title, kind: "list", items });
+      out.push({ id: `custom:${i}`, title: c.title, column: c.column, kind: "list", items });
     }
   });
 
@@ -225,8 +259,11 @@ export interface FormSectionInfo {
 }
 
 export function getAllFormSections(resume: Resume): FormSectionInfo[] {
-  const sections: FormSectionInfo[] = [...ALL_BASE_SECTIONS];
-  
+  const sections: FormSectionInfo[] = ALL_BASE_SECTIONS.map((s) => ({
+    id: s.id,
+    title: sectionTitle(resume, s.id, s.title),
+  }));
+
   (resume.customSections ?? []).forEach((c, i) => {
     sections.push({ 
       id: `custom:${i}`, 

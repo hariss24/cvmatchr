@@ -4,7 +4,7 @@ import type { Resume } from "@/lib/resume/schema";
 
 import { px, t, ThemeContext, PdfTheme, SectionContent } from "./primitives";
 import { ContactIcon, detectContactIcon } from "./contactIcons";
-import { buildSections, buildContacts, contactText, type ResumeSection } from "@/lib/resume/sections";
+import { buildSections, buildContacts, contactText, splitColumns, sectionTitle, type ResumeSection } from "@/lib/resume/sections";
 
 const theme: PdfTheme = {
   accent: "#26485a", // teal-navy des titres (nom du poste, titres de section)
@@ -193,9 +193,8 @@ function SideList({ items }: { items: string[] }) {
   );
 }
 
-/** Sections que Marine place dans sa barre latérale, dans cet ordre. Tout le reste va en colonne principale. */
+/** Sections de base que Marine place dans sa barre latérale, dans cet ordre. Tout le reste va en colonne principale. */
 const MARINE_SIDEBAR_ORDER = ["softSkills", "tools", "languages", "interests", "projects"];
-const MARINE_SIDEBAR = new Set(MARINE_SIDEBAR_ORDER);
 
 /** Marine nomme l'accroche « Profil » ; les autres sections gardent le titre porté par le CV. */
 const MARINE_TITLES: Record<string, string> = { summary: "Profil" };
@@ -252,10 +251,10 @@ export function MarineTemplate({
   // (barre latérale ou colonne principale) et du style. Compétences, projets,
   // certifications, bénévolat et sections libres — jadis avalés — remontent d'eux-mêmes.
   const sections = buildSections(d);
-  const sideSections = sections
-    .filter((sec) => MARINE_SIDEBAR.has(sec.id))
-    .sort((a, b) => MARINE_SIDEBAR_ORDER.indexOf(a.id) - MARINE_SIDEBAR_ORDER.indexOf(b.id));
-  const mainSections = sections.filter((sec) => !MARINE_SIDEBAR.has(sec.id));
+  // Marine place ses sections de base fixes en barre latérale ; les sections libres
+  // marquées `sidebar` l'y rejoignent (cf. `splitColumns`, réutilisable par tout modèle
+  // deux-colonnes). Tout le reste va en colonne principale.
+  const { side: sideSections, main: mainSections } = splitColumns(sections, MARINE_SIDEBAR_ORDER);
 
   return (
     <ThemeContext.Provider value={theme}>
@@ -302,7 +301,7 @@ export function MarineTemplate({
 
             {mainSections.map((sec) => (
               <View key={sec.id} style={s.mainSection}>
-                <Text style={s.mainSectionTitle}>{MARINE_TITLES[sec.id] ?? sec.title}</Text>
+                <Text style={s.mainSectionTitle}>{sectionTitle(d, sec.id, MARINE_TITLES[sec.id] ?? sec.title)}</Text>
                 <SectionContent section={sec} hideGutter subtitle="caps" />
               </View>
             ))}

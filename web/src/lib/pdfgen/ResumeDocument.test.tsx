@@ -224,6 +224,30 @@ describe("ResumeDocument (template graphique)", () => {
 
 
 
+  it("affiche le titre personnalisé d'une section renommée", async () => {
+    const text = await textOf(
+      resumeSchema.parse({
+        name: "X",
+        experience: [{ title: "Dev", company: "ACME", bullets: ["a"] }],
+        sectionTitles: { experience: "Parcours professionnel" },
+      }),
+    );
+    expect(text.toLowerCase()).toContain("parcours professionnel");
+    expect(text).not.toContain("EXPÉRIENCES");
+  });
+
+  it("Marine : le titre personnalisé prime sur son libellé par défaut « Profil »", async () => {
+    const buf = await renderToBuffer(
+      <ResumeDocument
+        resume={resumeSchema.parse({ name: "X", summary: "Accroche.", sectionTitles: { summary: "Mon résumé" } })}
+        templateId="marine"
+      />,
+    );
+    const pdf = (await extractPdfText(new Uint8Array(buf))).join("\n").toLowerCase();
+    expect(pdf).toContain("mon résumé");
+    expect(pdf).not.toContain("profil");
+  });
+
   it("ne plante pas avec une photo en data URI", async () => {
     const text = await textOf(resumeSchema.parse({ name: "Avec Photo", photo: PNG_1PX }));
     expect(text).toContain("AVEC PHOTO");

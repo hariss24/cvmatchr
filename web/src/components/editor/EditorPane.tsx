@@ -5,7 +5,7 @@ import Editor from "@monaco-editor/react";
 import FormEditor from "@/components/form/FormEditor";
 import LetterForm from "@/components/form/LetterForm";
 import { useDocStore } from "@/state/docStore";
-import { TEMPLATE_IDS, type TemplateId } from "@/lib/resume/templates";
+import { TEMPLATES, type TemplateId } from "@/lib/resume/templates";
 import { useSettingsStore } from "@/state/settingsStore";
 import { saveDraft } from "@/lib/storage/db";
 import { normalizeResume, normalizeLetter } from "@/lib/resume/normalize";
@@ -14,13 +14,6 @@ import SnapshotsModal from "@/components/modals/SnapshotsModal";
 import ImportTextModal from "@/components/modals/ImportTextModal";
 import ImportPdfModal from "@/components/modals/ImportPdfModal";
 import { stripBase64FromJson, restoreBase64InJson } from "@/lib/ai/base64";
-
-const TEMPLATE_LABELS: Record<TemplateId, string> = {
-  sobre: "Sobre",
-  graphique: "Graphique",
-  kakuna: "Kakuna",
-  marine: "Marine",
-};
 
 type Tab = "form" | "json" | "import";
 
@@ -229,9 +222,9 @@ export default function EditorPane() {
             title="Charger un modèle"
             onChange={(e) => setTemplate(e.target.value as TemplateId)}
           >
-            {TEMPLATE_IDS.map((id) => (
-              <option key={id} value={id}>
-                {TEMPLATE_LABELS[id]}
+            {TEMPLATES.map((tpl) => (
+              <option key={tpl.id} value={tpl.id}>
+                {tpl.label}
               </option>
             ))}
           </select>

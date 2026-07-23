@@ -58,6 +58,14 @@ export const volunteerItemSchema = z.object({
 export const customSectionSchema = z.object({
   title: z.string().default(""),
   items: z.array(z.string()).default([]),
+  /**
+   * Colonne cible dans un modèle à deux colonnes (cf. `templates.ts`, `columns: 2`) :
+   * `"sidebar"` place la section dans la barre latérale, sinon (absent ou `"main"`) dans
+   * la colonne principale. N'a d'effet QUE sur les modèles deux-colonnes ; les autres
+   * l'ignorent. Ne concerne que les sections libres — les sections de base gardent le
+   * placement défini par chaque modèle.
+   */
+  column: z.enum(["main", "sidebar"]).optional(),
 });
 
 /**
@@ -100,6 +108,14 @@ export const resumeSchema = z.object({
    */
   sectionOrder: z.array(z.string()).default([]),
   /**
+   * Titres personnalisés des sections, par identifiant (`summary`, `experience`… ou
+   * `custom:<i>`). Vide = titre canonique du modèle (cf. `ALL_BASE_SECTIONS`). C'est une
+   * préférence d'affichage de l'utilisateur : jamais envoyé à l'IA, toujours restauré
+   * après une adaptation (cf. `mergeTailored`). Les sections libres portent en plus leur
+   * titre dans `customSections[i].title` (source de vérité pour elles).
+   */
+  sectionTitles: z.record(z.string(), z.string()).default({}),
+  /**
    * Sections masquées, par identifiant. Masquer n'est PAS supprimer : la section
    * disparaît du PDF mais son contenu reste intact dans le CV, et un clic la ramène.
    * Sert à adapter un CV à une offre sans rien perdre. Jamais envoyé à l'IA : c'est une
@@ -140,7 +156,7 @@ export const RESUME_TOP_KEYS = [
   "name", "title", "location", "email", "phone", "linkedin", "summary",
   "experience", "education", "skills", "softSkills", "tools", "languages", "interests",
   "projects", "certifications", "volunteer", "customSections", "customFields",
-  "sectionOrder", "hiddenSections",
+  "sectionOrder", "sectionTitles", "hiddenSections",
 ] as const;
 
 /** Port fidèle de `DEFAULT_RESUME` (resume-form.js, l.20-51). */
@@ -195,6 +211,7 @@ export const DEFAULT_RESUME: Resume = {
   customSections: [],
   customFields: [],
   sectionOrder: [],
+  sectionTitles: {},
   hiddenSections: [],
 };
 

@@ -75,6 +75,16 @@ export function unwrap(input: unknown): Record<string, unknown> {
 const cleanList = (value: unknown): string[] =>
   splitToArray(value).map(s).filter(Boolean);
 
+/** Coerce une table `{ id → titre }` en `Record<string,string>`, en jetant les valeurs vides. */
+function cleanStringRecord(value: unknown): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(asRecord(value))) {
+    const val = s(v);
+    if (val) out[k] = val;
+  }
+  return out;
+}
+
 /**
  * Coerce une structure quelconque vers un CV propre et sûr (caps, types).
  * Port de `_normalize_resume` (la photo est conservée comme dans `normalizeIncoming`).
@@ -123,11 +133,13 @@ export function normalizeResume(input: unknown): Resume {
   });
 
   // Une section libre sans titre n'est pas affichable : on la jette, comme une
-  // langue sans nom. Idem si elle n'a aucune ligne exploitable.
+  // langue sans nom. Idem si elle n'a aucune ligne exploitable. `column` (placement
+  // deux-colonnes) est une préférence d'affichage : on la conserve telle quelle.
   const customSections = asArray(d.customSections)
     .map((raw) => {
       const c = asRecord(raw);
-      return { title: s(c.title), items: cleanList(c.items).slice(0, 20) };
+      const column = c.column === "sidebar" || c.column === "main" ? c.column : undefined;
+      return { title: s(c.title), items: cleanList(c.items).slice(0, 20), column };
     })
     .filter((c) => c.title && c.items.length);
 
@@ -163,6 +175,7 @@ export function normalizeResume(input: unknown): Resume {
     // Aucun filtrage sur les identifiants : `buildSections` ignore ceux qui ne correspondent
     // à rien, et une section absente de la liste se range à la fin plutôt que de disparaître.
     sectionOrder: cleanList(d.sectionOrder).slice(0, 40),
+    sectionTitles: cleanStringRecord(d.sectionTitles),
     hiddenSections: cleanList(d.hiddenSections).slice(0, 40),
   };
 
@@ -231,10 +244,18 @@ export function mergeTailored(base: Resume, tailored: Resume): Resume {
     result.customSections = base.customSections;
   if (result.customFields.length === 0 && base.customFields.length > 0)
     result.customFields = base.customFields;
-  // L'ordre et le masquage sont des préférences de mise en page, pas du contenu : une
-  // adaptation à une offre n'a aucune raison de les changer, et surtout aucune de les perdre.
-  // `hiddenSections` n'est même jamais envoyé à l'IA — on le recopie donc toujours.
+  // La colonne des sections libres (modèles deux-colonnes) est une préférence de mise en
+  // page que l'IA n'émet pas : on la restaure depuis la base par index (identité `custom:i`,
+  // déjà indexée partout dans l'app). Idempotent si customSections a été restauré ci-dessus.
+  result.customSections = result.customSections.map((c, i) => ({
+    ...c,
+    column: base.customSections[i]?.column ?? c.column,
+  }));
+  // L'ordre, les titres personnalisés et le masquage sont des préférences de mise en page,
+  // pas du contenu : une adaptation à une offre n'a aucune raison de les changer, et surtout
+  // aucune de les perdre. Jamais envoyés à l'IA — on les recopie donc toujours.
   if (base.sectionOrder.length > 0) result.sectionOrder = base.sectionOrder;
+  result.sectionTitles = base.sectionTitles;
   result.hiddenSections = base.hiddenSections;
 
   // Toujours restaurés depuis la base (aucun niveau d'adaptation ne les modifie).
