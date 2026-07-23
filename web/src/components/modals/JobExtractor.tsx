@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { toast, uiConfirm } from "@/state/uiStore";
+import { toast } from "@/state/uiStore";
 
 interface JobExtractorProps {
   onExtracted: (text: string) => void;
@@ -16,14 +16,6 @@ export default function JobExtractor({ onExtracted, disabled }: JobExtractorProp
       toast("Colle une URL d'offre d'emploi.", "error");
       return;
     }
-
-    const ok = await uiConfirm(
-      "L'extraction lit la page directement. Si elle est bloquée (LinkedIn, etc.), " +
-      "l'URL sera envoyée à Jina AI (r.jina.ai) pour extraction. " +
-      "Continuer ?",
-      "Extraction d'offre"
-    );
-    if (!ok) return;
 
     setExtracting(true);
     try {
