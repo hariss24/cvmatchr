@@ -77,7 +77,7 @@ const GENERIC_CRITERIA: ScoringCriterion[] = [
   { key: "seniority", label: "Séniorité", max: 20, description: "Adéquation au niveau d'expérience recherché." },
   { key: "sector", label: "Secteur", max: 15, description: "Pertinence sectorielle." },
   { key: "geo", label: "Géo (trajet)", max: 15, description: "Ajuste selon les temps de trajet fournis." },
-  { key: "red_flags", label: "Pièges", max: 10, description: "10 = aucun piège (salaire flou, offre douteuse)." },
+  { key: "red_flags", label: "Pièges", max: 10, description: "10 = aucun piège (salaire flou, missions imprécises)." },
 ];
 
 /** Profil vide — défauts neutres. Aucune donnée personnelle. */
