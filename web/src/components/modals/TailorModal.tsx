@@ -11,7 +11,7 @@ import AtsPanel from "./AtsPanel";
 import { useRouter } from "next/navigation";
 import DiffModal from "./DiffModal";
 import { loadMasterResume } from "@/lib/storage/master";
-import { renderTemplate } from "@/lib/templates/render";
+import { resolveMeta, buildAdaptedLetter } from "@/lib/letter/adapt";
 import type { Resume, Letter } from "@/lib/resume/schema";
 import type { TailorLevel } from "@/lib/ai/prompts";
 import { toast } from "@/state/uiStore";
@@ -195,15 +195,14 @@ export default function TailorModal({
 
   if (!open || typeof document === "undefined") return null;
 
-  // Préremplissage de la barre meta (nommage PDF/historique) — champs vides uniquement.
+  // Barre meta (nommage PDF/historique) : elle suit l'offre qu'on vient d'adapter, sinon le
+  // PDF sortirait au nom de la candidature précédente.
   const prefillMeta = (desc: string) => {
-    const { company, role, setCompany, setRole } = useDocStore.getState();
-    if (company.trim() && role.trim()) return;
-    void fetchJobMeta(desc).then((meta) => {
-      if (!meta) return;
+    void fetchJobMeta(desc).then((jobMeta) => {
       const s = useDocStore.getState();
-      if (!s.company.trim() && meta.company) setCompany(meta.company);
-      if (!s.role.trim() && meta.role) setRole(meta.role);
+      const meta = resolveMeta(jobMeta, { company: s.company, role: s.role });
+      if (meta.company) s.setCompany(meta.company);
+      if (meta.role) s.setRole(meta.role);
     });
   };
 
@@ -219,51 +218,28 @@ export default function TailorModal({
     try {
       // Le CV Maître sert de source de faits à l'IA (photo jamais envoyée).
       const master = await loadMasterResume();
+
+      // L'offre fait foi : on l'interroge à CHAQUE adaptation, sinon la barre meta garde
+      // silencieusement l'entreprise de la candidature précédente. AVANT l'adaptation, et
+      // non en parallèle : l'entreprise et le poste résolus partent à l'IA, qui les écrit
+      // dans le corps de la lettre.
+      const meta = resolveMeta(await fetchJobMeta(desc), { company, role });
+
       const { body } = await postJson<{ body: string }>("/api/adapt-letter", {
         letter_body: letter.body,
         job_desc: desc,
         cv_json: master ? { ...master, photo: "" } : {},
-        company: company.trim(),
-        role: role.trim(),
+        company: meta.company,
+        role: meta.role,
       });
       if (!body.trim()) throw new Error("Le corps adapté reçu est vide — lettre conservée.");
 
-      // En plus du corps, on renseigne les champs objectifs de l'en-tête (destinataire,
-      // objet, date) à partir de l'offre — comme le fait le Pack (buildLetterFromTemplate).
-      // company/role viennent de la barre meta ; si vides, on les extrait de l'offre.
-      let comp = company.trim();
-      let rol = role.trim();
-      if (!comp || !rol) {
-        const meta = await fetchJobMeta(desc);
-        if (meta) {
-          comp = comp || meta.company.trim();
-          rol = rol || meta.role.trim();
-        }
-      }
-      const city = (master?.location ?? "").split(",")[0].trim();
       const today = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+      setJson(buildAdaptedLetter({ letter, body, master, meta, today }));
 
-      // L'IA peut recopier les variables de modèle ({Entreprise}, {Poste}, {Prénom}…),
-      // comportement prévu pour le Pack : on les substitue ici, sinon elles resteraient
-      // littérales dans l'éditeur. Prénom/Nom viennent de la signature de la lettre courante.
-      const [prenom, ...rest] = (letter.signature || letter.sender_name || "").trim().split(/\s+/);
-      const renderedBody = renderTemplate(body, {
-        Entreprise: comp,
-        Poste: rol,
-        Date: today,
-        "Prénom": prenom ?? "",
-        Nom: rest.join(" "),
-        "M/Mme Nom": "",
-      });
-
-      const patch: Partial<Letter> = { body: renderedBody, date: city ? `${city}, le ${today}` : `Le ${today}` };
-      if (comp) patch.recipient_name = comp;
-      if (rol) patch.subject = `Candidature au poste de ${rol}`;
-      setJson({ ...letter, ...patch });
-
-      // Renseigne aussi la barre meta (nommage PDF/historique) avec ce qu'on a résolu.
-      if (comp && !company.trim()) setCompany(comp);
-      if (rol && !role.trim()) setRole(rol);
+      // La barre meta (nommage PDF/historique) suit l'offre, elle aussi.
+      if (meta.company) setCompany(meta.company);
+      if (meta.role) setRole(meta.role);
 
       toast("Lettre adaptée à l'offre.", "success");
     } catch (err) {

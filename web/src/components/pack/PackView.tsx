@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useDocStore } from "@/state/docStore";
 import { postJson } from "@/lib/ai/client";
 import { fetchJobMeta } from "@/lib/ai/jobMeta";
+import { resolveMeta } from "@/lib/letter/adapt";
 import VariableEditor from "./VariableEditor";
 import { TEMPLATE_VARIABLES, type TemplateVars } from "@/lib/templates/render";
 import type { Resume } from "@/lib/resume/schema";
@@ -83,13 +84,12 @@ export default function PackView() {
     return () => clearTimeout(t);
   }, [tpl]);
 
-  // Préremplissage silencieux depuis l'offre — ne remplit QUE les champs vides.
+  // L'offre collée fait foi : ces champs partent du dossier précédent (initialisés depuis le
+  // docStore) et resteraient dessus sans ça. L'extraction qui échoue ne les efface pas.
   const prefillFromJob = async (desc: string) => {
-    if (company.trim() && role.trim()) return;
-    const meta = await fetchJobMeta(desc);
-    if (!meta) return;
-    if (!company.trim() && meta.company) setCompanyLocal(meta.company);
-    if (!role.trim() && meta.role) setRoleLocal(meta.role);
+    const meta = resolveMeta(await fetchJobMeta(desc), { company, role });
+    if (meta.company) setCompanyLocal(meta.company);
+    if (meta.role) setRoleLocal(meta.role);
   };
 
   const adaptWithAi = async () => {
@@ -105,13 +105,19 @@ export default function PackView() {
     }
     setBusy(true);
     try {
+      // L'offre fait foi, et la meta résolue part à l'IA : sinon elle écrit dans la lettre
+      // l'entreprise de la candidature précédente, encore présente dans ces champs.
+      const meta = resolveMeta(await fetchJobMeta(desc), { company, role });
+      if (meta.company) setCompanyLocal(meta.company);
+      if (meta.role) setRoleLocal(meta.role);
+
       // Photo jamais envoyée à l'IA.
       const { body } = await postJson<{ body: string }>("/api/adapt-letter", {
         letter_body: tpl.letterBody,
         job_desc: desc,
         cv_json: { ...(identity?.cv ?? cvRaw), photo: "" },
-        company: company.trim(),
-        role: role.trim(),
+        company: meta.company,
+        role: meta.role,
       });
       patchTpl({ letterBody: body });
       toast("Corps de la lettre adapté à l'offre.", "success");
