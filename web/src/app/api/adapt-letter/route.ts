@@ -3,6 +3,7 @@ import { complete } from "@/lib/ai/clients";
 import { SYSTEM_ADAPT_LETTER } from "@/lib/ai/prompts";
 import { parseAiJson } from "@/lib/ai/json";
 import { aiErrorResponse } from "@/lib/ai/http";
+import { findLetterPlaceholder } from "@/lib/ai/letterPlaceholders";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -14,6 +15,14 @@ type Body = {
   company?: string;
   role?: string;
 };
+
+async function askForBody(content: string, userKey: string | null): Promise<string> {
+  const raw = await complete([{ role: "user", content }], SYSTEM_ADAPT_LETTER, userKey);
+  const result = parseAiJson(raw) as { body?: unknown };
+  const adapted = String(result?.body ?? "").trim();
+  if (!adapted) throw new Error("Réponse IA invalide : champ 'body' attendu.");
+  return adapted;
+}
 
 /** Adapte légèrement le corps du modèle de lettre de l'utilisateur à une offre. */
 export async function POST(req: Request): Promise<Response> {
@@ -39,10 +48,24 @@ export async function POST(req: Request): Promise<Response> {
   const userKey = req.headers.get("x-api-key")?.trim() || null;
 
   try {
-    const raw = await complete([{ role: "user", content }], SYSTEM_ADAPT_LETTER, userKey);
-    const result = parseAiJson(raw) as { body?: unknown };
-    const adapted = String(result?.body ?? "").trim();
-    if (!adapted) throw new Error("Réponse IA invalide : champ 'body' attendu.");
+    let adapted = await askForBody(content, userKey);
+
+    // Garde-fou : une lettre à trous part telle quelle au recruteur. Le prompt l'interdit,
+    // on vérifie quand même — une seule relance, en pointant le trou au modèle.
+    const hole = findLetterPlaceholder(adapted);
+    if (hole) {
+      const retry =
+        `${content}\n\nTa réponse précédente contenait un emplacement à compléter : « ${hole} ». ` +
+        "Recommence. Écris le fait réel lu dans le CV, ou supprime la phrase.";
+      adapted = await askForBody(retry, userKey);
+      const still = findLetterPlaceholder(adapted);
+      if (still) {
+        throw new Error(
+          `L'IA a laissé un passage à compléter (« ${still} ») : lettre conservée. Réessaie, ou complète ton CV.`,
+        );
+      }
+    }
+
     return NextResponse.json({ body: adapted });
   } catch (err) {
     return aiErrorResponse(err);

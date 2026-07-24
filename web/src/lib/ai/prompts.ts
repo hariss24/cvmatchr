@@ -353,7 +353,8 @@ export const SYSTEM_ADAPT_LETTER =
   "TA MISSION : adapter LÉGÈREMENT le corps de la lettre à l'offre.\n" +
   "RÈGLES :\n" +
   "- CONSERVE le ton, la structure, le nombre de paragraphes et la longueur (±20 %) du texte d'origine.\n" +
-  "- Intègre naturellement 2 à 4 mots-clés ou attentes IMPORTANTS de l'offre.\n" +
+  "- Intègre naturellement 2 à 4 mots-clés ou attentes IMPORTANTS de l'offre, et UNIQUEMENT ceux que " +
+  "le CV prouve déjà. Un mot-clé que le candidat ne peut pas justifier ne s'ajoute pas.\n" +
   "- Remplace les passages entre crochets [ ] par du contenu concret tiré du CV.\n" +
   "- N'invente AUCUN fait : utilise uniquement les expériences et compétences réellement présentes dans le CV.\n" +
   "- INTERDICTION ABSOLUE DE LAISSER UN TROU. Le texte que tu renvoies part tel quel au recruteur : " +
@@ -377,6 +378,16 @@ export const SYSTEM_ADAPT_LETTER =
   "Ne cite un outil que s'il éclaire une qualité humaine ou un résultat concret, jamais pour remplir.\n" +
   "- Raconte, n'énumère pas : la lettre se lit comme quelqu'un qui parle, pas comme une offre d'emploi " +
   "recopiée. Les mots-clés de l'offre s'intègrent dans une phrase vivante, ils ne se listent pas.\n" +
+  "- NE RECOPIE PAS LE VOCABULAIRE DE L'OFFRE. Les offres sont écrites en langue administrative " +
+  "(« enjeux de rayonnement et de visibilité institutionnelle », « stratégie éditoriale multicanale », " +
+  "« transformation digitale de notre institut ») : renvoyer ces formules au recruteur ne prouve rien, " +
+  "il voit qu'on lui récite son annonce. Reprends l'IDÉE avec les mots du candidat, pas le bloc de " +
+  "mots. PAS « je suis prêt à relever le défi de la transformation digitale de votre institut en " +
+  "alliant rédaction technique, optimisation du SEO et gestion des performances » MAIS quelque chose " +
+  "comme « refaire une présence en ligne qui date, c'est ce que j'ai fait chez X, et c'est le genre " +
+  "de chantier qui me plaît ».\n" +
+  "- Une phrase qui empile trois compétences reliées par « en alliant », « tout en » ou « ainsi que » " +
+  "est une phrase d'offre d'emploi : coupe-la en deux, ou garde une seule compétence, la mieux prouvée.\n" +
   "- Phrases COURTES, une idée par phrase. Bannis les phrases à rallonge qui enchaînent les " +
   "compétences techniques ;\n" +
   "- Reste sincère et mesuré : une motivation vraie et simple vaut mieux qu'un argumentaire parfait " +

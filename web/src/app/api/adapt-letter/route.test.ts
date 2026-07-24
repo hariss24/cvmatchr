@@ -31,6 +31,24 @@ describe("POST /api/adapt-letter", () => {
     expect(content).toContain("Entreprise visée : ACME");
   });
 
+  it("relance une fois quand l'IA laisse un trou, puis renvoie la version propre", async () => {
+    mockComplete
+      .mockResolvedValueOnce(JSON.stringify({ body: "en tant que Poste occupé chez ACME" }))
+      .mockResolvedValueOnce(JSON.stringify({ body: "en tant que webmaster chez ACME" }));
+    const res = await POST(req({ letter_body: "modèle", job_desc: "offre" }));
+    expect(res.status).toBe(200);
+    expect((await res.json()).body).toBe("en tant que webmaster chez ACME");
+    expect(mockComplete).toHaveBeenCalledTimes(2);
+    expect(mockComplete.mock.calls[1][0][0].content).toContain("Poste occupé");
+  });
+
+  it("échoue plutôt que de renvoyer une lettre à trous après la relance", async () => {
+    mockComplete.mockResolvedValue(JSON.stringify({ body: "j'ai notamment [votre réalisation]" }));
+    const res = await POST(req({ letter_body: "modèle", job_desc: "offre" }));
+    expect(res.status).toBe(502);
+    expect(mockComplete).toHaveBeenCalledTimes(2);
+  });
+
   it("400 si lettre ou offre manquante", async () => {
     const res = await POST(req({ letter_body: "", job_desc: "offre" }));
     expect(res.status).toBe(400);
