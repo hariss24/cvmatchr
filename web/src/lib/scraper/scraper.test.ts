@@ -46,7 +46,7 @@ describe("scraper", () => {
         return {
           ok: true,
           status: 200,
-          text: async () => "# Job Title\n\nWe are looking for a ninja."
+          json: async () => ({ data: { content: "# Job Title\n\nWe are looking for a ninja." } }),
         } as any;
       }
       return {
@@ -68,7 +68,7 @@ describe("scraper", () => {
         return {
           ok: true,
           status: 200,
-          text: async () => "Jina extracted text"
+          json: async () => ({ data: { content: "Jina extracted text" } }),
         } as any;
       }
       return {
@@ -81,6 +81,36 @@ describe("scraper", () => {
     const res = await scrapeJobText("https://example.com/short");
     expect(res.text).toBe("Jina extracted text");
     expect(global.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("ne garde que `data.content` de Jina, jamais les metadata ni le JSON brut", async () => {
+    vi.mocked(global.fetch).mockImplementation(async (url) => {
+      if (url.toString().startsWith("https://r.jina.ai/")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            code: 200,
+            data: {
+              title: "Responsable CRM — Vanessa Wu",
+              content: "### Le poste\n\nDescriptif du poste : piloter la stratégie CRM.",
+              url: "https://example.com/offre",
+              metadata: { "twitter:site": "@WTTJ", keywords: "jobs,emploi,startups" },
+              external: { modulepreload: { "https://cdn.example.com/index.js": {} } },
+              usage: { tokens: 1709 },
+            },
+          }),
+        } as any;
+      }
+      return { ok: false, status: 403 } as any;
+    });
+
+    const res = await scrapeJobText("https://example.com/offre");
+    expect(res.text).toBe("### Le poste\n\nDescriptif du poste : piloter la stratégie CRM.");
+    expect(res.title).toBe("Responsable CRM — Vanessa Wu");
+    expect(res.text).not.toContain("modulepreload");
+    expect(res.text).not.toContain("twitter:site");
+    expect(res.text).not.toContain("usage");
   });
 
   it("should throw if Jina is also blocked", async () => {
@@ -99,7 +129,7 @@ describe("scraper", () => {
       text: async () => `
         <html><head><title>Offre</title></head>
         <body><div class="job-description">
-          Description complète de l'offre. ${"pad".repeat(100)}
+          Description complète de l'offre. ${"pad".repeat(300)}
         </div></body></html>
       `,
     } as any);
@@ -116,7 +146,7 @@ describe("scraper", () => {
       text: async () => `
         <html><head><title>Offre</title></head>
         <body><div class="job-description">
-          Description complète de l'offre. ${"pad".repeat(100)}
+          Description complète de l'offre. ${"pad".repeat(300)}
         </div></body></html>
       `,
     } as any);
@@ -187,7 +217,7 @@ describe("scraper", () => {
           return {
             ok: true,
             status: 200,
-            text: async () => "Texte extrait par Jina",
+            json: async () => ({ data: { content: "Texte extrait par Jina" } }),
           } as any;
         }
         return { ok: false, status: 403 } as any;
@@ -207,7 +237,7 @@ describe("scraper", () => {
           return {
             ok: true,
             status: 200,
-            text: async () => "Texte extrait par Jina",
+            json: async () => ({ data: { content: "Texte extrait par Jina" } }),
           } as any;
         }
         return { ok: false, status: 403 } as any;

@@ -161,7 +161,11 @@ export async function scrapeJobText(url: string): Promise<{ text: string; title:
     try {
       const jinaRes = await fetch(`https://r.jina.ai/${safeUrl}`, {
         headers: {
-          "Accept": "text/event-stream", // or application/json, but text/plain returns markdown by default
+          // JSON (et pas text/event-stream) : le mode stream renvoie plusieurs
+          // snapshots successifs de la page, chacun avec metadata/external/preload.
+          // En JSON on ne garde que `data.content`, le markdown du corps de page.
+          "Accept": "application/json",
+          "x-retain-images": "none",
         },
         signal: AbortSignal.timeout(15000),
       });
@@ -170,10 +174,12 @@ export async function scrapeJobText(url: string): Promise<{ text: string; title:
         throw new Error("BLOCKED");
       }
 
-      const md = await jinaRes.text();
-      
-      // Jina returns a markdown file where title is usually at the top or in the URL.
-      text = md.trim();
+      const payload = (await jinaRes.json()) as {
+        data?: { content?: string; title?: string };
+      };
+
+      text = (payload.data?.content ?? "").trim();
+      title = title || payload.data?.title || "";
       if (!text || text.includes("Enable JavaScript and cookies to continue") || text.includes("Attention Required! | Cloudflare")) {
          throw new Error("BLOCKED");
       }
