@@ -1,0 +1,816 @@
+<!-- @dsCard group="Candidatures" name="Prototype cliquable" -->
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototype — Mes candidatures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Tokens repris tels quels de web/src/app/globals.css — aucune couleur en dur. */
+:root {
+  --bg: #FBFAF8;
+  --page-bg: radial-gradient(1100px 520px at 50% -10%, rgba(255,255,255,0.75), rgba(255,255,255,0) 60%),
+             linear-gradient(180deg, #F2EFEA 0%, #E5E1DA 100%);
+  --text: #1F1B16;
+  --muted: #6C655C;
+  --faint: #9A9187;
+  --orange: #E85D04;
+  --orange2: #F07030;
+  --orange-text: #A84402;
+  --link: #A84402;
+  --border: rgba(31,27,22,0.07);
+  --glass: rgba(253,252,250,0.62);
+  --glass-blur: blur(24px) saturate(1.7);
+  --glass-border: rgba(255,255,255,0.55);
+  --card: rgba(255,255,255,0.82);
+  --field: #FFFFFF;
+  --seg-track: linear-gradient(180deg, #EAE7E1, #E0DCD5);
+  --seg-knob: linear-gradient(180deg, #FFFFFF, #F5F2EE);
+  --seg-knob-shadow: 0 1px 2px rgba(31,27,22,0.16), 0 2px 5px rgba(31,27,22,0.08), inset 0 1px 0 rgba(255,255,255,0.95);
+  --cta-grad: linear-gradient(180deg, var(--orange2), var(--orange));
+  --cta-shadow: inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(0,0,0,0.10),
+                0 1px 2px rgba(31,27,22,0.15), 0 4px 14px -4px rgba(232,93,4,0.55);
+  --neu-raised-sm: 0 0 0 1px rgba(31,27,22,0.09), 0 1px 2px rgba(31,27,22,0.05), inset 0 1px 0 rgba(255,255,255,0.85);
+  --neu-raised: 0 0 0 1px rgba(31,27,22,0.09), 0 1px 2px rgba(31,27,22,0.06), 0 4px 10px -4px rgba(31,27,22,0.18), inset 0 1px 0 rgba(255,255,255,0.9);
+  --neu-raised-lg: 0 0 0 1px rgba(31,27,22,0.06), 0 1px 2px rgba(31,27,22,0.05), 0 16px 40px -24px rgba(31,27,22,0.30), inset 0 1px 0 rgba(255,255,255,0.5);
+  --neu-inset: 0 0 0 1px rgba(31,27,22,0.12), inset 0 1px 2px rgba(31,27,22,0.05);
+  --neu-inset-deep: 0 0 0 1px rgba(31,27,22,0.10), inset 0 1px 3px rgba(31,27,22,0.10);
+  --success: #256D2A;
+  --apply: #1E8E6A;
+  --apply-text: #146B4F;
+  --warning: #BF5000;
+  --error: #C62828;
+  --blue: #1565C0;
+  --font-ui: Inter, -apple-system, "Segoe UI", sans-serif;
+  --font-code: "JetBrains Mono", ui-monospace, monospace;
+}
+[data-theme="dark"] {
+  --bg: #26221E;
+  --page-bg: radial-gradient(1100px 520px at 50% -10%, rgba(255,255,255,0.06), rgba(255,255,255,0) 60%),
+             linear-gradient(180deg, #1D1A16 0%, #15120F 100%);
+  --text: #EDE8E1;
+  --muted: #A79E92;
+  --faint: #857D72;
+  --orange: #F07030;
+  --orange2: #F58A4A;
+  --orange-text: #F58A4A;
+  --link: #F58A4A;
+  --border: rgba(255,255,255,0.08);
+  --glass: rgba(38,34,30,0.62);
+  --glass-border: rgba(255,255,255,0.10);
+  --card: rgba(255,255,255,0.05);
+  --field: #1C1916;
+  --seg-track: linear-gradient(180deg, #1C1916, #171411);
+  --seg-knob: linear-gradient(180deg, #3B3630, #322D28);
+  --seg-knob-shadow: 0 1px 2px rgba(0,0,0,0.45), 0 2px 5px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.10);
+  --cta-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1px 0 rgba(0,0,0,0.25),
+                0 1px 2px rgba(0,0,0,0.40), 0 4px 14px -4px rgba(240,112,48,0.45);
+  --neu-raised-sm: 0 0 0 1px rgba(255,255,255,0.09), 0 1px 2px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+  --neu-raised: 0 0 0 1px rgba(255,255,255,0.10), 0 1px 2px rgba(0,0,0,0.40), 0 4px 10px -4px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.07);
+  --neu-raised-lg: 0 0 0 1px rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.40), 0 16px 40px -24px rgba(0,0,0,0.80), inset 0 1px 0 rgba(255,255,255,0.05);
+  --neu-inset: 0 0 0 1px rgba(255,255,255,0.12), inset 0 1px 2px rgba(0,0,0,0.35);
+  --neu-inset-deep: 0 0 0 1px rgba(255,255,255,0.10), inset 0 1px 3px rgba(0,0,0,0.50);
+  --success: #66BB6A;
+  --apply: #2FA982;
+  --apply-text: #4FC49F;
+  --warning: #FFA726;
+  --error: #EF5350;
+  --blue: #64B5F6;
+}
+</style>
+<style>
+/* ---------------------------------------------------------------------------
+   Maquette « Mes candidatures » — Cvmatchr
+   Tokens et classes reprises de web/src/app/globals.css. Les classes nouvelles
+   sont préfixées .app- (application = candidature) et n'utilisent que des
+   variables de thème : aucune couleur en dur.
+   --------------------------------------------------------------------------- */
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  font-family: var(--font-ui);
+  background: var(--page-bg); background-attachment: fixed;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--link); text-decoration: none; }
+
+.wrap { display: flex; flex-direction: column; min-height: 100vh; padding: 16px 20px; gap: 12px; }
+
+/* ---- Topbar de verre (identique aux pages secondaires) ---- */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  background: var(--glass);
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px; padding: 9px 14px;
+  box-shadow: var(--neu-raised-lg);
+}
+.topbar--secondary > .hist-h1 { flex: 1 1 0; min-width: 0; }
+.topbar--secondary > .topbar-actions { flex: 1 1 0; justify-content: flex-end; }
+.topbar-center { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+.hist-h1 { font-size: 22px; margin: 0; font-weight: 800; letter-spacing: -0.4px; color: var(--text); }
+
+.btn-nav {
+  background: var(--bg); border: none; color: var(--text);
+  border-radius: 10px; padding: 0 15px; height: 38px; cursor: pointer;
+  font-size: 13px; display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-ui); box-shadow: var(--neu-raised-sm);
+  transition: box-shadow 100ms, transform 100ms; white-space: nowrap;
+}
+.btn-nav:hover { box-shadow: var(--neu-raised); transform: translateY(-1px); }
+.btn-orange {
+  background: var(--cta-grad); color: #fff; font-weight: 600; box-shadow: var(--cta-shadow);
+}
+
+/* ---- Contrôle segmenté ---- */
+.seg {
+  position: relative; display: flex; padding: 3px; border-radius: 12px;
+  background: var(--seg-track);
+  box-shadow: inset 0 1px 2px rgba(31,27,22,0.12), inset 0 -1px 0 rgba(255,255,255,0.5);
+  --seg-w: 104px;
+}
+[data-theme="dark"] .seg { box-shadow: inset 0 1px 2px rgba(0,0,0,0.45), inset 0 -1px 0 rgba(255,255,255,0.05); }
+.seg__knob {
+  position: absolute; top: 3px; left: calc(3px + var(--seg-index, 0) * var(--seg-w));
+  width: var(--seg-w); height: calc(100% - 6px); border-radius: 9px;
+  background: var(--seg-knob); box-shadow: var(--seg-knob-shadow); pointer-events: none;
+}
+.seg__btn {
+  position: relative; z-index: 1; width: var(--seg-w);
+  background: none; border: none; padding: 6px 0; text-align: center;
+  font-size: 12.5px; font-weight: 600; font-family: var(--font-ui);
+  cursor: pointer; color: var(--muted);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.seg__btn.active { color: var(--text); }
+
+/* ---- Panneau givré ---- */
+.pane {
+  display: flex; flex-direction: column; min-width: 0;
+  border-radius: 18px; box-shadow: var(--neu-raised-lg);
+  background: var(--glass);
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+}
+.hist-content { padding: 24px; }
+
+/* ---- Dashboard : tuiles ---- */
+.app-dash {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 22px;
+}
+.app-tile {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 2px rgba(31,27,22,0.04), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+[data-theme="dark"] .app-tile { box-shadow: 0 1px 2px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.05); }
+.app-tile__label {
+  font-size: 10px; color: var(--muted); letter-spacing: 0.8px;
+  text-transform: uppercase; font-weight: 600; margin-bottom: 8px;
+}
+.app-tile__value { font-size: 28px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
+.app-tile__hint { font-size: 11px; color: var(--faint); margin-top: 6px; }
+.app-tile--interview .app-tile__value { color: var(--orange-text); }
+.app-tile--stale .app-tile__value { color: var(--faint); }
+
+/* ---- Barre de filtres ---- */
+.app-filters { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; }
+.hist-search {
+  background: var(--field); color: var(--text); border: none; border-radius: 12px;
+  padding: 11px 16px; font-size: 13px; flex: 1; min-width: 0;
+  font-family: var(--font-ui); box-shadow: var(--neu-inset); outline: none;
+}
+.hist-search::placeholder { color: var(--faint); }
+.app-chips { display: flex; gap: 6px; flex-shrink: 0; }
+.app-chip {
+  background: var(--bg); border: none; color: var(--muted);
+  font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+  padding: 0 12px; height: 36px; border-radius: 999px; cursor: pointer;
+  box-shadow: var(--neu-raised-sm); display: inline-flex; align-items: center; gap: 6px;
+}
+.app-chip:hover { color: var(--text); box-shadow: var(--neu-raised); }
+.app-chip.active { color: var(--text); box-shadow: var(--neu-inset); }
+.app-chip__count { color: var(--faint); font-family: var(--font-code); font-size: 11px; }
+
+/* ---- Liste ---- */
+.card-list { display: flex; flex-direction: column; gap: 14px; }
+
+/* ---- Carte de candidature ---- */
+.app-card {
+  background: var(--bg); box-shadow: var(--neu-raised-sm); border-radius: 16px;
+  padding: 16px 20px; display: grid; grid-template-columns: 78px 1fr auto;
+  gap: 20px; align-items: center; transition: box-shadow 150ms;
+}
+.app-card:hover { box-shadow: var(--neu-raised); }
+.app-card--stale { opacity: 0.62; }
+
+/* Médaillon d'ancienneté : creusé, façon compteur — le temps travaille seul. */
+.app-age {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 68px; height: 68px; border-radius: 50%;
+  background: var(--bg); box-shadow: var(--neu-inset);
+}
+.app-age__num { font-size: 22px; font-weight: 800; line-height: 1; }
+.app-age__unit { font-size: 10px; color: var(--faint); font-weight: 600; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+.app-age--fresh .app-age__num { color: var(--apply-text); }
+.app-age--warm .app-age__num { color: var(--text); }
+.app-age--stale .app-age__num { color: var(--faint); }
+.app-age--interview { box-shadow: var(--neu-inset), 0 0 0 2px var(--orange2); }
+
+.app-main { min-width: 0; }
+.app-company {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+  color: var(--orange-text); line-height: 1.3;
+}
+.app-role { font-size: 15px; font-weight: 700; color: var(--text); margin-top: 2px; }
+.app-meta { font-size: 12px; color: var(--muted); margin-top: 5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.app-dot { color: var(--faint); }
+.app-docs { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+.stat-chip {
+  font-size: 11px; padding: 3px 9px; border-radius: 999px;
+  box-shadow: var(--neu-raised-sm); background: var(--bg); color: var(--muted);
+  display: inline-flex; align-items: center; gap: 5px;
+}
+
+.app-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.app-badge {
+  font-size: 11px; font-weight: 700; padding: 4px 11px; border-radius: 999px;
+  background: var(--bg); box-shadow: var(--neu-raised-sm);
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.app-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.app-badge--applied { color: var(--apply-text); }
+.app-badge--interview { color: var(--orange-text); box-shadow: var(--neu-raised-sm), 0 0 0 1px var(--orange2); }
+.app-badge--rejected { color: var(--error); }
+.app-badge--stale { color: var(--faint); }
+.app-actions { display: flex; gap: 8px; }
+.app-btn {
+  background: var(--bg); border: none; color: var(--muted);
+  font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+  padding: 0 12px; height: 32px; border-radius: 9px; cursor: pointer;
+  box-shadow: var(--neu-raised-sm); display: inline-flex; align-items: center; gap: 6px;
+}
+.app-btn:hover { color: var(--text); box-shadow: var(--neu-raised); transform: translateY(-1px); }
+.app-btn--interview:hover { color: var(--orange-text); }
+.app-btn--reject:hover { color: var(--error); }
+.app-btn--icon { width: 32px; padding: 0; justify-content: center; }
+
+/* ---- Carte dépliée ---- */
+.app-card--open { grid-template-columns: 78px 1fr auto; }
+.app-expand {
+  grid-column: 1 / -1; margin-top: 6px; padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 14px;
+}
+.app-block__label {
+  font-size: 10px; color: var(--muted); letter-spacing: 0.8px;
+  text-transform: uppercase; font-weight: 600; margin-bottom: 8px;
+}
+.app-doc-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 10px 12px; margin-bottom: 8px;
+}
+.app-doc-name { font-family: var(--font-code); font-size: 12px; color: var(--text); }
+.app-doc-date { font-size: 11px; color: var(--faint); font-family: var(--font-code); }
+.app-offer {
+  background: var(--field); border-radius: 12px; box-shadow: var(--neu-inset);
+  padding: 12px 14px; font-size: 12.5px; line-height: 1.6; color: var(--muted);
+  max-height: 92px; overflow: hidden; position: relative;
+}
+.app-offer::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 38px;
+  background: linear-gradient(180deg, transparent, var(--field));
+}
+.app-note {
+  background: var(--field); color: var(--text); border: none; border-radius: 12px;
+  box-shadow: var(--neu-inset); padding: 10px 14px; font-size: 13px; width: 100%;
+  font-family: var(--font-ui); outline: none; resize: none;
+}
+.app-timeline { display: flex; flex-direction: column; gap: 7px; }
+.app-event { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+.app-event__date { font-family: var(--font-code); font-size: 11px; color: var(--faint); min-width: 76px; }
+.app-event__src {
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 999px; box-shadow: var(--neu-inset); color: var(--faint);
+}
+
+/* ---- Performance par CV : l'indicateur qui dit QUOI changer ---- */
+.app-perf {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 14px 16px; margin-bottom: 22px;
+  box-shadow: 0 1px 2px rgba(31,27,22,0.04), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+[data-theme="dark"] .app-perf { box-shadow: 0 1px 2px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.05); }
+.app-perf__row {
+  display: grid; grid-template-columns: 1fr 120px 110px 130px; gap: 14px;
+  align-items: center; padding: 9px 0; border-top: 1px solid var(--border);
+}
+.app-perf__row:first-of-type { border-top: none; }
+.app-perf__name { font-size: 13.5px; font-weight: 700; color: var(--text); }
+.app-perf__name--none { color: var(--faint); font-weight: 600; font-style: italic; }
+.app-perf__cell { font-size: 12.5px; color: var(--muted); }
+.app-perf__rate { font-size: 17px; font-weight: 800; text-align: right; letter-spacing: -0.3px; }
+.app-perf__rate--good { color: var(--apply-text); }
+.app-perf__rate--weak { color: var(--muted); }
+.app-perf__rate--thin { font-size: 11px; font-weight: 600; color: var(--faint); text-align: right; font-style: italic; }
+
+/* ---- Rayon « Mes CV » : une étagère assumée, pas un tiroir ---- */
+.app-shelf { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border); }
+.app-shelf__head {
+  display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px;
+}
+.app-shelf__title {
+  font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
+  color: var(--muted); margin: 0;
+}
+.app-shelf__count { color: var(--faint); font-family: var(--font-code); font-size: 11px; }
+.app-shelf__hint { font-size: 12px; color: var(--faint); margin: 0 0 14px; line-height: 1.6; }
+.app-shelf__list { display: flex; flex-direction: column; gap: 10px; }
+.app-cv {
+  background: var(--bg); box-shadow: var(--neu-raised-sm); border-radius: 14px;
+  padding: 13px 18px; display: grid; grid-template-columns: 1fr auto auto;
+  gap: 16px; align-items: center;
+}
+.app-cv:hover { box-shadow: var(--neu-raised); }
+.app-cv__name { font-size: 14px; font-weight: 700; color: var(--text); }
+.app-cv__name--unnamed { font-family: var(--font-code); font-size: 12.5px; font-weight: 500; color: var(--muted); }
+.app-cv__meta { font-size: 11.5px; color: var(--faint); margin-top: 3px; display: flex; gap: 8px; }
+.app-cv__used { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.app-cv__used strong { color: var(--text); }
+
+/* Renommage en ligne dans le rayon. */
+.app-cv__name[data-rename] { cursor: text; }
+.app-cv__name[data-rename]:hover { color: var(--orange-text); }
+.app-rename {
+  background: var(--field); color: var(--text); border: none; border-radius: 9px;
+  box-shadow: var(--neu-inset), 0 0 0 3.5px rgba(232,93,4,0.16);
+  padding: 5px 10px; font-size: 14px; font-weight: 700; font-family: var(--font-ui);
+  outline: none; width: 260px; max-width: 100%;
+}
+
+/* Bandeau d'aide du prototype (n'existe pas dans l'app). */
+.proto-tip {
+  position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%);
+  background: var(--glass); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border); border-radius: 999px;
+  box-shadow: var(--neu-raised-lg);
+  padding: 9px 18px; font-size: 11.5px; color: var(--muted);
+  max-width: calc(100vw - 40px); text-align: center; z-index: 50;
+}
+
+/* ---- Étiquettes d'annotation de maquette ---- */
+.mk-note {
+  font-size: 11px; color: var(--faint); font-family: var(--font-code);
+  padding: 4px 0 10px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar topbar--secondary">
+    <h1 class="hist-h1">Mes candidatures</h1>
+    <div class="topbar-center">
+      <nav class="seg" style="--seg-index: 2">
+        <span class="seg__knob"></span>
+        <a class="seg__btn">Éditeur</a>
+        <a class="seg__btn">Offres</a>
+        <a class="seg__btn active">Candidatures</a>
+      </nav>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-nav btn-orange" id="btn-add">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Ajouter
+      </button>
+      <button class="btn-nav" id="btn-theme" title="Basculer clair / sombre">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Thème
+      </button>
+      <button class="btn-nav">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Retour
+      </button>
+    </div>
+  </header>
+
+  <div class="pane">
+    <div class="hist-content">
+
+      <div class="app-dash" id="dash"></div>
+
+      <div class="app-filters">
+        <input class="hist-search" id="search" placeholder="Rechercher une entreprise, un poste, un mot de l'offre…" />
+        <div class="app-chips" id="chips"></div>
+      </div>
+
+      <div class="card-list" id="list"></div>
+      <div class="hist-empty" id="empty" style="display:none">Aucune candidature ne correspond.</div>
+
+      <section class="app-shelf">
+        <div class="app-shelf__head">
+          <h2 class="app-shelf__title">Mes CV</h2>
+          <span class="app-shelf__count" id="shelf-count"></span>
+        </div>
+        <p class="app-shelf__hint">
+          Les CV qui ne visent pas une entreprise précise — CV d'intérim, CV en anglais, CV généraliste.
+          Rouvrez-les quand vous en avez besoin.
+        </p>
+        <div class="app-shelf__list" id="shelf"></div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div class="proto-tip">
+  Prototype cliquable · Entretien / Refusée, filtres, recherche, pliage et renommage fonctionnent · bouton Thème pour le mode sombre
+</div>
+<script>
+/* Prototype « Mes candidatures » — option 1 (sans variantes).
+   Aucune dépendance. Toute la logique de statut est dérivée des dates :
+   c'est le point du design, donc c'est ce que le prototype doit prouver. */
+
+const TODAY = new Date("2026-07-25T12:00:00").getTime();
+const DAY = 86400000;
+const STALE_DAYS = 30;
+
+const d = (iso) => new Date(iso + "T09:00:00").getTime();
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+/* Une candidature = entreprise, poste, et un journal d'événements.
+   Le statut n'est jamais stocké : il se déduit du journal et de la date. */
+let apps = [
+  {
+    id: "a1", company: "SharkNinja", role: "Chef de projet e-commerce",
+    source: "ft-job", jobUrl: "#", notes: "",
+    jobText: "Nous cherchons un chef de projet e-commerce pour piloter les lancements produits sur les marketplaces européennes. Vous coordonnez les équipes contenu, logistique et marketing, et suivez les indicateurs de vente par plateforme.",
+    docs: [
+      { name: "Hariss Hafeji - CV.pdf", tpl: "Marine", at: "2026-07-16" },
+      { name: "Hariss Hafeji - Lettre.pdf", tpl: "Lettre", at: "2026-07-16" },
+    ],
+    events: [
+      { date: d("2026-07-16"), type: "applied", source: "system" },
+      { date: d("2026-07-22"), type: "interview", source: "manual", detail: "Entretien fixé au 28 juillet" },
+    ],
+  },
+  {
+    id: "a2", company: "Decathlon", role: "Product Owner — Parcours d'achat",
+    source: "ft-job", jobUrl: "#", notes: "Contact RH : Camille.",
+    jobText: "Nous recherchons un Product Owner pour piloter l'évolution du parcours d'achat sur nos plateformes e-commerce. Vous travaillerez avec les équipes design, data et développement pour prioriser la roadmap, rédiger les spécifications fonctionnelles et animer les rituels agiles.",
+    docs: [
+      { name: "Hariss Hafeji - CV.pdf", tpl: "Sobre", at: "2026-07-21" },
+      { name: "Hariss Hafeji - Lettre.pdf", tpl: "Lettre", at: "2026-07-21" },
+    ],
+    events: [{ date: d("2026-07-21"), type: "applied", source: "system" }],
+  },
+  {
+    id: "a3", company: "Manpower", role: "Manutentionnaire — préparation de commandes",
+    source: "manual", jobUrl: "", notes: "",
+    jobText: "",
+    docs: [{ name: "Hariss Hafeji - CV.pdf", tpl: "Sobre", at: "2026-07-23" }],
+    events: [{ date: d("2026-07-23"), type: "applied", source: "manual" }],
+  },
+  {
+    id: "a4", company: "Leroy Merlin", role: "Responsable e-commerce",
+    source: "manual", jobUrl: "", notes: "",
+    jobText: "",
+    docs: [{ name: "Hariss Hafeji - CV.pdf", tpl: "Kakuna", at: "2026-07-07" }],
+    events: [{ date: d("2026-07-07"), type: "applied", source: "system" }],
+  },
+  {
+    id: "a5", company: "Veepee", role: "Chef de produit digital",
+    source: "ft-job", jobUrl: "#", notes: "",
+    jobText: "Rattaché à la direction produit, vous pilotez le cycle de vie des offres sur le site et l'application mobile.",
+    docs: [
+      { name: "Hariss Hafeji - CV.pdf", tpl: "Sobre", at: "2026-07-03" },
+      { name: "Hariss Hafeji - Lettre.pdf", tpl: "Lettre", at: "2026-07-03" },
+    ],
+    events: [
+      { date: d("2026-07-03"), type: "applied", source: "system" },
+      { date: d("2026-07-19"), type: "rejected", source: "manual" },
+    ],
+  },
+  {
+    id: "a6", company: "Randstad", role: "Agent de quai",
+    source: "manual", jobUrl: "", notes: "",
+    jobText: "",
+    docs: [{ name: "Hariss Hafeji - CV.pdf", tpl: "Sobre", at: "2026-06-28" }],
+    events: [{ date: d("2026-06-28"), type: "applied", source: "manual" }],
+  },
+  {
+    id: "a7", company: "Cdiscount", role: "Traffic manager",
+    source: "ft-job", jobUrl: "#", notes: "",
+    jobText: "Vous pilotez l'acquisition payante et le référencement naturel sur l'ensemble des catégories.",
+    docs: [{ name: "Hariss Hafeji - CV.pdf", tpl: "Marine", at: "2026-06-08" }],
+    events: [{ date: d("2026-06-08"), type: "applied", source: "system" }],
+  },
+  {
+    id: "a8", company: "Adecco", role: "Cariste CACES 1-3-5",
+    source: "manual", jobUrl: "", notes: "",
+    jobText: "",
+    docs: [{ name: "Hariss Hafeji - CV.pdf", tpl: "Sobre", at: "2026-05-30" }],
+    events: [{ date: d("2026-05-30"), type: "applied", source: "manual" }],
+  },
+];
+
+/* Le rayon « Mes CV » : des documents réutilisables, rien de plus.
+   `label` est un simple libellé pour tes yeux — il ne déclenche aucun calcul. */
+let shelf = [
+  { id: "v1", label: "Intérim manutention", file: "Hariss Hafeji - CV.pdf", tpl: "Sobre", at: "2026-05-14" },
+  { id: "v2", label: "", file: "Hariss Hafeji - CV.pdf", tpl: "Graphique", at: "2026-07-23" },
+  { id: "v3", label: "CV anglais", file: "Hariss Hafeji - CV.pdf", tpl: "Kakuna", at: "2026-06-02" },
+];
+
+let filter = "all";
+let query = "";
+const open = new Set(["a2"]);
+
+/* --- Dérivation : le temps fait le travail, l'utilisateur ne saisit rien --- */
+function lastSignificant(app) {
+  const sig = app.events.filter((e) => e.type !== "note");
+  return sig.length ? sig[sig.length - 1] : null;
+}
+function deriveStatus(app) {
+  if (app.events.some((e) => e.type === "rejected")) return "rejected";
+  if (app.events.some((e) => e.type === "interview")) return "interview";
+  const last = lastSignificant(app);
+  const days = last ? Math.floor((TODAY - last.date) / DAY) : 0;
+  return days > STALE_DAYS ? "stale" : "applied";
+}
+function daysSince(app) {
+  const first = app.events.find((e) => e.type === "applied");
+  return Math.floor((TODAY - (first ? first.date : TODAY)) / DAY);
+}
+
+const LABELS = { applied: "En cours", interview: "Entretien", rejected: "Refusée", stale: "Sans suite" };
+const FR_MONTHS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+function frDate(ts) {
+  const x = new Date(ts);
+  return x.getDate() + " " + FR_MONTHS[x.getMonth()];
+}
+function ageClass(app, status) {
+  if (status === "stale") return "app-age--stale";
+  if (status === "interview") return "app-age--interview app-age--warm";
+  return daysSince(app) < 7 ? "app-age--fresh" : "app-age--warm";
+}
+
+function matches(app) {
+  const status = deriveStatus(app);
+  if (filter !== "all" && filter !== status) return false;
+  if (!query) return true;
+  const q = query.toLowerCase();
+  return (app.company + " " + app.role + " " + app.jobText).toLowerCase().includes(q);
+}
+
+/* --- Rendu --- */
+function renderDash() {
+  const total = apps.length;
+  const by = (s) => apps.filter((a) => deriveStatus(a) === s).length;
+  const answered = by("interview") + by("rejected");
+  const rate = total ? Math.round((answered / total) * 100) : 0;
+  const oldest = apps.reduce((m, a) => Math.min(m, a.events[0].date), Infinity);
+  const tiles = [
+    ["Candidatures", total, "depuis le " + frDate(oldest), ""],
+    ["En cours", by("applied"), "moins de " + STALE_DAYS + " jours", ""],
+    ["Entretiens", by("interview"), "réponses positives", "app-tile--interview"],
+    ["Taux de réponse", rate + " %", answered + " réponses sur " + total, ""],
+    ["Sans suite", by("stale"), "silence > " + STALE_DAYS + " jours", "app-tile--stale"],
+  ];
+  document.getElementById("dash").innerHTML = tiles
+    .map(([label, value, hint, cls]) => `
+      <div class="app-tile ${cls}">
+        <div class="app-tile__label">${label}</div>
+        <div class="app-tile__value">${value}</div>
+        <div class="app-tile__hint">${hint}</div>
+      </div>`)
+    .join("");
+}
+
+function renderChips() {
+  const counts = {
+    all: apps.length,
+    applied: apps.filter((a) => deriveStatus(a) === "applied").length,
+    interview: apps.filter((a) => deriveStatus(a) === "interview").length,
+    rejected: apps.filter((a) => deriveStatus(a) === "rejected").length,
+    stale: apps.filter((a) => deriveStatus(a) === "stale").length,
+  };
+  const defs = [["all", "Tout"], ["applied", "En cours"], ["interview", "Entretien"], ["rejected", "Refusée"], ["stale", "Sans suite"]];
+  document.getElementById("chips").innerHTML = defs
+    .map(([key, label]) => `
+      <button class="app-chip ${filter === key ? "active" : ""}" data-filter="${key}">
+        ${label} <span class="app-chip__count">${counts[key]}</span>
+      </button>`)
+    .join("");
+}
+
+function docChips(app) {
+  return app.docs
+    .map((doc) => `<span class="stat-chip">${doc.tpl === "Lettre" ? "Lettre" : "CV · " + doc.tpl}</span>`)
+    .join("");
+}
+
+function metaLine(app, status) {
+  const applied = app.events.find((e) => e.type === "applied");
+  const bits = ["Postulée le " + frDate(applied.date)];
+  const itw = app.events.find((e) => e.type === "interview");
+  if (itw) bits.push(itw.detail || "Entretien décroché");
+  const rej = app.events.find((e) => e.type === "rejected");
+  if (rej) bits.push("Refus reçu le " + frDate(rej.date));
+  if (status === "stale") bits.push("Aucune réponse");
+  if (app.jobUrl) bits.push('<a href="#" onclick="return false">Voir l\'offre</a>');
+  return bits.join('<span class="app-dot">•</span>');
+}
+
+function renderExpand(app) {
+  const docs = app.docs
+    .map((doc) => `
+      <div class="app-doc-row">
+        <span class="app-doc-name">${doc.name}</span>
+        <span style="display:flex;align-items:center;gap:12px">
+          <span class="app-doc-date">${doc.at.slice(8)}/${doc.at.slice(5, 7)}</span>
+          <button class="app-btn">Ouvrir dans l'éditeur</button>
+        </span>
+      </div>`)
+    .join("");
+  const offer = app.jobText
+    ? `<div><div class="app-block__label">Offre conservée</div><div class="app-offer">${app.jobText}</div></div>`
+    : "";
+  const timeline = app.events
+    .map((e) => `
+      <div class="app-event">
+        <span class="app-event__date">${new Date(e.date).toLocaleDateString("fr-FR")}</span>
+        <span>${{ applied: "Candidature envoyée", interview: "Entretien décroché", rejected: "Refus enregistré", note: "Note" }[e.type]}</span>
+        <span class="app-event__src">${e.source === "system" ? "auto" : e.source === "ai" ? "ia" : "vous"}</span>
+      </div>`)
+    .join("");
+  return `
+    <div class="app-expand">
+      <div><div class="app-block__label">Documents rattachés</div>${docs}</div>
+      ${offer}
+      <div><div class="app-block__label">Journal</div><div class="app-timeline">${timeline}</div></div>
+      <div>
+        <div class="app-block__label">Note</div>
+        <textarea class="app-note" rows="2" data-note="${app.id}" placeholder="Un détail à retenir (facultatif)…">${esc(app.notes)}</textarea>
+      </div>
+    </div>`;
+}
+
+function renderList() {
+  const shown = apps
+    .filter(matches)
+    .sort((a, b) => b.events[0].date - a.events[0].date);
+  document.getElementById("empty").style.display = shown.length ? "none" : "block";
+  document.getElementById("list").innerHTML = shown
+    .map((app) => {
+      const status = deriveStatus(app);
+      const isOpen = open.has(app.id);
+      const actions = [];
+      if (status !== "interview" && status !== "rejected")
+        actions.push(`<button class="app-btn app-btn--interview" data-act="interview" data-id="${app.id}">Entretien</button>`);
+      if (status !== "rejected")
+        actions.push(`<button class="app-btn app-btn--reject" data-act="rejected" data-id="${app.id}">Refusée</button>`);
+      if (status === "rejected" || status === "interview")
+        actions.push(`<button class="app-btn" data-act="undo" data-id="${app.id}" title="Annuler la dernière action">Annuler</button>`);
+      return `
+        <article class="app-card ${status === "stale" ? "app-card--stale" : ""} ${isOpen ? "app-card--open" : ""}">
+          <div class="app-age ${ageClass(app, status)}">
+            <span class="app-age__num">${daysSince(app)}</span>
+            <span class="app-age__unit">jours</span>
+          </div>
+          <div class="app-main">
+            <div class="app-company">${app.company}</div>
+            <div class="app-role">${app.role}</div>
+            <div class="app-meta">${metaLine(app, status)}</div>
+            <div class="app-docs">${docChips(app)}</div>
+          </div>
+          <div class="app-right">
+            <span class="app-badge app-badge--${status}">${LABELS[status]}</span>
+            <div class="app-actions">
+              ${actions.join("")}
+              <button class="app-btn app-btn--icon" data-act="toggle" data-id="${app.id}" title="${isOpen ? "Replier" : "Déplier"}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="${isOpen ? "M18 15l-6-6-6 6" : "M6 9l6 6 6-6"}"/></svg>
+              </button>
+            </div>
+          </div>
+          ${isOpen ? renderExpand(app) : ""}
+        </article>`;
+    })
+    .join("");
+}
+
+function renderShelf() {
+  document.getElementById("shelf-count").textContent = shelf.length;
+  document.getElementById("shelf").innerHTML = shelf
+    .map((cv) => `
+      <article class="app-cv">
+        <div>
+          <div class="app-cv__name ${cv.label ? "" : "app-cv__name--unnamed"}" data-rename="${cv.id}" title="Cliquer pour renommer">${esc(cv.label || cv.file)}</div>
+          <div class="app-cv__meta"><span>CV · ${cv.tpl}</span><span class="app-dot">•</span><span>créé le ${frDate(d(cv.at))}</span></div>
+        </div>
+        <div class="app-actions">
+          <button class="app-btn">Ouvrir dans l'éditeur</button>
+          <button class="app-btn app-btn--icon" data-rename-btn="${cv.id}" title="Renommer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </button>
+          <button class="app-btn app-btn--reject app-btn--icon" data-del="${cv.id}" title="Supprimer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+      </article>`)
+    .join("");
+}
+
+function renderAll() {
+  renderDash();
+  renderChips();
+  renderList();
+  renderShelf();
+}
+
+/* --- Interactions --- */
+document.addEventListener("click", (ev) => {
+  const chip = ev.target.closest("[data-filter]");
+  if (chip) { filter = chip.dataset.filter; renderAll(); return; }
+
+  const act = ev.target.closest("[data-act]");
+  if (act) {
+    const app = apps.find((a) => a.id === act.dataset.id);
+    const kind = act.dataset.act;
+    if (kind === "toggle") { open.has(app.id) ? open.delete(app.id) : open.add(app.id); }
+    else if (kind === "undo") {
+      const i = app.events.map((e) => e.type).lastIndexOf(app.events.some((e) => e.type === "rejected") ? "rejected" : "interview");
+      if (i > 0) app.events.splice(i, 1);
+    } else {
+      app.events.push({ date: TODAY, type: kind, source: "manual" });
+    }
+    renderAll();
+    return;
+  }
+
+  const renameTarget = ev.target.closest("[data-rename]") || ev.target.closest("[data-rename-btn]");
+  if (renameTarget) {
+    const id = renameTarget.dataset.rename || renameTarget.dataset.renameBtn;
+    startRename(id);
+    return;
+  }
+
+  const del = ev.target.closest("[data-del]");
+  if (del) { shelf = shelf.filter((c) => c.id !== del.dataset.del); renderShelf(); }
+});
+
+/* Renommage en ligne — pas de prompt() natif, l'app les interdit. */
+function startRename(id) {
+  const cv = shelf.find((c) => c.id === id);
+  const node = document.querySelector(`[data-rename="${id}"]`);
+  if (!cv || !node || node.querySelector("input")) return;
+  node.innerHTML = `<input class="app-rename" value="${esc(cv.label)}" placeholder="Ex : Intérim manutention" />`;
+  const input = node.querySelector("input");
+  input.focus();
+  input.select();
+  const commit = () => { cv.label = input.value.trim(); renderShelf(); };
+  input.addEventListener("blur", commit);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") commit();
+    if (e.key === "Escape") renderShelf();
+  });
+}
+
+document.getElementById("search").addEventListener("input", (e) => {
+  query = e.target.value;
+  renderList();
+});
+
+document.addEventListener("input", (e) => {
+  const note = e.target.closest("[data-note]");
+  if (note) {
+    const app = apps.find((a) => a.id === note.dataset.note);
+    if (app) app.notes = note.value;
+  }
+});
+
+document.getElementById("btn-theme").addEventListener("click", () => {
+  const root = document.documentElement;
+  root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+});
+
+document.getElementById("btn-add").addEventListener("click", () => {
+  const company = "Nouvelle entreprise";
+  apps.unshift({
+    id: "n" + Date.now(), company, role: "Poste à préciser",
+    source: "manual", jobUrl: "", notes: "", jobText: "",
+    docs: [],
+    events: [{ date: TODAY, type: "applied", source: "manual" }],
+  });
+  renderAll();
+});
+
+renderAll();
+
+</script>
+</body>
+</html>
