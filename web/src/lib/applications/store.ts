@@ -12,6 +12,7 @@ import {
 import { normKey } from "./normKey";
 import { anonymousIdsToDelete } from "./shelf";
 import { planBackfill } from "./backfill";
+import { indexOfLastStatusEvent } from "./status";
 import type { Application } from "./types";
 
 const BACKFILL_KEY = "applications-backfill-v1";
@@ -84,11 +85,8 @@ export async function undoLastStatusEvent(id: string): Promise<void> {
   const all = await listApplicationsRaw();
   const app = all.find((a) => a.id === id);
   if (!app) return;
-  const idx = app.events.map((e) => e.type).reduce<number>(
-    (last, type, i) => (type === "interview" || type === "rejected" ? i : last),
-    -1,
-  );
-  if (idx <= 0) return;
+  const idx = indexOfLastStatusEvent(app.events);
+  if (idx < 0) return;
   app.events = app.events.filter((_, i) => i !== idx);
   app.updatedAt = Date.now();
   await putApplication(app);
@@ -103,7 +101,15 @@ export async function saveApplicationNotes(id: string, notes: string): Promise<v
   await putApplication(app);
 }
 
-/** Supprime la candidature et détache ses documents (ils repassent au rayon). */
+/**
+ * Supprime la candidature et détache ses documents : ils repassent tous au rayon
+ * « Mes CV » et sont conservés — c'est ce que promet le message de confirmation.
+ * Si la candidature portait plusieurs documents non nommés, le rayon contient
+ * alors temporairement plus d'un anonyme du même type. C'est assumé : la règle du
+ * CV anonyme unique est appliquée à l'export, donc le prochain téléchargement
+ * nettoie l'excédent. Supprimer un document ici serait une perte de donnée que
+ * l'utilisateur n'a pas demandée. Décision propriétaire du 25/07/2026.
+ */
 export async function deleteApplication(id: string): Promise<void> {
   const docs = await listHistoryByApplication(id);
   for (const doc of docs) await updateHistoryFields(doc.id, { applicationId: undefined });

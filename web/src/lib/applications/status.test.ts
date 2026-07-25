@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { deriveStatus, daysSince, summarize } from "./status";
+import { deriveStatus, daysSince, summarize, indexOfLastStatusEvent } from "./status";
 import type { Application, ApplicationEvent } from "./types";
 
 const DAY = 86400000;
@@ -77,5 +77,29 @@ describe("summarize", () => {
     expect(s.total).toBe(0);
     expect(s.responseRate).toBe(0);
     expect(s.oldest).toBeNull();
+  });
+});
+
+describe("indexOfLastStatusEvent", () => {
+  it("retourne -1 quand aucun événement de statut n'a été saisi", () => {
+    expect(indexOfLastStatusEvent(app([applied(3)]).events)).toBe(-1);
+  });
+
+  it("retourne l'index du dernier événement de statut quand il y en a plusieurs", () => {
+    const a = app([
+      applied(30),
+      { date: NOW - 20 * DAY, type: "interview", source: "manual" },
+      { date: NOW - 10 * DAY, type: "rejected", source: "manual" },
+    ]);
+    expect(indexOfLastStatusEvent(a.events)).toBe(2);
+  });
+
+  it("ne désigne jamais un événement applied ou note", () => {
+    const a = app([
+      applied(30),
+      { date: NOW - 20 * DAY, type: "interview", source: "manual" },
+      { date: NOW - 1 * DAY, type: "note", source: "manual", detail: "relu" },
+    ]);
+    expect(indexOfLastStatusEvent(a.events)).toBe(1);
   });
 });

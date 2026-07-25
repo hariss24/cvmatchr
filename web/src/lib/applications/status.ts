@@ -34,6 +34,19 @@ export function daysSince(app: Application, now: number): number {
   return Math.floor((now - (first ? first.date : now)) / DAY);
 }
 
+/**
+ * Index du dernier événement de statut saisi à la main (entretien ou refus),
+ * ou -1 s'il n'y en a aucun. Sert au bouton « Annuler ». L'événement `applied`
+ * n'est jamais candidat : l'ancienneté de la candidature ne peut donc pas être
+ * perdue par une annulation.
+ */
+export function indexOfLastStatusEvent(events: ApplicationEvent[]): number {
+  return events.reduce<number>(
+    (last, e, i) => (e.type === "interview" || e.type === "rejected" ? i : last),
+    -1,
+  );
+}
+
 export interface ApplicationSummary {
   total: number;
   applied: number;
