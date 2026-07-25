@@ -2499,3 +2499,170 @@ button.go:disabled {
   box-shadow: var(--seg-knob-shadow);
 }
 
+/* ===========================================================================
+   MES CANDIDATURES (tracker) — maquette docs/design/candidatures/
+   =========================================================================== */
+
+/* ---- Dashboard : tuiles ---- */
+.app-dash {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 22px;
+}
+.app-tile {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 2px rgba(31,27,22,0.04), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+[data-theme="dark"] .app-tile { box-shadow: 0 1px 2px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.05); }
+.app-tile__label {
+  font-size: 10px; color: var(--muted); letter-spacing: 0.8px;
+  text-transform: uppercase; font-weight: 600; margin-bottom: 8px;
+}
+.app-tile__value { font-size: 28px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
+.app-tile__hint { font-size: 11px; color: var(--faint); margin-top: 6px; }
+.app-tile--interview .app-tile__value { color: var(--orange-text); }
+.app-tile--stale .app-tile__value { color: var(--faint); }
+
+/* ---- Barre de filtres ---- */
+.app-filters { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; }
+.app-chips { display: flex; gap: 6px; flex-shrink: 0; }
+.app-chip {
+  background: var(--bg); border: none; color: var(--muted);
+  font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+  padding: 0 12px; height: 36px; border-radius: 999px; cursor: pointer;
+  box-shadow: var(--neu-raised-sm); display: inline-flex; align-items: center; gap: 6px;
+}
+.app-chip:hover { color: var(--text); box-shadow: var(--neu-raised); }
+.app-chip.active { color: var(--text); box-shadow: var(--neu-inset); }
+.app-chip__count { color: var(--faint); font-family: var(--font-code); font-size: 11px; }
+
+/* ---- Carte de candidature ---- */
+.app-card {
+  background: var(--bg); box-shadow: var(--neu-raised-sm); border-radius: 16px;
+  padding: 16px 20px; display: grid; grid-template-columns: 78px 1fr auto;
+  gap: 20px; align-items: center; transition: box-shadow 150ms;
+}
+.app-card:hover { box-shadow: var(--neu-raised); }
+.app-card--stale { opacity: 0.62; }
+
+/* Médaillon d'ancienneté : creusé, façon compteur — le temps travaille seul. */
+.app-age {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 68px; height: 68px; border-radius: 50%;
+  background: var(--bg); box-shadow: var(--neu-inset);
+}
+.app-age__num { font-size: 22px; font-weight: 800; line-height: 1; }
+.app-age__unit { font-size: 10px; color: var(--faint); font-weight: 600; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+.app-age--fresh .app-age__num { color: var(--apply-text); }
+.app-age--warm .app-age__num { color: var(--text); }
+.app-age--stale .app-age__num { color: var(--faint); }
+.app-age--interview { box-shadow: var(--neu-inset), 0 0 0 2px var(--orange2); }
+
+.app-main { min-width: 0; }
+.app-company {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+  color: var(--orange-text); line-height: 1.3;
+}
+.app-role { font-size: 15px; font-weight: 700; color: var(--text); margin-top: 2px; }
+.app-meta { font-size: 12px; color: var(--muted); margin-top: 5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.app-dot { color: var(--faint); }
+.app-docs { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+
+.app-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.app-badge {
+  font-size: 11px; font-weight: 700; padding: 4px 11px; border-radius: 999px;
+  background: var(--bg); box-shadow: var(--neu-raised-sm);
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.app-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.app-badge--applied { color: var(--apply-text); }
+.app-badge--interview { color: var(--orange-text); box-shadow: var(--neu-raised-sm), 0 0 0 1px var(--orange2); }
+.app-badge--rejected { color: var(--error); }
+.app-badge--stale { color: var(--faint); }
+.app-actions { display: flex; gap: 8px; }
+.app-btn {
+  background: var(--bg); border: none; color: var(--muted);
+  font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+  padding: 0 12px; height: 32px; border-radius: 9px; cursor: pointer;
+  box-shadow: var(--neu-raised-sm); display: inline-flex; align-items: center; gap: 6px;
+}
+.app-btn:hover { color: var(--text); box-shadow: var(--neu-raised); transform: translateY(-1px); }
+.app-btn--interview:hover { color: var(--orange-text); }
+.app-btn--reject:hover { color: var(--error); }
+.app-btn--icon { width: 32px; padding: 0; justify-content: center; }
+
+/* ---- Carte dépliée ---- */
+.app-card--open { grid-template-columns: 78px 1fr auto; }
+.app-expand {
+  grid-column: 1 / -1; margin-top: 6px; padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 14px;
+}
+.app-block__label {
+  font-size: 10px; color: var(--muted); letter-spacing: 0.8px;
+  text-transform: uppercase; font-weight: 600; margin-bottom: 8px;
+}
+.app-doc-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 10px 12px; margin-bottom: 8px;
+}
+.app-doc-name { font-family: var(--font-code); font-size: 12px; color: var(--text); }
+.app-doc-date { font-size: 11px; color: var(--faint); font-family: var(--font-code); }
+.app-offer {
+  background: var(--field); border-radius: 12px; box-shadow: var(--neu-inset);
+  padding: 12px 14px; font-size: 12.5px; line-height: 1.6; color: var(--muted);
+  max-height: 92px; overflow: hidden; position: relative;
+}
+.app-offer::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 38px;
+  background: linear-gradient(180deg, transparent, var(--field));
+}
+.app-note {
+  background: var(--field); color: var(--text); border: none; border-radius: 12px;
+  box-shadow: var(--neu-inset); padding: 10px 14px; font-size: 13px; width: 100%;
+  font-family: var(--font-ui); outline: none; resize: none;
+}
+.app-timeline { display: flex; flex-direction: column; gap: 7px; }
+.app-event { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+.app-event__date { font-family: var(--font-code); font-size: 11px; color: var(--faint); min-width: 76px; }
+.app-event__src {
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 999px; box-shadow: var(--neu-inset); color: var(--faint);
+}
+
+/* ---- Rayon « Mes CV » : une étagère assumée, pas un tiroir ---- */
+.app-shelf { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border); }
+.app-shelf__head {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
+}
+.app-cv__warn { color: var(--warning); }
+.app-cv__kept { color: var(--apply-text); }
+.app-shelf__title {
+  font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
+  color: var(--muted); margin: 0;
+}
+.app-shelf__count { color: var(--faint); font-family: var(--font-code); font-size: 11px; }
+.app-shelf__hint { font-size: 12px; color: var(--faint); margin: 0 0 14px; line-height: 1.6; }
+.app-shelf__list { display: flex; flex-direction: column; gap: 10px; }
+.app-cv {
+  background: var(--bg); box-shadow: var(--neu-raised-sm); border-radius: 14px;
+  padding: 13px 18px; display: grid; grid-template-columns: 1fr auto auto;
+  gap: 16px; align-items: center;
+}
+.app-cv:hover { box-shadow: var(--neu-raised); }
+.app-cv__name { font-size: 14px; font-weight: 700; color: var(--text); }
+.app-cv__name--unnamed { font-family: var(--font-code); font-size: 12.5px; font-weight: 500; color: var(--muted); }
+.app-cv__meta { font-size: 11.5px; color: var(--faint); margin-top: 3px; display: flex; gap: 8px; }
+.app-cv__used { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.app-cv__used strong { color: var(--text); }
+
+/* Renommage en ligne dans le rayon. */
+.app-cv__name[data-rename] { cursor: text; }
+.app-cv__name[data-rename]:hover { color: var(--orange-text); }
+.app-rename {
+  background: var(--field); color: var(--text); border: none; border-radius: 9px;
+  box-shadow: var(--neu-inset), 0 0 0 3.5px rgba(232,93,4,0.16);
+  padding: 5px 10px; font-size: 14px; font-weight: 700; font-family: var(--font-ui);
+  outline: none; width: 260px; max-width: 100%;
+}
+
