@@ -6,11 +6,11 @@ import { usePathname } from "next/navigation";
 const SCREENS = [
   { href: "/", label: "Éditeur" },
   { href: "/jobs", label: "Offres" },
-  { href: "/history", label: "Historique" },
+  { href: "/candidatures", label: "Candidatures" },
 ];
 
 /**
- * Navigation segmentée des trois écrans (Éditeur / Offres / Historique),
+ * Navigation segmentée des trois écrans (Éditeur / Offres / Candidatures),
  * avec curseur coulissant — design « Refonte Atelier ».
  */
 export default function SegmentedNav() {

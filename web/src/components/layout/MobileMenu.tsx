@@ -55,9 +55,9 @@ export default function MobileMenu({
           Offres
         </Link>
 
-        <Link href="/history" className="mobile-menu__item" onClick={onClose}>
+        <Link href="/candidatures" className="mobile-menu__item" onClick={onClose}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><polyline points="12 7 12 12 15 14" /></svg>
-          Historique
+          Candidatures
         </Link>
 
         <Link href="/profil" className="mobile-menu__item" onClick={onClose}>

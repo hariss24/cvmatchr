@@ -77,7 +77,7 @@ export default function ApplicationCard({
   async function reload(doc: HistoryEntry) {
     if (!(await uiConfirm("Recharger ce document dans l'éditeur ? Votre travail actuel sera remplacé.", "Recharger"))) return;
     await updateHistoryEntryStat(doc.id, "editor_reloads");
-    // eslint-disable-next-line react-hooks/purity -- Date.now() ici est dans un handler async (clic), pas pendant le render ; même motif que HistoryList.handleReload.
+    // eslint-disable-next-line react-hooks/purity -- appel confiné à un gestionnaire de clic derrière une confirmation, inatteignable pendant le render.
     await saveDraft({ id: `draft-${doc.doc_type}`, json: doc.json, templateId: doc.templateId, updatedAt: Date.now() });
     setDocType(doc.doc_type);
     if (doc.json) setJson(doc.json);
