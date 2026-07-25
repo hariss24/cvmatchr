@@ -9,6 +9,7 @@ import type { JobOffer } from "@/lib/jobs/francetravail";
 import { EMPTY_PROFILE, type JobSearchProfile } from "@/lib/jobs/profile";
 import { getJobProfile, saveJobProfile } from "@/lib/storage/db";
 import { relevance } from "@/lib/jobs/prefilter";
+import { upsertApplicationForDocument } from "@/lib/applications/store";
 import ScanProgress from "./ScanProgress";
 import JobCard from "./JobCard";
 import ScoringInfo from "./ScoringInfo";
@@ -198,6 +199,24 @@ export default function JobsView() {
     router.push("/pack");
   }
 
+  /** « Suivre » : crée la candidature et conserve le texte de l'offre pour plus tard. */
+  async function track(job: JobEntry) {
+    const applicationId = await upsertApplicationForDocument({
+      company: job.company,
+      role: job.title,
+      source: "ft-job",
+      jobText: job.jobText,
+      jobUrl: job.url,
+    });
+    if (!applicationId) {
+      toast("Cette offre n'a ni entreprise ni intitulé exploitable.", "error");
+      return;
+    }
+    await saveJob({ ...job, applicationId });
+    toast("Ajoutée à « Mes candidatures ».", "success");
+    await reload();
+  }
+
   async function dismiss(job: JobEntry) {
     await setJobStatus(job.id, "dismissed");
     setJobs((prev) => prev.filter((j) => j.id !== job.id));
@@ -270,7 +289,7 @@ export default function JobsView() {
       ) : (
         <div className="jobs-list" data-testid="jobs-list">
           {jobs.map((job) => (
-            <JobCard key={job.id} job={job} onAdapt={adapt} onApply={apply} onDismiss={dismiss} onSeen={seen} />
+            <JobCard key={job.id} job={job} onAdapt={adapt} onApply={apply} onTrack={track} onDismiss={dismiss} onSeen={seen} />
           ))}
         </div>
       )}

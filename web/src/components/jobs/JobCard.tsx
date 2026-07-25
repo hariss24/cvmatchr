@@ -13,12 +13,14 @@ export default function JobCard({
   job,
   onAdapt,
   onApply,
+  onTrack,
   onDismiss,
   onSeen,
 }: {
   job: JobEntry;
   onAdapt: (job: JobEntry) => void;
   onApply: (job: JobEntry) => void;
+  onTrack: (job: JobEntry) => void;
   onDismiss: (job: JobEntry) => void;
   onSeen: (job: JobEntry) => void;
 }) {
@@ -56,6 +58,16 @@ export default function JobCard({
           data-testid="job-apply"
         >
           Candidater
+        </button>
+        <button
+          type="button"
+          className="neu-btn-sm"
+          onClick={() => onTrack(job)}
+          disabled={Boolean(job.applicationId)}
+          data-testid="job-track"
+          title={job.applicationId ? "Déjà suivie dans Mes candidatures" : "Suivre cette candidature"}
+        >
+          {job.applicationId ? "Suivie" : "Suivre"}
         </button>
         {job.url ? (
           <a

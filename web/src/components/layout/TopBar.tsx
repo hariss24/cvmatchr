@@ -8,6 +8,7 @@ import { generateResumePdfBlob, generateLetterPdfBlob } from "@/lib/pdfgen/gener
 // import removed
 import { toast, uiAlert, uiConfirm } from "@/state/uiStore";
 import { saveHistoryEntry, loadProfile } from "@/lib/storage/db";
+import { upsertApplicationForDocument, pruneAnonymousShelf } from "@/lib/applications/store";
 import { applyProfileToResume } from "@/lib/profile/profile";
 import { takeSnapshot } from "@/lib/storage/snapshots";
 import ChatPanel from "@/components/modals/ChatPanel";
@@ -102,8 +103,15 @@ export default function TopBar() {
       URL.revokeObjectURL(url);
       toast("PDF téléchargé.", "success");
 
+      // Une candidature naît de l'export dès qu'entreprise et poste sont connus.
+      // Sinon le document part au rayon « Mes CV », où un seul anonyme par type est
+      // conservé : l'ancien est remplacé silencieusement (le libellé l'annonce).
+      const applicationId = await upsertApplicationForDocument({
+        company, role, source: "generated",
+      });
+      const entryId = crypto.randomUUID();
       await saveHistoryEntry({
-        id: crypto.randomUUID(),
+        id: entryId,
         created_at: new Date().toISOString(),
         doc_type: currentDocType,
         company,
@@ -116,7 +124,9 @@ export default function TopBar() {
         last_viewed_at: new Date().toISOString(),
         json: structuredClone(json),
         templateId,
+        applicationId,
       });
+      if (!applicationId) await pruneAnonymousShelf(currentDocType, entryId);
     } catch {
       await uiAlert("Impossible de générer le PDF.", "Conversion PDF");
     } finally {
