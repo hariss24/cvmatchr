@@ -49,6 +49,7 @@ Conséquences retenues :
 | Dashboard | Migre de `/settings` vers `/candidatures`, recentré sur des indicateurs de candidature. `/settings` redevient purement réglages. |
 | Création | Automatique (génération de PDF) + 1 clic depuis l'onglet Offres + ajout manuel. |
 | Statuts | Postulée / Entretien / Refusée (manuels) + Sans suite (dérivé de l'ancienneté). |
+| CV non rattachés | Rayon nommé « Mes CV » (et non un tiroir « documents libres »). Les candidatures mémorisent la variante utilisée, d'où un taux de réponse par CV. |
 | Extensibilité IA | Journal d'événements avec un champ `source` acceptant `"ai"`. Aucun code de connecteur écrit maintenant. |
 | Style | Skeumorphique / neumorphique existant, variables `--neu-*` et tokens de thème. Jamais de couleur en dur. Maquette validée via Claude Design avant implémentation. |
 
@@ -75,6 +76,7 @@ export interface Application {
   source: "generated" | "ft-job" | "manual";
   events: ApplicationEvent[];
   notes: string;
+  variantLabel: string;    // nom du CV utilisé ("Intérim manutention"), "" si inconnu
   updatedAt: number;
 }
 ```
@@ -97,10 +99,15 @@ créée (cas des documents libres, voir 6.4).
 
 - `HistoryEntry.applicationId?: string` — rattache un document généré à sa
   candidature.
+- `HistoryEntry.label?: string` — nom donné à un CV du rayon « Mes CV »
+  (voir section 6.5). Vide ou absent = document non nommé.
 - `JobEntry.applicationId?: string` — mémorise qu'une offre France Travail est
   suivie (l'affichage du bouton « Suivre » en dépend).
+- `Draft.sourceVariantLabel?: string` — nom de la variante d'où vient le document
+  en cours d'édition, propagé à la candidature lors de l'export. Persisté dans le
+  brouillon pour survivre à un rechargement de page.
 
-Les deux sont optionnels : aucune donnée existante n'est invalidée.
+Tous sont optionnels : aucune donnée existante n'est invalidée.
 
 ### 4.4 Migration v8
 
@@ -183,13 +190,40 @@ Bouton « + Ajouter » sur `/candidatures`, ouvrant une modale (style
 toast le signale et la candidature existante est mise en évidence dans la liste
 plutôt que dupliquée.
 
-### 6.4 Documents libres
+### 6.4 Rayon « Mes CV » (documents non rattachés)
 
-Les entrées d'historique sans entreprise **ni** poste ne sont rattachables à
-aucune candidature. Elles restent accessibles dans une section repliée
-« Documents libres » en bas de `/candidatures`, avec les mêmes actions que
-l'ancienne page Historique (ouvrir dans l'éditeur, supprimer). Rien n'est perdu
-par la suppression de `/history`.
+Un CV peut être généré sans viser une entreprise précise : un CV « Intérim
+manutention » qu'on ressortira devant vingt agences, un CV en anglais, un CV
+généraliste. Ce n'est ni une candidature, ni un déchet : **c'est un actif
+réutilisable**, et il a besoin de sa propre étagère.
+
+Les entrées d'historique sans `applicationId` (donc sans entreprise **ni** poste)
+apparaissent dans une section **« Mes CV »** en bas de `/candidatures`, dépliée
+par défaut si elle n'est pas vide. Chaque document y expose :
+
+- son **nom**, éditable en ligne (`HistoryEntry.label`) — bouton « Nommer » tant
+  qu'il est vide, texte cliquable ensuite ;
+- sa date de création et son gabarit ;
+- « Ouvrir dans l'éditeur » et « Supprimer ».
+
+Le nommage est ce qui transforme un reliquat en variante identifiable. Il reste
+facultatif : un document non nommé s'affiche sous son nom de fichier, comme dans
+l'ancienne page Historique. Rien n'est perdu par la suppression de `/history`.
+
+### 6.5 Traçage de la variante utilisée
+
+« Ouvrir dans l'éditeur » depuis le rayon « Mes CV » écrit
+`sourceVariantLabel` (le `label` du document, ou `""` s'il n'est pas nommé) dans
+`docStore` et dans le brouillon. À l'export suivant, si une candidature est créée,
+elle enregistre cette valeur dans `variantLabel`.
+
+`sourceVariantLabel` est remis à `""` lorsque le document courant est remplacé par
+autre chose qu'une ouverture de variante : nouveau document, import PDF/texte,
+restauration d'un snapshot. Un CV construit de zéro produit donc une candidature
+sans variante, affichée « Sans variante » dans les statistiques.
+
+Aucune saisie n'est demandée à l'utilisateur : la variante est déduite du geste
+« j'ouvre ce CV-là pour postuler ».
 
 ## 7. Page `/candidatures`
 
@@ -199,14 +233,16 @@ par la suppression de `/history`.
 app/candidatures/page.tsx        # page, chargement des données, état des filtres
 components/applications/
   ApplicationsDashboard.tsx      # bandeau d'indicateurs
+  VariantPerformance.tsx         # taux de réponse par CV
   ApplicationsFilters.tsx        # recherche + filtres de statut
   ApplicationList.tsx            # liste
   ApplicationCard.tsx            # une candidature (dépliable)
   AddApplicationModal.tsx        # ajout manuel
-  FreeDocumentsSection.tsx       # documents libres (repliée)
+  ResumeShelf.tsx                # rayon « Mes CV » (documents non rattachés)
 lib/applications/
   status.ts                      # dérivation pure (testée)
   normKey.ts                     # normalisation (testée)
+  variants.ts                    # agrégation par variante (pure, testée)
   store.ts                       # accès Dexie + upsert + backfill (testé)
 ```
 
@@ -226,6 +262,26 @@ Cinq indicateurs, tous calculés depuis `applications` :
 Réutilise le style des tuiles actuellement dans `/settings` (`form-item`,
 grande valeur en gras). Aucun graphique dans cette version.
 
+### 7.2 bis Performance par CV
+
+Sous les tuiles, un bloc **« Performance par CV »** agrège les candidatures par
+`variantLabel` (les candidatures sans variante forment une ligne « Sans
+variante »). Une ligne par variante : nom, nombre de candidatures, nombre
+d'entretiens, et le taux de réponse.
+
+Deux garde-fous d'honnêteté statistique :
+
+- le taux en pourcentage **n'est affiché qu'à partir de 5 candidatures** pour la
+  variante ; en dessous, on montre les nombres bruts et la mention « trop peu de
+  données » ;
+- le bloc entier est masqué tant qu'aucune candidature ne porte de variante.
+
+Fonction pure `aggregateByVariant(apps, now, staleDays)` dans
+`lib/applications/variants.ts`, testée indépendamment de React.
+
+C'est l'indicateur le plus actionnable de la page : il ne dit pas seulement où en
+sont les candidatures, il dit **quel CV fonctionne**.
+
 ### 7.3 Filtres
 
 - Champ de recherche texte : filtre sur entreprise, poste et texte de l'offre.
@@ -240,6 +296,7 @@ Repliée : entreprise, poste, ancienneté en clair (« il y a 12 jours »), badg
 statut, nombre de documents rattachés.
 
 Dépliée :
+- la variante utilisée (`variantLabel`) si elle est connue ;
 - documents rattachés — chacun avec « Ouvrir dans l'éditeur » (recharge le JSON,
   comportement identique à l'actuelle page Historique) ;
 - lien vers l'offre (`jobUrl`) si présent ;
@@ -256,8 +313,8 @@ Dépliée :
 - `SegmentedNav` : `Historique` → `Candidatures` (`/candidatures`).
 - `app/history/page.tsx` devient une redirection vers `/candidatures` (les liens
   et signets existants continuent de fonctionner). Les composants
-  `components/history/*` encore utiles sont réutilisés par
-  `FreeDocumentsSection` et `ApplicationCard` ; les autres sont supprimés.
+  `components/history/*` encore utiles sont réutilisés par `ResumeShelf` et
+  `ApplicationCard` ; les autres sont supprimés.
 - `/settings` : la section Dashboard est retirée, le titre redevient
   « Paramètres », et le réglage `staleDays` est ajouté dans « Préférences de
   l'Application ».
@@ -313,13 +370,21 @@ Tests Vitest (nouveaux) :
 4. `backfillApplications` — idempotent (deux exécutions ne dupliquent rien) ;
    trois entrées d'historique pour deux entreprises → deux candidatures avec les
    documents correctement rattachés.
+5. `aggregateByVariant` — regroupe correctement par `variantLabel` ; les
+   candidatures sans variante forment une ligne « Sans variante » ; le
+   pourcentage est `null` en dessous de 5 candidatures et calculé au-delà ;
+   les entretiens sont comptés une seule fois par candidature.
+6. Propagation de la variante — ouvrir un CV nommé depuis le rayon puis exporter
+   avec entreprise + poste crée une candidature portant ce `variantLabel` ; un
+   import PDF entre-temps remet la variante à vide.
 
 Vérifications manuelles :
 
-5. `npm test` passe.
-6. `npm run build` passe (typecheck strict inclus — Vitest ne typecheck pas).
-7. `npm run lint` passe.
-8. Dans le navigateur : générer un PDF avec entreprise + poste renseignés fait
-   apparaître la candidature dans `/candidatures` ; « Entretien » change le
-   badge ; `/history` redirige ; le dashboard a disparu de `/settings` ; le
-   rendu respecte la maquette validée en mode clair **et** sombre.
+7. `npm test` passe.
+8. `npm run build` passe (typecheck strict inclus — Vitest ne typecheck pas).
+9. `npm run lint` passe.
+10. Dans le navigateur : générer un PDF avec entreprise + poste renseignés fait
+    apparaître la candidature dans `/candidatures` ; « Entretien » change le
+    badge ; un PDF sans entreprise ni poste atterrit dans « Mes CV » et peut être
+    nommé ; `/history` redirige ; le dashboard a disparu de `/settings` ; le
+    rendu respecte la maquette validée en mode clair **et** sombre.

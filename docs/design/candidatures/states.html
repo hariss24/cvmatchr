@@ -298,18 +298,49 @@ a { color: var(--link); text-decoration: none; }
   padding: 2px 7px; border-radius: 999px; box-shadow: var(--neu-inset); color: var(--faint);
 }
 
-/* ---- Section repliée « Documents libres » ---- */
-.app-free {
-  margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--border);
+/* ---- Performance par CV : l'indicateur qui dit QUOI changer ---- */
+.app-perf {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 14px 16px; margin-bottom: 22px;
+  box-shadow: 0 1px 2px rgba(31,27,22,0.04), inset 0 1px 0 rgba(255,255,255,0.9);
 }
-.app-free__head {
-  display: flex; align-items: center; gap: 8px; width: 100%;
-  background: none; border: none; padding: 4px 0; cursor: pointer;
+[data-theme="dark"] .app-perf { box-shadow: 0 1px 2px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.05); }
+.app-perf__row {
+  display: grid; grid-template-columns: 1fr 120px 110px 130px; gap: 14px;
+  align-items: center; padding: 9px 0; border-top: 1px solid var(--border);
+}
+.app-perf__row:first-of-type { border-top: none; }
+.app-perf__name { font-size: 13.5px; font-weight: 700; color: var(--text); }
+.app-perf__name--none { color: var(--faint); font-weight: 600; font-style: italic; }
+.app-perf__cell { font-size: 12.5px; color: var(--muted); }
+.app-perf__rate { font-size: 17px; font-weight: 800; text-align: right; letter-spacing: -0.3px; }
+.app-perf__rate--good { color: var(--apply-text); }
+.app-perf__rate--weak { color: var(--muted); }
+.app-perf__rate--thin { font-size: 11px; font-weight: 600; color: var(--faint); text-align: right; font-style: italic; }
+
+/* ---- Rayon « Mes CV » : une étagère assumée, pas un tiroir ---- */
+.app-shelf { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border); }
+.app-shelf__head {
+  display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px;
+}
+.app-shelf__title {
   font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
-  color: var(--muted); font-family: var(--font-ui);
+  color: var(--muted); margin: 0;
 }
-.app-free__count { color: var(--faint); font-family: var(--font-code); text-transform: none; letter-spacing: 0; }
-.app-free__hint { font-size: 12px; color: var(--faint); margin-top: 8px; line-height: 1.6; }
+.app-shelf__count { color: var(--faint); font-family: var(--font-code); font-size: 11px; }
+.app-shelf__hint { font-size: 12px; color: var(--faint); margin: 0 0 14px; line-height: 1.6; }
+.app-shelf__list { display: flex; flex-direction: column; gap: 10px; }
+.app-cv {
+  background: var(--bg); box-shadow: var(--neu-raised-sm); border-radius: 14px;
+  padding: 13px 18px; display: grid; grid-template-columns: 1fr auto auto;
+  gap: 16px; align-items: center;
+}
+.app-cv:hover { box-shadow: var(--neu-raised); }
+.app-cv__name { font-size: 14px; font-weight: 700; color: var(--text); }
+.app-cv__name--unnamed { font-family: var(--font-code); font-size: 12.5px; font-weight: 500; color: var(--muted); }
+.app-cv__meta { font-size: 11.5px; color: var(--faint); margin-top: 3px; display: flex; gap: 8px; }
+.app-cv__used { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.app-cv__used strong { color: var(--text); }
 
 /* ---- Étiquettes d'annotation de maquette ---- */
 .mk-note {
@@ -368,7 +399,72 @@ a { color: var(--link); text-decoration: none; }
         <button class="app-chip">Sans suite <span class="app-chip__count">19</span></button>
       </div>
 
-      <div class="app-block__label">Tuiles du dashboard</div>
+      <div class="app-block__label">Performance par CV — le pourcentage n'apparaît qu'à partir de 5 candidatures</div>
+      <div class="app-perf" style="margin-top:10px">
+        <div class="app-perf__row">
+          <div>
+            <div class="app-perf__name">Intérim manutention</div>
+            <div class="app-cv__meta">CV · Sobre</div>
+          </div>
+          <div class="app-perf__cell">18 candidatures</div>
+          <div class="app-perf__cell">2 entretiens</div>
+          <div class="app-perf__rate app-perf__rate--good">22 %</div>
+        </div>
+        <div class="app-perf__row">
+          <div>
+            <div class="app-perf__name">Product Owner e-commerce</div>
+            <div class="app-cv__meta">CV · Marine</div>
+          </div>
+          <div class="app-perf__cell">11 candidatures</div>
+          <div class="app-perf__cell">1 entretien</div>
+          <div class="app-perf__rate app-perf__rate--weak">9 %</div>
+        </div>
+        <div class="app-perf__row">
+          <div>
+            <div class="app-perf__name app-perf__name--none">Sans variante</div>
+            <div class="app-cv__meta">construits de zéro</div>
+          </div>
+          <div class="app-perf__cell">2 candidatures</div>
+          <div class="app-perf__cell">0 entretien</div>
+          <div class="app-perf__rate--thin">trop peu de données</div>
+        </div>
+      </div>
+
+      <div class="app-block__label" style="margin-top:26px">Rayon « Mes CV » — nommé, réutilisable</div>
+      <div class="app-shelf__list" style="margin-top:10px">
+        <article class="app-cv">
+          <div>
+            <div class="app-cv__name">Intérim manutention</div>
+            <div class="app-cv__meta"><span>CV · Sobre</span><span class="app-dot">•</span><span>créé le 14 mai</span></div>
+          </div>
+          <div class="app-cv__used">Utilisé pour <strong>18</strong> candidatures</div>
+          <div class="app-actions">
+            <button class="app-btn">Ouvrir dans l'éditeur</button>
+            <button class="app-btn app-btn--icon" title="Renommer">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+            <button class="app-btn app-btn--reject app-btn--icon" title="Supprimer">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </article>
+        <article class="app-cv">
+          <div>
+            <div class="app-cv__name app-cv__name--unnamed">Hariss Hafeji - CV.pdf</div>
+            <div class="app-cv__meta"><span>CV · Graphique</span><span class="app-dot">•</span><span>créé le 23 juillet</span></div>
+          </div>
+          <div class="app-cv__used" style="color:var(--faint)">Jamais utilisé</div>
+          <div class="app-actions">
+            <button class="app-btn app-btn--interview">Nommer</button>
+            <button class="app-btn">Ouvrir dans l'éditeur</button>
+            <button class="app-btn app-btn--reject app-btn--icon" title="Supprimer">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <div class="app-block__label" style="margin-top:26px">Tuiles du dashboard</div>
       <div class="app-dash" style="margin-top:10px">
         <div class="app-tile">
           <div class="app-tile__label">Candidatures</div>
