@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** missions post-audit 4–10 livrées et fusionnées le 17/07 (retrait legacy HTML/sur-mesure/ATS boost, purge Dexie v6, CI fusionnée + SSRF, microservice Camoufox + cascade) — implémentation Gemini 3.1, vérification/fusion Claude. Pour utiliser Camoufox en local : créer le venv dans `scraper-service/` (voir son README) puis lancer `Lancer Scraper (Camoufox).bat`. Reste en priorité haute dans `TODO.md` : la validation de bout en bout sur un vrai CV importé.
+**Prochaine étape suggérée :** tracker « Mes candidatures » terminé le 25/07 sur la branche `feat/tracker-candidatures` (13 tâches, 341 tests, vérifié dans le navigateur) — reste à fusionner dans `main`. Rappel des chantiers antérieurs : missions post-audit 4–10 livrées et fusionnées le 17/07 (retrait legacy HTML/sur-mesure/ATS boost, purge Dexie v6, CI fusionnée + SSRF, microservice Camoufox + cascade) — implémentation Gemini 3.1, vérification/fusion Claude. Pour utiliser Camoufox en local : créer le venv dans `scraper-service/` (voir son README) puis lancer `Lancer Scraper (Camoufox).bat`. Reste en priorité haute dans `TODO.md` : la validation de bout en bout sur un vrai CV importé.
 
 ---
 
@@ -40,6 +40,46 @@
 ---
 
 ## Journal
+
+### 2026-07-25 : Tracker « Mes candidatures » (branche `feat/tracker-candidatures`)
+
+Nouvelle page `/candidatures` qui **absorbe l'ancien Historique** (`/history` redirige)
+et récupère le dashboard de Paramètres, lequel redevient purement réglages.
+
+**Le principe qui gouverne tout le reste : le statut n'est jamais stocké, il est
+dérivé** du journal d'événements et de l'ancienneté. Un refus est terminal, un entretien
+décroché ne vieillit jamais, et au-delà de 30 jours de silence (seuil réglable) une
+candidature passe seule en « Sans suite ». Les deux seules saisies manuelles sont
+« Entretien » et « Refusée ». C'est ce qui rend le suivi tenable à 100+ candidatures :
+le mode d'échec classique d'un tracker est que sa mise à jour coûte plus cher que son
+bénéfice.
+
+Contrainte structurante découverte pendant le cadrage : le projet n'a **ni `jsdom` ni
+`fake-indexeddb`**. Toute la logique décisionnelle vit donc dans des modules purs
+(`src/lib/applications/{normKey,status,shelf,backfill}.ts`, 31 tests), et `store.ts` ne
+fait qu'appliquer leurs décisions à Dexie (table `applications`, migration v8).
+
+Une candidature naît toute seule de l'export PDF dès qu'entreprise et poste sont
+renseignés ; sinon le document part au rayon « Mes CV », où **un seul document anonyme
+par type** existe à la fois — le suivant le remplace. **Nommer un document, c'est le
+garder.** L'historique existant est rattaché rétroactivement au premier affichage, donc
+la page n'est jamais vide au démarrage.
+
+Décidé et écarté en cours de route, pour ne pas réinventer l'idée dans six mois :
+le suivi de « variante de CV » et le taux de réponse par CV (reposaient sur une corvée
+de nommage et produisaient des chiffres faux dès qu'un CV était retouché) ; et la
+suppression d'une candidature conserve tous ses documents plutôt que d'appliquer
+immédiatement la règle d'unicité (perte de donnée non demandée).
+
+Exécution : plan en 13 tâches, tâches 1 à 8 pilotées par sous-agents avec revue
+systématique (2 constats *Important* remontés et corrigés, tous deux issus du plan
+lui-même), tâches 9 à 13 exécutées en ligne après épuisement de la limite de dépense.
+Vérifs finales : lint 0 erreur, 341 tests, build OK, parcours complet validé dans le
+navigateur en thème clair et sombre.
+
+Spec `docs/superpowers/specs/2026-07-25-tracker-candidatures-design.md` ·
+plan `docs/superpowers/plans/2026-07-25-tracker-candidatures.md` ·
+maquettes `docs/design/candidatures/`.
 
 ### 2026-07-24 : Adaptation de lettre — trous IA, jargon de l'offre et en-tête périmé
 - **Quoi :** trois correctifs sur le parcours « Adapter la lettre à une offre ».
