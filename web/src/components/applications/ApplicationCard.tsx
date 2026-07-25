@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { STATUS_LABELS } from "@/lib/applications/status";
 import type { Application, ApplicationStatus } from "@/lib/applications/types";
@@ -97,11 +97,13 @@ export default function ApplicationCard({
         <div className="app-company">{app.company || "Entreprise non précisée"}</div>
         <div className="app-role">{app.role || "Poste non précisé"}</div>
         <div className="app-meta">
+          {/* Puce et texte sont frères, pas imbriqués : c'est l'espacement flex de
+              .app-meta qui les sépare, comme dans la maquette validée. */}
           {meta.map((m, i) => (
-            <span key={i}>
+            <Fragment key={i}>
               {i > 0 ? <span className="app-dot">•</span> : null}
-              {m}
-            </span>
+              <span>{m}</span>
+            </Fragment>
           ))}
           {app.jobUrl ? (
             <>
