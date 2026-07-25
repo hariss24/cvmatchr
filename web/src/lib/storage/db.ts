@@ -5,6 +5,7 @@ import type { TemplateId } from "@/lib/resume/templates";
 import { DEFAULT_TEMPLATES, type MailTemplate } from "@/lib/templates/defaults";
 import type { UserProfile } from "@/lib/profile/profile";
 import type { JobSearchProfile } from "@/lib/jobs/profile";
+import type { Application } from "@/lib/applications/types";
 
 // ---------------------------------------------------------------------------
 // TYPES
@@ -41,7 +42,11 @@ export interface HistoryEntry {
   pdf_views: number;
   editor_reloads: number;
   last_viewed_at?: string;
-  
+  /** Candidature à laquelle ce document est rattaché (feature « Mes candidatures »). */
+  applicationId?: string;
+  /** Nom donné à un CV du rayon « Mes CV ». Vide/absent = document anonyme. */
+  label?: string;
+
   json: DocData;
   templateId: TemplateId | null;
 }
@@ -60,6 +65,8 @@ export interface JobEntry {
   status: "new" | "dismissed" | "hidden"; // hidden = explorée mais sous le seuil (mémorisée, non affichée)
   seen?: boolean;      // false = pas encore consultée (badge « Nouveau ») ; absent/true = déjà vue
   publishedAt?: string; // date de publication de l'offre (ISO France Travail)
+  /** Candidature créée depuis cette offre (bouton « Suivre »). */
+  applicationId?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -74,6 +81,7 @@ export class AppDatabase extends Dexie {
   templates!: Table<MailTemplate, string>; // Primary key: id
   profile!: Table<UserProfile, string>; // Primary key: id (singleton "me")
   jobProfile!: Table<{ id: string; profile: JobSearchProfile }, string>; // Primary key: id (singleton "me")
+  applications!: Table<Application, string>; // Primary key: id
 
   constructor() {
     // Nouveau nom pour éviter les collisions si on lance sur le même port que Flask
@@ -127,6 +135,12 @@ export class AppDatabase extends Dexie {
     // v7 : profil de recherche d'offres paramétrable (singleton id="me").
     this.version(7).stores({
       jobProfile: "id",
+    });
+
+    // v8 : tracker de candidatures « Mes candidatures ». Le statut n'est pas
+    // stocké (dérivé du journal d'événements), donc aucun index de statut.
+    this.version(8).stores({
+      applications: "id, normKey, createdAt, updatedAt",
     });
   }
 }
@@ -423,5 +437,84 @@ export async function saveJobProfile(profile: JobSearchProfile): Promise<void> {
     await db.jobProfile.put({ id: "me", profile });
   } catch (e) {
     console.warn("saveJobProfile error:", e);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// APPLICATIONS API (tracker « Mes candidatures »)
+// ---------------------------------------------------------------------------
+
+export async function listApplicationsRaw(): Promise<Application[]> {
+  try {
+    return await db.applications.toArray();
+  } catch (e) {
+    console.warn("listApplicationsRaw error:", e);
+    return [];
+  }
+}
+
+export async function getApplicationByNormKey(key: string): Promise<Application | undefined> {
+  try {
+    return await db.applications.where("normKey").equals(key).first();
+  } catch (e) {
+    console.warn("getApplicationByNormKey error:", e);
+    return undefined;
+  }
+}
+
+export async function putApplication(app: Application): Promise<void> {
+  try {
+    await db.applications.put(app);
+  } catch (e) {
+    console.warn("putApplication error:", e);
+  }
+}
+
+export async function deleteApplicationRecord(id: string): Promise<void> {
+  try {
+    await db.applications.delete(id);
+  } catch (e) {
+    console.warn("deleteApplicationRecord error:", e);
+  }
+}
+
+/** Documents d'historique rattachés à une candidature. */
+export async function listHistoryByApplication(applicationId: string): Promise<HistoryEntry[]> {
+  try {
+    const all = await db.history.filter((h) => h.applicationId === applicationId).toArray();
+    return all.sort((a, b) => a.created_at.localeCompare(b.created_at));
+  } catch (e) {
+    console.warn("listHistoryByApplication error:", e);
+    return [];
+  }
+}
+
+/** Documents d'historique non rattachés à une candidature (rayon « Mes CV »). */
+export async function listUnattachedHistory(): Promise<HistoryEntry[]> {
+  try {
+    const all = await db.history.filter((h) => !h.applicationId).toArray();
+    return all.sort((a, b) => b.created_at.localeCompare(a.created_at));
+  } catch (e) {
+    console.warn("listUnattachedHistory error:", e);
+    return [];
+  }
+}
+
+export async function updateHistoryFields(
+  id: string,
+  fields: Partial<Pick<HistoryEntry, "applicationId" | "label">>,
+): Promise<void> {
+  try {
+    await db.history.update(id, fields);
+  } catch (e) {
+    console.warn("updateHistoryFields error:", e);
+  }
+}
+
+export async function deleteHistoryEntries(ids: string[]): Promise<void> {
+  try {
+    await db.history.bulkDelete(ids);
+  } catch (e) {
+    console.warn("deleteHistoryEntries error:", e);
   }
 }
