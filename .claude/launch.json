@@ -11,6 +11,17 @@
       "cwd": "web",
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "maquettes",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4173"
+      ],
+      "cwd": "docs/design",
+      "port": 4173
     }
   ]
 }

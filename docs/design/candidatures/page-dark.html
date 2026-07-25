@@ -1,0 +1,612 @@
+<!-- @dsCard group="Candidatures" name="Page Mes candidatures — sombre" -->
+<!doctype html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mes candidatures — Cvmatchr (sombre)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Tokens repris tels quels de web/src/app/globals.css — aucune couleur en dur. */
+:root {
+  --bg: #FBFAF8;
+  --page-bg: radial-gradient(1100px 520px at 50% -10%, rgba(255,255,255,0.75), rgba(255,255,255,0) 60%),
+             linear-gradient(180deg, #F2EFEA 0%, #E5E1DA 100%);
+  --text: #1F1B16;
+  --muted: #6C655C;
+  --faint: #9A9187;
+  --orange: #E85D04;
+  --orange2: #F07030;
+  --orange-text: #A84402;
+  --link: #A84402;
+  --border: rgba(31,27,22,0.07);
+  --glass: rgba(253,252,250,0.62);
+  --glass-blur: blur(24px) saturate(1.7);
+  --glass-border: rgba(255,255,255,0.55);
+  --card: rgba(255,255,255,0.82);
+  --field: #FFFFFF;
+  --seg-track: linear-gradient(180deg, #EAE7E1, #E0DCD5);
+  --seg-knob: linear-gradient(180deg, #FFFFFF, #F5F2EE);
+  --seg-knob-shadow: 0 1px 2px rgba(31,27,22,0.16), 0 2px 5px rgba(31,27,22,0.08), inset 0 1px 0 rgba(255,255,255,0.95);
+  --cta-grad: linear-gradient(180deg, var(--orange2), var(--orange));
+  --cta-shadow: inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(0,0,0,0.10),
+                0 1px 2px rgba(31,27,22,0.15), 0 4px 14px -4px rgba(232,93,4,0.55);
+  --neu-raised-sm: 0 0 0 1px rgba(31,27,22,0.09), 0 1px 2px rgba(31,27,22,0.05), inset 0 1px 0 rgba(255,255,255,0.85);
+  --neu-raised: 0 0 0 1px rgba(31,27,22,0.09), 0 1px 2px rgba(31,27,22,0.06), 0 4px 10px -4px rgba(31,27,22,0.18), inset 0 1px 0 rgba(255,255,255,0.9);
+  --neu-raised-lg: 0 0 0 1px rgba(31,27,22,0.06), 0 1px 2px rgba(31,27,22,0.05), 0 16px 40px -24px rgba(31,27,22,0.30), inset 0 1px 0 rgba(255,255,255,0.5);
+  --neu-inset: 0 0 0 1px rgba(31,27,22,0.12), inset 0 1px 2px rgba(31,27,22,0.05);
+  --neu-inset-deep: 0 0 0 1px rgba(31,27,22,0.10), inset 0 1px 3px rgba(31,27,22,0.10);
+  --success: #256D2A;
+  --apply: #1E8E6A;
+  --apply-text: #146B4F;
+  --warning: #BF5000;
+  --error: #C62828;
+  --blue: #1565C0;
+  --font-ui: Inter, -apple-system, "Segoe UI", sans-serif;
+  --font-code: "JetBrains Mono", ui-monospace, monospace;
+}
+[data-theme="dark"] {
+  --bg: #26221E;
+  --page-bg: radial-gradient(1100px 520px at 50% -10%, rgba(255,255,255,0.06), rgba(255,255,255,0) 60%),
+             linear-gradient(180deg, #1D1A16 0%, #15120F 100%);
+  --text: #EDE8E1;
+  --muted: #A79E92;
+  --faint: #857D72;
+  --orange: #F07030;
+  --orange2: #F58A4A;
+  --orange-text: #F58A4A;
+  --link: #F58A4A;
+  --border: rgba(255,255,255,0.08);
+  --glass: rgba(38,34,30,0.62);
+  --glass-border: rgba(255,255,255,0.10);
+  --card: rgba(255,255,255,0.05);
+  --field: #1C1916;
+  --seg-track: linear-gradient(180deg, #1C1916, #171411);
+  --seg-knob: linear-gradient(180deg, #3B3630, #322D28);
+  --seg-knob-shadow: 0 1px 2px rgba(0,0,0,0.45), 0 2px 5px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.10);
+  --cta-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1px 0 rgba(0,0,0,0.25),
+                0 1px 2px rgba(0,0,0,0.40), 0 4px 14px -4px rgba(240,112,48,0.45);
+  --neu-raised-sm: 0 0 0 1px rgba(255,255,255,0.09), 0 1px 2px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+  --neu-raised: 0 0 0 1px rgba(255,255,255,0.10), 0 1px 2px rgba(0,0,0,0.40), 0 4px 10px -4px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.07);
+  --neu-raised-lg: 0 0 0 1px rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.40), 0 16px 40px -24px rgba(0,0,0,0.80), inset 0 1px 0 rgba(255,255,255,0.05);
+  --neu-inset: 0 0 0 1px rgba(255,255,255,0.12), inset 0 1px 2px rgba(0,0,0,0.35);
+  --neu-inset-deep: 0 0 0 1px rgba(255,255,255,0.10), inset 0 1px 3px rgba(0,0,0,0.50);
+  --success: #66BB6A;
+  --apply: #2FA982;
+  --apply-text: #4FC49F;
+  --warning: #FFA726;
+  --error: #EF5350;
+  --blue: #64B5F6;
+}
+</style>
+<style>
+/* ---------------------------------------------------------------------------
+   Maquette « Mes candidatures » — Cvmatchr
+   Tokens et classes reprises de web/src/app/globals.css. Les classes nouvelles
+   sont préfixées .app- (application = candidature) et n'utilisent que des
+   variables de thème : aucune couleur en dur.
+   --------------------------------------------------------------------------- */
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  font-family: var(--font-ui);
+  background: var(--page-bg); background-attachment: fixed;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--link); text-decoration: none; }
+
+.wrap { display: flex; flex-direction: column; min-height: 100vh; padding: 16px 20px; gap: 12px; }
+
+/* ---- Topbar de verre (identique aux pages secondaires) ---- */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  background: var(--glass);
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px; padding: 9px 14px;
+  box-shadow: var(--neu-raised-lg);
+}
+.topbar--secondary > .hist-h1 { flex: 1 1 0; min-width: 0; }
+.topbar--secondary > .topbar-actions { flex: 1 1 0; justify-content: flex-end; }
+.topbar-center { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+.hist-h1 { font-size: 22px; margin: 0; font-weight: 800; letter-spacing: -0.4px; color: var(--text); }
+
+.btn-nav {
+  background: var(--bg); border: none; color: var(--text);
+  border-radius: 10px; padding: 0 15px; height: 38px; cursor: pointer;
+  font-size: 13px; display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-ui); box-shadow: var(--neu-raised-sm);
+  transition: box-shadow 100ms, transform 100ms; white-space: nowrap;
+}
+.btn-nav:hover { box-shadow: var(--neu-raised); transform: translateY(-1px); }
+.btn-orange {
+  background: var(--cta-grad); color: #fff; font-weight: 600; box-shadow: var(--cta-shadow);
+}
+
+/* ---- Contrôle segmenté ---- */
+.seg {
+  position: relative; display: flex; padding: 3px; border-radius: 12px;
+  background: var(--seg-track);
+  box-shadow: inset 0 1px 2px rgba(31,27,22,0.12), inset 0 -1px 0 rgba(255,255,255,0.5);
+  --seg-w: 104px;
+}
+[data-theme="dark"] .seg { box-shadow: inset 0 1px 2px rgba(0,0,0,0.45), inset 0 -1px 0 rgba(255,255,255,0.05); }
+.seg__knob {
+  position: absolute; top: 3px; left: calc(3px + var(--seg-index, 0) * var(--seg-w));
+  width: var(--seg-w); height: calc(100% - 6px); border-radius: 9px;
+  background: var(--seg-knob); box-shadow: var(--seg-knob-shadow); pointer-events: none;
+}
+.seg__btn {
+  position: relative; z-index: 1; width: var(--seg-w);
+  background: none; border: none; padding: 6px 0; text-align: center;
+  font-size: 12.5px; font-weight: 600; font-family: var(--font-ui);
+  cursor: pointer; color: var(--muted);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.seg__btn.active { color: var(--text); }
+
+/* ---- Panneau givré ---- */
+.pane {
+  display: flex; flex-direction: column; min-width: 0;
+  border-radius: 18px; box-shadow: var(--neu-raised-lg);
+  background: var(--glass);
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+}
+.hist-content { padding: 24px; }
+
+/* ---- Dashboard : tuiles ---- */
+.app-dash {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 22px;
+}
+.app-tile {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 2px rgba(31,27,22,0.04), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+[data-theme="dark"] .app-tile { box-shadow: 0 1px 2px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.05); }
+.app-tile__label {
+  font-size: 10px; color: var(--muted); letter-spacing: 0.8px;
+  text-transform: uppercase; font-weight: 600; margin-bottom: 8px;
+}
+.app-tile__value { font-size: 28px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
+.app-tile__hint { font-size: 11px; color: var(--faint); margin-top: 6px; }
+.app-tile--interview .app-tile__value { color: var(--orange-text); }
+.app-tile--stale .app-tile__value { color: var(--faint); }
+
+/* ---- Barre de filtres ---- */
+.app-filters { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; }
+.hist-search {
+  background: var(--field); color: var(--text); border: none; border-radius: 12px;
+  padding: 11px 16px; font-size: 13px; flex: 1; min-width: 0;
+  font-family: var(--font-ui); box-shadow: var(--neu-inset); outline: none;
+}
+.hist-search::placeholder { color: var(--faint); }
+.app-chips { display: flex; gap: 6px; flex-shrink: 0; }
+.app-chip {
+  background: var(--bg); border: none; color: var(--muted);
+  font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+  padding: 0 12px; height: 36px; border-radius: 999px; cursor: pointer;
+  box-shadow: var(--neu-raised-sm); display: inline-flex; align-items: center; gap: 6px;
+}
+.app-chip:hover { color: var(--text); box-shadow: var(--neu-raised); }
+.app-chip.active { color: var(--text); box-shadow: var(--neu-inset); }
+.app-chip__count { color: var(--faint); font-family: var(--font-code); font-size: 11px; }
+
+/* ---- Liste ---- */
+.card-list { display: flex; flex-direction: column; gap: 14px; }
+
+/* ---- Carte de candidature ---- */
+.app-card {
+  background: var(--bg); box-shadow: var(--neu-raised-sm); border-radius: 16px;
+  padding: 16px 20px; display: grid; grid-template-columns: 78px 1fr auto;
+  gap: 20px; align-items: center; transition: box-shadow 150ms;
+}
+.app-card:hover { box-shadow: var(--neu-raised); }
+.app-card--stale { opacity: 0.62; }
+
+/* Médaillon d'ancienneté : creusé, façon compteur — le temps travaille seul. */
+.app-age {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 68px; height: 68px; border-radius: 50%;
+  background: var(--bg); box-shadow: var(--neu-inset);
+}
+.app-age__num { font-size: 22px; font-weight: 800; line-height: 1; }
+.app-age__unit { font-size: 10px; color: var(--faint); font-weight: 600; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+.app-age--fresh .app-age__num { color: var(--apply-text); }
+.app-age--warm .app-age__num { color: var(--text); }
+.app-age--stale .app-age__num { color: var(--faint); }
+.app-age--interview { box-shadow: var(--neu-inset), 0 0 0 2px var(--orange2); }
+
+.app-main { min-width: 0; }
+.app-company {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+  color: var(--orange-text); line-height: 1.3;
+}
+.app-role { font-size: 15px; font-weight: 700; color: var(--text); margin-top: 2px; }
+.app-meta { font-size: 12px; color: var(--muted); margin-top: 5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.app-dot { color: var(--faint); }
+.app-docs { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+.stat-chip {
+  font-size: 11px; padding: 3px 9px; border-radius: 999px;
+  box-shadow: var(--neu-raised-sm); background: var(--bg); color: var(--muted);
+  display: inline-flex; align-items: center; gap: 5px;
+}
+
+.app-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.app-badge {
+  font-size: 11px; font-weight: 700; padding: 4px 11px; border-radius: 999px;
+  background: var(--bg); box-shadow: var(--neu-raised-sm);
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.app-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.app-badge--applied { color: var(--apply-text); }
+.app-badge--interview { color: var(--orange-text); box-shadow: var(--neu-raised-sm), 0 0 0 1px var(--orange2); }
+.app-badge--rejected { color: var(--error); }
+.app-badge--stale { color: var(--faint); }
+.app-actions { display: flex; gap: 8px; }
+.app-btn {
+  background: var(--bg); border: none; color: var(--muted);
+  font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+  padding: 0 12px; height: 32px; border-radius: 9px; cursor: pointer;
+  box-shadow: var(--neu-raised-sm); display: inline-flex; align-items: center; gap: 6px;
+}
+.app-btn:hover { color: var(--text); box-shadow: var(--neu-raised); transform: translateY(-1px); }
+.app-btn--interview:hover { color: var(--orange-text); }
+.app-btn--reject:hover { color: var(--error); }
+.app-btn--icon { width: 32px; padding: 0; justify-content: center; }
+
+/* ---- Carte dépliée ---- */
+.app-card--open { grid-template-columns: 78px 1fr auto; }
+.app-expand {
+  grid-column: 1 / -1; margin-top: 6px; padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 14px;
+}
+.app-block__label {
+  font-size: 10px; color: var(--muted); letter-spacing: 0.8px;
+  text-transform: uppercase; font-weight: 600; margin-bottom: 8px;
+}
+.app-doc-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 10px 12px; margin-bottom: 8px;
+}
+.app-doc-name { font-family: var(--font-code); font-size: 12px; color: var(--text); }
+.app-doc-date { font-size: 11px; color: var(--faint); font-family: var(--font-code); }
+.app-offer {
+  background: var(--field); border-radius: 12px; box-shadow: var(--neu-inset);
+  padding: 12px 14px; font-size: 12.5px; line-height: 1.6; color: var(--muted);
+  max-height: 92px; overflow: hidden; position: relative;
+}
+.app-offer::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 38px;
+  background: linear-gradient(180deg, transparent, var(--field));
+}
+.app-note {
+  background: var(--field); color: var(--text); border: none; border-radius: 12px;
+  box-shadow: var(--neu-inset); padding: 10px 14px; font-size: 13px; width: 100%;
+  font-family: var(--font-ui); outline: none; resize: none;
+}
+.app-timeline { display: flex; flex-direction: column; gap: 7px; }
+.app-event { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+.app-event__date { font-family: var(--font-code); font-size: 11px; color: var(--faint); min-width: 76px; }
+.app-event__src {
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 999px; box-shadow: var(--neu-inset); color: var(--faint);
+}
+
+/* ---- Section repliée « Documents libres » ---- */
+.app-free {
+  margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--border);
+}
+.app-free__head {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  background: none; border: none; padding: 4px 0; cursor: pointer;
+  font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
+  color: var(--muted); font-family: var(--font-ui);
+}
+.app-free__count { color: var(--faint); font-family: var(--font-code); text-transform: none; letter-spacing: 0; }
+.app-free__hint { font-size: 12px; color: var(--faint); margin-top: 8px; line-height: 1.6; }
+
+/* ---- Étiquettes d'annotation de maquette ---- */
+.mk-note {
+  font-size: 11px; color: var(--faint); font-family: var(--font-code);
+  padding: 4px 0 10px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar topbar--secondary">
+    <h1 class="hist-h1">Mes candidatures</h1>
+    <div class="topbar-center">
+      <nav class="seg" style="--seg-index: 2">
+        <span class="seg__knob"></span>
+        <a class="seg__btn">Éditeur</a>
+        <a class="seg__btn">Offres</a>
+        <a class="seg__btn active">Candidatures</a>
+      </nav>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-nav btn-orange">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Ajouter
+      </button>
+      <button class="btn-nav">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Retour
+      </button>
+    </div>
+  </header>
+
+  <div class="pane">
+    <div class="hist-content">
+
+      <!-- Dashboard : 5 indicateurs, tous dérivés des dates. Aucune saisie. -->
+      <div class="app-dash">
+        <div class="app-tile">
+          <div class="app-tile__label">Candidatures</div>
+          <div class="app-tile__value">34</div>
+          <div class="app-tile__hint">depuis le 12 mai</div>
+        </div>
+        <div class="app-tile">
+          <div class="app-tile__label">En cours</div>
+          <div class="app-tile__value">12</div>
+          <div class="app-tile__hint">moins de 30 jours</div>
+        </div>
+        <div class="app-tile app-tile--interview">
+          <div class="app-tile__label">Entretiens</div>
+          <div class="app-tile__value">3</div>
+          <div class="app-tile__hint">dont 1 à venir</div>
+        </div>
+        <div class="app-tile">
+          <div class="app-tile__label">Taux de réponse</div>
+          <div class="app-tile__value">18 %</div>
+          <div class="app-tile__hint">6 réponses sur 34</div>
+        </div>
+        <div class="app-tile app-tile--stale">
+          <div class="app-tile__label">Sans suite</div>
+          <div class="app-tile__value">19</div>
+          <div class="app-tile__hint">silence &gt; 30 jours</div>
+        </div>
+      </div>
+
+      <!-- Filtres : recherche plein-texte (entreprise, poste, offre) + statut -->
+      <div class="app-filters">
+        <input class="hist-search" placeholder="Rechercher une entreprise, un poste, un mot de l'offre…" />
+        <div class="app-chips">
+          <button class="app-chip active">Tout <span class="app-chip__count">34</span></button>
+          <button class="app-chip">En cours <span class="app-chip__count">12</span></button>
+          <button class="app-chip">Entretien <span class="app-chip__count">3</span></button>
+          <button class="app-chip">Refusée <span class="app-chip__count">3</span></button>
+          <button class="app-chip">Sans suite <span class="app-chip__count">19</span></button>
+        </div>
+      </div>
+
+      <div class="card-list">
+
+        <!-- Entretien décroché : ne vieillit jamais, anneau orange -->
+        <article class="app-card">
+          <div class="app-age app-age--interview app-age--warm">
+            <span class="app-age__num">9</span>
+            <span class="app-age__unit">jours</span>
+          </div>
+          <div class="app-main">
+            <div class="app-company">SharkNinja</div>
+            <div class="app-role">Chef de projet e-commerce</div>
+            <div class="app-meta">
+              <span>Postulée le 16 juillet</span>
+              <span class="app-dot">•</span>
+              <span>Entretien le 28 juillet</span>
+              <span class="app-dot">•</span>
+              <a href="#">Voir l'offre</a>
+            </div>
+            <div class="app-docs">
+              <span class="stat-chip">CV · Marine</span>
+              <span class="stat-chip">Lettre</span>
+            </div>
+          </div>
+          <div class="app-right">
+            <span class="app-badge app-badge--interview">Entretien</span>
+            <div class="app-actions">
+              <button class="app-btn app-btn--reject">Refusée</button>
+              <button class="app-btn app-btn--icon" title="Déplier">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Carte dépliée : documents, offre conservée, journal, note -->
+        <article class="app-card app-card--open">
+          <div class="app-age app-age--fresh">
+            <span class="app-age__num">4</span>
+            <span class="app-age__unit">jours</span>
+          </div>
+          <div class="app-main">
+            <div class="app-company">Decathlon</div>
+            <div class="app-role">Product Owner — Parcours d'achat</div>
+            <div class="app-meta">
+              <span>Postulée le 21 juillet</span>
+              <span class="app-dot">•</span>
+              <span>Ajoutée depuis Offres</span>
+              <span class="app-dot">•</span>
+              <a href="#">Voir l'offre</a>
+            </div>
+            <div class="app-docs">
+              <span class="stat-chip">CV · Sobre</span>
+              <span class="stat-chip">CV · Graphique</span>
+              <span class="stat-chip">Lettre</span>
+            </div>
+          </div>
+          <div class="app-right">
+            <span class="app-badge app-badge--applied">En cours</span>
+            <div class="app-actions">
+              <button class="app-btn app-btn--interview">Entretien</button>
+              <button class="app-btn app-btn--reject">Refusée</button>
+              <button class="app-btn app-btn--icon" title="Replier">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="app-expand">
+            <div>
+              <div class="app-block__label">Documents rattachés</div>
+              <div class="app-doc-row">
+                <span class="app-doc-name">Hariss Hafeji - CV.pdf</span>
+                <span style="display:flex;align-items:center;gap:12px">
+                  <span class="app-doc-date">21/07 · 14:02</span>
+                  <button class="app-btn">Ouvrir dans l'éditeur</button>
+                </span>
+              </div>
+              <div class="app-doc-row">
+                <span class="app-doc-name">Hariss Hafeji - Lettre.pdf</span>
+                <span style="display:flex;align-items:center;gap:12px">
+                  <span class="app-doc-date">21/07 · 14:08</span>
+                  <button class="app-btn">Ouvrir dans l'éditeur</button>
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <div class="app-block__label">Offre conservée</div>
+              <div class="app-offer">
+                Nous recherchons un Product Owner pour piloter l'évolution du parcours d'achat sur nos plateformes e-commerce. Vous travaillerez avec les équipes design, data et développement pour prioriser la roadmap, rédiger les spécifications fonctionnelles et animer les rituels agiles. Vous êtes garant de la valeur livrée à chaque itération et suivez les indicateurs de conversion…
+              </div>
+            </div>
+
+            <div>
+              <div class="app-block__label">Journal</div>
+              <div class="app-timeline">
+                <div class="app-event">
+                  <span class="app-event__date">21/07/2026</span>
+                  <span>Candidature envoyée</span>
+                  <span class="app-event__src">auto</span>
+                </div>
+                <div class="app-event">
+                  <span class="app-event__date">21/07/2026</span>
+                  <span>Offre importée depuis l'onglet Offres</span>
+                  <span class="app-event__src">auto</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="app-block__label">Note</div>
+              <textarea class="app-note" rows="2" placeholder="Un détail à retenir (facultatif)…">Poste vu sur France Travail — score 82. Contact RH : Camille.</textarea>
+            </div>
+          </div>
+        </article>
+
+        <!-- En cours, ancienneté neutre -->
+        <article class="app-card">
+          <div class="app-age app-age--warm">
+            <span class="app-age__num">18</span>
+            <span class="app-age__unit">jours</span>
+          </div>
+          <div class="app-main">
+            <div class="app-company">Leroy Merlin</div>
+            <div class="app-role">Responsable e-commerce</div>
+            <div class="app-meta">
+              <span>Postulée le 7 juillet</span>
+              <span class="app-dot">•</span>
+              <span>Ajout manuel</span>
+            </div>
+            <div class="app-docs">
+              <span class="stat-chip">CV · Kakuna</span>
+            </div>
+          </div>
+          <div class="app-right">
+            <span class="app-badge app-badge--applied">En cours</span>
+            <div class="app-actions">
+              <button class="app-btn app-btn--interview">Entretien</button>
+              <button class="app-btn app-btn--reject">Refusée</button>
+              <button class="app-btn app-btn--icon" title="Déplier">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Refusée : état terminal, saisi en un clic -->
+        <article class="app-card">
+          <div class="app-age app-age--warm">
+            <span class="app-age__num">22</span>
+            <span class="app-age__unit">jours</span>
+          </div>
+          <div class="app-main">
+            <div class="app-company">Veepee</div>
+            <div class="app-role">Chef de produit digital</div>
+            <div class="app-meta">
+              <span>Postulée le 3 juillet</span>
+              <span class="app-dot">•</span>
+              <span>Refus reçu le 19 juillet</span>
+            </div>
+            <div class="app-docs">
+              <span class="stat-chip">CV · Sobre</span>
+              <span class="stat-chip">Lettre</span>
+            </div>
+          </div>
+          <div class="app-right">
+            <span class="app-badge app-badge--rejected">Refusée</span>
+            <div class="app-actions">
+              <button class="app-btn app-btn--icon" title="Déplier">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Sans suite : calculé, jamais saisi. Carte estompée. -->
+        <article class="app-card app-card--stale">
+          <div class="app-age app-age--stale">
+            <span class="app-age__num">47</span>
+            <span class="app-age__unit">jours</span>
+          </div>
+          <div class="app-main">
+            <div class="app-company">Cdiscount</div>
+            <div class="app-role">Traffic manager</div>
+            <div class="app-meta">
+              <span>Postulée le 8 juin</span>
+              <span class="app-dot">•</span>
+              <span>Aucune réponse</span>
+            </div>
+            <div class="app-docs">
+              <span class="stat-chip">CV · Marine</span>
+            </div>
+          </div>
+          <div class="app-right">
+            <span class="app-badge app-badge--stale">Sans suite</span>
+            <div class="app-actions">
+              <button class="app-btn app-btn--interview">Entretien</button>
+              <button class="app-btn app-btn--icon" title="Déplier">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- Rien n'est perdu par la suppression de /history -->
+      <section class="app-free">
+        <button class="app-free__head">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          Documents libres
+          <span class="app-free__count">7</span>
+        </button>
+        <div class="app-free__hint">
+          Documents générés sans entreprise ni poste renseignés — non rattachables à une candidature.
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>
