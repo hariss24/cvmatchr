@@ -263,6 +263,27 @@ export default function SettingsPage() {
 
               <div style={{ height: "1px", background: "var(--border)" }} />
 
+              {/* Seuil "sans suite" */}
+              <div className="form-field">
+                <label className="form-label">Candidature sans réponse considérée comme perdue après</label>
+                <p style={{ fontSize: "13px", color: "var(--muted)", marginBottom: "8px", lineHeight: "1.5" }}>
+                  Au-delà de ce délai sans nouvelle, une candidature passe automatiquement en « Sans suite » dans « Mes candidatures ». Rien à mettre à jour à la main.
+                </p>
+                <CustomSelect<number>
+                  value={settings.staleDays}
+                  onChange={(v) => settings.setStaleDays(v)}
+                  style={{ width: "100%" }}
+                  options={[
+                    { value: 15, label: "15 jours" },
+                    { value: 30, label: "30 jours (par défaut)" },
+                    { value: 45, label: "45 jours" },
+                    { value: 60, label: "60 jours" },
+                  ]}
+                />
+              </div>
+
+              <div style={{ height: "1px", background: "var(--border)" }} />
+
               {/* Thème */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
                 <div className="form-field">

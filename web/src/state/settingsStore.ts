@@ -21,7 +21,8 @@ export type SettingsState = {
   // App
   language: string; // 'fr' | 'en'
   autosaveDelay: number; // 0 = manuel, 1000 = 1s, 5000 = 5s, 30000 = 30s
-  accentColor: AccentColor; 
+  accentColor: AccentColor;
+  staleDays: number;
 };
 
 type SettingsActions = {
@@ -34,6 +35,7 @@ type SettingsActions = {
   setLanguage: (lang: string) => void;
   setAutosaveDelay: (delay: number) => void;
   setAccentColor: (color: AccentColor) => void;
+  setStaleDays: (days: number) => void;
 };
 
 export const useSettingsStore = create<SettingsState & SettingsActions>()(
@@ -48,6 +50,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       language: "fr",
       autosaveDelay: 1000,
       accentColor: "orange",
+      staleDays: 30,
 
       setGeminiKey: (geminiKey) => set({ geminiKey }),
       setAnthropicKey: (anthropicKey) => set({ anthropicKey }),
@@ -58,6 +61,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       setLanguage: (language) => set({ language }),
       setAutosaveDelay: (autosaveDelay) => set({ autosaveDelay }),
       setAccentColor: (accentColor) => set({ accentColor }),
+      setStaleDays: (staleDays) => set({ staleDays }),
     }),
     {
       name: "cv-tailor-settings",
