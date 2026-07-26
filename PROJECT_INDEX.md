@@ -83,9 +83,14 @@ Il est retiré avant l'appel et restauré à la réception (`src/lib/ai/base64.t
 - **`src/lib/storage/db.ts`** (Dexie, IndexedDB, tout est local au navigateur) :
   - `snapshots` — points de sauvegarde manuels (max 20, purge auto des plus anciens)
   - `drafts` — brouillon courant par type de document (`draft-CV`, `draft-Lettre`)
-  - `history` — CV/lettres générés (historique consultable, stats de vues)
-  - `jobs` — offres retenues/masquées par le chasseur d'offres (dédoublonnage par id)
+  - `history` — CV/lettres générés. Champs ajoutés en v8 : `applicationId` (rattache
+    le document à une candidature) et `label` (nom donné à un CV du rayon « Mes CV » ;
+    vide = document anonyme, remplaçable au prochain export du même type).
+  - `jobs` — offres retenues/masquées par le chasseur d'offres (dédoublonnage par id).
+    Champ ajouté en v8 : `applicationId` (offre suivie → bouton « Suivie » inactif).
   - `templates` — modèles avec variables dynamiques (Lettre + Email)
+  - `applications` (v8) — candidatures suivies. **Le statut n'est jamais stocké** : il
+    est dérivé du journal `events` et de l'ancienneté (voir section « Mes candidatures »).
 
 ---
 
@@ -173,6 +178,59 @@ message de configuration au lieu de chercher (voir `web/README.md`).
 
 ---
 
+## 8 bis. Fonctionnalité « Mes candidatures » (tracker)
+
+Page `app/candidatures/page.tsx`. Elle **absorbe l'ancien Historique** (`/history`
+redirige) et récupère le dashboard qui vivait dans Paramètres.
+
+**Principe directeur : le suivi ne doit rien coûter à l'utilisateur.** Le mode d'échec
+de tout tracker de candidatures est que la mise à jour coûte plus cher que le bénéfice.
+Donc **le statut n'est jamais stocké, il est dérivé** :
+
+- un refus est terminal ; un entretien décroché ne vieillit jamais ;
+- au-delà de `staleDays` de silence (réglable dans Paramètres, défaut 30) la
+  candidature passe seule en « Sans suite » — personne ne clique pour ça ;
+- les événements `note` n'influencent ni le statut ni l'ancienneté.
+
+Les deux seules saisies manuelles sont « Entretien » et « Refusée », délibérément rares.
+
+**Toute la logique décisionnelle est dans des modules purs** (`src/lib/applications/`),
+parce que le projet n'a ni `jsdom` ni `fake-indexeddb` : c'est la seule couche
+testable par Vitest. `store.ts` ne fait qu'appliquer leurs décisions à Dexie.
+
+1. **`normKey.ts`** — clé de dédoublonnage entreprise+poste (accents, casse et
+   ponctuation neutralisés). `""` si les deux champs sont vides → aucune candidature.
+2. **`types.ts`** — `Application`, `ApplicationEvent` (`source: "manual" | "system" | "ai"`).
+3. **`status.ts`** — `deriveStatus`, `daysSince`, `summarize`, `indexOfLastStatusEvent`.
+4. **`shelf.ts`** — règle du CV anonyme (voir ci-dessous).
+5. **`backfill.ts`** — `planBackfill` peuple le tracker depuis l'historique existant
+   au premier affichage, groupé par entreprise+poste. Idempotent.
+
+**Points d'entrée d'une candidature** : automatique à l'export PDF quand entreprise et
+poste sont renseignés (`TopBar.onConvert`) ; bouton « Suivre » sur une offre France
+Travail ; ajout manuel. Le dédoublonnage sur `normKey` fait que régénérer un CV pour la
+même entreprise+poste n'ajoute ni candidature ni événement.
+
+**Rayon « Mes CV »** (bas de page) : les documents sans candidature. **Un seul document
+anonyme par type de document** — un nouvel export sans entreprise ni poste remplace le
+précédent, silencieusement (le libellé « Dernier CV exporté · sera remplacé au prochain
+export » l'annonce). **Nommer un document, c'est le garder** : dès qu'il porte un
+`label` il est épinglé et n'est jamais remplacé.
+
+**Décision propriétaire du 25/07/2026** : supprimer une candidature *détache* ses
+documents et les conserve tous, même si le rayon contient alors temporairement plusieurs
+anonymes du même type. La règle d'unicité étant appliquée à l'export, le prochain
+téléchargement nettoie. Supprimer ici serait une perte de donnée non demandée.
+
+**Écarté explicitement** : aucune statistique par variante de CV (taux de réponse par
+CV). Cela reposait sur une corvée de nommage que l'utilisateur cible ne fera pas et sur
+une déduction invisible produisant des chiffres faux dès qu'un CV est retouché.
+
+Spec : `docs/superpowers/specs/2026-07-25-tracker-candidatures-design.md`.
+Maquettes validées : `docs/design/candidatures/` (dont un prototype cliquable).
+
+---
+
 ## 9. Authentification
 
 `src/middleware.ts` : si `REMOTE_AUTH_PASSWORD`/`AUTH_PASSWORD` est défini, toutes
@@ -188,16 +246,18 @@ Sans variable définie → app ouverte (mode local). Rate-limiting basique par I
 ```
 app/
   page.tsx          # Éditeur principal (TopBar, MetaBar, EditorPane, PreviewPane, ActionsBar, DraftManager)
+  candidatures/     # Tracker « Mes candidatures » (absorbe l'ancien Historique)
   help/             # Page d'aide / FAQ
-  history/          # Historique des CV/lettres générés
+  history/          # Redirection vers /candidatures (signets et liens existants)
   jobs/             # Chasseur d'offres
   login/            # Écran de mot de passe (mode remote)
   pack/             # Pack candidature (lettre de motivation / email)
   profil/           # Profil du candidat (préremplissage)
 components/
   editor/           # EditorPane (formulaire ⇄ JSON), PreviewPane, PdfPreview (rendu canvas)
+  applications/     # ApplicationsScreen, ApplicationsDashboard, ApplicationsFilters,
+                     # ApplicationCard, ResumeShelf, AddApplicationModal
   form/             # FormEditor (CV), LetterForm
-  history/          # HistoryList, HistoryActions
   jobs/             # JobsView, JobCard, ScanProgress, ScoringInfo
   layout/           # TopBar, MetaBar, ActionsBar, DraftManager
   modals/           # TailorModal, ChatPanel, PackModal, DiffModal, ImportPdfModal,

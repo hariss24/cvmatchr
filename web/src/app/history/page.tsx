@@ -1,29 +1,6 @@
-import HistoryList from "@/components/history/HistoryList";
-import HistoryActions from "@/components/history/HistoryActions";
-import SegmentedNav from "@/components/layout/SegmentedNav";
+import { redirect } from "next/navigation";
 
-export const metadata = {
-  title: "Historique — CVMatchr",
-};
-
+/** L'Historique a été absorbé par « Mes candidatures » (spec du 25/07/2026). */
 export default function HistoryPage() {
-  return (
-    <div className="wrap">
-      <header className="topbar topbar--secondary">
-        <h1 className="hist-h1">Historique</h1>
-        <div className="topbar-center">
-          <SegmentedNav />
-        </div>
-        <div className="topbar-actions">
-          <HistoryActions />
-        </div>
-      </header>
-
-      <div className="pane" style={{ overflowY: "auto" }}>
-        <div className="hist-content">
-          <HistoryList />
-        </div>
-      </div>
-    </div>
-  );
+  redirect("/candidatures");
 }

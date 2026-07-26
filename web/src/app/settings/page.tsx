@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { db } from "@/lib/storage/db";
 import { exportDatabase, importDatabase, resetDatabase } from "@/lib/storage/backup";
 import SegmentedNav from "@/components/layout/SegmentedNav";
 import { useSettingsStore, type AiModel, type AccentColor } from "@/state/settingsStore";
@@ -10,12 +9,6 @@ import CustomSelect from "@/components/ui/CustomSelect";
 
 export default function SettingsPage() {
   const [theme, setTheme] = useState("light");
-  const [stats, setStats] = useState({
-    history: 0,
-    jobs: 0,
-    snapshots: 0,
-    templates: 0,
-  });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const settings = useSettingsStore();
@@ -30,24 +23,6 @@ export default function SettingsPage() {
     const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
     const id = setTimeout(() => setTheme(currentTheme), 0);
 
-    const loadStats = async () => {
-      try {
-        const historyCount = await db.history.count();
-        const jobsCount = await db.jobs.count();
-        const snapshotsCount = await db.snapshots.count();
-        const templatesCount = await db.templates.count();
-        setStats({
-          history: historyCount,
-          jobs: jobsCount,
-          snapshots: snapshotsCount,
-          templates: templatesCount,
-        });
-      } catch (e) {
-        console.error("Failed to load DB stats", e);
-      }
-    };
-    void loadStats();
-    
     return () => clearTimeout(id);
   }, [settings]);
 
@@ -82,7 +57,7 @@ export default function SettingsPage() {
   return (
     <div className="wrap">
       <header className="topbar topbar--secondary">
-        <h1 className="hist-h1">Paramètres & Dashboard</h1>
+        <h1 className="hist-h1">Paramètres</h1>
         <div className="topbar-center mobile-hidden">
           <SegmentedNav />
         </div>
@@ -97,29 +72,6 @@ export default function SettingsPage() {
       <div className="pane" style={{ overflowY: "auto" }}>
         <div className="pane-body form-editor" style={{ maxWidth: "800px", margin: "0 auto", padding: "24px" }}>
           
-          {/* DASHBOARD SECTION */}
-          <section className="form-section">
-            <h3 className="form-section__title">Dashboard</h3>
-            <div className="form-grid">
-              <div className="form-item" style={{ padding: "16px", margin: 0 }}>
-                <div className="form-label" style={{ marginBottom: "8px" }}>Documents générés</div>
-                <div style={{ fontSize: "28px", fontWeight: "bold", color: "var(--text)" }}>{stats.history}</div>
-              </div>
-              <div className="form-item" style={{ padding: "16px", margin: 0 }}>
-                <div className="form-label" style={{ marginBottom: "8px" }}>Offres suivies</div>
-                <div style={{ fontSize: "28px", fontWeight: "bold", color: "var(--text)" }}>{stats.jobs}</div>
-              </div>
-              <div className="form-item" style={{ padding: "16px", margin: 0 }}>
-                <div className="form-label" style={{ marginBottom: "8px" }}>Snapshots d&apos;historique</div>
-                <div style={{ fontSize: "28px", fontWeight: "bold", color: "var(--text)" }}>{stats.snapshots}</div>
-              </div>
-              <div className="form-item" style={{ padding: "16px", margin: 0 }}>
-                <div className="form-label" style={{ marginBottom: "8px" }}>Modèles personnalisés</div>
-                <div style={{ fontSize: "28px", fontWeight: "bold", color: "var(--text)" }}>{stats.templates}</div>
-              </div>
-            </div>
-          </section>
-
           {/* AI CONFIGURATION */}
           <section className="form-section">
             <h3 className="form-section__title">Configuration IA</h3>
@@ -257,6 +209,27 @@ export default function SettingsPage() {
                     { value: 5000, label: "Normal (5 secondes)" },
                     { value: 30000, label: "Lent (30 secondes)" },
                     { value: 0, label: "Manuel (Désactivé)" },
+                  ]}
+                />
+              </div>
+
+              <div style={{ height: "1px", background: "var(--border)" }} />
+
+              {/* Seuil "sans suite" */}
+              <div className="form-field">
+                <label className="form-label">Candidature sans réponse considérée comme perdue après</label>
+                <p style={{ fontSize: "13px", color: "var(--muted)", marginBottom: "8px", lineHeight: "1.5" }}>
+                  Au-delà de ce délai sans nouvelle, une candidature passe automatiquement en « Sans suite » dans « Mes candidatures ». Rien à mettre à jour à la main.
+                </p>
+                <CustomSelect<number>
+                  value={settings.staleDays}
+                  onChange={(v) => settings.setStaleDays(v)}
+                  style={{ width: "100%" }}
+                  options={[
+                    { value: 15, label: "15 jours" },
+                    { value: 30, label: "30 jours (par défaut)" },
+                    { value: 45, label: "45 jours" },
+                    { value: 60, label: "60 jours" },
                   ]}
                 />
               </div>
