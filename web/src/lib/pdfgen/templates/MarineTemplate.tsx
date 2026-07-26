@@ -299,8 +299,11 @@ export function MarineTemplate({
               {t(d.name) ? <Text style={s.name}>{d.name}</Text> : null}
             </View>
 
-            {mainSections.map((sec) => (
-              <View key={sec.id} style={s.mainSection}>
+            {/* La dernière section ne porte pas de marge basse : invisible en fin de
+                colonne, elle consommait 12 pt de hauteur et suffisait à faire naître
+                une seconde page vide sur un CV pile à la limite. */}
+            {mainSections.map((sec, i) => (
+              <View key={sec.id} style={i === mainSections.length - 1 ? undefined : s.mainSection}>
                 <Text style={s.mainSectionTitle}>{sectionTitle(d, sec.id, MARINE_TITLES[sec.id] ?? sec.title)}</Text>
                 <SectionContent section={sec} hideGutter subtitle="caps" />
               </View>
