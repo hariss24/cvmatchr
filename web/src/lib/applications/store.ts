@@ -116,11 +116,30 @@ export async function deleteApplication(id: string): Promise<void> {
   await deleteApplicationRecord(id);
 }
 
-/** Peuple le tracker depuis l'historique existant. Une seule fois, idempotent. */
-export async function runBackfillOnce(): Promise<void> {
-  if (typeof localStorage !== "undefined" && localStorage.getItem(BACKFILL_KEY)) return;
+/**
+ * Peuple le tracker depuis l'historique existant. Une seule fois, idempotent.
+ *
+ * Le marqueur `localStorage` n'est posé qu'à la fin, donc il ne protège pas
+ * pendant l'exécution : deux montages rapprochés du composant (React remonte les
+ * effets en développement) lançaient deux passages simultanés qui recréaient
+ * chacun tout le lot. D'où le verrou en mémoire ci-dessous, et la liste des clés
+ * déjà en base transmise au plan comme seconde barrière.
+ */
+let backfillInFlight: Promise<void> | null = null;
+
+export function runBackfillOnce(): Promise<void> {
+  if (typeof localStorage !== "undefined" && localStorage.getItem(BACKFILL_KEY)) return Promise.resolve();
+  if (!backfillInFlight) {
+    backfillInFlight = doBackfill().finally(() => { backfillInFlight = null; });
+  }
+  return backfillInFlight;
+}
+
+async function doBackfill(): Promise<void> {
   const entries = await listUnattachedHistory();
-  const plan = planBackfill(entries, Date.now(), () => crypto.randomUUID());
+  const existing = await listApplicationsRaw();
+  const known = new Map(existing.map((a) => [a.normKey, a.id]));
+  const plan = planBackfill(entries, Date.now(), () => crypto.randomUUID(), known);
   for (const app of plan.applications) await putApplication(app);
   for (const link of plan.links) await updateHistoryFields(link.entryId, { applicationId: link.applicationId });
   if (typeof localStorage !== "undefined") localStorage.setItem(BACKFILL_KEY, "1");

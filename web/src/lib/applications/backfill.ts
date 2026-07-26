@@ -20,13 +20,18 @@ export interface BackfillPlan {
 /**
  * Calcule les candidatures à créer depuis l'historique existant, groupées par
  * entreprise+poste. Fonction pure : `newId` fournit les identifiants pour que le
- * résultat soit déterministe en test. Idempotent en pratique parce que les
- * entrées déjà rattachées (`applicationId`) sont ignorées.
+ * résultat soit déterministe en test.
+ *
+ * `existing` (clé → identifiant des candidatures déjà en base) est la seconde
+ * barrière contre les doublons : le marquage des entrées ne suffit pas, car deux
+ * exécutions concurrentes lisent l'historique avant que l'une ait écrit ses
+ * liens. Une clé déjà connue est rattachée, jamais recréée.
  */
 export function planBackfill(
   entries: BackfillEntry[],
   now: number,
   newId: (index: number) => string,
+  existing: Map<string, string> = new Map(),
 ): BackfillPlan {
   const groups = new Map<string, BackfillEntry[]>();
   for (const e of entries) {
@@ -43,6 +48,11 @@ export function planBackfill(
   let i = 0;
   for (const [key, group] of groups) {
     const sorted = [...group].sort((a, b) => a.created_at.localeCompare(b.created_at));
+    const known = existing.get(key);
+    if (known) {
+      for (const e of sorted) links.push({ entryId: e.id, applicationId: known });
+      continue;
+    }
     const first = sorted[0];
     const at = new Date(first.created_at).getTime();
     const id = newId(i);

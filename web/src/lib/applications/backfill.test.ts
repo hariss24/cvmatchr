@@ -60,4 +60,28 @@ describe("planBackfill", () => {
   it("est vide quand il n'y a rien à faire (donc idempotent une fois les liens écrits)", () => {
     expect(planBackfill([], NOW, ids)).toEqual({ applications: [], links: [] });
   });
+
+  it("rattache à la candidature existante au lieu d'en créer une deuxième", () => {
+    const plan = planBackfill(
+      [entry("d1", "2026-07-01T10:00:00Z", "Decathlon", "Product Owner")],
+      NOW,
+      ids,
+      new Map([["decathlon|product owner", "app-existante"]]),
+    );
+    expect(plan.applications).toEqual([]);
+    expect(plan.links).toEqual([{ entryId: "d1", applicationId: "app-existante" }]);
+  });
+
+  it("ne crée qu'une candidature par clé même si le plan est rejoué sur ses propres résultats", () => {
+    const entries = [
+      entry("d1", "2026-07-01T10:00:00Z", "Decathlon", "Product Owner"),
+      entry("d2", "2026-07-02T10:00:00Z", "Decathlon", "Product Owner"),
+    ];
+    const first = planBackfill(entries, NOW, ids);
+    const existing = new Map(first.applications.map((a) => [a.normKey, a.id]));
+    // Les entrées n'ont pas encore été marquées : c'est exactement la course observée.
+    const second = planBackfill(entries, NOW, ids, existing);
+    expect(second.applications).toEqual([]);
+    expect(second.links.map((l) => l.applicationId)).toEqual(["app-0", "app-0"]);
+  });
 });
