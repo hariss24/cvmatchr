@@ -26,7 +26,7 @@ describe("GET /api/jobs/locations", () => {
     expect(results).toContainEqual({ kind: "region", code: "11", label: "Île-de-France" });
   });
 
-  it("convertit Paris/Lyon/Marseille en département (FT rejette leur code commune agrégé)", async () => {
+  it("garde Paris comme commune, pour que le rayon reste disponible", async () => {
     vi.stubGlobal("fetch", vi.fn(async (url: string) => {
       if (url.includes("/communes")) {
         return { ok: true, json: async () => ([{ nom: "Paris", code: "75056", codesPostaux: ["75001", "75012"] }]) };
@@ -35,7 +35,7 @@ describe("GET /api/jobs/locations", () => {
     }));
     const res = await GET(req("par"));
     const { results } = await res.json();
-    expect(results).toContainEqual({ kind: "departement", code: "75", label: "Paris (75001)" });
+    expect(results).toContainEqual({ kind: "commune", code: "75056", label: "Paris (75001)" });
   });
 
   it("tolère une panne de geo.api.gouv.fr (retourne [])", async () => {
