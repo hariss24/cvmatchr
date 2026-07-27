@@ -1,4 +1,4 @@
-import type { JobOffer } from "./francetravail";
+import type { JobOffer } from "./offer";
 
 /** Minuscule + suppression des accents pour une comparaison robuste. */
 function normalize(s: string): string {

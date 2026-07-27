@@ -51,7 +51,11 @@ describe("mapOffer", () => {
   });
 
   it("tolère les champs manquants", () => {
-    expect(mapOffer({}, 3000)).toEqual({ id: "", title: "", company: "", location: "", commuteDestination: "", url: "", jobText: "", publishedAt: "" });
+    expect(mapOffer({}, 3000)).toMatchObject({
+      id: "", title: "", company: "", location: "",
+      commuteDestination: "", url: "", jobText: "", publishedAt: "",
+      source: "francetravail", logoUrl: "",
+    });
   });
 });
 

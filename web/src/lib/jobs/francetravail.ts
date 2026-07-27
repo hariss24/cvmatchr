@@ -18,17 +18,11 @@ export interface RawOffer {
   origineOffre?: { urlOrigine?: string };
 }
 
-/** Offre normalisée pour l'affichage et le scoring (contrat unique client ⇄ serveur). */
-export interface JobOffer {
-  id: string;
-  title: string;
-  company: string;
-  location: string;        // libellé lisible (affichage)
-  commuteDestination: string; // "lat,lng" si dispo, sinon libellé (calcul trajet) ; "" si absent
-  url: string;
-  jobText: string;
-  publishedAt: string;     // date de création de l'offre (ISO France Travail) ; "" si absente
-}
+import type { JobOffer } from "./offer";
+
+// Réexport de compatibilité : plusieurs modules importent encore `JobOffer`
+// depuis ce fichier. Les nouveaux modules importent depuis `./offer`.
+export type { JobOffer } from "./offer";
 
 const TOKEN_URL = "https://entreprise.francetravail.fr/connexion/oauth2/access_token";
 const SEARCH_URL = "https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search";
@@ -133,10 +127,10 @@ function commuteDestination(offer: RawOffer): string {
   return lieu.libelle ?? "";
 }
 
-/** Offre brute → offre normalisée (description tronquée + destination de trajet). */
 export function mapOffer(offer: RawOffer, maxDescriptionChars: number): JobOffer {
   return {
     id: offer.id ?? "",
+    source: "francetravail",
     title: offer.intitule ?? "",
     company: offer.entreprise?.nom ?? "",
     location: offer.lieuTravail?.libelle ?? "",
@@ -144,5 +138,10 @@ export function mapOffer(offer: RawOffer, maxDescriptionChars: number): JobOffer
     url: offer.origineOffre?.urlOrigine ?? "",
     jobText: (offer.description ?? "").slice(0, maxDescriptionChars),
     publishedAt: offer.dateCreation ?? "",
+    logoUrl: "",
+    boardDomain: "",
+    boardName: "France Travail",
+    contractLabel: "",
+    salaryLabel: "",
   };
 }
