@@ -91,12 +91,24 @@ Champs ajoutés, tous alimentés par les providers :
 
 ```ts
 source: "francetravail" | "adzuna" | "jsearch";
-logoUrl: string;        // "" si la source n'en fournit pas
+logoUrl: string;        // logo entreprise ; "" si la source n'en fournit pas
+boardDomain: string;    // domaine normalisé du jobboard, ex. "linkedin.com"
+boardName: string;      // nom lisible, ex. "LinkedIn" (title + repli initiale)
 contractLabel: string;  // "CDI · Plein temps", "CDD · 8 mois", "" si inconnu
 salaryLabel: string;    // "33–36 k€ / an", "" si non précisé
 ```
 
-`JobEntry` (Dexie) reçoit les mêmes quatre champs afin que l'affichage survive au
+`boardDomain` / `boardName` alimentent la pastille décrite en 5.3.1 :
+
+- **JSearch** — `job_publisher` donne le nom, le domaine vient de
+  `job_apply_link`. C'est la source qui bénéficie le plus de ce mécanisme :
+  ses offres viennent de dizaines de jobboards différents.
+- **France Travail** — domaine de `origineOffre.urlOrigine`, souvent
+  `francetravail.fr`, parfois un partenaire.
+- **Adzuna** — `redirect_url` pointe toujours vers `adzuna.fr` : cette source ne
+  révèle pas le jobboard d'origine, la pastille affiche donc Adzuna.
+
+`JobEntry` (Dexie) reçoit les mêmes champs afin que l'affichage survive au
 rechargement. Migration **Dexie v9**, sans `upgrade` : les offres déjà stockées
 n'ont pas ces champs, l'UI retombe sur ses valeurs de repli (initiale de
 l'entreprise, « Salaire non précisé »). Aucun index nouveau — on ne filtre ni ne
@@ -220,32 +232,51 @@ Grille deux colonnes, repliée en une seule sous 900 px.
   Un fait absent s'affiche en gris (« Salaire non précisé ») plutôt que de
   disparaître : l'absence d'information est elle-même une information.
 - **Description** — trois lignes, dépliables par « Voir plus ».
-- **Pied** — logo de la source à gauche (attribution), puis « Adapter mon CV »
+- **Pied** — pastille du jobboard d'origine à gauche, puis « Adapter mon CV »
   (action principale, compacte) et « Voir l'offre » ; le menu « ⋯ » regroupe
   Candidater, Suivre et Pas intéressé.
 
 Deux actions visibles au lieu de cinq. Les trois autres restent à un clic
 supplémentaire, sans encombrer la grille.
 
-### 5.3.1 Logos de source
+### 5.3.1 Pastille du jobboard d'origine
 
-Logotypes officiels, récupérés sur Wikimedia Commons et servis depuis
-`web/public/images/job-boards/` : `francetravail.svg` (400×142),
-`adzuna.png` (600×154), `google.svg`.
+La carte affiche **le site où l'offre est réellement publiée** — LinkedIn,
+Indeed, Welcome to la Jungle, HelloWork… — et non la source technique qui nous
+l'a fait remonter. « Google for Jobs » est une plomberie d'agrégation : le
+candidat, lui, veut savoir sur quel site il va postuler.
 
-Ces marques sont des **logotypes larges** (ratio ≈ 2,8:1), pas des icônes
-carrées. Elles sont donc posées en pied de carte à hauteur fixe (18 px) et
-largeur libre, et non dans une pastille carrée où le logotype France Travail
-devenait illisible. Aucune icône de substitution n'est dessinée : afficher une
-approximation d'une marque déposée serait à la fois inexact et inutile.
+L'icône est le **favicon du domaine du lien de l'offre**, servi par
+`https://www.google.com/s2/favicons?domain=<domaine>&sz=64`. Conséquences :
+aucun logo n'est stocké dans le dépôt, et tout jobboard inconnu fonctionne sans
+la moindre modification de code.
 
-Le logotype France Travail reste peu lisible dans son détail à cette taille — sa
-trame de pastilles multicolores suffit à l'identifier, et dans le panneau des
-sources il est de toute façon accompagné de son nom en toutes lettres. Découper
-l'emblème du logotype (35 tracés) a été écarté : fragile et disproportionné.
+**Normalisation du domaine — obligatoire.** Le service échoue sur les
+sous-domaines : `candidat.francetravail.fr` renvoie 404 (avec un globe
+générique, identique à celui d'un domaine inexistant), là où `francetravail.fr`
+renvoie le bon favicon. Le domaine est donc réduit à ses deux derniers labels
+avant l'appel. Vérifié sur les six domaines rencontrés : la normalisation
+corrige le seul cas en échec et n'en casse aucun autre.
 
-En thème sombre, une tuile claire est appliquée derrière le logo : la marque
-France Travail est bleu marine sur fond transparent et disparaîtrait sinon.
+Limite connue : la réduction « deux derniers labels » est fausse pour les
+suffixes composés (`example.co.uk` → `co.uk`). Aucun jobboard français n'est
+concerné ; embarquer une Public Suffix List serait disproportionné.
+
+**Repli.** Si le favicon ne charge pas, on affiche l'initiale du jobboard.
+Attention : un domaine inconnu reçoit un globe générique en HTTP 404 — le repli
+doit donc se déclencher sur l'erreur de chargement, jamais sur l'absence
+d'image.
+
+Pastille ronde de 24 px, favicon de 15 px. En thème sombre, tuile claire :
+beaucoup de favicons sont sombres sur fond transparent.
+
+**Compromis de vie privée assumé.** Le service reçoit le domaine de chaque offre
+affichée : Google apprend quels jobboards l'utilisateur consulte. Alternative
+écartée (proxy serveur avec cache) : plus de code pour un gain marginal, l'app
+appelant déjà Google Maps et Gemini. DuckDuckGo
+(`icons.duckduckgo.com/ip3/<domaine>.ico`) a été testé — il gère les
+sous-domaines sans normalisation mais échoue sur `adzuna.fr` et sert des
+fichiers 30× plus lourds (24 Ko contre 834 o).
 
 ### 5.4 Vignette d'entreprise
 
@@ -290,12 +321,19 @@ Au niveau de la route :
 
 Le mapping des contrats Adzuna (4.5) est testé sur ses deux branches.
 
+La normalisation de domaine (5.3.1) est testée en module pur :
+`candidat.francetravail.fr` → `francetravail.fr`, `fr.linkedin.com` →
+`linkedin.com`, domaine déjà court inchangé, URL invalide → `""`.
+
 ## 7. Hors périmètre
 
 - Scraping direct de Google, LinkedIn ou Indeed : contraire à leurs CGU, cassant au
   moindre changement de page, et inutile puisque JSearch expose légalement le même
   index.
-- Enrichissement de logo par un service tiers (cf. 5.4).
+- Enrichissement du logo **d'entreprise** par un service tiers (cf. 5.4). Le
+  favicon du **jobboard** (5.3.1) est un cas distinct : il part d'un domaine
+  réel tiré du lien de l'offre, pas d'une devinette à partir d'un nom.
+- Stockage local des logos de plateformes : rendu inutile par 5.3.1.
 - Filtrage ou tri par source dans la liste : le score reste le seul ordre. Une
   source n'est pas une qualité.
 - Refonte du formulaire de critères lui-même : seul l'ajout du bloc « Où chercher »

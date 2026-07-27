@@ -314,18 +314,23 @@ a { color: var(--link); text-decoration: none; }
   min-width: 0;
 }
 .job-company__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* Logo de source : les marques officielles sont des logotypes LARGES (France
-   Travail 400×142, Adzuna 600×154) — illisibles dans une pastille carrée. On
-   les pose donc en pied de carte, à hauteur fixe et largeur libre, comme une
-   mention d'attribution. Pas de texte « Disponible sur » : le logo suffit. */
+/* Pastille du jobboard d'origine. On n'affiche PAS la source technique
+   (France Travail / Adzuna / Google for Jobs) mais le site où l'offre est
+   réellement publiée — LinkedIn, Indeed, Welcome to the Jungle… : c'est
+   l'information utile au candidat. Le favicon vient du domaine du lien de
+   l'offre, donc aucun logo n'est stocké et tout nouveau jobboard marche seul. */
 .job-src {
-  display: inline-flex; align-items: center; flex-shrink: 0;
-  padding: 3px 7px; border-radius: 7px;
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  background: var(--field); box-shadow: var(--neu-inset);
+  display: inline-flex; align-items: center; justify-content: center;
+  overflow: hidden;
 }
-.job-src img { height: 18px; width: auto; display: block; }
-/* Le logo France Travail est bleu marine sur fond transparent : sur fond sombre
-   il se noie. Tuile claire en thème sombre, comme pour les logos d'entreprise. */
-[data-theme="dark"] .job-src { background: #F2EFEA; }
+.job-src img { width: 15px; height: 15px; object-fit: contain; display: block; }
+/* Repli quand le domaine n'a pas de favicon exploitable : initiale du jobboard. */
+.job-src__initial { font-size: 10px; font-weight: 800; color: var(--faint); }
+/* Beaucoup de favicons sont sombres sur fond transparent : tuile claire en
+   thème sombre, sinon ils se noient. */
+[data-theme="dark"] .job-src { background: #F2EFEA; box-shadow: none; }
 
 .job-card__aside {
   display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0;
@@ -543,7 +548,7 @@ a { color: var(--link); text-decoration: none; }
           <button class="job-more">Voir plus</button>
 
           <div class="job-card__foot">
-            <span class="job-src" title="Google for Jobs"><img src="google.svg" alt="Google for Jobs"></span>
+            <span class="job-src" title="Publiée sur LinkedIn"><img src="https://www.google.com/s2/favicons?domain=linkedin.com&sz=64" alt="LinkedIn"></span>
             <button class="job-cta">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2Z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/></svg>
               Adapter mon CV
@@ -583,7 +588,7 @@ a { color: var(--link); text-decoration: none; }
           <button class="job-more">Voir plus</button>
 
           <div class="job-card__foot">
-            <span class="job-src" title="France Travail"><img src="francetravail.svg" alt="France Travail"></span>
+            <span class="job-src" title="Publiée sur France Travail"><img src="https://www.google.com/s2/favicons?domain=francetravail.fr&sz=64" alt="France Travail"></span>
             <button class="job-cta">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2Z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/></svg>
               Adapter mon CV
@@ -644,7 +649,7 @@ a { color: var(--link); text-decoration: none; }
           </div>
 
           <div class="job-card__foot">
-            <span class="job-src" title="Google for Jobs"><img src="google.svg" alt="Google for Jobs"></span>
+            <span class="job-src" title="Publiée sur Welcome to the Jungle"><img src="https://www.google.com/s2/favicons?domain=welcometothejungle.com&sz=64" alt="Welcome to the Jungle"></span>
             <button class="job-cta">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2Z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/></svg>
               Adapter mon CV
@@ -684,7 +689,7 @@ a { color: var(--link); text-decoration: none; }
           <button class="job-more">Voir plus</button>
 
           <div class="job-card__foot">
-            <span class="job-src" title="Adzuna"><img src="adzuna.png" alt="Adzuna"></span>
+            <span class="job-src" title="Publiée sur HelloWork"><img src="https://www.google.com/s2/favicons?domain=hellowork.com&sz=64" alt="HelloWork"></span>
             <button class="job-cta">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2Z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/></svg>
               Adapter mon CV

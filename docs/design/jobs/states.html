@@ -314,18 +314,23 @@ a { color: var(--link); text-decoration: none; }
   min-width: 0;
 }
 .job-company__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* Logo de source : les marques officielles sont des logotypes LARGES (France
-   Travail 400×142, Adzuna 600×154) — illisibles dans une pastille carrée. On
-   les pose donc en pied de carte, à hauteur fixe et largeur libre, comme une
-   mention d'attribution. Pas de texte « Disponible sur » : le logo suffit. */
+/* Pastille du jobboard d'origine. On n'affiche PAS la source technique
+   (France Travail / Adzuna / Google for Jobs) mais le site où l'offre est
+   réellement publiée — LinkedIn, Indeed, Welcome to the Jungle… : c'est
+   l'information utile au candidat. Le favicon vient du domaine du lien de
+   l'offre, donc aucun logo n'est stocké et tout nouveau jobboard marche seul. */
 .job-src {
-  display: inline-flex; align-items: center; flex-shrink: 0;
-  padding: 3px 7px; border-radius: 7px;
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  background: var(--field); box-shadow: var(--neu-inset);
+  display: inline-flex; align-items: center; justify-content: center;
+  overflow: hidden;
 }
-.job-src img { height: 18px; width: auto; display: block; }
-/* Le logo France Travail est bleu marine sur fond transparent : sur fond sombre
-   il se noie. Tuile claire en thème sombre, comme pour les logos d'entreprise. */
-[data-theme="dark"] .job-src { background: #F2EFEA; }
+.job-src img { width: 15px; height: 15px; object-fit: contain; display: block; }
+/* Repli quand le domaine n'a pas de favicon exploitable : initiale du jobboard. */
+.job-src__initial { font-size: 10px; font-weight: 800; color: var(--faint); }
+/* Beaucoup de favicons sont sombres sur fond transparent : tuile claire en
+   thème sombre, sinon ils se noient. */
+[data-theme="dark"] .job-src { background: #F2EFEA; box-shadow: none; }
 
 .job-card__aside {
   display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0;
@@ -505,7 +510,7 @@ a { color: var(--link); text-decoration: none; }
               <span class="job-source__box">
                 <svg class="job-source__tick" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
               </span>
-              <span class="job-src" title="France Travail"><img src="francetravail.svg" alt="France Travail"></span>
+              <span class="job-src" title="Publiée sur France Travail"><img src="https://www.google.com/s2/favicons?domain=francetravail.fr&sz=64" alt="France Travail"></span>
               <span class="job-source__name">France Travail</span>
               <span class="job-source__quota">illimité</span>
             </label>
@@ -513,7 +518,7 @@ a { color: var(--link); text-decoration: none; }
               <span class="job-source__box">
                 <svg class="job-source__tick" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
               </span>
-              <span class="job-src" title="Google for Jobs"><img src="google.svg" alt="Google for Jobs"></span>
+              <span class="job-src" title="Publiée sur Google for Jobs"><img src="https://www.google.com/s2/favicons?domain=google.com&sz=64" alt="Google for Jobs"></span>
               <span class="job-source__name">Google for Jobs</span>
               <span class="job-source__quota">183/200 ce mois</span>
             </label>
@@ -521,7 +526,7 @@ a { color: var(--link); text-decoration: none; }
               <span class="job-source__box">
                 <svg class="job-source__tick" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
               </span>
-              <span class="job-src" title="Adzuna"><img src="adzuna.png" alt="Adzuna"></span>
+              <span class="job-src" title="Publiée sur Adzuna"><img src="https://www.google.com/s2/favicons?domain=adzuna.fr&sz=64" alt="Adzuna"></span>
               <span class="job-source__name">Adzuna</span>
               <span class="job-source__quota">947/1000 ce mois</span>
             </label>
@@ -533,19 +538,31 @@ a { color: var(--link); text-decoration: none; }
       <!-- =============================================================
            2. Pastilles de source
            ============================================================= -->
-      <div class="app-block__label" style="margin-top:26px">Logos de source — logotypes officiels, posés en pied de carte</div>
+      <div class="app-block__label" style="margin-top:26px">Jobboard d'origine — favicon dérivé du domaine de l'offre, aucun logo stocké</div>
       <div style="display:flex; gap:22px; align-items:center; margin:10px 0 26px; flex-wrap:wrap">
         <div style="text-align:center">
-          <div class="job-company" style="justify-content:center"><span class="job-src" title="France Travail"><img src="francetravail.svg" alt="France Travail"></span><span>France Travail</span></div>
-          <div class="mk-note">entreprise sans logo</div>
+          <div class="job-company" style="justify-content:center"><span class="job-src" title="Publiée sur LinkedIn"><img src="https://www.google.com/s2/favicons?domain=linkedin.com&sz=64" alt="LinkedIn"></span><span>LinkedIn</span></div>
+          <div class="mk-note">via Google for Jobs</div>
         </div>
         <div style="text-align:center">
-          <div class="job-company" style="justify-content:center"><span class="job-src" title="Google for Jobs"><img src="google.svg" alt="Google for Jobs"></span><span>Google for Jobs</span></div>
-          <div class="mk-note">fournit le logo entreprise</div>
+          <div class="job-company" style="justify-content:center"><span class="job-src" title="Publiée sur Indeed"><img src="https://www.google.com/s2/favicons?domain=indeed.com&sz=64" alt="Indeed"></span><span>Indeed</span></div>
+          <div class="mk-note">via Google for Jobs</div>
         </div>
         <div style="text-align:center">
-          <div class="job-company" style="justify-content:center"><span class="job-src" title="Adzuna"><img src="adzuna.png" alt="Adzuna"></span><span>Adzuna</span></div>
-          <div class="mk-note">entreprise sans logo</div>
+          <div class="job-company" style="justify-content:center"><span class="job-src" title="Publiée sur Welcome to the Jungle"><img src="https://www.google.com/s2/favicons?domain=welcometothejungle.com&sz=64" alt="Welcome to the Jungle"></span><span>Welcome to the Jungle</span></div>
+          <div class="mk-note">via Google for Jobs</div>
+        </div>
+        <div style="text-align:center">
+          <div class="job-company" style="justify-content:center"><span class="job-src" title="Publiée sur France Travail"><img src="https://www.google.com/s2/favicons?domain=francetravail.fr&sz=64" alt="France Travail"></span><span>France Travail</span></div>
+          <div class="mk-note">source directe</div>
+        </div>
+        <div style="text-align:center">
+          <div class="job-company" style="justify-content:center"><span class="job-src" title="Publiée sur Adzuna"><img src="https://www.google.com/s2/favicons?domain=adzuna.fr&sz=64" alt="Adzuna"></span><span>Adzuna</span></div>
+          <div class="mk-note">source directe</div>
+        </div>
+        <div style="text-align:center">
+          <div class="job-company" style="justify-content:center"><span class="job-src"><span class="job-src__initial">?</span></span><span>Sans favicon</span></div>
+          <div class="mk-note">repli : initiale</div>
         </div>
       </div>
 
