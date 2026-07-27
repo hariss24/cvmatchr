@@ -65,19 +65,19 @@ describe("search", () => {
   it("renvoie [] immédiatement si la source est désactivée", async () => {
     const p = parseProfile({ ...hariss, sources: { francetravail: false } });
     const spy = vi.spyOn(globalThis, "fetch");
-    expect(await search(p, creds)).toEqual([]);
+    expect(await search(p, creds)).toEqual({ offers: [], calls: 0 });
     expect(spy).not.toHaveBeenCalled();
   });
 
   it("renvoie [] si pas d'identifiants", async () => {
     const spy = vi.spyOn(globalThis, "fetch");
-    expect(await search(DEFAULT_PROFILE, { clientId: "", clientSecret: "" })).toEqual([]);
+    expect(await search(DEFAULT_PROFILE, { clientId: "", clientSecret: "" })).toEqual({ offers: [], calls: 0 });
     expect(spy).not.toHaveBeenCalled();
   });
 
   it("gère l'erreur d'authentification sans planter", async () => {
     vi.stubGlobal("fetch", async () => ({ ok: false, status: 401, json: async () => ({}) }));
-    expect(await search(DEFAULT_PROFILE, creds)).toEqual([]);
+    expect(await search(DEFAULT_PROFILE, creds)).toEqual({ offers: [], calls: 0 });
   });
 
   it("boucle sur les mots-clés et dédoublonne", async () => {
@@ -93,7 +93,8 @@ describe("search", () => {
     vi.stubGlobal("fetch", fetchMock);
     const p = parseProfile({ ...hariss, keywords: ["A", "B"] });
     const out = await search(p, creds);
-    expect(out).toHaveLength(3);
-    expect(out.map(o => o.id)).toEqual(["1", "2", "3"]);
+    expect(out.offers).toHaveLength(3);
+    expect(out.offers.map(o => o.id)).toEqual(["1", "2", "3"]);
+    expect(out.calls).toBe(2);
   });
 });

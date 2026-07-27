@@ -1,27 +1,29 @@
 import { NextResponse } from "next/server";
 import { resolveProfile } from "@/lib/jobs/resolveProfile";
-import { search as searchFT } from "@/lib/jobs/francetravail";
+import { search as searchFranceTravail } from "@/lib/jobs/francetravail";
+import { searchAdzuna } from "@/lib/jobs/adzuna";
+import { searchJSearch } from "@/lib/jobs/jsearch";
+import { dedupeOffers } from "@/lib/jobs/dedupe";
 import { matchesIncludeKeywords } from "@/lib/jobs/includeFilter";
+import type { JobOffer, SourceId } from "@/lib/jobs/offer";
 
-// France Travail (fetch + OAuth) : runtime Node.js.
+// Appels réseau sortants : runtime Node.js.
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+const ZERO_CALLS: Record<SourceId, number> = { francetravail: 0, adzuna: 0, jsearch: 0 };
+
 /**
- * Recherche les offres pour le profil courant : jeton FT, une requête par mot-clé, filtre
- * stages/alternances, dédoublonnage par id, description tronquée. Réponse `{ offers }`.
- * Clés France Travail absentes → 400 `{ error: "config" }` (l'onglet affiche l'invite de config).
+ * Recherche les offres pour le profil courant, sur les seules sources activées.
+ *
+ * Les sources sont interrogées en parallèle : une panne de l'une n'empêche pas
+ * les autres de répondre (elle est signalée dans `failed`). Les résultats sont
+ * fusionnés, dédoublonnés inter-source, puis filtrés par `includeKeywords`.
+ *
+ * Réponse : `{ offers, calls, failed }`. `calls` alimente le compteur de quota
+ * local côté client.
  */
 export async function POST(req: Request): Promise<Response> {
-  const clientId = process.env.FT_CLIENT_ID;
-  const clientSecret = process.env.FT_CLIENT_SECRET;
-  if (!clientId || !clientSecret) {
-    return NextResponse.json(
-      { error: "config", message: "Configurez FT_CLIENT_ID et FT_CLIENT_SECRET pour rechercher des offres." },
-      { status: 400 },
-    );
-  }
-
   let body: unknown = {};
   try {
     body = await req.json();
@@ -30,20 +32,61 @@ export async function POST(req: Request): Promise<Response> {
   }
   const profile = resolveProfile(body);
 
-  try {
-    if (profile.keywords.length === 0) {
-      return NextResponse.json({ offers: [] });
-    }
-
-    const creds = { clientId, clientSecret };
-    const rawOffers = await searchFT(profile, creds);
-    
-    // Le filtre sur les mots-clés (includeKeywords) se fait post-unification
-    const offers = rawOffers.filter(o => matchesIncludeKeywords(o, profile.includeKeywords));
-    
-    return NextResponse.json({ offers });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ offers: [] });
+  if (profile.keywords.length === 0) {
+    return NextResponse.json({ offers: [], calls: ZERO_CALLS, failed: [] });
   }
+
+  const ftId = process.env.FT_CLIENT_ID;
+  const ftSecret = process.env.FT_CLIENT_SECRET;
+  const adzId = process.env.ADZUNA_APP_ID;
+  const adzKey = process.env.ADZUNA_APP_KEY;
+  const jsKey = process.env.JSEARCH_API_KEY;
+
+  // Chaque source activée doit avoir ses clés : mieux vaut le dire tout de suite
+  // que de renvoyer une liste amputée sans explication.
+  const missing: string[] = [];
+  if (profile.sources.francetravail && !(ftId && ftSecret)) missing.push("FT_CLIENT_ID / FT_CLIENT_SECRET");
+  if (profile.sources.adzuna && !(adzId && adzKey)) missing.push("ADZUNA_APP_ID / ADZUNA_APP_KEY");
+  if (profile.sources.jsearch && !jsKey) missing.push("JSEARCH_API_KEY");
+  if (missing.length > 0) {
+    return NextResponse.json(
+      { error: "config", message: `Clés manquantes pour les sources activées : ${missing.join(", ")}.` },
+      { status: 400 },
+    );
+  }
+
+  const enabled = (Object.keys(profile.sources) as SourceId[]).filter((s) => profile.sources[s]);
+  if (enabled.length === 0) {
+    return NextResponse.json(
+      { error: "config", message: "Aucune source sélectionnée. Coche au moins une source dans « Mes critères »." },
+      { status: 400 },
+    );
+  }
+
+  const runners: Record<SourceId, () => Promise<{ offers: JobOffer[]; calls: number }>> = {
+    francetravail: () => searchFranceTravail(profile, { clientId: ftId!, clientSecret: ftSecret! }),
+    adzuna: () => searchAdzuna(profile, { appId: adzId!, appKey: adzKey! }),
+    jsearch: () => searchJSearch(profile, { apiKey: jsKey! }),
+  };
+
+  // `allSettled` : une source qui jette ne doit pas emporter les autres.
+  const settled = await Promise.allSettled(enabled.map((s) => runners[s]()));
+
+  const calls = { ...ZERO_CALLS };
+  const failed: SourceId[] = [];
+  let merged: JobOffer[] = [];
+
+  settled.forEach((r, i) => {
+    const source = enabled[i];
+    if (r.status === "fulfilled") {
+      calls[source] = r.value.calls;
+      merged = merged.concat(r.value.offers);
+    } else {
+      failed.push(source);
+      console.warn(`Source ${source} en échec :`, r.reason);
+    }
+  });
+
+  const offers = dedupeOffers(merged).filter((o) => matchesIncludeKeywords(o, profile.includeKeywords));
+  return NextResponse.json({ offers, calls, failed });
 }

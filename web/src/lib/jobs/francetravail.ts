@@ -155,16 +155,19 @@ export interface FranceTravailCreds {
 export async function search(
   profile: JobSearchProfile,
   creds: FranceTravailCreds
-): Promise<JobOffer[]> {
-  if (!profile.sources.francetravail) return [];
-  if (!creds.clientId || !creds.clientSecret) return [];
+): Promise<{ offers: JobOffer[], calls: number }> {
+  if (!profile.sources.francetravail) return { offers: [], calls: 0 };
+  if (!creds.clientId || !creds.clientSecret) return { offers: [], calls: 0 };
 
   try {
     const token = await getToken(creds.clientId, creds.clientSecret);
     const all: JobOffer[] = [];
     const seen = new Set<string>();
 
+    let calls = 0;
+
     for (const kw of profile.keywords) {
+      calls++;
       const raw = await fetchOffers(token, kw, profile);
       for (const r of raw) {
         if (r.id && !seen.has(r.id) && !isExcluded(r, profile.excludedWords)) {
@@ -173,10 +176,10 @@ export async function search(
         }
       }
     }
-    return all;
+    return { offers: all, calls };
   } catch (err) {
     console.error("France Travail search error:", err);
-    return [];
+    return { offers: [], calls: 0 };
   }
 }
 
