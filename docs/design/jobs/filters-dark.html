@@ -1,10 +1,10 @@
-<!-- @dsCard group="Offres" name="Page offres — clair" -->
+<!-- @dsCard group="Offres" name="Filtres — interactions (sombre)" -->
 <!doctype html>
-<html lang="fr" data-theme="light">
+<html lang="fr" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chercher des offres — clair</title>
+<title>Filtres — interactions (sombre)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -647,206 +647,138 @@ a { color: var(--link); text-decoration: none; }
 </style>
 </head>
 <body>
-<div class="wrap">
-
-  <!-- ==================== Topbar (identique aux pages secondaires) ==================== -->
-  <div class="topbar topbar--secondary">
-    <h1 class="hist-h1">Chercher des offres</h1>
-    <div class="topbar-center">
-      <div class="seg" style="--seg-index:1">
-        <div class="seg__knob"></div>
-        <button class="seg__btn">Éditeur</button>
-        <button class="seg__btn active">Offres</button>
-        <button class="seg__btn">Candidatures</button>
-        <button class="seg__btn">Historique</button>
-      </div>
-    </div>
-    <div class="topbar-actions">
-      <button class="btn-nav">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-      </button>
-      <button class="btn-nav">Réglages</button>
-    </div>
-  </div>
-
+<div class="wrap" style="min-height:auto">
   <div class="pane">
     <div class="hist-content">
 
-      <!-- ==================== Barre de filtres ====================
-           Toujours visible : on voit en permanence ce qui contraint les
-           résultats. Étage 1 = ce que je cherche, étage 2 = comment je
-           restreins. Plus de bouton « Mes critères » qui cache tout. -->
-      <div class="flt">
+      <!-- ============ 1. Les trois états d'une pastille ============ -->
+      <div class="app-block__label">Pastille — trois états seulement, lisibles sans lire</div>
+      <div style="display:flex; gap:26px; align-items:flex-start; margin:12px 0 30px; flex-wrap:wrap">
+        <div style="text-align:center">
+          <button class="flt-pill">Expérience
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="mk-note">par défaut · ne filtre rien</div>
+        </div>
+        <div style="text-align:center">
+          <button class="flt-pill is-set">Contrat <span class="flt-pill__val">CDI, CDD</span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="mk-note">actif · anneau + valeur</div>
+        </div>
+        <div style="text-align:center">
+          <button class="flt-pill is-open">Expérience
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+          </button>
+          <div class="mk-note">ouvert · enfoncé</div>
+        </div>
+      </div>
+
+      <!-- ============ 2. Menus ============ -->
+      <div class="app-block__label">Menus — courts, une décision par menu</div>
+      <div style="display:flex; gap:20px; align-items:flex-start; margin:12px 0 30px; flex-wrap:wrap">
+
+        <div class="flt-menu" style="position:static">
+          <div class="flt-menu__title">Type de contrat</div>
+          <label class="flt-opt"><input type="checkbox" checked> CDI</label>
+          <label class="flt-opt"><input type="checkbox" checked> CDD</label>
+          <label class="flt-opt"><input type="checkbox"> Intérim</label>
+          <label class="flt-opt"><input type="checkbox"> Saisonnier</label>
+        </div>
+
+        <div class="flt-menu" style="position:static">
+          <div class="flt-menu__title">Publiée depuis</div>
+          <button class="flt-opt is-on">Peu importe<svg class="flt-opt__tick" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg></button>
+          <button class="flt-opt">Aujourd&apos;hui<svg class="flt-opt__tick" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg></button>
+          <button class="flt-opt">3 derniers jours<svg class="flt-opt__tick" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg></button>
+          <button class="flt-opt">7 derniers jours<svg class="flt-opt__tick" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg></button>
+          <button class="flt-opt">30 derniers jours<svg class="flt-opt__tick" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg></button>
+        </div>
+
+        <!-- Le quota vit ici, au moment où on choisit d'interroger une source :
+             c'est là qu'il éclaire une décision, pas dans un réglage lointain. -->
+        <div class="flt-menu" style="position:static; min-width:250px">
+          <div class="flt-menu__title">Où chercher</div>
+          <label class="flt-opt">
+            <input type="checkbox" checked>
+            <span class="job-src" style="width:19px;height:19px"><img src="https://www.google.com/s2/favicons?domain=francetravail.fr&sz=64" alt=""></span>
+            France Travail <span class="flt-opt__sub">illimité</span>
+          </label>
+          <label class="flt-opt">
+            <input type="checkbox" checked>
+            <span class="job-src" style="width:19px;height:19px"><img src="https://www.google.com/s2/favicons?domain=google.com&sz=64" alt=""></span>
+            Google for Jobs <span class="flt-opt__sub">183/200</span>
+          </label>
+          <label class="flt-opt">
+            <input type="checkbox" checked>
+            <span class="job-src" style="width:19px;height:19px"><img src="https://www.google.com/s2/favicons?domain=adzuna.fr&sz=64" alt=""></span>
+            Adzuna <span class="flt-opt__sub">947/1000</span>
+          </label>
+          <div class="flt-menu__sep"></div>
+          <p class="flt-menu__note">Décocher une source, c&apos;est ne pas l&apos;interroger : son quota mensuel est préservé.</p>
+        </div>
+      </div>
+
+      <!-- ============ 3. Plus de filtres ============ -->
+      <div class="app-block__label">« Plus de filtres » — le rare, rangé mais pas caché</div>
+      <div class="flt" style="margin-top:12px">
+        <div class="flt-row" style="margin-top:0; padding-top:0; border-top:none">
+          <button class="flt-pill is-open">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+            Plus de filtres <span class="flt-count">2</span>
+          </button>
+        </div>
+        <div class="flt-more">
+          <div class="flt-field">
+            <label class="flt-field__label">Compétences — pré-tri gratuit</label>
+            <div class="flt-tags">
+              <span class="flt-tag">seo <button>×</button></span>
+              <span class="flt-tag">wordpress <button>×</button></span>
+              <input class="flt-input" placeholder="Ajouter…">
+            </div>
+            <span class="flt-field__note">Écarte sans IA les offres sans aucun recoupement.</span>
+          </div>
+          <div class="flt-field">
+            <label class="flt-field__label">Mots à exclure</label>
+            <div class="flt-tags">
+              <span class="flt-tag">alternance <button>×</button></span>
+              <span class="flt-tag">stagiaire <button>×</button></span>
+              <input class="flt-input" placeholder="Ajouter…">
+            </div>
+          </div>
+          <div class="flt-field">
+            <label class="flt-field__label">Salaire minimum</label>
+            <input class="flt-text" placeholder="Ex. 32 000 € par an">
+          </div>
+          <div class="flt-field">
+            <label class="flt-field__label">Score minimum pour retenir une offre</label>
+            <input class="flt-text" value="70">
+            <span class="flt-field__note">Sous ce score, l&apos;offre n&apos;est pas enregistrée.</span>
+          </div>
+          <div class="flt-field flt-field--wide">
+            <label class="flt-field__label">Adresse de départ — calcul du temps de trajet</label>
+            <input class="flt-text" placeholder="Ex. 10 rue de Paris, 75012 Paris">
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ 4. Rien à chercher ============ -->
+      <div class="app-block__label" style="margin-top:30px">Sans poste renseigné — le bouton se désarme, le champ appelle</div>
+      <div class="flt" style="margin-top:12px">
         <div class="flt-search">
           <div class="flt-box flt-box--role">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-            <span class="flt-tag">Webmaster <button aria-label="Retirer Webmaster">×</button></span>
-            <span class="flt-tag">Intégrateur web <button aria-label="Retirer Intégrateur web">×</button></span>
-            <input class="flt-input" placeholder="Ajouter un poste…">
+            <input class="flt-input" placeholder="Quel poste cherches-tu ? Ex. Webmaster">
           </div>
-
           <div class="flt-box flt-box--place">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-            <input class="flt-input" value="Paris (75001)">
-            <span class="flt-radius">
-              dans un rayon de
-              <select><option>10 km</option><option selected>20 km</option><option>30 km</option><option>50 km</option></select>
-            </span>
+            <input class="flt-input" placeholder="Partout en France">
           </div>
-
-          <button class="flt-go">
+          <button class="flt-go" disabled>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
             Rechercher
           </button>
         </div>
-
-        <div class="flt-row">
-          <button class="flt-pill is-set">
-            Contrat <span class="flt-pill__val">CDI, CDD</span>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-
-          <button class="flt-pill">
-            Publiée depuis
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-
-          <button class="flt-pill">
-            Expérience
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-
-          <button class="flt-pill">
-            Temps de travail
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-
-          <!-- Les sources se lisent d'un coup d'œil : leurs favicons EN SONT
-               l'étiquette, pas un mot de plus. -->
-          <button class="flt-pill is-set">
-            <span class="job-src" style="width:18px;height:18px"><img src="https://www.google.com/s2/favicons?domain=francetravail.fr&sz=64" alt=""></span>
-            <span class="job-src" style="width:18px;height:18px;margin-left:-11px"><img src="https://www.google.com/s2/favicons?domain=google.com&sz=64" alt=""></span>
-            <span class="job-src" style="width:18px;height:18px;margin-left:-11px"><img src="https://www.google.com/s2/favicons?domain=adzuna.fr&sz=64" alt=""></span>
-            <span style="margin-left:3px">3 sources</span>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-
-          <button class="flt-pill">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
-            Plus de filtres
-          </button>
-
-          <div class="flt-spacer"></div>
-          <span class="flt-results"><strong>28</strong> offres retenues</span>
-          <button class="flt-reset">Réinitialiser</button>
-        </div>
-      </div>
-
-      <!-- ==================== Liste : 2 colonnes ==================== -->
-      <div class="job-grid">
-
-        <article class="job-card">
-          <div class="job-card__head">
-            <div class="job-logo"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-WjGZe8VqaTez0tNdvqUwPE-HzMXhM9d3UbMw&amp;s=0" alt="Médecins sans Frontières France"></div>
-            <div class="job-card__id">
-              <h2 class="job-title">Webmaster F/H</h2>
-              <div class="job-company"><span class="job-company__name">Médecins sans Frontières France</span></div>
-            </div>
-            <div class="job-card__aside"><span class="job-score job-score--high"><span class="job-score__num">91</span><span class="job-score__max">/100</span></span><span class="job-new">Nouveau</span></div>
-          </div>
-
-          <div class="job-facts"><span class="job-fact"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Paris</span><span class="job-fact job-fact--none"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Type non précisé</span><span class="job-fact job-fact--none"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Salaire non précisé</span><span class="job-fact job-fact--commute"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="2"/><path d="M4 11h16M8 21l2-3m6 3-2-3"/><circle cx="8.5" cy="13.5" r=".8" fill="currentColor"/><circle cx="15.5" cy="13.5" r=".8" fill="currentColor"/></svg>28 min en transport</span></div>
-
-          <p class="job-desc">Médecins Sans Frontières, association médicale humanitaire internationale créée en 1971, apporte une assistance médicale à des populations dont la vie est menacée : principalement en cas de conflits armés, mais aussi d&#x27;épidémies, de pandémies, de catastrophes …</p>
-          <button class="job-more">Voir plus</button>
-
-          <div class="job-card__foot">
-            <span class="job-src" title="Publiée sur Jobs That Make Sense"><img src="https://www.google.com/s2/favicons?domain=jobs.makesense.org&sz=64" alt="Jobs That Make Sense"></span>
-            <button class="job-cta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2Z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/></svg>Adapter mon CV</button>
-            <div class="job-card__foot-spacer"></div>
-            <a class="job-ghost" href="#">Voir l'offre</a>
-            <button class="job-kebab" title="Plus d'actions"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></button>
-          </div>
-        </article>
-
-        <article class="job-card">
-          <div class="job-card__head">
-            <div class="job-logo"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGzoepnwbGqpSA02_F-yJv81uo-ywVMnPm7s0_&amp;s=0" alt="My Paris Concierge"></div>
-            <div class="job-card__id">
-              <h2 class="job-title">Webmaster Claude / GitHub</h2>
-              <div class="job-company"><span class="job-company__name">My Paris Concierge</span></div>
-            </div>
-            <div class="job-card__aside"><span class="job-score job-score--mid"><span class="job-score__num">84</span><span class="job-score__max">/100</span></span><span class="job-date">il y a 15 jours</span></div>
-          </div>
-
-          <div class="job-facts"><span class="job-fact"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Paris</span><span class="job-fact"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>À plein temps</span><span class="job-fact job-fact--none"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Salaire non précisé</span><span class="job-fact job-fact--commute"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="2"/><path d="M4 11h16M8 21l2-3m6 3-2-3"/><circle cx="8.5" cy="13.5" r=".8" fill="currentColor"/><circle cx="15.5" cy="13.5" r=".8" fill="currentColor"/></svg>35 min en transport</span></div>
-
-          <p class="job-desc">M.C.S SERVICES Myparisconcierge recherche un(e) Webmaster passionné(e) par les technologies d&#x27;IA et les outils modernes de développement web. Vous travaillerez avec Claude (IA d&#x27;Anthropic) et GitHub pour gérer, optimiser et développer notre présence en ligne. …</p>
-          <button class="job-more">Voir plus</button>
-
-          <div class="job-card__foot">
-            <span class="job-src" title="Publiée sur LinkedIn"><img src="https://www.google.com/s2/favicons?domain=fr.linkedin.com&sz=64" alt="LinkedIn"></span>
-            <button class="job-cta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2Z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/></svg>Adapter mon CV</button>
-            <div class="job-card__foot-spacer"></div>
-            <a class="job-ghost" href="#">Voir l'offre</a>
-            <button class="job-kebab" title="Plus d'actions"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></button>
-          </div>
-        </article>
-
-        <article class="job-card">
-          <div class="job-card__head">
-            <div class="job-logo"><span class="job-logo__initial">V</span></div>
-            <div class="job-card__id">
-              <h2 class="job-title">[VO2 Brand Experience] - Webmaster E-commerce</h2>
-              <div class="job-company"><span class="job-company__name">VO2 Group</span></div>
-            </div>
-            <div class="job-card__aside"><span class="job-score job-score--mid"><span class="job-score__num">74</span><span class="job-score__max">/100</span></span><span class="job-date">il y a 7 jours</span></div>
-          </div>
-
-          <div class="job-facts"><span class="job-fact"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Paris</span><span class="job-fact"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>À plein temps</span><span class="job-fact job-fact--none"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Salaire non précisé</span></div>
-
-          <p class="job-desc">Webmaster E-commerce , vous pourrez intervenir sur des missions à forte valeur ajoutée au sein d’équipes agiles et pluridisciplinaires chez nos clients dans les secteurs Bancaire, Luxe, Pharmaceutique, … Mises à jour quotidiennes de contenu web Mise à jour des…</p>
-          <button class="job-more">Voir plus</button>
-          <div class="job-menu">
-            <button class="job-menu__item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v5H4zM4 13h16v7H4z"/></svg>Candidater (CV + lettre)</button>
-            <button class="job-menu__item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18l-7-4-7 4Z"/></svg>Suivre cette candidature</button>
-            <div class="job-menu__sep"></div>
-            <button class="job-menu__item job-menu__item--danger"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Pas intéressé</button>
-          </div>
-
-          <div class="job-card__foot">
-            <span class="job-src" title="Publiée sur WhatJobs"><img src="https://www.google.com/s2/favicons?domain=fr.whatjobs.com&sz=64" alt="WhatJobs"></span>
-            <button class="job-cta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2Z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/></svg>Adapter mon CV</button>
-            <div class="job-card__foot-spacer"></div>
-            <a class="job-ghost" href="#">Voir l'offre</a>
-            <button class="job-kebab" title="Plus d'actions"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></button>
-          </div>
-        </article>
-
-        <article class="job-card">
-          <div class="job-card__head">
-            <div class="job-logo"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRn6jEP0po8gcqggu24Pcn65d_1KqDEfZNfLkww&amp;s=0" alt="LVMH Group"></div>
-            <div class="job-card__id">
-              <h2 class="job-title">Apprentice Webmaster: Optimize &amp; Deploy Digital Platforms</h2>
-              <div class="job-company"><span class="job-company__name">LVMH Group</span></div>
-            </div>
-            <div class="job-card__aside"><span class="job-score job-score--mid"><span class="job-score__num">71</span><span class="job-score__max">/100</span></span><span class="job-date">il y a 9 jours</span></div>
-          </div>
-
-          <div class="job-facts"><span class="job-fact"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Paris</span><span class="job-fact"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>À plein temps</span><span class="job-fact job-fact--none"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Salaire non précisé</span><span class="job-fact job-fact--commute"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="2"/><path d="M4 11h16M8 21l2-3m6 3-2-3"/><circle cx="8.5" cy="13.5" r=".8" fill="currentColor"/><circle cx="15.5" cy="13.5" r=".8" fill="currentColor"/></svg>41 min en transport</span></div>
-
-          <p class="job-desc">Le Groupe Le Bon Marché recrute un(e) apprenti(e) Webmaster pour contribuer à la maintenance et à la gestion des plateformes web, en intégrant les besoins métiers (éditorial, SEO, opérations commerciales). Vous travaillerez avec les équipes Marketing et IT et …</p>
-          <button class="job-more">Voir plus</button>
-
-          <div class="job-card__foot">
-            <span class="job-src" title="Publiée sur JobLeads"><img src="https://www.google.com/s2/favicons?domain=www.jobleads.com&sz=64" alt="JobLeads"></span>
-            <button class="job-cta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2Z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/></svg>Adapter mon CV</button>
-            <div class="job-card__foot-spacer"></div>
-            <a class="job-ghost" href="#">Voir l'offre</a>
-            <button class="job-kebab" title="Plus d'actions"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></button>
-          </div>
-        </article>
-
       </div>
 
     </div>

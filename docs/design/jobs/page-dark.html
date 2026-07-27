@@ -462,6 +462,188 @@ a { color: var(--link); text-decoration: none; }
 
 /* ---- Étiquettes d'annotation de maquette ---- */
 .mk-note { font-size: 11px; color: var(--faint); font-family: var(--font-code); padding: 4px 0 10px; }
+
+
+/* ---------------------------------------------------------------------------
+   Barre de filtres — refonte
+   ---------------------------------------------------------------------------
+   Parti pris : les filtres ne se cachent plus derrière un bouton « Mes
+   critères » qui ouvre un formulaire de onze champs empilés. Ils vivent dans
+   une barre compacte TOUJOURS visible, comme chez LinkedIn, Indeed et France
+   Travail — on voit en permanence ce qui contraint les résultats.
+
+   Deux étages, deux rôles distincts pour l'œil :
+     1. CE QUE JE CHERCHE — poste + lieu, en grand, c'est le sujet.
+     2. COMMENT JE RESTREINS — pastilles secondaires, plus petites.
+
+   Une pastille au réglage par défaut reste grise et n'affiche que son nom.
+   Dès qu'elle contraint la recherche, elle passe en actif (anneau orange +
+   valeur affichée) : l'œil repère instantanément ce qui filtre réellement.
+   --------------------------------------------------------------------------- */
+
+.flt {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 2px rgba(31,27,22,0.04), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+[data-theme="dark"] .flt { box-shadow: 0 1px 2px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.05); }
+
+/* ---- Étage 1 : ce que je cherche ---- */
+.flt-search { display: flex; gap: 10px; align-items: stretch; }
+
+.flt-box {
+  display: flex; align-items: center; gap: 9px;
+  background: var(--field); border-radius: 12px; box-shadow: var(--neu-inset);
+  padding: 0 14px; min-height: 46px; min-width: 0;
+}
+.flt-box svg { color: var(--faint); flex-shrink: 0; }
+.flt-box--role { flex: 1 1 55%; flex-wrap: wrap; padding: 7px 14px; }
+.flt-box--place { flex: 1 1 45%; }
+
+.flt-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg); box-shadow: var(--neu-raised-sm);
+  font-size: 12.5px; font-weight: 600; color: var(--text);
+  padding: 5px 8px 5px 11px; border-radius: 999px; white-space: nowrap;
+}
+.flt-tag button {
+  background: none; border: none; padding: 0; cursor: pointer; line-height: 1;
+  color: var(--faint); font-size: 15px; display: inline-flex; align-items: center;
+}
+.flt-tag button:hover { color: var(--error); }
+
+.flt-input {
+  background: none; border: none; outline: none; flex: 1; min-width: 110px;
+  font-family: var(--font-ui); font-size: 13.5px; color: var(--text); padding: 6px 0;
+}
+.flt-input::placeholder { color: var(--faint); }
+
+/* Le rayon vit DANS le champ de lieu : c'est une propriété du lieu, pas un
+   critère autonome. Il disparaît quand la portée n'est pas une commune. */
+.flt-radius {
+  display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
+  padding-left: 10px; margin-left: 2px; border-left: 1px solid var(--border);
+  font-size: 12px; color: var(--muted); white-space: nowrap;
+}
+.flt-radius select {
+  background: none; border: none; outline: none; cursor: pointer;
+  font-family: var(--font-ui); font-size: 12.5px; font-weight: 600; color: var(--text);
+  padding: 2px 0;
+}
+
+.flt-go {
+  background: var(--cta-grad); color: #fff; border: none; cursor: pointer;
+  font-family: var(--font-ui); font-size: 13.5px; font-weight: 600;
+  padding: 0 22px; border-radius: 12px; box-shadow: var(--cta-shadow);
+  display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+  transition: transform 100ms;
+}
+.flt-go:hover { transform: translateY(-1px); }
+.flt-go:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ---- Étage 2 : comment je restreins ---- */
+.flt-row {
+  display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+  margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--border);
+}
+
+.flt-pill {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg); border: none; cursor: pointer;
+  font-family: var(--font-ui); font-size: 12.5px; font-weight: 600; color: var(--muted);
+  height: 32px; padding: 0 11px; border-radius: 999px;
+  box-shadow: var(--neu-raised-sm); white-space: nowrap;
+  transition: box-shadow 120ms, color 120ms;
+}
+.flt-pill:hover { color: var(--text); box-shadow: var(--neu-raised); }
+.flt-pill svg { color: var(--faint); flex-shrink: 0; }
+
+/* Réglage actif : anneau orange + valeur. L'œil trie sans lire. */
+.flt-pill.is-set { color: var(--text); box-shadow: var(--neu-raised-sm), 0 0 0 1.5px var(--orange2); }
+.flt-pill.is-set svg { color: var(--orange-text); }
+.flt-pill__val { color: var(--orange-text); font-weight: 700; }
+
+/* Pastille ouverte : enfoncée, pour qu'on sache d'où sort le menu. */
+.flt-pill.is-open { box-shadow: var(--neu-inset); color: var(--text); }
+
+.flt-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 17px; height: 17px; padding: 0 5px; border-radius: 999px;
+  background: var(--cta-grad); color: #fff; box-shadow: var(--cta-shadow);
+  font-size: 10px; font-weight: 800;
+}
+
+.flt-spacer { flex: 1 1 auto; }
+
+.flt-reset {
+  background: none; border: none; cursor: pointer; padding: 0 4px;
+  font-family: var(--font-ui); font-size: 12px; font-weight: 600; color: var(--faint);
+}
+.flt-reset:hover { color: var(--error); text-decoration: underline; }
+
+.flt-results { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.flt-results strong { color: var(--text); font-weight: 800; }
+
+/* ---- Menu d'une pastille ---- */
+.flt-menu {
+  position: absolute; top: calc(100% + 7px); left: 0; z-index: 20;
+  background: var(--glass);
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border); border-radius: 14px;
+  box-shadow: var(--neu-raised-lg); padding: 7px; min-width: 208px;
+  display: flex; flex-direction: column; gap: 1px; text-align: left;
+  cursor: default;
+}
+.flt-menu__title {
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.8px;
+  font-weight: 700; color: var(--faint); padding: 5px 9px 6px;
+}
+.flt-opt {
+  display: flex; align-items: center; gap: 9px; cursor: pointer;
+  background: none; border: none; width: 100%; text-align: left;
+  font-family: var(--font-ui); font-size: 12.5px; font-weight: 600; color: var(--text);
+  padding: 8px 9px; border-radius: 9px;
+}
+.flt-opt:hover { background: var(--card); }
+.flt-opt input { accent-color: var(--orange); width: 14px; height: 14px; cursor: pointer; }
+.flt-opt__sub { margin-left: auto; font-size: 10.5px; color: var(--faint); font-family: var(--font-code); }
+.flt-opt__tick { margin-left: auto; color: var(--orange-text); opacity: 0; }
+.flt-opt.is-on .flt-opt__tick { opacity: 1; }
+.flt-menu__sep { height: 1px; background: var(--border); margin: 5px 7px; }
+.flt-menu__note { font-size: 10.5px; color: var(--faint); line-height: 1.5; padding: 2px 9px 5px; }
+
+/* ---- Panneau « Plus de filtres » ---- */
+.flt-more {
+  margin-top: 11px; padding-top: 13px; border-top: 1px solid var(--border);
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px;
+}
+@media (max-width: 900px) {
+  .flt-more { grid-template-columns: 1fr; }
+  .flt-search { flex-wrap: wrap; }
+  .flt-box--role, .flt-box--place { flex-basis: 100%; }
+  .flt-go { width: 100%; justify-content: center; min-height: 44px; }
+}
+.flt-field { min-width: 0; }
+.flt-field--wide { grid-column: 1 / -1; }
+.flt-field__label {
+  display: block; font-size: 9.5px; color: var(--muted); letter-spacing: 0.8px;
+  text-transform: uppercase; font-weight: 700; margin-bottom: 6px;
+}
+.flt-field__note { display: block; font-size: 11px; color: var(--faint); margin-top: 5px; line-height: 1.5; }
+.flt-text {
+  background: var(--field); color: var(--text); border: none; border-radius: 10px;
+  padding: 9px 12px; font-size: 12.5px; width: 100%;
+  font-family: var(--font-ui); box-shadow: var(--neu-inset); outline: none;
+}
+.flt-text::placeholder { color: var(--faint); }
+.flt-tags {
+  background: var(--field); border-radius: 10px; box-shadow: var(--neu-inset);
+  padding: 6px 8px; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; min-height: 38px;
+}
 </style>
 </head>
 <body>
@@ -490,24 +672,74 @@ a { color: var(--link); text-decoration: none; }
   <div class="pane">
     <div class="hist-content">
 
-      <!-- ==================== Barre d'action ====================
-           Tout l'écran principal tient en une ligne : ce que je cherche
-           (résumé), où le régler (bouton discret), et le bouton d'action. -->
-      <div class="job-bar">
-        <button class="btn-nav">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
-          Mes critères
-        </button>
-        <div class="job-summary">
-          <span class="job-summary__k">Webmaster</span><span class="app-dot">•</span>
-          <span>Paris + 20 km</span><span class="app-dot">•</span>
-          <span>CDI, CDD</span>
+      <!-- ==================== Barre de filtres ====================
+           Toujours visible : on voit en permanence ce qui contraint les
+           résultats. Étage 1 = ce que je cherche, étage 2 = comment je
+           restreins. Plus de bouton « Mes critères » qui cache tout. -->
+      <div class="flt">
+        <div class="flt-search">
+          <div class="flt-box flt-box--role">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <span class="flt-tag">Webmaster <button aria-label="Retirer Webmaster">×</button></span>
+            <span class="flt-tag">Intégrateur web <button aria-label="Retirer Intégrateur web">×</button></span>
+            <input class="flt-input" placeholder="Ajouter un poste…">
+          </div>
+
+          <div class="flt-box flt-box--place">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            <input class="flt-input" value="Paris (75001)">
+            <span class="flt-radius">
+              dans un rayon de
+              <select><option>10 km</option><option selected>20 km</option><option>30 km</option><option>50 km</option></select>
+            </span>
+          </div>
+
+          <button class="flt-go">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            Rechercher
+          </button>
         </div>
-        <div class="job-bar__spacer"></div>
-        <button class="job-scan">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          Chercher des offres
-        </button>
+
+        <div class="flt-row">
+          <button class="flt-pill is-set">
+            Contrat <span class="flt-pill__val">CDI, CDD</span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+
+          <button class="flt-pill">
+            Publiée depuis
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+
+          <button class="flt-pill">
+            Expérience
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+
+          <button class="flt-pill">
+            Temps de travail
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+
+          <!-- Les sources se lisent d'un coup d'œil : leurs favicons EN SONT
+               l'étiquette, pas un mot de plus. -->
+          <button class="flt-pill is-set">
+            <span class="job-src" style="width:18px;height:18px"><img src="https://www.google.com/s2/favicons?domain=francetravail.fr&sz=64" alt=""></span>
+            <span class="job-src" style="width:18px;height:18px;margin-left:-11px"><img src="https://www.google.com/s2/favicons?domain=google.com&sz=64" alt=""></span>
+            <span class="job-src" style="width:18px;height:18px;margin-left:-11px"><img src="https://www.google.com/s2/favicons?domain=adzuna.fr&sz=64" alt=""></span>
+            <span style="margin-left:3px">3 sources</span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+
+          <button class="flt-pill">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+            Plus de filtres
+          </button>
+
+          <div class="flt-spacer"></div>
+          <span class="flt-results"><strong>28</strong> offres retenues</span>
+          <button class="flt-reset">Réinitialiser</button>
+        </div>
       </div>
 
       <!-- ==================== Liste : 2 colonnes ==================== -->
