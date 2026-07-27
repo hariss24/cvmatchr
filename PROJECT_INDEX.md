@@ -153,7 +153,7 @@ l'import PDF). Modèle Gemini par défaut : `gemini-3.1-flash-lite` (réglable v
 
 ---
 
-## 8. Fonctionnalité « Offres » (chasseur France Travail)
+## 8. Fonctionnalité « Offres » (chasseur multi-sources)
 
 Onglet dédié (`app/jobs/page.tsx`, composants `components/jobs/*`). Pipeline :
 
@@ -162,16 +162,22 @@ Onglet dédié (`app/jobs/page.tsx`, composants `components/jobs/*`). Pipeline :
    ancienneté max, mots exclus, score minimum, grille de notation). Une seule
    instance aujourd'hui (`DEFAULT_PROFILE`, profil de Hariss) ; conçu pour devenir
    multi-utilisateur sans toucher au cœur de la logique.
-2. **`src/lib/jobs/francetravail.ts`** — recherche via l'API France Travail (OAuth
-   client_credentials), une requête par mot-clé, filtre stages/alternances.
-3. **`src/lib/jobs/prefilter.ts`** — pré-tri gratuit (sans IA) par recoupement de
-   mots-clés (titre = poids 2, description = poids 1) ; élimine les offres à 0
-   avant d'appeler l'IA.
-4. **`src/lib/jobs/score.ts`** — notation IA structurée (Gemini uniquement, sortie
-   JSON) sur plusieurs critères (tech, séniorité, secteur, géo, red flags).
-5. **`src/lib/jobs/maps.ts`** — temps de trajet réel (Google Distance Matrix).
-6. Résultat stocké dans `db.jobs` (statuts `new` / `dismissed` / `hidden`,
-   dédoublonnage par id France Travail).
+
+La recherche interroge trois sources au choix de l'utilisateur : **France Travail**
+(illimité), **Adzuna** (1 000 appels/mois) et **JSearch / Google for Jobs**
+(200 appels/mois, seule source à fournir un logo d'entreprise et le jobboard réel).
+Un module par source dans `web/src/lib/jobs/` expose `search(profile, creds)` et
+renvoie des `JobOffer` (`web/src/lib/jobs/offer.ts`). `/api/jobs/search` les appelle
+en parallèle, fusionne, dédoublonne par `normKey` (`dedupe.ts`), puis le pipeline
+existant prend le relais. Le plafond `aiShortlist` s'applique au pool fusionné :
+ajouter des sources n'augmente pas le coût IA.
+
+Pièges :
+- Décocher une source signifie **ne pas l'interroger**, pas masquer ses résultats.
+- Le favicon du jobboard passe par une **cascade de domaines** (`board.ts`) : le
+  service échoue sur certains sous-domaines et renvoie un globe générique **en
+  HTTP 404**, donc le repli doit se déclencher sur l'erreur de chargement.
+- Le compteur de quota (table Dexie `apiUsage`) est **local et indicatif**.
 
 Sans `FT_CLIENT_ID`/`FT_CLIENT_SECRET`/`GOOGLE_MAPS_API_KEY`, l'onglet affiche un
 message de configuration au lieu de chercher (voir `web/README.md`).

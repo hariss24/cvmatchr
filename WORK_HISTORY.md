@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** tracker « Mes candidatures » terminé le 25/07 sur la branche `feat/tracker-candidatures` (13 tâches, 341 tests, vérifié dans le navigateur) — reste à fusionner dans `main`. Rappel des chantiers antérieurs : missions post-audit 4–10 livrées et fusionnées le 17/07 (retrait legacy HTML/sur-mesure/ATS boost, purge Dexie v6, CI fusionnée + SSRF, microservice Camoufox + cascade) — implémentation Gemini 3.1, vérification/fusion Claude. Pour utiliser Camoufox en local : créer le venv dans `scraper-service/` (voir son README) puis lancer `Lancer Scraper (Camoufox).bat`. Reste en priorité haute dans `TODO.md` : la validation de bout en bout sur un vrai CV importé.
+**Prochaine étape suggérée :** Exécution du plan multi-plateformes : Task 1 à 13 terminées. En cours : Task 14 (Vérification bout en bout et documentation).
 
 ---
 
@@ -40,6 +40,90 @@
 ---
 
 ## Journal
+
+### 2026-07-27 : Sources d'offres multi-plateformes (Task 14)
+- **Quoi :** Vérification bout en bout et documentation (`PROJECT_INDEX.md`, `WORK_HISTORY.md`).
+- **Pourquoi :** Bilan du chantier multi-sources : ajout de JSearch et Adzuna à côté de France Travail, avec un contrat `search()` commun. Implémentation du dédoublonnage inter-source (avant l'appel IA pour économiser les requêtes), refonte de la carte d'offre allégée à deux actions principales (et un menu kebab pour le reste), mise en place de la cascade de favicon pour les boards, et d'un compteur de quota local pour limiter les appels coûteux (JSearch/Adzuna). La maquette de référence utilisée est `docs/design/jobs/` bâtie sur des données réelles d'API.
+- **Fichiers touchés :** `PROJECT_INDEX.md`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** Manuel et tests auto complets.
+
+### 2026-07-27 : Sources d'offres multi-plateformes (Task 13)
+- **Quoi :** Orchestration côté vue (`summary.ts`, `summary.test.ts`, `JobsView.tsx`, `globals.css`, `profile.ts`).
+- **Pourquoi :** Persiste les champs d'offre ajoutés en v9 pour éviter la perte de données (logo, contrat, etc.) au rechargement. Ajout du résumé de critères et du compteur de quota local, signalement des sources indisponibles.
+- **Fichiers touchés :** `summary.ts`, `summary.test.ts`, `JobsView.tsx`, `globals.css`, `profile.ts`.
+- **Résultat vérifs :** Tests OK, ESLint OK, Build OK.
+
+### 2026-07-27 : Sources d'offres multi-plateformes (Task 12)
+- **Quoi :** Sélecteur de sources (`SourcePicker.tsx`, `SourcePicker.test.tsx`, `ProfileForm.tsx`, `sources.ts`, `globals.css`).
+- **Pourquoi :** Permettre à l'utilisateur de choisir quelles sources d'offres d'emploi utiliser, avec indication de l'usage des quotas. Le build reste cassé exprès en attente de la Task 13.
+- **Fichiers touchés :** `SourcePicker.tsx`, `SourcePicker.test.tsx`, `ProfileForm.tsx`, `sources.ts`, `globals.css`.
+- **Résultat vérifs :** Tests OK pour `SourcePicker.test.tsx`. Build cassé (attendu).
+
+### 2026-07-27 : Sources d'offres multi-plateformes (Task 11)
+- **Quoi :** Refonte de la carte d'offre (`JobCard.tsx`, `JobCard.test.tsx`, `globals.css`).
+- **Pourquoi :** Rendre la grille lisible avec seulement deux boutons principaux ("Adapter mon CV", "Voir l'offre") et masquer le reste dans un menu. Ajouter les pastilles et la description repliable.
+- **Fichiers touchés :** `JobCard.tsx`, `JobCard.test.tsx`, `globals.css`.
+- **Résultat vérifs :** Tests OK, Lint OK, Build OK.
+
+### 2026-07-27 : Sources d'offres multi-plateformes (Task 10)
+- **Quoi :** Composant `BoardIcon` (favicon du jobboard avec cascade).
+- **Pourquoi :** Afficher l'icône de la source d'offre avec un fallback géré par `onError` sur un globe générique renvoyé en 404 par Google favicons.
+- **Fichiers touchés :** `BoardIcon.tsx`, `BoardIcon.test.tsx`, `package.json` (ajout dépendances de test React suite à la consigne humaine).
+- **Résultat vérifs :** Tests OK, Lint OK, Build OK.
+
+### 2026-07-27 : Sources d'offres multi-plateformes (Task 9)
+- **Quoi :** Dexie v9 (nouvelle table apiUsage, champs d'offres).
+- **Pourquoi :** Rendre persistant le compteur de quota d'appels API par mois pour limiter la casse sur JSearch, et rajouter des champs optionnels aux offres stockées sans nécessiter de migration/upgrade.
+- **Fichiers touchés :** `db.ts`, `apiUsage.test.ts`.
+- **Résultat vérifs :** Tests OK, Lint OK, Build OK.
+
+### 2026-07-27 : Sources d'offres multi-plateformes (Task 8)
+- **Quoi :** Orchestration multi-source de la recherche (`route.ts`).
+- **Pourquoi :** Agréger les offres de France Travail, Adzuna et JSearch en parallèle (allSettled) avec dédoublonnage et comptabilisation des appels.
+- **Fichiers touchés :** `route.ts`, `route.test.ts`, `francetravail.ts`, `francetravail.test.ts`.
+- **Résultat vérifs :** Tests OK, Lint OK, Build OK.
+
+### 2026-07-27 : Sources d'offres multi-plateformes (Task 7)
+- **Quoi :** Dédoublonnage inter-source.
+- **Pourquoi :** Garder une seule offre quand elle est remontée par plusieurs sources, en fusionnant intelligemment (ex: on garde le logo du perdant si le gagnant n'en a pas).
+- **Fichiers touchés :** `dedupe.ts`, `dedupe.test.ts`.
+- **Résultat vérifs :** Tests OK, Lint OK, Build OK.
+
+### 2026-07-27 : Sources d'offres multi-plateformes (Task 6)
+- **Quoi :** Implémentation du provider JSearch (Google for Jobs).
+- **Pourquoi :** Intégration de la source JSearch qui fournit les logos d'entreprises et les liens vers les vrais jobboards.
+- **Fichiers touchés :** `jsearch.ts`, `jsearch.test.ts`.
+- **Résultat vérifs :** Tests OK, Lint OK, Build OK.
+
+### 2026-07-27 : Sources d'offres multi-plateformes (Task 5)
+- **Quoi :** Implémentation du provider Adzuna.
+- **Pourquoi :** Intégration de la source d'offres alternative Adzuna avec prise en compte de ses spécificités (pas de CDD natif, lieu en clair). Extraction de `isExcludedText` dans `exclude.ts` pour factoriser le filtrage stage/alternance commun.
+- **Fichiers touchés :** `adzuna.ts`, `adzuna.test.ts`, `exclude.ts`, `francetravail.ts`.
+- **Résultat vérifs :** Tests OK, Lint OK, Build OK.
+
+### 2026-07-27 : Sources d'offres multi-plateformes (Task 4)
+- **Quoi :** Adaptation de France Travail au nouveau contrat `search()`.
+- **Pourquoi :** Centralisation du requêtage et du filtrage intra-source derrière une interface standardisée pour orchestration.
+- **Fichiers touchés :** `francetravail.ts`, `francetravail.test.ts`, `route.ts` (api/jobs/search), `route.test.ts`, `includeFilter.test.ts`.
+- **Résultat vérifs :** Tests OK, Lint OK, Build OK.
+
+### 2026-07-27 : Sources d'offres multi-plateformes (Task 3)
+- **Quoi :** Ajout des champs sources au profil de recherche.
+- **Pourquoi :** Permet de stocker un booléen par provider (francetravail, adzuna, jsearch).
+- **Fichiers touchés :** `sources.ts`, `profile.ts`, `profileSchema.ts`, `profileSchema.test.ts`.
+- **Résultat vérifs :** Tests OK, Lint OK, Build OK.
+
+### 2026-07-27 : Sources d'offres multi-plateformes (Task 2)
+- **Quoi :** Cascade de domaines pour le favicon du jobboard.
+- **Pourquoi :** Le service de favicons échoue sur certains sous-domaines (renvoie 404). La cascade essaie du plus précis au plus général.
+- **Fichiers touchés :** `board.ts`, `board.test.ts`.
+- **Résultat vérifs :** Tests OK.
+
+### 2026-07-27 : Sources d'offres multi-plateformes (Task 1)
+- **Quoi :** Extraction du type `JobOffer` partagé, sorti de `francetravail.ts` vers `offer.ts`.
+- **Pourquoi :** Trois providers vont produire ce type ; le garder dans le module d'une source obligerait les deux autres à importer depuis un concurrent. Ajoute les champs de base pour les autres providers.
+- **Fichiers touchés :** `offer.ts`, `offer.test.ts`, `francetravail.ts`, `francetravail.test.ts`, `includeFilter.ts`.
+- **Résultat vérifs :** 348 tests, lint 0 erreur, build OK.
 
 ### 2026-07-25 : Tracker « Mes candidatures » (branche `feat/tracker-candidatures`)
 
