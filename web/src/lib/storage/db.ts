@@ -6,6 +6,7 @@ import { DEFAULT_TEMPLATES, type MailTemplate } from "@/lib/templates/defaults";
 import type { UserProfile } from "@/lib/profile/profile";
 import type { JobSearchProfile } from "@/lib/jobs/profile";
 import type { Application } from "@/lib/applications/types";
+import type { SourceId } from "@/lib/jobs/offer";
 
 // ---------------------------------------------------------------------------
 // TYPES
@@ -67,6 +68,18 @@ export interface JobEntry {
   publishedAt?: string; // date de publication de l'offre (ISO France Travail)
   /** Candidature créée depuis cette offre (bouton « Suivre »). */
   applicationId?: string;
+  /** Source qui a fait remonter l'offre. Absent = donnée d'avant la v9. */
+  source?: SourceId;
+  /** Logo d'entreprise fourni par la source ; absent/"" → repli sur l'initiale. */
+  logoUrl?: string;
+  /** Hôte du lien de l'offre, pour le favicon du jobboard. */
+  boardDomain?: string;
+  /** Nom lisible du jobboard, ex. "LinkedIn". */
+  boardName?: string;
+  /** "CDI · Plein temps"… ; absent/"" → « Type non précisé ». */
+  contractLabel?: string;
+  /** "33–36 k€ / an" ; absent/"" → « Salaire non précisé ». */
+  salaryLabel?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -82,6 +95,7 @@ export class AppDatabase extends Dexie {
   profile!: Table<UserProfile, string>; // Primary key: id (singleton "me")
   jobProfile!: Table<{ id: string; profile: JobSearchProfile }, string>; // Primary key: id (singleton "me")
   applications!: Table<Application, string>; // Primary key: id
+  apiUsage!: Table<{ key: string; count: number }, string>; // Primary key: key
 
   constructor() {
     // Nouveau nom pour éviter les collisions si on lance sur le même port que Flask
@@ -141,6 +155,13 @@ export class AppDatabase extends Dexie {
     // stocké (dérivé du journal d'événements), donc aucun index de statut.
     this.version(8).stores({
       applications: "id, normKey, createdAt, updatedAt",
+    });
+
+    // v9 : sources multiples. Les champs ajoutés à JobEntry sont optionnels —
+    // les offres existantes n'en ont pas et l'affichage retombe sur ses replis,
+    // donc aucun upgrade n'est nécessaire. Nouvelle table de comptage d'appels.
+    this.version(9).stores({
+      apiUsage: "key",
     });
   }
 }
@@ -517,4 +538,51 @@ export async function deleteHistoryEntries(ids: string[]): Promise<void> {
   } catch (e) {
     console.warn("deleteHistoryEntries error:", e);
   }
+}
+
+// ---------------------------------------------------------------------------
+// QUOTA D'APPELS API
+// ---------------------------------------------------------------------------
+
+/** Clé de comptage : une ligne par source et par mois. */
+export function usageKey(source: SourceId, at: Date): string {
+  const month = `${at.getFullYear()}-${String(at.getMonth() + 1).padStart(2, "0")}`;
+  return `${source}-${month}`;
+}
+
+/**
+ * Incrémente les compteurs du mois courant.
+ *
+ * Compteur **local et indicatif** : il mesure ce que ce navigateur a consommé,
+ * pas ce que le fournisseur a facturé. Il sert à éviter d'épuiser un quota
+ * gratuit sans s'en rendre compte, pas à faire autorité.
+ */
+export async function bumpApiUsage(calls: Partial<Record<SourceId, number>>): Promise<void> {
+  const now = new Date();
+  try {
+    await db.transaction("rw", db.apiUsage, async () => {
+      for (const [source, n] of Object.entries(calls) as [SourceId, number][]) {
+        if (!n) continue;
+        const key = usageKey(source, now);
+        const row = await db.apiUsage.get(key);
+        await db.apiUsage.put({ key, count: (row?.count ?? 0) + n });
+      }
+    });
+  } catch (e) {
+    console.warn("bumpApiUsage error:", e);
+  }
+}
+
+/** Appels consommés ce mois-ci, par source. */
+export async function getApiUsage(): Promise<Record<SourceId, number>> {
+  const now = new Date();
+  const out: Record<SourceId, number> = { francetravail: 0, adzuna: 0, jsearch: 0 };
+  try {
+    for (const source of Object.keys(out) as SourceId[]) {
+      out[source] = (await db.apiUsage.get(usageKey(source, now)))?.count ?? 0;
+    }
+  } catch (e) {
+    console.warn("getApiUsage error:", e);
+  }
+  return out;
 }
