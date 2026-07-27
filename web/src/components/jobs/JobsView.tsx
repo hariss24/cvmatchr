@@ -7,6 +7,7 @@ import { useDocStore } from "@/state/docStore";
 import { toast } from "@/state/uiStore";
 import type { JobOffer } from "@/lib/jobs/francetravail";
 import { EMPTY_PROFILE, type JobSearchProfile } from "@/lib/jobs/profile";
+import { parseProfile } from "@/lib/jobs/profileSchema";
 import { getJobProfile, saveJobProfile } from "@/lib/storage/db";
 import { relevance } from "@/lib/jobs/prefilter";
 import { upsertApplicationForDocument } from "@/lib/applications/store";
@@ -50,7 +51,11 @@ export default function JobsView() {
     listJobs("new").then(setJobs);
     getApiUsage().then(setUsage);
     getJobProfile().then((p) => {
-      if (p) setProfile(p);
+      // Le profil persisté peut dater d'avant l'ajout d'un champ (ex. `sources`,
+      // arrivé avec les sources multiples) : on le repasse par le schéma
+      // tolérant, qui complète les manques avec les défauts neutres. Sans ça,
+      // un profil existant fait planter le formulaire sur un champ absent.
+      if (p) setProfile(parseProfile(p));
       else setShowForm(true); // Profil vide → ouvrir la saisie initiale.
     });
   }, []);

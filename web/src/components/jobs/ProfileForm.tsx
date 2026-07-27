@@ -100,6 +100,11 @@ export function ProfileForm({
         </div>
       </div>
 
+      {/* Le choix des sources reste dans le bloc principal : enterré sous
+          « Critères avancés », il devenait introuvable alors que c'est lui qui
+          décide de l'étendue de la recherche et de la consommation de quota. */}
+      <SourcePicker value={profile.sources} onChange={(s) => set("sources", s)} usage={usage} />
+
       {/* Filtres rapides */}
       <div className="jf-filters">
         <div className="jf-filters-row">
@@ -247,11 +252,6 @@ export function ProfileForm({
               placeholder="Titre, formation, expériences, compétences clés…" />
           </div>
 
-          <SourcePicker
-            value={profile.sources}
-            onChange={(s) => set("sources", s)}
-            usage={usage}
-          />
         </div>
       )}
     </section>

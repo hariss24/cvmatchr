@@ -1466,74 +1466,12 @@ button.go:disabled {
   background: var(--bg); box-shadow: var(--neu-inset); border-radius: 5px; padding: 1px 6px;
 }
 
-.jobs-list { display: flex; flex-direction: column; gap: 14px; }
-.job-card {
-  background: var(--bg); box-shadow: var(--neu-raised-sm); border-radius: 16px;
-  padding: 16px 20px; display: grid; grid-template-columns: 78px 1fr auto;
-  gap: 20px; align-items: center; transition: box-shadow 150ms;
-}
-.job-card:hover { box-shadow: var(--neu-raised); }
+/* Les anciennes règles de la carte d'offre (.job-score-num, .job-main,
+   .job-meta, .job-new-badge, .job-actions, .job-dismiss-link…) ont été
+   retirées ici : la carte remaniée n'émet plus ces classes, et .job-score
+   imposait un width/height/flex-direction que la nouvelle règle ne
+   redéclarait pas — le score sortait en gros cercle au lieu d'une pastille. */
 
-.job-score {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  width: 68px; height: 68px; border-radius: 50%;
-  background: var(--bg); box-shadow: var(--neu-inset);
-}
-.job-score-num { font-size: 22px; font-weight: 800; line-height: 1; }
-.job-score-max { font-size: 10px; color: var(--faint); font-weight: 600; margin-top: 2px; }
-.job-score-high .job-score-num { color: var(--apply-text); }
-.job-score-mid .job-score-num { color: var(--orange-text); }
-.job-score-low .job-score-num { color: var(--muted); }
-
-.job-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.job-title { font-size: 15px; font-weight: 700; color: var(--text); }
-.job-new-badge {
-  display: inline-block; margin-right: 8px; padding: 1px 7px; border-radius: 999px;
-  background: var(--cta-grad); color: #fff; font-size: 11px; font-weight: 800;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
-  text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle;
-}
-.job-meta { font-size: 13px; color: var(--muted); font-weight: 500; }
-.job-date { font-size: 12px; color: var(--faint); font-weight: 500; }
-.job-commute { font-size: 12px; color: var(--faint); font-family: var(--font-code); }
-
-.job-actions { display: flex; gap: 8px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
-
-/* « Pas intéressé » : action de retrait, volontairement hors de la hiérarchie
-   des boutons — un lien nu, sans coquille. */
-.job-dismiss-link {
-  background: none; border: none; box-shadow: none;
-  padding: 6px 4px; margin-left: 4px;
-  color: var(--muted); font-size: 12px; font-family: var(--font-ui);
-  cursor: pointer; transition: color 120ms;
-}
-.job-dismiss-link:hover { color: var(--error); text-decoration: underline; }
-
-@media (max-width: 768px) {
-  /* Score compact à côté du titre, boutons en grille pleine largeur à
-     hauteurs égales (Adapter/Voir à 50-50, Pas intéressé en dessous). */
-  .job-card { grid-template-columns: 56px 1fr; gap: 12px 14px; padding: 16px; }
-  .job-score { width: 56px; height: 56px; }
-  .job-score-num { font-size: 19px; }
-  .job-actions {
-    grid-column: 1 / -1;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-    align-items: stretch;
-  }
-  /* Les vrais boutons se partagent la largeur ; le lien de retrait en est exclu. */
-  .job-actions > *:not(.job-dismiss-link) {
-    width: 100%; min-height: 44px;
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  /* « Voir l'offre » est seul sur sa ligne : il la prend en entier, plutôt que de
-     laisser une demi-colonne vide à sa droite. */
-  .job-actions > a.neu-btn-sm { grid-column: 1 / -1; }
-  /* Le lien passe seul sur sa ligne, centré, avec une cible tactile de 44 px. */
-  .job-dismiss-link {
-    grid-column: 1 / -1; justify-self: center;
-    min-height: 44px; margin-left: 0;
-  }
-}
 
 /* ---- Aide « Comment ça marche ? » ---- */
 .actions-help {
@@ -1696,74 +1634,7 @@ button.go:disabled {
   background: var(--bg); box-shadow: var(--neu-inset); border-radius: 5px; padding: 1px 6px;
 }
 
-.jobs-list { display: flex; flex-direction: column; gap: 14px; }
-.job-card {
-  background: var(--bg); box-shadow: var(--neu-raised-sm); border-radius: 16px;
-  padding: 16px 20px; display: grid; grid-template-columns: 78px 1fr auto;
-  gap: 20px; align-items: center; transition: box-shadow 150ms;
-}
-.job-card:hover { box-shadow: var(--neu-raised); }
 
-.job-score {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  width: 68px; height: 68px; border-radius: 50%;
-  background: var(--bg); box-shadow: var(--neu-inset);
-}
-.job-score-num { font-size: 22px; font-weight: 800; line-height: 1; }
-.job-score-max { font-size: 10px; color: var(--faint); font-weight: 600; margin-top: 2px; }
-.job-score-high .job-score-num { color: var(--apply-text); }
-.job-score-mid .job-score-num { color: var(--orange-text); }
-.job-score-low .job-score-num { color: var(--muted); }
-
-.job-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.job-title { font-size: 15px; font-weight: 700; color: var(--text); }
-.job-new-badge {
-  display: inline-block; margin-right: 8px; padding: 1px 7px; border-radius: 999px;
-  background: var(--cta-grad); color: #fff; font-size: 11px; font-weight: 800;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
-  text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle;
-}
-.job-meta { font-size: 13px; color: var(--muted); font-weight: 500; }
-.job-date { font-size: 12px; color: var(--faint); font-weight: 500; }
-.job-commute { font-size: 12px; color: var(--faint); font-family: var(--font-code); }
-
-.job-actions { display: flex; gap: 8px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
-
-/* « Pas intéressé » : action de retrait, volontairement hors de la hiérarchie
-   des boutons — un lien nu, sans coquille. */
-.job-dismiss-link {
-  background: none; border: none; box-shadow: none;
-  padding: 6px 4px; margin-left: 4px;
-  color: var(--muted); font-size: 12px; font-family: var(--font-ui);
-  cursor: pointer; transition: color 120ms;
-}
-.job-dismiss-link:hover { color: var(--error); text-decoration: underline; }
-
-@media (max-width: 768px) {
-  /* Score compact à côté du titre, boutons en grille pleine largeur à
-     hauteurs égales (Adapter/Voir à 50-50, Pas intéressé en dessous). */
-  .job-card { grid-template-columns: 56px 1fr; gap: 12px 14px; padding: 16px; }
-  .job-score { width: 56px; height: 56px; }
-  .job-score-num { font-size: 19px; }
-  .job-actions {
-    grid-column: 1 / -1;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-    align-items: stretch;
-  }
-  /* Les vrais boutons se partagent la largeur ; le lien de retrait en est exclu. */
-  .job-actions > *:not(.job-dismiss-link) {
-    width: 100%; min-height: 44px;
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  /* « Voir l'offre » est seul sur sa ligne : il la prend en entier, plutôt que de
-     laisser une demi-colonne vide à sa droite. */
-  .job-actions > a.neu-btn-sm { grid-column: 1 / -1; }
-  /* Le lien passe seul sur sa ligne, centré, avec une cible tactile de 44 px. */
-  .job-dismiss-link {
-    grid-column: 1 / -1; justify-self: center;
-    min-height: 44px; margin-left: 0;
-  }
-}
 
 /* ---- Aide « Comment ça marche ? » ---- */
 .actions-help {
@@ -2669,9 +2540,12 @@ button.go:disabled {
 
 /* ---------------------------------------------------------------------------
    Offres — carte remaniée (cf. docs/design/jobs/). Deux actions visibles,
-   grille deux colonnes, faits en pastilles. Les anciennes règles .job-card /
-   .job-score / .job-actions plus haut dans ce fichier sont remplacées par
-   celles-ci, qui viennent après et gagnent donc en cascade.
+   grille deux colonnes, faits en pastilles.
+
+   Les anciennes règles de carte ont été SUPPRIMÉES, pas simplement shadowées :
+   compter sur la cascade ne suffisait pas. .job-score portait width/height/
+   flex-direction, que ces règles-ci ne redéclarent pas — le score sortait en
+   cercle de 68 px au lieu d'une pastille, et la règle mobile forçait 56 px.
    --------------------------------------------------------------------------- */
 .jobs-list {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;
