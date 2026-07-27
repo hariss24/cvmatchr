@@ -28,7 +28,7 @@ const TOKEN_URL = "https://entreprise.francetravail.fr/connexion/oauth2/access_t
 const SEARCH_URL = "https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search";
 
 /** Jeton OAuth (client_credentials) France Travail. */
-export async function getToken(clientId: string, clientSecret: string): Promise<string> {
+async function getToken(clientId: string, clientSecret: string): Promise<string> {
   const res = await fetch(`${TOKEN_URL}?realm=%2Fpartenaire`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -56,7 +56,7 @@ function isoSeconds(d: Date): string {
  * Recherche les offres pour un mot-clé. L'API exige `minCreationDate` ET `maxCreationDate`.
  * Renvoie la liste brute (`resultats`) ; `[]` si l'API répond autre chose que 200/206.
  */
-export async function fetchOffers(
+async function fetchOffers(
   token: string,
   keyword: string,
   profile: JobSearchProfile,
@@ -145,3 +145,43 @@ export function mapOffer(offer: RawOffer, maxDescriptionChars: number): JobOffer
     salaryLabel: "",
   };
 }
+
+export interface FranceTravailCreds {
+  clientId: string;
+  clientSecret: string;
+}
+
+/**
+ * Point d'entrée unique du provider. Si la source est désactivée ou les
+ * identifiants manquants, renvoie []. Gère la boucle sur les mots-clés,
+ * le dédoublonnage intra-source (par id), le filtrage et le mapping.
+ */
+export async function search(
+  profile: JobSearchProfile,
+  creds: FranceTravailCreds
+): Promise<JobOffer[]> {
+  if (!profile.sources.francetravail) return [];
+  if (!creds.clientId || !creds.clientSecret) return [];
+
+  try {
+    const token = await getToken(creds.clientId, creds.clientSecret);
+    const all: JobOffer[] = [];
+    const seen = new Set<string>();
+
+    for (const kw of profile.keywords) {
+      const raw = await fetchOffers(token, kw, profile);
+      for (const r of raw) {
+        if (r.id && !seen.has(r.id) && !isExcluded(r, profile.excludedWords)) {
+          seen.add(r.id);
+          all.push(mapOffer(r, profile.maxDescriptionChars));
+        }
+      }
+    }
+    return all;
+  } catch (err) {
+    console.error("France Travail search error:", err);
+    return [];
+  }
+}
+
+

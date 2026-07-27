@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { resolveProfile } from "@/lib/jobs/resolveProfile";
-import { getToken, fetchOffers, isExcluded, mapOffer, type JobOffer } from "@/lib/jobs/francetravail";
+import { search as searchFT } from "@/lib/jobs/francetravail";
 import { matchesIncludeKeywords } from "@/lib/jobs/includeFilter";
 
 // France Travail (fetch + OAuth) : runtime Node.js.
@@ -35,25 +35,15 @@ export async function POST(req: Request): Promise<Response> {
       return NextResponse.json({ offers: [] });
     }
 
-    const token = await getToken(clientId, clientSecret);
-    const seen = new Set<string>();
-    const offers: JobOffer[] = [];
-
-    for (const keyword of profile.keywords) {
-      const raw = await fetchOffers(token, keyword, profile);
-      for (const offer of raw) {
-        const id = offer.id ?? "";
-        if (!id || seen.has(id)) continue;
-        seen.add(id);
-        if (isExcluded(offer, profile.excludedWords)) continue;
-        const mapped = mapOffer(offer, profile.maxDescriptionChars);
-        if (!matchesIncludeKeywords(mapped, profile.includeKeywords)) continue;
-        offers.push(mapped);
-      }
-    }
+    const creds = { clientId, clientSecret };
+    const rawOffers = await searchFT(profile, creds);
+    
+    // Le filtre sur les mots-clés (includeKeywords) se fait post-unification
+    const offers = rawOffers.filter(o => matchesIncludeKeywords(o, profile.includeKeywords));
+    
     return NextResponse.json({ offers });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Échec de la recherche d'offres.";
-    return NextResponse.json({ error: message }, { status: 502 });
+    console.error(err);
+    return NextResponse.json({ offers: [] });
   }
 }

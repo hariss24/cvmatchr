@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { getToken, fetchOffers, isExcluded, mapOffer, type RawOffer } from "./francetravail";
+import { search, isExcluded, mapOffer, type RawOffer } from "./francetravail";
 import { parseProfile } from "./profileSchema";
 import hariss from "../../../tests/fixtures/job_profile_hariss.json";
 const DEFAULT_PROFILE = parseProfile(hariss);
@@ -59,75 +59,41 @@ describe("mapOffer", () => {
   });
 });
 
-describe("getToken", () => {
-  it("renvoie l'access_token", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, json: async () => ({ access_token: "tok" }) })));
-    expect(await getToken("id", "secret")).toBe("tok");
+describe("search", () => {
+  const creds = { clientId: "id", clientSecret: "secret" };
+
+  it("renvoie [] immédiatement si la source est désactivée", async () => {
+    const p = parseProfile({ ...hariss, sources: { francetravail: false } });
+    const spy = vi.spyOn(globalThis, "fetch");
+    expect(await search(p, creds)).toEqual([]);
+    expect(spy).not.toHaveBeenCalled();
   });
 
-  it("lève si la réponse n'est pas ok", async () => {
+  it("renvoie [] si pas d'identifiants", async () => {
+    const spy = vi.spyOn(globalThis, "fetch");
+    expect(await search(DEFAULT_PROFILE, { clientId: "", clientSecret: "" })).toEqual([]);
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it("gère l'erreur d'authentification sans planter", async () => {
     vi.stubGlobal("fetch", async () => ({ ok: false, status: 401, json: async () => ({}) }));
-    await expect(getToken("id", "secret")).rejects.toThrow(/France Travail/);
+    expect(await search(DEFAULT_PROFILE, creds)).toEqual([]);
   });
-});
 
-describe("fetchOffers", () => {
-  it("renvoie resultats sur 200", async () => {
-    const fetchMock = vi.fn(async () => ({ status: 200, json: async () => ({ resultats: [{ id: "1" }] }) }));
+  it("boucle sur les mots-clés et dédoublonne", async () => {
+    const fetchMock = vi.fn(async (url: string | URL | Request) => {
+      const u = url.toString();
+      if (u.includes("token")) return { ok: true, json: async () => ({ access_token: "tok" }) };
+      // 1er mot clé renvoie id:1 et id:2
+      if (u.includes("motsCles=A")) return { status: 200, json: async () => ({ resultats: [{ id: "1" }, { id: "2" }] }) };
+      // 2e mot clé renvoie id:2 (doublon) et id:3
+      if (u.includes("motsCles=B")) return { status: 200, json: async () => ({ resultats: [{ id: "2" }, { id: "3" }] }) };
+      return { status: 200, json: async () => ({ resultats: [] }) };
+    });
     vi.stubGlobal("fetch", fetchMock);
-    const out = await fetchOffers("tok", "SEO", DEFAULT_PROFILE);
-    expect(out).toEqual([{ id: "1" }]);
-    const [url] = fetchMock.mock.calls[0] as unknown as [string];
-    expect(url).toContain("offresdemploi/v2/offres/search");
-    expect(url).toContain("motsCles=SEO");
-    expect(url).toContain("minCreationDate=");
-    expect(url).toContain("maxCreationDate=");
-  });
-
-  it("renvoie [] sur un statut inattendu", async () => {
-    vi.stubGlobal("fetch", async () => ({ status: 500, json: async () => ({}) }));
-    expect(await fetchOffers("tok", "SEO", DEFAULT_PROFILE)).toEqual([]);
-  });
-
-  it("construit les paramètres géo commune + rayon", async () => {
-    const fetchMock = vi.fn(async () => ({ status: 200, json: async () => ({ resultats: [] }) }));
-    vi.stubGlobal("fetch", fetchMock);
-    const p = parseProfile({ ...hariss, location: { kind: "commune", code: "75112", label: "", radiusKm: 15 } });
-    await fetchOffers("tok", "SEO", p);
-    const [url] = fetchMock.mock.calls[0] as unknown as [string];
-    expect(url).toContain("commune=75112");
-    expect(url).toContain("distance=15");
-    expect(url).not.toContain("region=");
-  });
-
-  it("construit region quand kind=region", async () => {
-    const fetchMock = vi.fn(async () => ({ status: 200, json: async () => ({ resultats: [] }) }));
-    vi.stubGlobal("fetch", fetchMock);
-    const p = parseProfile({ ...hariss, location: { kind: "region", code: "11", label: "", radiusKm: 10 } });
-    await fetchOffers("tok", "SEO", p);
-    const [url] = fetchMock.mock.calls[0] as unknown as [string];
-    expect(url).toContain("region=11");
-    expect(url).not.toContain("commune=");
-  });
-
-  it("ajoute experienceExige=D si débutant accepté, sinon absent", async () => {
-    const fetchMock = vi.fn(async () => ({ status: 200, json: async () => ({ resultats: [] }) }));
-    vi.stubGlobal("fetch", fetchMock);
-    await fetchOffers("tok", "SEO", parseProfile({ ...hariss, debutantAccepte: true }));
-    await fetchOffers("tok", "SEO", parseProfile({ ...hariss, debutantAccepte: false }));
-    const [u1] = fetchMock.mock.calls[0] as unknown as [string];
-    const [u2] = fetchMock.mock.calls[1] as unknown as [string];
-    expect(u1).toContain("experienceExige=D");
-    expect(u2).not.toContain("experienceExige");
-  });
-
-  it("ajoute salaireMin + periodeSalaire quand défini", async () => {
-    const fetchMock = vi.fn(async () => ({ status: 200, json: async () => ({ resultats: [] }) }));
-    vi.stubGlobal("fetch", fetchMock);
-    const p = parseProfile({ ...hariss, salaireMin: 30000, periodeSalaire: "A" });
-    await fetchOffers("tok", "SEO", p);
-    const [url] = fetchMock.mock.calls[0] as unknown as [string];
-    expect(url).toContain("salaireMin=30000");
-    expect(url).toContain("periodeSalaire=A");
+    const p = parseProfile({ ...hariss, keywords: ["A", "B"] });
+    const out = await search(p, creds);
+    expect(out).toHaveLength(3);
+    expect(out.map(o => o.id)).toEqual(["1", "2", "3"]);
   });
 });

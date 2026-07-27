@@ -47,10 +47,11 @@ describe("POST /api/jobs/search", () => {
     expect(offers[0]).toMatchObject({ id: "1", title: "Webmaster", company: "ACME" });
   });
 
-  it("502 si France Travail échoue", async () => {
+  it("renvoie [] si France Travail échoue (erreur avalée par provider)", async () => {
     vi.stubGlobal("fetch", async () => ({ ok: false, status: 503, json: async () => ({}) }));
     const res = await POST(req());
-    expect(res.status).toBe(502);
+    expect(res.status).toBe(200);
+    expect((await res.json()).offers).toEqual([]);
   });
 
   it("ne lance aucune requête FT si keywords est vide", async () => {

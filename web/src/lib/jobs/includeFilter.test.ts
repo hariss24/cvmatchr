@@ -5,7 +5,7 @@ import type { JobOffer } from "./francetravail";
 const base: JobOffer = {
   id: "1", title: "Webmaster SEO", company: "ACME", location: "Paris",
   commuteDestination: "", url: "", jobText: "Poste orienté référencement naturel.", publishedAt: "",
-};
+} as JobOffer;
 
 describe("matchesIncludeKeywords", () => {
   it("accepte tout si la liste est vide", () => {
