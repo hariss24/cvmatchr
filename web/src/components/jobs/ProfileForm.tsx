@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import type { JobSearchProfile } from "@/lib/jobs/profile";
+import type { SourceId } from "@/lib/jobs/offer";
 import { LocationInput } from "./LocationInput";
 import { MetierInput } from "./MetierInput";
+import { SourcePicker } from "./SourcePicker";
 
 const CONTRACT_OPTIONS = [
   { code: "CDI", label: "CDI" },
@@ -63,9 +65,11 @@ function TagInput({
 export function ProfileForm({
   profile,
   onChange,
+  usage,
 }: {
   profile: JobSearchProfile;
   onChange: (p: JobSearchProfile) => void;
+  usage: Record<SourceId, number>;
 }) {
   const [advanced, setAdvanced] = useState(false);
   const set = <K extends keyof JobSearchProfile>(k: K, v: JobSearchProfile[K]) => onChange({ ...profile, [k]: v });
@@ -79,7 +83,7 @@ export function ProfileForm({
     <section className="jobs-form" aria-label="Mes critères de recherche">
       <header className="jf-head">
         <h3 className="jf-title">Mes critères de recherche</h3>
-        <p className="jf-hint">Ces critères pilotent la recherche France Travail et le tri des offres.</p>
+        <p className="jf-hint">Ces critères pilotent la recherche sur les sources choisies et le tri des offres.</p>
       </header>
 
       {/* Bloc principal */}
@@ -242,6 +246,12 @@ export function ProfileForm({
               onChange={(e) => set("candidateSummary", e.target.value)}
               placeholder="Titre, formation, expériences, compétences clés…" />
           </div>
+
+          <SourcePicker
+            value={profile.sources}
+            onChange={(s) => set("sources", s)}
+            usage={usage}
+          />
         </div>
       )}
     </section>
