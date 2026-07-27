@@ -157,6 +157,15 @@ l'import PDF). Modèle Gemini par défaut : `gemini-3.1-flash-lite` (réglable v
 
 Onglet dédié (`app/jobs/page.tsx`, composants `components/jobs/*`). Pipeline :
 
+Les critères se règlent dans une **barre de filtres toujours visible**
+(`FilterBar`) : poste et lieu en haut, pastilles (`FilterPill`) pour contrat,
+ancienneté, expérience, temps de travail et sources, et un panneau
+« Plus de filtres » (`MoreFilters`) pour les onze réglages rares. Les libellés et
+états actifs des pastilles viennent d'un module pur, `lib/jobs/filters.ts`.
+`FilterBar` n'est monté qu'une fois le profil lu depuis Dexie — `LocationInput`
+fige le libellé du lieu à son montage.
+
+
 1. **`src/lib/jobs/profile.ts`** — `JobSearchProfile` : configuration centrale
    (adresse, mots-clés de poste, modes de transport, types de contrat, région,
    ancienneté max, mots exclus, score minimum, grille de notation). Une seule
@@ -264,7 +273,7 @@ components/
   applications/     # ApplicationsScreen, ApplicationsDashboard, ApplicationsFilters,
                      # ApplicationCard, ResumeShelf, AddApplicationModal
   form/             # FormEditor (CV), LetterForm
-  jobs/             # JobsView, JobCard, ScanProgress, ScoringInfo
+  jobs/             # JobsView, FilterBar, JobCard, ScanProgress, ScoringInfo
   layout/           # TopBar, MetaBar, ActionsBar, DraftManager
   modals/           # TailorModal, ChatPanel, PackModal, DiffModal, ImportPdfModal,
                      # ImportTextModal, JobExtractor, AtsPanel, SnapshotsModal, HelpModal

@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Exécution du plan multi-plateformes : Task 1 à 13 terminées. En cours : Task 14 (Vérification bout en bout et documentation).
+**Prochaine étape suggérée :** Refonte de la barre de filtres livrée et vérifiée. Rien en cours.
 
 ---
 
@@ -40,6 +40,37 @@
 ---
 
 ## Journal
+
+### 2026-07-27 : Refonte de la barre de filtres
+
+- **Quoi :** Le bouton « Mes critères » et son formulaire de 22 champs empilés
+  sont remplacés par une barre toujours visible : poste + lieu en haut, pastilles
+  (contrat, ancienneté, expérience, temps de travail, sources) en dessous, et un
+  panneau « Plus de filtres » pour les onze réglages rares. `ProfileForm` et
+  `summary.ts` sont supprimés.
+- **Pourquoi :** Les filtres étaient invisibles tant qu'on n'ouvrait pas le
+  panneau : on ne voyait pas ce qui contraignait les résultats. Le résumé d'une
+  ligne, ajouté pour compenser, devient redondant dès que la barre est visible.
+- **Décisions tranchées :** « Filtres » nomme la zone (`aria-label`), pas un
+  bouton — le bouton disparaît. Aucun réglage n'est perdu : un test dédié
+  (`MoreFilters.test.tsx`) échoue si l'un des onze champs disparaît.
+  « Réinitialiser » ne touche ni au poste, ni au lieu, ni aux sources.
+- **Fichiers touchés :** création de `filters.ts`, `FilterBar`, `FilterPill`,
+  `MoreFilters`, `TagInput` ; réécriture de `SourcePicker` en menu ; `JobsView`,
+  `ScoringInfo`, `route.ts`, `globals.css`.
+- **Piège rencontré :** `LocationInput` fige le libellé du lieu dans un état
+  local à son montage. La barre étant montée immédiatement (le formulaire, lui,
+  ne l'était qu'après un clic), elle capturait le profil vide : le lieu
+  enregistré devenait invisible **tout en continuant de contraindre la
+  recherche**. `JobsView` n'affiche donc la barre qu'une fois le profil lu.
+- **Autre trouvaille :** `backdrop-filter` calcule `none` sur toute l'app
+  (topbar comprise) — les surfaces `--glass` n'ont aucun flou. Sans conséquence
+  sur la topbar, mais un menu flottant au-dessus des cartes devenait illisible :
+  les menus de pastilles utilisent donc un fond opaque.
+- **Résultat vérifs :** `npm test` 425/425, `npm run lint` 0 erreur,
+  `npm run build` OK, plus vérification navigateur (profil existant, thème
+  sombre, mobile 375 px, autocomplétion non rognée).
+
 
 ### 2026-07-27 : Sources d'offres multi-plateformes (Task 14)
 - **Quoi :** Vérification bout en bout et documentation (`PROJECT_INDEX.md`, `WORK_HISTORY.md`).

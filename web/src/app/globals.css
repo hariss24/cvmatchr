@@ -1327,22 +1327,218 @@ button.go:disabled {
 .jobs-toolbar { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
 .jobs-hint { font-size: 12.5px; color: var(--muted); font-weight: 500; }
 
-/* ===== Formulaire de critères de recherche (néomorphique « atelier ») ===== */
-.jobs-form-bar { display: flex; }
-.jobs-form-toggle { font-size: 13px; }
+/* ===== Barre de filtres =====
+   Les filtres ne se cachent plus derrière un bouton qui ouvre un formulaire de
+   onze champs empilés : ils vivent dans une barre compacte toujours visible,
+   comme chez LinkedIn, Indeed et France Travail — on voit en permanence ce qui
+   contraint les résultats.
 
-.jobs-form {
-  display: flex; flex-direction: column; gap: 18px;
-  background: var(--bg); border-radius: 18px; padding: 22px 24px;
-  box-shadow: var(--neu-raised);
-}
-.jf-head { display: flex; flex-direction: column; gap: 3px; }
-.jf-title { margin: 0; font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
-.jf-hint { margin: 0; font-size: 12px; color: var(--muted); }
+   Deux étages, deux rôles pour l'œil :
+     1. CE QUE JE CHERCHE — poste + lieu, en grand, c'est le sujet.
+     2. COMMENT JE RESTREINS — pastilles secondaires, plus petites. */
 
-.jf-primary {
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px;
+.flt {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 2px rgba(31,27,22,0.04), inset 0 1px 0 rgba(255,255,255,0.9);
 }
+[data-theme="dark"] .flt { box-shadow: 0 1px 2px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.05); }
+
+/* ---- Étage 1 : ce que je cherche ---- */
+.flt-search { display: flex; gap: 10px; align-items: stretch; }
+
+.flt-box {
+  display: flex; align-items: center; gap: 9px;
+  background: var(--field); border-radius: 12px; box-shadow: var(--neu-inset);
+  padding: 0 14px; min-height: 46px; min-width: 0;
+}
+.flt-box svg { color: var(--faint); flex-shrink: 0; }
+.flt-box--role { flex: 1 1 55%; flex-wrap: wrap; padding: 7px 14px; }
+.flt-box--place { flex: 1 1 45%; }
+
+.flt-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg); box-shadow: var(--neu-raised-sm);
+  font-size: 12.5px; font-weight: 600; color: var(--text);
+  padding: 5px 8px 5px 11px; border-radius: 999px; white-space: nowrap;
+}
+.flt-tag button {
+  background: none; border: none; padding: 0; cursor: pointer; line-height: 1;
+  color: var(--faint); font-size: 15px; display: inline-flex; align-items: center;
+}
+.flt-tag button:hover { color: var(--error); }
+
+.flt-input {
+  background: none; border: none; outline: none; flex: 1; min-width: 110px;
+  font-family: var(--font-ui); font-size: 13.5px; color: var(--text); padding: 6px 0;
+}
+.flt-input::placeholder { color: var(--faint); }
+
+/* Le rayon vit DANS le champ de lieu : c'est une propriété du lieu, pas un
+   critère autonome. Il disparaît quand la portée n'est pas une commune. */
+.flt-radius {
+  display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
+  padding-left: 10px; margin-left: 2px; border-left: 1px solid var(--border);
+  font-size: 12px; color: var(--muted); white-space: nowrap;
+}
+.flt-radius select {
+  background: none; border: none; outline: none; cursor: pointer;
+  font-family: var(--font-ui); font-size: 12.5px; font-weight: 600; color: var(--text);
+  padding: 2px 0;
+}
+
+.flt-go {
+  background: var(--cta-grad); color: #fff; border: none; cursor: pointer;
+  font-family: var(--font-ui); font-size: 13.5px; font-weight: 600;
+  padding: 0 22px; border-radius: 12px; box-shadow: var(--cta-shadow);
+  display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+  transition: transform 100ms;
+}
+.flt-go:hover { transform: translateY(-1px); }
+.flt-go:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ---- Étage 2 : comment je restreins ---- */
+.flt-row {
+  display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+  margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--border);
+}
+
+.flt-pill-wrap { position: relative; display: inline-flex; }
+/* Les trois favicons se chevauchent : ils servent d'étiquette à la pastille
+   « Où chercher », pas de liste — d'où le décalage négatif. */
+.flt-pill__srcs { display: inline-flex; align-items: center; }
+.flt-pill__srcs .job-src { width: 18px; height: 18px; }
+.flt-pill__srcs .job-src + .job-src { margin-left: -11px; }
+.flt-opt .job-src { width: 19px; height: 19px; }
+
+.flt-pill {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg); border: none; cursor: pointer;
+  font-family: var(--font-ui); font-size: 12.5px; font-weight: 600; color: var(--muted);
+  height: 32px; padding: 0 11px; border-radius: 999px;
+  box-shadow: var(--neu-raised-sm); white-space: nowrap;
+  transition: box-shadow 120ms, color 120ms;
+}
+.flt-pill:hover { color: var(--text); box-shadow: var(--neu-raised); }
+.flt-pill svg { color: var(--faint); flex-shrink: 0; }
+
+/* Réglage actif : anneau orange + valeur. L'œil trie sans lire. */
+.flt-pill.is-set { color: var(--text); box-shadow: var(--neu-raised-sm), 0 0 0 1.5px var(--orange2); }
+.flt-pill.is-set svg { color: var(--orange-text); }
+.flt-pill__val { color: var(--orange-text); font-weight: 700; }
+
+/* Pastille ouverte : enfoncée, pour qu'on sache d'où sort le menu. */
+.flt-pill.is-open { box-shadow: var(--neu-inset); color: var(--text); }
+
+.flt-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 17px; height: 17px; padding: 0 5px; border-radius: 999px;
+  background: var(--cta-grad); color: #fff; box-shadow: var(--cta-shadow);
+  font-size: 10px; font-weight: 800;
+}
+
+.flt-spacer { flex: 1 1 auto; }
+
+.flt-reset {
+  background: none; border: none; cursor: pointer; padding: 0 4px;
+  font-family: var(--font-ui); font-size: 12px; font-weight: 600; color: var(--faint);
+}
+.flt-reset:hover { color: var(--error); text-decoration: underline; }
+
+.flt-results { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.flt-results strong { color: var(--text); font-weight: 800; }
+
+/* ---- Menu d'une pastille ---- */
+.flt-menu {
+  position: absolute; top: calc(100% + 7px); left: 0; z-index: 20;
+  /* Fond OPAQUE, pas le verre du reste de l'app : ce menu flotte au-dessus des
+     cartes d'offres, et leur texte transparaissait au travers. Le `--glass`
+     d'ailleurs ne s'accompagne d'aucun flou ici — `backdrop-filter` calcule
+     `none` sur toute l'app, topbar comprise. On reprend le traitement de
+     `.loc-suggestions`, l'autre menu flottant de l'app : `--bg` + grande ombre. */
+  background: var(--bg);
+  border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: var(--neu-raised-lg); padding: 7px; min-width: 236px;
+  display: flex; flex-direction: column; gap: 1px; text-align: left;
+  cursor: default;
+}
+.flt-menu__title {
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.8px;
+  font-weight: 700; color: var(--faint); padding: 5px 9px 6px;
+}
+/* `white-space: nowrap` : une option de menu ne se casse jamais en deux
+   lignes, sinon son libellé passe sous le quota aligné à droite. */
+.flt-opt {
+  display: flex; align-items: center; gap: 9px; cursor: pointer; white-space: nowrap;
+  background: none; border: none; width: 100%; text-align: left;
+  font-family: var(--font-ui); font-size: 12.5px; font-weight: 600; color: var(--text);
+  padding: 8px 9px; border-radius: 9px;
+}
+.flt-opt:hover { background: var(--card); }
+.flt-opt input { accent-color: var(--orange); width: 14px; height: 14px; cursor: pointer; }
+.flt-opt__sub { margin-left: auto; font-size: 10.5px; color: var(--faint); font-family: var(--font-code); }
+.flt-opt__tick { margin-left: auto; color: var(--orange-text); opacity: 0; }
+.flt-opt.is-on .flt-opt__tick { opacity: 1; }
+.flt-menu__sep { height: 1px; background: var(--border); margin: 5px 7px; }
+/* La note, elle, doit se replier : elle n'est pas une option. */
+.flt-menu__note { font-size: 10.5px; color: var(--faint); line-height: 1.5; padding: 2px 9px 5px; white-space: normal; max-width: 250px; }
+
+/* ---- Panneau « Plus de filtres » ---- */
+.flt-more {
+  margin-top: 11px; padding-top: 13px; border-top: 1px solid var(--border);
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px;
+}
+@media (max-width: 900px) {
+  .flt-more { grid-template-columns: 1fr; }
+  .flt-search { flex-wrap: wrap; }
+  .flt-box--role, .flt-box--place { flex-basis: 100%; }
+  .flt-go { width: 100%; justify-content: center; min-height: 44px; }
+}
+.flt-field { min-width: 0; }
+.flt-field--wide { grid-column: 1 / -1; }
+.flt-field__label {
+  display: block; font-size: 9.5px; color: var(--muted); letter-spacing: 0.8px;
+  text-transform: uppercase; font-weight: 700; margin-bottom: 6px;
+}
+.flt-field__note { display: block; font-size: 11px; color: var(--faint); margin-top: 5px; line-height: 1.5; }
+.flt-text {
+  background: var(--field); color: var(--text); border: none; border-radius: 10px;
+  padding: 9px 12px; font-size: 12.5px; width: 100%;
+  font-family: var(--font-ui); box-shadow: var(--neu-inset); outline: none;
+}
+.flt-text::placeholder { color: var(--faint); }
+.flt-text--area { resize: vertical; min-height: 92px; line-height: 1.5; }
+/* Les selects du panneau reprennent l'aspect des champs texte : sans ça, le
+   rendu natif du navigateur détonne au milieu des champs neumorphiques. */
+.flt-select {
+  appearance: none; background: var(--field); color: var(--text); border: none;
+  border-radius: 10px; padding: 9px 12px; font-size: 12.5px; width: 100%;
+  font-family: var(--font-ui); box-shadow: var(--neu-inset); outline: none; cursor: pointer;
+}
+.flt-select:focus { box-shadow: var(--neu-inset), 0 0 0 3.5px rgba(232,93,4,0.16); }
+.flt-tags {
+  background: var(--field); border-radius: 10px; box-shadow: var(--neu-inset);
+  padding: 6px 8px; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; min-height: 38px;
+}
+
+/* MetierInput et LocationInput sont réutilisés tels quels dans la barre : on
+   les aplatit ici plutôt que de dupliquer deux composants. Le scoping suffit
+   (spécificité supérieure), mais toute propriété non redéclarée ci-dessous
+   continue de venir des règles .jf- / .loc- d'origine — les vérifier à l'œil. */
+.flt-box .jf-tags-field,
+.flt-box .loc-field { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 6px; flex: 1; min-width: 0; }
+.flt-box .jf-tags { gap: 5px; }
+.flt-box .loc-input-wrap { flex: 1; min-width: 120px; }
+.flt-box .ui-input { background: none; box-shadow: none; padding: 6px 0; font-size: 13.5px; }
+.flt-box .ui-input:focus { box-shadow: none; }
+.flt-box .loc-radius { padding-left: 10px; border-left: 1px solid var(--border); }
+.flt-box .loc-radius input { width: 54px; }
+
+
 .jf-field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
 .jf-field--wide { grid-column: 1 / -1; }
 .jf-label {
@@ -1351,19 +1547,6 @@ button.go:disabled {
 }
 .jf-note { font-size: 11px; color: var(--muted); }
 
-/* Groupe « filtres rapides » séparé du bloc de recherche par un filet discret. */
-.jf-filters {
-  display: flex; flex-direction: column; gap: 16px;
-  padding-top: 18px; box-shadow: inset 0 1px 0 var(--border);
-}
-.jf-filters-row {
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
-  gap: 20px; align-items: end;
-}
-
-.jf-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px;
-}
 
 /* Select aligné sur .ui-input (inset néomorphique + focus orange). */
 .jf-select {
@@ -1373,20 +1556,6 @@ button.go:disabled {
 }
 .jf-select:focus { box-shadow: var(--neu-inset), 0 0 0 3.5px rgba(232,93,4,0.16); }
 
-/* Chips de sélection (types de contrat). */
-.jf-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.jf-chip {
-  font-family: var(--font-ui); font-size: 12.5px; font-weight: 600; color: var(--text);
-  background: var(--bg); border: none; border-radius: 999px; padding: 7px 15px; cursor: pointer;
-  box-shadow: var(--neu-raised-sm); transition: box-shadow 130ms, transform 130ms, color 130ms;
-}
-.jf-chip:hover:not(.is-on) { box-shadow: var(--neu-raised); transform: translateY(-1px); }
-.jf-chip:active { transform: translateY(0); box-shadow: var(--neu-inset); }
-.jf-chip.is-on { color: #fff; background: var(--orange); box-shadow: inset 0 1px 3px rgba(0,0,0,0.18); }
-
-/* Toggle « Débutant accepté » : réutilise .ui-switch, neutralise le style bouton. */
-.jf-switch { width: 100%; border: none; background: var(--bg); box-shadow: var(--neu-inset); text-align: left; }
-.jf-switch:hover { background: var(--bg); }
 
 /* Tags (mots-clés, mots exclus, compétences, ROME). */
 .jf-tags-field { display: flex; flex-direction: column; gap: 8px; }
@@ -1403,17 +1572,7 @@ button.go:disabled {
 }
 .jf-tag button:hover { color: var(--text); }
 
-/* Section avancée. */
-.jf-adv-toggle {
-  align-self: flex-start; font-family: var(--font-ui); font-size: 12.5px; font-weight: 600;
-  color: var(--muted); background: none; border: none; cursor: pointer; padding: 2px 0;
-  transition: color 130ms;
-}
-.jf-adv-toggle:hover { color: var(--text); }
-.jf-advanced {
-  display: flex; flex-direction: column; gap: 16px;
-  padding-top: 18px; box-shadow: inset 0 1px 0 var(--border);
-}
+
 .jf-textarea { min-height: 96px; resize: vertical; line-height: 1.5; padding: 10px 12px; }
 
 /* Champ lieu + autocomplétion. */
@@ -1435,10 +1594,6 @@ button.go:disabled {
 .loc-radius input { width: 74px; }
 .loc-radius-unit { color: var(--muted); }
 
-@media (max-width: 640px) {
-  .jf-primary { grid-template-columns: 1fr; }
-  .jf-filters-row { grid-template-columns: 1fr; }
-}
 
 .scan-progress { display: flex; flex-direction: column; gap: 6px; min-width: 240px; flex: 1; }
 .scan-progress-bar {
@@ -2674,24 +2829,6 @@ button.go:disabled {
 .job-menu__item--danger { color: var(--error); }
 .job-menu__sep { height: 1px; background: var(--border); margin: 4px 6px; }
 
-/* ---- Choix des sources (dans le panneau de critères) ---- */
-.jf-sources { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
-.jf-sources-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-.jf-source {
-  display: inline-flex; align-items: center; gap: 9px; cursor: pointer;
-  background: var(--bg); box-shadow: var(--neu-raised-sm);
-  border-radius: 12px; padding: 8px 14px 8px 11px; transition: box-shadow 120ms;
-}
-.jf-source:hover { box-shadow: var(--neu-raised); }
-.jf-source.is-on { box-shadow: var(--neu-raised-sm), 0 0 0 1.5px var(--orange2); }
-.jf-source input { accent-color: var(--orange); width: 15px; height: 15px; cursor: pointer; }
-.jf-source-name { font-size: 12.5px; font-weight: 600; color: var(--text); }
-.jf-source-quota { font-size: 10.5px; color: var(--faint); font-family: var(--font-code); }
-
-/* ---- Résumé des critères, sur l'écran principal ---- */
-.jobs-form-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.jobs-summary {
-  display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
-  font-size: 12px; color: var(--muted); min-width: 0;
-}
-.jobs-summary__dot { color: var(--faint); margin-right: 7px; }
+/* Le choix des sources vit maintenant dans un menu de pastille (.flt-opt) et
+   le résumé de critères a disparu avec le panneau : leurs règles sont
+   supprimées, pas laissées mortes derrière la nouvelle barre. */

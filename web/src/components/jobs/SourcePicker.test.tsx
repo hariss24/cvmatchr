@@ -14,6 +14,11 @@ describe("SourcePicker", () => {
     cleanup();
   });
 
+  it("porte le titre du menu", () => {
+    render(<SourcePicker value={value} onChange={() => {}} usage={usage} />);
+    expect(screen.getByText("Où chercher")).toBeInTheDocument();
+  });
+
   it("affiche les trois sources", () => {
     render(<SourcePicker value={value} onChange={() => {}} usage={usage} />);
     expect(screen.getByLabelText(/France Travail/)).toBeInTheDocument();
@@ -24,8 +29,8 @@ describe("SourcePicker", () => {
   it("montre le quota consommé, « illimité » pour France Travail", () => {
     render(<SourcePicker value={value} onChange={() => {}} usage={usage} />);
     expect(screen.getByText("illimité")).toBeInTheDocument();
-    expect(screen.getByText("183/200 ce mois")).toBeInTheDocument();
-    expect(screen.getByText("947/1000 ce mois")).toBeInTheDocument();
+    expect(screen.getByText("183/200")).toBeInTheDocument();
+    expect(screen.getByText("947/1000")).toBeInTheDocument();
   });
 
   it("bascule une source", () => {

@@ -14,11 +14,10 @@ import { upsertApplicationForDocument } from "@/lib/applications/store";
 import { getApiUsage, bumpApiUsage } from "@/lib/storage/db";
 import type { SourceId } from "@/lib/jobs/offer";
 import { SOURCES } from "@/lib/jobs/sources";
-import { summarizeProfile } from "@/lib/jobs/summary";
+import { FilterBar } from "./FilterBar";
 import ScanProgress from "./ScanProgress";
 import JobCard from "./JobCard";
 import ScoringInfo from "./ScoringInfo";
-import { ProfileForm } from "./ProfileForm";
 
 /**
  * Orchestrateur du scan d'offres (piloté par le navigateur, cf. spec §4) :
@@ -36,7 +35,7 @@ const ZERO: ScanState = { phase: "", found: 0, scored: 0, retained: 0 };
 export default function JobsView() {
   const [jobs, setJobs] = useState<JobEntry[]>([]);
   const [profile, setProfile] = useState<JobSearchProfile>(EMPTY_PROFILE);
-  const [showForm, setShowForm] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [progress, setProgress] = useState<ScanState>(ZERO);
   const [configMsg, setConfigMsg] = useState<string | null>(null);
@@ -56,7 +55,7 @@ export default function JobsView() {
       // tolérant, qui complète les manques avec les défauts neutres. Sans ça,
       // un profil existant fait planter le formulaire sur un champ absent.
       if (p) setProfile(parseProfile(p));
-      else setShowForm(true); // Profil vide → ouvrir la saisie initiale.
+      setProfileLoaded(true);
     });
   }, []);
 
@@ -272,7 +271,7 @@ export default function JobsView() {
         <p>{configMsg}</p>
         <p className="jobs-config-hint">
           Renseigne les variables d&apos;environnement des sources que tu as cochées dans
-          « Mes critères de recherche ».
+          «&nbsp;Où chercher&nbsp;».
         </p>
       </div>
     );
@@ -285,42 +284,23 @@ export default function JobsView() {
         minScore={profile.minScore}
       />
 
-      <div className="jobs-form-bar">
-        <button
-          type="button"
-          className="ghost jobs-form-toggle"
-          onClick={() => setShowForm((s) => !s)}
-          aria-expanded={showForm}
-        >
-          {showForm ? "Masquer les critères" : "Mes critères"}
-        </button>
-        {/* Le résumé rend le panneau inutile en usage courant : on voit ses
-            réglages sans avoir à les ouvrir (cf. spec §5.1). */}
-        <div className="jobs-summary">
-          {summarizeProfile(profile).map((part, i) => (
-            <span key={`${part}-${i}`}>
-              {i > 0 && <span className="jobs-summary__dot">•</span>}
-              {part}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {showForm && <ProfileForm profile={profile} onChange={updateProfile} usage={usage} />}
+      {/* La barre n'est montée qu'une fois le profil lu : `LocationInput` fige
+          le libellé du lieu dans un état local à son montage. Monté avant, il
+          capturait le profil vide et le lieu enregistré restait invisible alors
+          qu'il continuait de contraindre la recherche. */}
+      {profileLoaded && (
+        <FilterBar
+          profile={profile}
+          onChange={updateProfile}
+          usage={usage}
+          resultCount={jobs.length}
+          canScan={canScan}
+          scanning={scanning}
+          onScan={() => scan()}
+        />
+      )}
 
       <div className="jobs-toolbar">
-        <button
-          type="button"
-          className="tailor-btn"
-          onClick={() => scan()}
-          disabled={scanning || !canScan}
-          data-testid="jobs-scan"
-        >
-          {scanning ? "Recherche en cours…" : "Chercher des offres"}
-        </button>
-        {!scanning && !canScan && (
-          <span className="jobs-hint">Renseigne au moins un poste pour lancer une recherche.</span>
-        )}
         {scanning ? <ScanProgress {...progress} /> : null}
       </div>
 
