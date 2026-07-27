@@ -314,15 +314,18 @@ a { color: var(--link); text-decoration: none; }
   min-width: 0;
 }
 .job-company__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* Pastille de source : une icône, pas une ligne « Disponible sur ». */
+/* Logo de source : les marques officielles sont des logotypes LARGES (France
+   Travail 400×142, Adzuna 600×154) — illisibles dans une pastille carrée. On
+   les pose donc en pied de carte, à hauteur fixe et largeur libre, comme une
+   mention d'attribution. Pas de texte « Disponible sur » : le logo suffit. */
 .job-src {
-  width: 15px; height: 15px; border-radius: 4px; flex-shrink: 0;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 8px; font-weight: 800; color: #fff; letter-spacing: -0.2px;
+  display: inline-flex; align-items: center; flex-shrink: 0;
+  padding: 3px 7px; border-radius: 7px;
 }
-.job-src--ft { background: #2B2E7F; }
-.job-src--adzuna { background: #00B2A9; }
-.job-src--google { background: #4285F4; }
+.job-src img { height: 18px; width: auto; display: block; }
+/* Le logo France Travail est bleu marine sur fond transparent : sur fond sombre
+   il se noie. Tuile claire en thème sombre, comme pour les logos d'entreprise. */
+[data-theme="dark"] .job-src { background: #F2EFEA; }
 
 .job-card__aside {
   display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0;
@@ -377,6 +380,9 @@ a { color: var(--link); text-decoration: none; }
   display: flex; align-items: center; gap: 8px;
   margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--border);
 }
+/* Attribution à gauche, actions à droite : la source est une information de
+   provenance, pas une action — elle ne doit pas concurrencer le CTA. */
+.job-card__foot > .job-src { margin-left: -5px; margin-right: 2px; }
 /* Le CTA reste identifiable sans occuper toute la largeur : quatre barres
    orange pleine largeur, en grille 2 colonnes, écrasaient la lecture. */
 .job-cta {
@@ -517,7 +523,6 @@ a { color: var(--link); text-decoration: none; }
             <div class="job-card__id">
               <h2 class="job-title">Webmaster H/F — spécialiste Mobile</h2>
               <div class="job-company">
-                <span class="job-src job-src--google" title="Trouvée via Google for Jobs">G</span>
                 <span class="job-company__name">SKOLAE</span>
               </div>
             </div>
@@ -538,6 +543,7 @@ a { color: var(--link); text-decoration: none; }
           <button class="job-more">Voir plus</button>
 
           <div class="job-card__foot">
+            <span class="job-src" title="Google for Jobs"><img src="google.svg" alt="Google for Jobs"></span>
             <button class="job-cta">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2Z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/></svg>
               Adapter mon CV
@@ -557,7 +563,6 @@ a { color: var(--link); text-decoration: none; }
             <div class="job-card__id">
               <h2 class="job-title">Webmaster F/H — site humanitaire</h2>
               <div class="job-company">
-                <span class="job-src job-src--ft" title="France Travail">FT</span>
                 <span class="job-company__name">Médecins sans Frontières France</span>
               </div>
             </div>
@@ -578,6 +583,7 @@ a { color: var(--link); text-decoration: none; }
           <button class="job-more">Voir plus</button>
 
           <div class="job-card__foot">
+            <span class="job-src" title="France Travail"><img src="francetravail.svg" alt="France Travail"></span>
             <button class="job-cta">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2Z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/></svg>
               Adapter mon CV
@@ -602,7 +608,6 @@ a { color: var(--link); text-decoration: none; }
             <div class="job-card__id">
               <h2 class="job-title">Webmaster E-commerce — Brand Experience</h2>
               <div class="job-company">
-                <span class="job-src job-src--google" title="Trouvée via Google for Jobs">G</span>
                 <span class="job-company__name">VO2 Group</span>
               </div>
             </div>
@@ -639,6 +644,7 @@ a { color: var(--link); text-decoration: none; }
           </div>
 
           <div class="job-card__foot">
+            <span class="job-src" title="Google for Jobs"><img src="google.svg" alt="Google for Jobs"></span>
             <button class="job-cta">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2Z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/></svg>
               Adapter mon CV
@@ -658,7 +664,6 @@ a { color: var(--link); text-decoration: none; }
             <div class="job-card__id">
               <h2 class="job-title">Webmaster développeur — web front end</h2>
               <div class="job-company">
-                <span class="job-src job-src--adzuna" title="Adzuna">A</span>
                 <span class="job-company__name">LWS — Ligne Web Services</span>
               </div>
             </div>
@@ -679,6 +684,7 @@ a { color: var(--link); text-decoration: none; }
           <button class="job-more">Voir plus</button>
 
           <div class="job-card__foot">
+            <span class="job-src" title="Adzuna"><img src="adzuna.png" alt="Adzuna"></span>
             <button class="job-cta">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2Z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/></svg>
               Adapter mon CV

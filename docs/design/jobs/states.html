@@ -314,15 +314,18 @@ a { color: var(--link); text-decoration: none; }
   min-width: 0;
 }
 .job-company__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* Pastille de source : une icône, pas une ligne « Disponible sur ». */
+/* Logo de source : les marques officielles sont des logotypes LARGES (France
+   Travail 400×142, Adzuna 600×154) — illisibles dans une pastille carrée. On
+   les pose donc en pied de carte, à hauteur fixe et largeur libre, comme une
+   mention d'attribution. Pas de texte « Disponible sur » : le logo suffit. */
 .job-src {
-  width: 15px; height: 15px; border-radius: 4px; flex-shrink: 0;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 8px; font-weight: 800; color: #fff; letter-spacing: -0.2px;
+  display: inline-flex; align-items: center; flex-shrink: 0;
+  padding: 3px 7px; border-radius: 7px;
 }
-.job-src--ft { background: #2B2E7F; }
-.job-src--adzuna { background: #00B2A9; }
-.job-src--google { background: #4285F4; }
+.job-src img { height: 18px; width: auto; display: block; }
+/* Le logo France Travail est bleu marine sur fond transparent : sur fond sombre
+   il se noie. Tuile claire en thème sombre, comme pour les logos d'entreprise. */
+[data-theme="dark"] .job-src { background: #F2EFEA; }
 
 .job-card__aside {
   display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0;
@@ -377,6 +380,9 @@ a { color: var(--link); text-decoration: none; }
   display: flex; align-items: center; gap: 8px;
   margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--border);
 }
+/* Attribution à gauche, actions à droite : la source est une information de
+   provenance, pas une action — elle ne doit pas concurrencer le CTA. */
+.job-card__foot > .job-src { margin-left: -5px; margin-right: 2px; }
 /* Le CTA reste identifiable sans occuper toute la largeur : quatre barres
    orange pleine largeur, en grille 2 colonnes, écrasaient la lecture. */
 .job-cta {
@@ -499,7 +505,7 @@ a { color: var(--link); text-decoration: none; }
               <span class="job-source__box">
                 <svg class="job-source__tick" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
               </span>
-              <span class="job-src job-src--ft">FT</span>
+              <span class="job-src" title="France Travail"><img src="francetravail.svg" alt="France Travail"></span>
               <span class="job-source__name">France Travail</span>
               <span class="job-source__quota">illimité</span>
             </label>
@@ -507,7 +513,7 @@ a { color: var(--link); text-decoration: none; }
               <span class="job-source__box">
                 <svg class="job-source__tick" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
               </span>
-              <span class="job-src job-src--google">G</span>
+              <span class="job-src" title="Google for Jobs"><img src="google.svg" alt="Google for Jobs"></span>
               <span class="job-source__name">Google for Jobs</span>
               <span class="job-source__quota">183/200 ce mois</span>
             </label>
@@ -515,7 +521,7 @@ a { color: var(--link); text-decoration: none; }
               <span class="job-source__box">
                 <svg class="job-source__tick" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
               </span>
-              <span class="job-src job-src--adzuna">A</span>
+              <span class="job-src" title="Adzuna"><img src="adzuna.png" alt="Adzuna"></span>
               <span class="job-source__name">Adzuna</span>
               <span class="job-source__quota">947/1000 ce mois</span>
             </label>
@@ -527,19 +533,19 @@ a { color: var(--link); text-decoration: none; }
       <!-- =============================================================
            2. Pastilles de source
            ============================================================= -->
-      <div class="app-block__label" style="margin-top:26px">Pastilles de source — une icône, pas une ligne « Disponible sur »</div>
+      <div class="app-block__label" style="margin-top:26px">Logos de source — logotypes officiels, posés en pied de carte</div>
       <div style="display:flex; gap:22px; align-items:center; margin:10px 0 26px; flex-wrap:wrap">
         <div style="text-align:center">
-          <div class="job-company" style="justify-content:center"><span class="job-src job-src--ft">FT</span><span>France Travail</span></div>
-          <div class="mk-note">jamais de logo → initiale</div>
+          <div class="job-company" style="justify-content:center"><span class="job-src" title="France Travail"><img src="francetravail.svg" alt="France Travail"></span><span>France Travail</span></div>
+          <div class="mk-note">entreprise sans logo</div>
         </div>
         <div style="text-align:center">
-          <div class="job-company" style="justify-content:center"><span class="job-src job-src--google">G</span><span>Google for Jobs</span></div>
-          <div class="mk-note">vrai logo fourni</div>
+          <div class="job-company" style="justify-content:center"><span class="job-src" title="Google for Jobs"><img src="google.svg" alt="Google for Jobs"></span><span>Google for Jobs</span></div>
+          <div class="mk-note">fournit le logo entreprise</div>
         </div>
         <div style="text-align:center">
-          <div class="job-company" style="justify-content:center"><span class="job-src job-src--adzuna">A</span><span>Adzuna</span></div>
-          <div class="mk-note">jamais de logo → initiale</div>
+          <div class="job-company" style="justify-content:center"><span class="job-src" title="Adzuna"><img src="adzuna.png" alt="Adzuna"></span><span>Adzuna</span></div>
+          <div class="mk-note">entreprise sans logo</div>
         </div>
       </div>
 

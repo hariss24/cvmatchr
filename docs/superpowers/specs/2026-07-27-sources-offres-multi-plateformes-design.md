@@ -41,11 +41,14 @@ Critères de succès vérifiables :
 | Quota gratuit | illimité | 1 000 appels/mois | 200 appels/mois |
 | Logo entreprise | non fourni | non fourni | `employer_logo` (souvent rempli) |
 | Rayon géographique | oui (`distance`) | oui (`distance`) | non |
-| Statut des clés | en place | **en place** (`.env.local`) | **à créer — prérequis bloquant** |
+| Statut des clés | en place | **en place** (`.env.local`) | **en place** (`.env.local`) |
 
-`ADZUNA_APP_ID` / `ADZUNA_APP_KEY` sont déjà renseignés et vérifiés en direct
-(2 258 offres pour « développeur » à Paris). La clé JSearch reste à obtenir : c'est
-un prérequis à lever avant d'implémenter le provider correspondant.
+Les trois jeux de clés sont en place et vérifiés en direct :
+
+- Adzuna — 2 258 offres pour « développeur » à Paris.
+- JSearch (`JSEARCH_API_KEY`) — 10 offres pour « webmaster en Paris », dont
+  **6 avec `employer_logo`**. Ce taux confirme que le repli sur l'initiale (5.4)
+  n'est pas un cas limite mais le comportement d'environ une offre sur trois.
 
 ## 4. Architecture
 
@@ -211,17 +214,38 @@ profil.
 
 Grille deux colonnes, repliée en une seule sous 900 px.
 
-- **En-tête** — vignette d'entreprise, titre (2 lignes max), pastille de source +
-  nom d'entreprise ; à droite le score `/100` et la date relative.
+- **En-tête** — vignette d'entreprise, titre (2 lignes max), nom d'entreprise ;
+  à droite le score `/100` et la date relative.
 - **Faits** — pastilles sur une ligne : lieu, contrat, salaire, temps de trajet.
   Un fait absent s'affiche en gris (« Salaire non précisé ») plutôt que de
   disparaître : l'absence d'information est elle-même une information.
 - **Description** — trois lignes, dépliables par « Voir plus ».
-- **Pied** — « Adapter mon CV » (action principale, compacte) et « Voir l'offre » ;
-  le menu « ⋯ » regroupe Candidater, Suivre et Pas intéressé.
+- **Pied** — logo de la source à gauche (attribution), puis « Adapter mon CV »
+  (action principale, compacte) et « Voir l'offre » ; le menu « ⋯ » regroupe
+  Candidater, Suivre et Pas intéressé.
 
 Deux actions visibles au lieu de cinq. Les trois autres restent à un clic
 supplémentaire, sans encombrer la grille.
+
+### 5.3.1 Logos de source
+
+Logotypes officiels, récupérés sur Wikimedia Commons et servis depuis
+`web/public/images/job-boards/` : `francetravail.svg` (400×142),
+`adzuna.png` (600×154), `google.svg`.
+
+Ces marques sont des **logotypes larges** (ratio ≈ 2,8:1), pas des icônes
+carrées. Elles sont donc posées en pied de carte à hauteur fixe (18 px) et
+largeur libre, et non dans une pastille carrée où le logotype France Travail
+devenait illisible. Aucune icône de substitution n'est dessinée : afficher une
+approximation d'une marque déposée serait à la fois inexact et inutile.
+
+Le logotype France Travail reste peu lisible dans son détail à cette taille — sa
+trame de pastilles multicolores suffit à l'identifier, et dans le panneau des
+sources il est de toute façon accompagné de son nom en toutes lettres. Découper
+l'emblème du logotype (35 tracés) a été écarté : fragile et disproportionné.
+
+En thème sombre, une tuile claire est appliquée derrière le logo : la marque
+France Travail est bleu marine sur fond transparent et disparaîtrait sinon.
 
 ### 5.4 Vignette d'entreprise
 
