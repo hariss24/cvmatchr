@@ -15,6 +15,12 @@ const criterionSchema = z.object({
   description: z.string(),
 });
 
+const sourcesSchema = z.object({
+  francetravail: z.boolean().catch(true),
+  adzuna: z.boolean().catch(false),
+  jsearch: z.boolean().catch(false),
+}).catch(EMPTY_PROFILE.sources);
+
 /**
  * Schéma tolérant : chaque champ retombe sur le défaut neutre d'EMPTY_PROFILE
  * via `.catch(...)`, pour qu'un corps de requête partiel ou légèrement invalide
@@ -42,6 +48,7 @@ export const jobSearchProfileSchema = z.object({
   scoringCriteria: z.array(criterionSchema).catch(EMPTY_PROFILE.scoringCriteria),
   prefilterKeywords: z.array(z.string()).catch(EMPTY_PROFILE.prefilterKeywords),
   aiShortlist: z.number().int().min(1).max(100).catch(EMPTY_PROFILE.aiShortlist),
+  sources: sourcesSchema,
 });
 
 /** Valide un input inconnu et complète les champs manquants avec les défauts neutres. */
