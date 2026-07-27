@@ -1531,7 +1531,20 @@ button.go:disabled {
    continue de venir des règles .jf- / .loc- d'origine — les vérifier à l'œil. */
 .flt-box .jf-tags-field,
 .flt-box .loc-field { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 6px; flex: 1; min-width: 0; }
-.flt-box .jf-tags { gap: 5px; }
+.flt-box .jf-tags { gap: 5px; min-width: 0; }
+
+/* Champ « poste » replié : une seule ligne, quel que soit le nombre de postes.
+   Sans ça, quatre intitulés longs faisaient doubler la hauteur de toute la
+   barre. Les tags s'élident plutôt que de pousser la largeur. */
+.flt-box .jf-tags-field--collapsed { flex-wrap: nowrap; }
+.flt-box .jf-tags-field--collapsed .jf-tags { flex-wrap: nowrap; }
+.flt-box .jf-tags-field--collapsed .jf-tag { max-width: 150px; }
+.jf-tag__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.jf-tag--more {
+  border: none; cursor: pointer; font-family: var(--font-ui); font-weight: 700;
+  color: var(--orange-text); padding: 4px 11px; flex-shrink: 0;
+}
+.jf-tag--more:hover { box-shadow: var(--neu-raised); }
 .flt-box .loc-input-wrap { flex: 1; min-width: 120px; }
 .flt-box .ui-input { background: none; box-shadow: none; padding: 6px 0; font-size: 13.5px; }
 .flt-box .ui-input:focus { box-shadow: none; }
