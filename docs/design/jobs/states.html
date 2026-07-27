@@ -538,7 +538,7 @@ a { color: var(--link); text-decoration: none; }
       <!-- =============================================================
            2. Pastilles de source
            ============================================================= -->
-      <div class="app-block__label" style="margin-top:26px">Jobboard d'origine — favicon dérivé du domaine de l'offre, aucun logo stocké</div>
+      <div class="app-block__label" style="margin-top:26px">Jobboard d'origine — favicon dérivé du domaine de l'offre ; cascade si le sous-domaine échoue</div>
       <div style="display:flex; gap:22px; align-items:center; margin:10px 0 26px; flex-wrap:wrap">
         <div style="text-align:center">
           <div class="job-company" style="justify-content:center"><span class="job-src" title="Publiée sur LinkedIn"><img src="https://www.google.com/s2/favicons?domain=linkedin.com&sz=64" alt="LinkedIn"></span><span>LinkedIn</span></div>
@@ -564,27 +564,28 @@ a { color: var(--link); text-decoration: none; }
           <div class="job-company" style="justify-content:center"><span class="job-src"><span class="job-src__initial">?</span></span><span>Sans favicon</span></div>
           <div class="mk-note">repli : initiale</div>
         </div>
+        <div style="text-align:center">
+          <div class="job-company" style="justify-content:center"><span class="job-src" title="LilyLifestyle Jobs"><img src="https://www.google.com/s2/favicons?domain=lilylifestyle.co.uk&sz=64" alt="LilyLifestyle Jobs"></span><span>LilyLifestyle</span></div>
+          <div class="mk-note">.co.uk : cascade en 2 essais</div>
+        </div>
       </div>
 
       <!-- =============================================================
            3. Logo : vrai vs repli
            ============================================================= -->
-      <div class="app-block__label">Vignette d'entreprise — vrai logo quand la source le fournit, sinon initiale</div>
+      <div class="app-block__label">Vignette d'entreprise — logo réel quand la source le fournit (≈ 2 offres sur 3), sinon initiale</div>
       <div style="display:flex; gap:18px; align-items:center; margin:10px 0 26px">
         <div style="text-align:center">
-          <div class="job-logo">
-            <svg viewBox="0 0 44 44" style="width:100%;height:100%;padding:9px" fill="none">
-              <rect x="3" y="3" width="17" height="17" rx="4" fill="#1F1B16"/>
-              <rect x="24" y="3" width="17" height="17" rx="8.5" fill="#1F1B16"/>
-              <rect x="3" y="24" width="17" height="17" rx="8.5" fill="#1F1B16"/>
-              <rect x="24" y="24" width="17" height="17" rx="4" fill="#1F1B16"/>
-            </svg>
-          </div>
-          <div class="mk-note">logo Google</div>
+          <div class="job-logo"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-WjGZe8VqaTez0tNdvqUwPE-HzMXhM9d3UbMw&s=0" alt="Médecins sans Frontières"></div>
+          <div class="mk-note">logo réel (API)</div>
         </div>
         <div style="text-align:center">
-          <div class="job-logo"><span class="job-logo__initial">M</span></div>
-          <div class="mk-note">repli : initiale</div>
+          <div class="job-logo"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRn6jEP0po8gcqggu24Pcn65d_1KqDEfZNfLkww&s=0" alt="LVMH Group"></div>
+          <div class="mk-note">logo réel (API)</div>
+        </div>
+        <div style="text-align:center">
+          <div class="job-logo"><span class="job-logo__initial">V</span></div>
+          <div class="mk-note">VO2 Group : sans logo</div>
         </div>
         <div style="text-align:center">
           <div class="job-logo"><span class="job-logo__initial">?</span></div>

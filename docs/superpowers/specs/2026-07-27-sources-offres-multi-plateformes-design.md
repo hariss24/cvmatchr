@@ -5,6 +5,12 @@
 **Maquette :** `docs/design/jobs/` (page-light, page-dark, states) — également poussée
 sur Claude Design, projet « Design System », groupe **Offres**.
 
+Les cartes de la maquette sont générées **à partir d'une réponse JSearch réelle**
+(entreprises, logos, intitulés, jobboards et descriptions authentiques ; seules
+les notes /100 et les temps de trajet sont illustratifs, puisqu'ils viennent de
+notre propre scoring). Aucun logo n'y est dessiné à la main : ce qui s'affiche
+est ce que produira l'application.
+
 ---
 
 ## 1. Problème
@@ -251,21 +257,31 @@ L'icône est le **favicon du domaine du lien de l'offre**, servi par
 aucun logo n'est stocké dans le dépôt, et tout jobboard inconnu fonctionne sans
 la moindre modification de code.
 
-**Normalisation du domaine — obligatoire.** Le service échoue sur les
-sous-domaines : `candidat.francetravail.fr` renvoie 404 (avec un globe
-générique, identique à celui d'un domaine inexistant), là où `francetravail.fr`
-renvoie le bon favicon. Le domaine est donc réduit à ses deux derniers labels
-avant l'appel. Vérifié sur les six domaines rencontrés : la normalisation
-corrige le seul cas en échec et n'en casse aucun autre.
+**Cascade de domaines — obligatoire.** Le service échoue sur certains
+sous-domaines : `candidat.francetravail.fr` (l'URL que donne France Travail) et
+`jobs.lilylifestyle.co.uk` renvoient tous deux 404, avec un globe générique
+identique à celui d'un domaine inexistant.
 
-Limite connue : la réduction « deux derniers labels » est fausse pour les
-suffixes composés (`example.co.uk` → `co.uk`). Aucun jobboard français n'est
-concerné ; embarquer une Public Suffix List serait disproportionné.
+On essaie donc le domaine complet, puis on retire le label de gauche à chaque
+échec, en s'arrêtant à deux labels :
 
-**Repli.** Si le favicon ne charge pas, on affiche l'initiale du jobboard.
-Attention : un domaine inconnu reçoit un globe générique en HTTP 404 — le repli
-doit donc se déclencher sur l'erreur de chargement, jamais sur l'absence
-d'image.
+```
+fr.linkedin.com           → fr.linkedin.com        (1 essai)
+candidat.francetravail.fr → francetravail.fr       (2 essais)
+jobs.lilylifestyle.co.uk  → lilylifestyle.co.uk    (2 essais)
+inexistant-zzz999.fr      → échec → initiale
+```
+
+Une réduction fixe aux « deux derniers labels » avait d'abord été retenue, puis
+écartée : les données réelles de JSearch contiennent `jobs.lilylifestyle.co.uk`,
+que cette règle réduit à `co.uk` — un suffixe public, sans favicon. La cascade
+n'a pas ce défaut et ne nécessite aucune Public Suffix List. Coût : au plus deux
+requêtes supplémentaires, et seulement pour les domaines en échec.
+
+**Repli.** Après épuisement de la cascade, on affiche l'initiale du jobboard.
+Attention : un domaine inconnu reçoit un globe générique **en HTTP 404** — le
+repli doit donc se déclencher sur l'erreur de chargement, jamais sur l'absence
+d'image, sans quoi on afficherait des globes sans jamais s'en apercevoir.
 
 Pastille ronde de 24 px, favicon de 15 px. En thème sombre, tuile claire :
 beaucoup de favicons sont sombres sur fond transparent.
@@ -321,9 +337,11 @@ Au niveau de la route :
 
 Le mapping des contrats Adzuna (4.5) est testé sur ses deux branches.
 
-La normalisation de domaine (5.3.1) est testée en module pur :
-`candidat.francetravail.fr` → `francetravail.fr`, `fr.linkedin.com` →
-`linkedin.com`, domaine déjà court inchangé, URL invalide → `""`.
+La cascade de domaines (5.3.1) est testée en module pur, sur la suite de
+candidats qu'elle produit : `jobs.lilylifestyle.co.uk` →
+`[jobs.lilylifestyle.co.uk, lilylifestyle.co.uk]`, `candidat.francetravail.fr` →
+`[candidat.francetravail.fr, francetravail.fr]`, `adzuna.fr` → `[adzuna.fr]`
+(aucune descente sous deux labels), URL invalide → `[]`.
 
 ## 7. Hors périmètre
 
