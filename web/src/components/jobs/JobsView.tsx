@@ -10,6 +10,10 @@ import { EMPTY_PROFILE, type JobSearchProfile } from "@/lib/jobs/profile";
 import { getJobProfile, saveJobProfile } from "@/lib/storage/db";
 import { relevance } from "@/lib/jobs/prefilter";
 import { upsertApplicationForDocument } from "@/lib/applications/store";
+import { getApiUsage, bumpApiUsage } from "@/lib/storage/db";
+import type { SourceId } from "@/lib/jobs/offer";
+import { SOURCES } from "@/lib/jobs/sources";
+import { summarizeProfile } from "@/lib/jobs/summary";
 import ScanProgress from "./ScanProgress";
 import JobCard from "./JobCard";
 import ScoringInfo from "./ScoringInfo";
@@ -35,6 +39,7 @@ export default function JobsView() {
   const [scanning, setScanning] = useState(false);
   const [progress, setProgress] = useState<ScanState>(ZERO);
   const [configMsg, setConfigMsg] = useState<string | null>(null);
+  const [usage, setUsage] = useState<Record<SourceId, number>>({ francetravail: 0, adzuna: 0, jsearch: 0 });
   const setPendingJobDesc = useDocStore((s) => s.setPendingJobDesc);
   const setCompany = useDocStore((s) => s.setCompany);
   const setRole = useDocStore((s) => s.setRole);
@@ -43,6 +48,7 @@ export default function JobsView() {
 
   useEffect(() => {
     listJobs("new").then(setJobs);
+    getApiUsage().then(setUsage);
     getJobProfile().then((p) => {
       if (p) setProfile(p);
       else setShowForm(true); // Profil vide → ouvrir la saisie initiale.
@@ -82,6 +88,21 @@ export default function JobsView() {
       }
 
       const offers: JobOffer[] = data.offers ?? [];
+
+      // Compteur de quota : local et indicatif, il mesure ce que CE navigateur
+      // a consommé, pas ce que le fournisseur a facturé.
+      if (data.calls) {
+        await bumpApiUsage(data.calls);
+        setUsage(await getApiUsage());
+      }
+
+      // Une source en panne ne fait pas échouer la recherche : on le dit sans bloquer.
+      const failed: SourceId[] = data.failed ?? [];
+      if (failed.length > 0) {
+        const names = failed.map((s: SourceId) => SOURCES.find((x) => x.id === s)?.label ?? s).join(", ");
+        toast(`Source(s) indisponible(s) : ${names}. Les autres résultats sont affichés.`, "error");
+      }
+
       const minScore = p.minScore;
 
       // Écarter les offres déjà en base (dédoublonnage local).
@@ -158,6 +179,12 @@ export default function JobsView() {
               publishedAt: offer.publishedAt,
               status: "new",
               seen: false,
+              source: offer.source,
+              logoUrl: offer.logoUrl,
+              boardDomain: offer.boardDomain,
+              boardName: offer.boardName,
+              contractLabel: offer.contractLabel,
+              salaryLabel: offer.salaryLabel,
             });
             retained++;
           } else if (typeof d.score === "number") {
@@ -239,8 +266,8 @@ export default function JobsView() {
       <div className="jobs-config" data-testid="jobs-config">
         <p>{configMsg}</p>
         <p className="jobs-config-hint">
-          Renseigne <code>FT_CLIENT_ID</code>, <code>FT_CLIENT_SECRET</code> et{" "}
-          <code>GOOGLE_MAPS_API_KEY</code> dans les variables d&apos;environnement.
+          Renseigne les variables d&apos;environnement des sources que tu as cochées dans
+          « Mes critères de recherche ».
         </p>
       </div>
     );
@@ -260,11 +287,21 @@ export default function JobsView() {
           onClick={() => setShowForm((s) => !s)}
           aria-expanded={showForm}
         >
-          {showForm ? "Masquer les critères" : "Mes critères de recherche"}
+          {showForm ? "Masquer les critères" : "Mes critères"}
         </button>
+        {/* Le résumé rend le panneau inutile en usage courant : on voit ses
+            réglages sans avoir à les ouvrir (cf. spec §5.1). */}
+        <div className="jobs-summary">
+          {summarizeProfile(profile).map((part, i) => (
+            <span key={`${part}-${i}`}>
+              {i > 0 && <span className="jobs-summary__dot">•</span>}
+              {part}
+            </span>
+          ))}
+        </div>
       </div>
 
-      {showForm && <ProfileForm profile={profile} onChange={updateProfile} />}
+      {showForm && <ProfileForm profile={profile} onChange={updateProfile} usage={usage} />}
 
       <div className="jobs-toolbar">
         <button

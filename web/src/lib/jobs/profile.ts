@@ -1,4 +1,4 @@
-import type { JobSources } from "./sources";
+import { DEFAULT_SOURCES, type SourceToggles } from "./sources";
 
 /**
  * Profil de recherche d'offres — pièce centrale de la paramétrabilité.
@@ -72,7 +72,7 @@ export interface JobSearchProfile {
   /** Nombre max d'offres envoyées à l'IA par recherche. */
   aiShortlist: number;
   /** Activation par provider. */
-  sources: JobSources;
+  sources: SourceToggles;
 }
 
 /** Barème générique par défaut (aucune donnée personnelle). */
@@ -107,5 +107,5 @@ export const EMPTY_PROFILE: JobSearchProfile = {
   scoringCriteria: GENERIC_CRITERIA,
   prefilterKeywords: [],
   aiShortlist: 20,
-  sources: { francetravail: true, adzuna: false, jsearch: false },
+  sources: DEFAULT_SOURCES,
 };
