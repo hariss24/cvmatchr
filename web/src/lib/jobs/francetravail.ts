@@ -4,6 +4,7 @@
  */
 
 import type { JobSearchProfile } from "./profile";
+import { isExcludedText } from "./exclude";
 
 /** Offre brute renvoyée par l'API France Travail (champs utilisés uniquement). */
 export interface RawOffer {
@@ -103,18 +104,13 @@ async function fetchOffers(
   return data.resultats ?? [];
 }
 
-/** Minuscule + suppression des accents (comparaison robuste, alignée sur includeFilter). */
-function norm(s: string): string {
-  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-}
-
 /** True si l'offre est un stage/alternance (filtre local strict, port de `bot.py`). */
 export function isExcluded(offer: RawOffer, excludedWords: string[]): boolean {
   if (offer.alternance) return true;
-  const text = norm(`${offer.intitule ?? ""} ${offer.description ?? ""} ${offer.typeContratLibelle ?? ""}`);
-  if (excludedWords.some((w) => text.includes(norm(w)))) return true;
-  // "stage" en mot isolé (les tirets comptent comme séparateurs).
-  return text.replace(/-/g, " ").split(/\s+/).includes("stage");
+  return isExcludedText(
+    `${offer.intitule ?? ""} ${offer.description ?? ""} ${offer.typeContratLibelle ?? ""}`,
+    excludedWords,
+  );
 }
 
 /** Destination pour le trajet : coordonnées si dispo, sinon libellé du lieu, sinon "". */
