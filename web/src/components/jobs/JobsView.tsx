@@ -2,14 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { listJobs, saveJob, saveExplored, markJobSeen, jobExists, setJobStatus, type JobEntry } from "@/lib/storage/db";
+import { listJobs, saveJob, markJobSeen, jobExists, setJobStatus, type JobEntry } from "@/lib/storage/db";
 import { useDocStore } from "@/state/docStore";
 import { toast } from "@/state/uiStore";
 import type { JobOffer } from "@/lib/jobs/francetravail";
 import { EMPTY_PROFILE, type JobSearchProfile } from "@/lib/jobs/profile";
 import { parseProfile } from "@/lib/jobs/profileSchema";
 import { getJobProfile, saveJobProfile } from "@/lib/storage/db";
-import { relevance } from "@/lib/jobs/prefilter";
+import { rankOffer, buildRankContext, shouldPersist } from "@/lib/jobs/rank";
+import { geocodeHome } from "@/lib/jobs/homeCoords";
 import { upsertApplicationForDocument } from "@/lib/applications/store";
 import { getApiUsage, bumpApiUsage } from "@/lib/storage/db";
 import type { SourceId } from "@/lib/jobs/offer";
@@ -20,17 +21,20 @@ import JobCard from "./JobCard";
 import ScoringInfo from "./ScoringInfo";
 
 /**
- * Orchestrateur du scan d'offres (piloté par le navigateur, cf. spec §4) :
- * `POST /api/jobs/search` → filtre les offres déjà vues (Dexie) → note chaque offre via
- * `POST /api/jobs/score` (jusqu'au plafond) → enregistre celles au-dessus du seuil. Progression
- * en direct ; arrêt propre sur quota IA (429). Les offres retenues sont stockées localement.
+ * Orchestrateur du scan d'offres : `POST /api/jobs/search` → écarte les offres
+ * déjà connues (Dexie) → **classe toutes les autres en local** → enregistre.
  *
- * Le profil de recherche est chargé depuis Dexie, édité en direct (auto-save) et envoyé
- * dans le corps de chaque requête ; tous les seuils/critères en dérivent.
+ * Plus aucun appel réseau après la recherche : le classement est instantané et
+ * gratuit (spec §2). C'est ce qui permet de lever les deux limites qui
+ * n'existaient que pour contenir le coût de l'IA — le plafond d'offres notées et
+ * le rejet définitif des offres sous le seuil.
+ *
+ * Le profil de recherche est chargé depuis Dexie, édité en direct (auto-save) et
+ * envoyé dans le corps de la requête de recherche.
  */
 
-export type ScanState = { phase: string; found: number; scored: number; retained: number };
-const ZERO: ScanState = { phase: "", found: 0, scored: 0, retained: 0 };
+export type ScanState = { phase: string; found: number; retained: number };
+const ZERO: ScanState = { phase: "", found: 0, retained: 0 };
 
 export default function JobsView() {
   const [jobs, setJobs] = useState<JobEntry[]>([]);
@@ -107,103 +111,50 @@ export default function JobsView() {
         toast(`Source(s) indisponible(s) : ${names}. Les autres résultats sont affichés.`, "error");
       }
 
-      const minScore = p.minScore;
-
       // Écarter les offres déjà en base (dédoublonnage local).
       const fresh: JobOffer[] = [];
       for (const o of offers) {
         if (o.id && !(await jobExists(o.id))) fresh.push(o);
       }
 
-      // Pré-filtre « Équilibré » : classer par pertinence mots-clés, écarter les offres
-      // à recoupement nul, ne noter que les meilleures (plafond aiShortlist). Zéro appel IA.
-      // À défaut de compétences renseignées, on retombe sur les intitulés de poste.
-      const prefilter = p.prefilterKeywords.length > 0 ? p.prefilterKeywords : p.keywords;
-      const toScore = fresh
-        .map((o) => ({ o, r: relevance(o, prefilter) }))
-        .filter((x) => x.r > 0)
-        .sort((a, b) => b.r - a.r)
-        .map((x) => x.o)
-        .slice(0, p.aiShortlist);
+      setProgress({ phase: "Classement des offres…", found: fresh.length, retained: 0 });
 
-      // Ne pas laisser un « 0 offre » muet : le pré-tri a pu tout écarter (cf. audit B7).
-      if (fresh.length > 0 && toScore.length === 0) {
-        toast(
-          `${fresh.length} offre(s) trouvée(s), mais aucune n'a passé le pré-tri par mots-clés. Élargis tes postes ou renseigne des compétences.`,
-          "info",
-        );
+      // Une seule requête de géocodage pour tout le scan, et seulement si une
+      // adresse est renseignée. Sans domicile, le critère de distance reste neutre.
+      const home = await geocodeHome(p.homeAddress);
+      const ctx = buildRankContext(p, home);
+      const maintenant = Date.now();
+
+      let retained = 0;
+      for (const offer of fresh) {
+        const result = rankOffer(offer, p, ctx, maintenant);
+        if (!shouldPersist(result, p)) continue;
+        await saveJob({
+          id: offer.id,
+          createdAt: maintenant,
+          title: offer.title,
+          company: offer.company,
+          location: offer.location,
+          commute: "", // calculé à la demande à l'ouverture de l'offre
+          score: result.score,
+          grade: result.grade,
+          breakdown: result.breakdown,
+          url: offer.url,
+          jobText: offer.jobText,
+          publishedAt: offer.publishedAt,
+          status: "new",
+          seen: false,
+          source: offer.source,
+          logoUrl: offer.logoUrl,
+          boardDomain: offer.boardDomain,
+          boardName: offer.boardName,
+          contractLabel: offer.contractLabel,
+          salaryLabel: offer.salaryLabel,
+        });
+        retained++;
       }
 
-      let scored = 0;
-      let retained = 0;
-      setProgress({ phase: "Notation des offres…", found: toScore.length, scored, retained });
-
-      // Notation en parallèle via un pool borné (cf. audit B8) : bien plus rapide que
-      // le séquentiel. On stoppe net l'alimentation du pool sur quota IA (429) ou
-      // erreur de config ; les requêtes déjà en vol se terminent proprement.
-      const CONCURRENCY = 4;
-      let next = 0;
-      let stopped = false;
-
-      const worker = async () => {
-        while (!stopped) {
-          const i = next++;
-          if (i >= toScore.length) return;
-          const offer = toScore[i];
-          const r = await fetch("/api/jobs/score", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ offer, profile: p }),
-          });
-          if (r.status === 429) {
-            if (!stopped) toast("Limite IA atteinte. Réessaie plus tard.", "error");
-            stopped = true;
-            return;
-          }
-          const d = await r.json().catch(() => ({}));
-          if (r.status === 400 && d.error === "config") {
-            stopped = true;
-            setConfigMsg(d.message);
-            return;
-          }
-          if (!r.ok) continue; // offre ponctuellement en échec : on la saute
-
-          scored++;
-          if (typeof d.score === "number" && d.score >= minScore) {
-            await saveJob({
-              id: offer.id,
-              createdAt: Date.now(),
-              title: offer.title,
-              company: offer.company,
-              location: offer.location,
-              commute: d.commuteText ?? "",
-              score: d.score,
-              url: offer.url,
-              jobText: offer.jobText,
-              publishedAt: offer.publishedAt,
-              status: "new",
-              seen: false,
-              source: offer.source,
-              logoUrl: offer.logoUrl,
-              boardDomain: offer.boardDomain,
-              boardName: offer.boardName,
-              contractLabel: offer.contractLabel,
-              salaryLabel: offer.salaryLabel,
-            });
-            retained++;
-          } else if (typeof d.score === "number") {
-            // Offre explorée mais sous le seuil : mémorisée pour ne jamais la re-noter.
-            await saveExplored(offer.id, d.score);
-          }
-          setProgress({ phase: "Notation des offres…", found: toScore.length, scored, retained });
-        }
-      };
-
-      await Promise.all(
-        Array.from({ length: Math.min(CONCURRENCY, toScore.length) }, () => worker()),
-      );
-
-      setProgress((p) => ({ ...p, phase: "Terminé" }));
+      setProgress({ phase: "Terminé", found: fresh.length, retained });
       await reload();
     } catch {
       toast("Erreur réseau pendant la recherche.", "error");
