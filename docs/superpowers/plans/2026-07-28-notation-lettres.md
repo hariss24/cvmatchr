@@ -1144,8 +1144,14 @@ const POIDS_TITRE = 3;
 const POIDS_PROFIL = 2;
 const POIDS_RESTE = 1;
 
-/** Plafond de crédit par mot-clé : au-delà, la répétition n'ajoute plus rien. */
-const PLAFOND = 4;
+/**
+ * Plafond de crédit par mot-clé : au-delà, la répétition n'ajoute plus rien.
+ * Calé sur `POIDS_TITRE` : un mot-clé présent dans l'intitulé du poste sature à
+ * lui seul, car c'est le signal le plus fort qu'une annonce puisse donner. Un
+ * plafond plus haut exigerait titre + rappel dans le corps pour saturer, ce qui
+ * rendrait les 45 points quasi inatteignables et viderait le palier S.
+ */
+const PLAFOND = POIDS_TITRE;
 
 /** Occurrences d'un terme dans un texte (sous-chaîne, sans limite de mot). */
 function compte(texte: string, terme: string): number {
@@ -1212,7 +1218,7 @@ export function keywordPoints(
 cd web && npx vitest run src/lib/jobs/rank/text.test.ts
 ```
 
-Attendu : 14 tests verts.
+Attendu : 13 tests verts.
 
 - [ ] **Step 5 : Commit**
 
