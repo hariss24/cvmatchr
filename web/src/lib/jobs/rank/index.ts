@@ -14,7 +14,7 @@ import { buildRomeTargets } from "../rome";
 import type { LatLng } from "../geo";
 import {
   competencesPoints, metierPoints, distanceLigne, contratSalairePoints,
-  experiencePoints, malusHorsSujet, malusSignaux,
+  experiencePoints, malusHorsSujet, malusSignaux, TEXTE_CONCLUANT,
   type Ligne, type RankContext,
 } from "./criteria";
 
@@ -41,6 +41,39 @@ export function buildRankContext(profile: JobSearchProfile, home: LatLng | null)
 }
 
 /**
+ * Sort le critère « compétences » de l'enveloppe quand la source ne permet pas
+ * de le mesurer — il pèse alors `max: 0` et le score se calcule au prorata du
+ * reste, au lieu d'imputer à l'offre un zéro qu'elle n'a pas mérité.
+ *
+ * Mesuré en conditions réelles : sur 12 offres Adzuna, dont cinq « Webmaster »
+ * pour une recherche « Webmaster », le critère trouvait zéro compétence partout,
+ * la description étant tronquée à 500 caractères par la source. Aucune offre ne
+ * dépassait C : les 45 points manquaient à tout le monde.
+ *
+ * Trois garde-fous, chacun contre une façon de faire remonter du bruit :
+ *
+ * - L'offre doit avoir prouvé sa pertinence autrement (`metier > 0`). Sans quoi
+ *   un comptable profiterait du prorata sans avoir montré aucun signe d'être le
+ *   poste cherché.
+ * - Aucun code ROME : lorsqu'il existe, on sait déjà trancher, et le bénéfice du
+ *   doute annulerait le malus hors-sujet. Une offre « Conseiller en formation
+ *   webmaster » classée K2101 doit rester au fond.
+ * - Description trop courte pour conclure : sur un texte complet, ne rien
+ *   trouver reste une vraie information et doit continuer à coûter.
+ */
+function beneficeDuDoute(competences: Ligne, metier: Ligne, offer: JobOffer): Ligne {
+  const illisible =
+    competences.points === 0 &&
+    metier.points > 0 &&
+    !offer.romeCode &&
+    offer.jobText.length < TEXTE_CONCLUANT;
+
+  return illisible
+    ? { ...competences, points: 0, max: 0, reason: "" }
+    : competences;
+}
+
+/**
  * Note une offre. `maintenant` est injecté pour que les tests restent
  * déterministes ; en production il vaut l'heure courante.
  */
@@ -50,9 +83,12 @@ export function rankOffer(
   ctx: RankContext,
   maintenant: number = Date.now(),
 ): RankResult {
+  const competences = competencesPoints(offer, profile, ctx);
+  const metier = metierPoints(offer, profile, ctx);
+
   const breakdown: Ligne[] = [
-    competencesPoints(offer, profile, ctx),
-    metierPoints(offer, profile, ctx),
+    beneficeDuDoute(competences, metier, offer),
+    metier,
     distanceLigne(offer, profile, ctx),
     contratSalairePoints(offer, profile),
     experiencePoints(offer, profile),
@@ -60,7 +96,17 @@ export function rankOffer(
     malusSignaux(offer, profile, maintenant),
   ];
 
-  const brut = breakdown.reduce((t, l) => t + l.points, 0);
+  // Le score est un prorata de l'enveloppe réellement mesurable, pas une somme
+  // brute : un critère que la source ne permet pas d'évaluer porte `max: 0` et
+  // sort du calcul au lieu d'y peser un zéro qu'il n'a pas mérité. Sans cela,
+  // les 45 points de « compétences » manquaient à toutes les offres Adzuna et
+  // aucune ne dépassait C. Les malus, eux, portent aussi `max: 0` mais se
+  // retranchent en valeur absolue — une pénalité ne se dilue pas.
+  const enveloppe = breakdown.reduce((t, l) => t + l.max, 0);
+  const acquis = breakdown.reduce((t, l) => (l.max > 0 ? t + l.points : t), 0);
+  const malus = breakdown.reduce((t, l) => (l.max === 0 ? t + l.points : t), 0);
+
+  const brut = enveloppe > 0 ? Math.round((100 * acquis) / enveloppe) + malus : 0;
   const score = Math.max(0, Math.min(100, brut));
 
   return { score, grade: gradeOf(score, profile.gradeThresholds), breakdown };

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 // `gradeOf` et consorts viennent de `grade.ts` mais sont réexportés par `index.ts` :
 // on importe ici comme le fera JobsView, ce qui vérifie aussi le réexport.
-import { rankOffer, gradeOf, buildRankContext, shouldPersist, DEFAULT_THRESHOLDS, GRADE_ORDER } from "./index";
+import { rankOffer, gradeOf, buildRankContext, shouldPersist, DEFAULT_THRESHOLDS, GRADE_ORDER, MAX } from "./index";
 import { EMPTY_PROFILE, type JobSearchProfile } from "../profile";
 import type { JobOffer } from "../offer";
 
@@ -86,6 +86,41 @@ describe("rankOffer", () => {
       lat: 48.86, lng: 2.35,
     }), profilWeb, ctx(), T0);
     expect(r.grade === "C" || r.grade === "D").toBe(true);
+  });
+
+  // Cas mesuré en conditions réelles : Adzuna tronque ses descriptions à ~500
+  // caractères, si bien qu'aucune compétence n'y est jamais repérable. Compter
+  // ce vide comme un zéro plafonnait toutes ses offres en C, y compris les
+  // meilleures. Le poste ci-dessous est exactement celui recherché.
+  const adzunaWebmaster = () => offre({
+    source: "adzuna",
+    title: "Webmaster E-commerce F/H",
+    jobText: "Sous la responsabilité d'un Responsable Webmaster, tu prends en "
+      + "charge le paramétrage éditorial et l'animation digitale des plateformes…",
+    contractLabel: "CDI",
+    lat: 48.86, lng: 2.35,
+  });
+
+  it("ne punit pas une offre pertinente pour une description tronquée par la source", () => {
+    const r = rankOffer(adzunaWebmaster(), profilWeb, ctx(), T0);
+    expect(["S", "A", "B"]).toContain(r.grade);
+    // Le critère illisible sort de l'enveloppe au lieu d'y peser un zéro.
+    const comp = r.breakdown.find((l) => l.key === "competences");
+    expect(comp?.max).toBe(0);
+  });
+
+  // Garde-fou du bénéfice du doute : sans signe de pertinence, pas de cadeau.
+  // Sinon n'importe quelle offre en CDI près de chez soi remonterait.
+  it("ne l'accorde pas à une offre sans le moindre signe de pertinence", () => {
+    const r = rankOffer(offre({
+      source: "adzuna",
+      title: "Comptable général",
+      jobText: "Écritures, rapprochements bancaires et bilans annuels…",
+      contractLabel: "CDI",
+      lat: 48.86, lng: 2.35,
+    }), profilWeb, ctx(), T0);
+    expect(r.grade === "C" || r.grade === "D").toBe(true);
+    expect(r.breakdown.find((l) => l.key === "competences")?.max).toBe(MAX.competences);
   });
 
   it("classe une offre franchement étrangère tout en bas", () => {

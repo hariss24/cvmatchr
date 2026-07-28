@@ -41,17 +41,36 @@ describe("JobCard", () => {
     expect(screen.getByText("33–36 k€ / an")).toBeInTheDocument();
   });
 
-  it("dit explicitement ce qui est inconnu", () => {
+  // Annoncer « Salaire non précisé » occupe une ligne pour ne rien apprendre :
+  // la puce disparaît au lieu de meubler.
+  it("tait ce qui est inconnu au lieu de l'annoncer", () => {
     render(<JobCard job={{ ...base, contractLabel: "", salaryLabel: "" }} {...handlers} />);
-    expect(screen.getByText("Type non précisé")).toBeInTheDocument();
-    expect(screen.getByText("Salaire non précisé")).toBeInTheDocument();
+    expect(screen.queryByText(/non précisé/i)).toBeNull();
+    expect(screen.getByText("Paris")).toBeInTheDocument();
   });
 
-  it("affiche le logo d'entreprise quand il existe, sinon l'initiale", () => {
-    const { rerender } = render(<JobCard job={{ ...base, logoUrl: "https://l/acme.png" }} {...handlers} />);
-    expect(screen.getByAltText("ACME")).toBeInTheDocument();
-    rerender(<JobCard job={base} {...handlers} />);
-    expect(screen.queryByAltText("ACME")).toBeNull();
+  it("affiche le logo fourni par la source en priorité", () => {
+    render(<JobCard job={{ ...base, logoUrl: "https://l/acme.png" }} {...handlers} />);
+    expect(screen.getByTestId("job-logo-img")).toHaveAttribute("src", "https://l/acme.png");
+  });
+
+  // Sans logo de la source — le cas de la quasi-totalité des offres — on tente le
+  // favicon du site deviné depuis la raison sociale plutôt que d'afficher tout de
+  // suite une lettre grise. L'initiale reste le dernier recours, testé plus bas.
+  it("retombe sur le favicon du domaine deviné quand la source n'en fournit pas", () => {
+    render(<JobCard job={base} {...handlers} />);
+    expect(screen.getByTestId("job-logo-img")).toHaveAttribute(
+      "src",
+      "https://icons.duckduckgo.com/ip3/acme.fr.ico",
+    );
+  });
+
+  it("finit sur l'initiale quand toutes les pistes échouent", () => {
+    render(<JobCard job={base} {...handlers} />);
+    // Deux replis à épuiser : .fr puis .com.
+    fireEvent.error(screen.getByTestId("job-logo-img"));
+    fireEvent.error(screen.getByTestId("job-logo-img"));
+    expect(screen.queryByTestId("job-logo-img")).toBeNull();
     expect(screen.getByTestId("job-logo-initial")).toHaveTextContent("A");
   });
 

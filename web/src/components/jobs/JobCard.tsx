@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import type { JobEntry } from "@/lib/storage/db";
 import { gradeOf } from "@/lib/jobs/grade";
 import { BoardIcon } from "./BoardIcon";
+import { CompanyLogo } from "./CompanyLogo";
 
 /** Date de publication relative (« il y a 4 jours ») ou null si absente/invalide. */
 function relativeDate(iso?: string): string | null {
@@ -68,21 +69,16 @@ export default function JobCard({
     <article className={`job-card${open ? " is-open" : ""}`} data-testid="job-card">
       <div className="job-card__head">
         <div className="job-logo">
-          {job.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={job.logoUrl} alt={job.company || "Entreprise"} />
-          ) : (
-            <span className="job-logo__initial" data-testid="job-logo-initial">
-              {job.company.trim().charAt(0).toUpperCase() || "?"}
-            </span>
-          )}
+          <CompanyLogo logoUrl={job.logoUrl ?? ""} company={job.company} />
         </div>
 
         <div className="job-card__id">
           <h2 className="job-title">{job.title || "Sans titre"}</h2>
-          <div className="job-company">
-            <span className="job-company__name">{job.company || "Entreprise inconnue"}</span>
-          </div>
+          {job.company ? (
+            <div className="job-company">
+              <span className="job-company__name">{job.company}</span>
+            </div>
+          ) : null}
         </div>
 
         <div className="job-card__aside">
@@ -98,14 +94,18 @@ export default function JobCard({
         </div>
       </div>
 
+      {/* Un fait absent ne s'annonce pas : afficher « Salaire non précisé » occupe
+          une ligne pour ne rien apprendre. La puce disparaît, le reste se resserre. */}
       <div className="job-facts">
-        <span className="job-fact"><Icon path={PIN} />{job.location || "Lieu non précisé"}</span>
-        <span className={`job-fact${job.contractLabel ? "" : " job-fact--none"}`}>
-          <Icon path={CASE} />{job.contractLabel || "Type non précisé"}
-        </span>
-        <span className={`job-fact${job.salaryLabel ? "" : " job-fact--none"}`}>
-          <Icon path={EURO} />{job.salaryLabel || "Salaire non précisé"}
-        </span>
+        {job.location ? (
+          <span className="job-fact"><Icon path={PIN} />{job.location}</span>
+        ) : null}
+        {job.contractLabel ? (
+          <span className="job-fact"><Icon path={CASE} />{job.contractLabel}</span>
+        ) : null}
+        {job.salaryLabel ? (
+          <span className="job-fact"><Icon path={EURO} />{job.salaryLabel}</span>
+        ) : null}
         {commute ? (
           <span className="job-fact job-fact--commute"><Icon path={TRAIN} />{commute}</span>
         ) : null}

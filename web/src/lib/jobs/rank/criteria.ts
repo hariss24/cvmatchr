@@ -47,6 +47,16 @@ const PART_STRUCTUREE = 0.4;
 const CREDIT_PLEIN = 6;
 
 /**
+ * En deçà de cette longueur, une description est trop tronquée pour qu'une
+ * absence de mot-clé signifie quoi que ce soit. Adzuna ne renvoie que ~500
+ * caractères coupés en pleine phrase : mesuré en conditions réelles, le critère
+ * y trouvait zéro compétence sur 12 offres sur 12, y compris sur des postes
+ * parfaitement pertinents. France Travail renvoie plusieurs milliers de
+ * caractères, où l'absence reste une vraie information.
+ */
+export const TEXTE_CONCLUANT = 1200;
+
+/**
  * Compétences et missions — le critère le plus lourd.
  *
  * La voie textuelle sert de socle pour toutes les sources. Sur France Travail,
@@ -167,7 +177,7 @@ export function distanceLigne(
     label: "Distance",
     points: distancePoints(km, profile.location.radiusKm, MAX.distance),
     max: MAX.distance,
-    reason: km === null ? "distance inconnue" : `${Math.round(km)} km à vol d'oiseau`,
+    reason: km === null ? "" : `${Math.round(km)} km à vol d'oiseau`,
   };
 }
 
@@ -189,7 +199,8 @@ export function contratSalairePoints(offer: JobOffer, profile: JobSearchProfile)
     label: "Contrat & salaire",
     points: (contratOk ? PART_CONTRAT : 0) + (salaireOk ? PART_SALAIRE : 0),
     max: MAX.contrat,
-    reason: bouts.length > 0 ? bouts.join(" · ") : "contrat et salaire non précisés",
+    // Rien à dire vaut mieux que « non précisé » : la ligne disparaît de la carte.
+    reason: bouts.join(" · "),
   };
 }
 
@@ -214,7 +225,7 @@ export function experiencePoints(offer: JobOffer, profile: JobSearchProfile): Li
     return { key, label, points: max, max, reason: "débutant accepté" };
   }
   if (!offer.experienceExige) {
-    return { key, label, points: Math.round(max * 0.7), max, reason: "non précisée" };
+    return { key, label, points: Math.round(max * 0.7), max, reason: "" };
   }
   if (offer.experienceExige === "S") {
     return { key, label, points: Math.round(max * 0.8), max, reason: "expérience souhaitée" };
