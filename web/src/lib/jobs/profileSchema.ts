@@ -16,10 +16,25 @@ const criterionSchema = z.object({
 });
 
 const sourcesSchema = z.object({
-  francetravail: z.boolean().catch(true),
-  adzuna: z.boolean().catch(false),
-  jsearch: z.boolean().catch(false),
+  francetravail: z.boolean().catch(EMPTY_PROFILE.sources.francetravail),
+  adzuna: z.boolean().catch(EMPTY_PROFILE.sources.adzuna),
+  jsearch: z.boolean().catch(EMPTY_PROFILE.sources.jsearch),
 }).catch(EMPTY_PROFILE.sources);
+
+/**
+ * Seuils score → lettre. Ils doivent décroître strictement, sinon deux lettres
+ * deviendraient inatteignables : on retombe alors sur les défauts plutôt que
+ * de laisser un classement incohérent.
+ */
+const gradeThresholdsSchema = z
+  .object({
+    S: z.number().int().min(0).max(100),
+    A: z.number().int().min(0).max(100),
+    B: z.number().int().min(0).max(100),
+    C: z.number().int().min(0).max(100),
+  })
+  .refine((t) => t.S > t.A && t.A > t.B && t.B > t.C)
+  .catch(EMPTY_PROFILE.gradeThresholds);
 
 /**
  * Schéma tolérant : chaque champ retombe sur le défaut neutre d'EMPTY_PROFILE
@@ -49,6 +64,7 @@ export const jobSearchProfileSchema = z.object({
   prefilterKeywords: z.array(z.string()).catch(EMPTY_PROFILE.prefilterKeywords),
   aiShortlist: z.number().int().min(1).max(100).catch(EMPTY_PROFILE.aiShortlist),
   sources: sourcesSchema,
+  gradeThresholds: gradeThresholdsSchema,
 });
 
 /** Valide un input inconnu et complète les champs manquants avec les défauts neutres. */

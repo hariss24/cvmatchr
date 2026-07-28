@@ -1,4 +1,5 @@
 import { DEFAULT_SOURCES, type SourceToggles } from "./sources";
+import { DEFAULT_THRESHOLDS, type GradeThresholds } from "./grade";
 
 /**
  * Profil de recherche d'offres — pièce centrale de la paramétrabilité.
@@ -73,6 +74,8 @@ export interface JobSearchProfile {
   aiShortlist: number;
   /** Activation par provider. */
   sources: SourceToggles;
+  /** Seuils de conversion score → lettre. Réglables (décision §3.1). */
+  gradeThresholds: GradeThresholds;
 }
 
 /** Barème générique par défaut (aucune donnée personnelle). */
@@ -108,4 +111,5 @@ export const EMPTY_PROFILE: JobSearchProfile = {
   prefilterKeywords: [],
   aiShortlist: 20,
   sources: DEFAULT_SOURCES,
+  gradeThresholds: DEFAULT_THRESHOLDS,
 };
