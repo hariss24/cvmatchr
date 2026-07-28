@@ -177,9 +177,28 @@ La recherche interroge trois sources au choix de l'utilisateur : **France Travai
 (200 appels/mois, seule source à fournir un logo d'entreprise et le jobboard réel).
 Un module par source dans `web/src/lib/jobs/` expose `search(profile, creds)` et
 renvoie des `JobOffer` (`web/src/lib/jobs/offer.ts`). `/api/jobs/search` les appelle
-en parallèle, fusionne, dédoublonne par `normKey` (`dedupe.ts`), puis le pipeline
-existant prend le relais. Le plafond `aiShortlist` s'applique au pool fusionné :
-ajouter des sources n'augmente pas le coût IA.
+en parallèle, fusionne, dédoublonne par `normKey` (`dedupe.ts`).
+
+Les offres sont classées **en local, sans IA** : `lib/jobs/rank/` note chaque
+offre sur 100 (compétences & missions 45, métier 20, distance 15, contrat &
+salaire 10, expérience 10, malus hors-sujet −20 et signaux négatifs −15), puis
+traduit le score en lettre S/A/B/C/D par des seuils absolus réglables. Le
+classement ne dépend jamais du lot analysé : une lettre reste stable dans le
+temps.
+
+Deux voies par critère : les champs structurés de France Travail (`romeCode`,
+`competences` codifiées) et l'analyse du texte pour toutes les sources, pour le
+même nombre de points — sans quoi les offres France Travail seraient
+systématiquement avantagées.
+
+Le référentiel ROME 4.0 est embarqué (`lib/jobs/data/`, régénérable par
+`scripts/build-rome.mjs`). Le code ROME sert surtout de filtre anti-bruit.
+
+Google Maps n'est plus appelé pendant le scan (c'était 354 appels facturés par
+passage) mais au dépliage d'une offre, avec un cache de 30 jours.
+
+Conception détaillée et mesures :
+`docs/superpowers/specs/2026-07-28-notation-lettres-design.md`.
 
 Pièges :
 - Décocher une source signifie **ne pas l'interroger**, pas masquer ses résultats.

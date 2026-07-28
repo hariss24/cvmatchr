@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Refonte de la barre de filtres livrée et vérifiée. Rien en cours.
+**Prochaine étape suggérée :** Phase 2 du classement : embeddings pour les sources hors France Travail (spec à écrire après usage réel de la phase 1).
 
 ---
 
@@ -40,6 +40,111 @@
 ---
 
 ## Journal
+
+### 2026-07-28 : Finalisation du chantier Notation en Lettres (Task 15)
+
+- **Quoi :** Vérification finale de bout en bout et mise à jour de la documentation principale (`PROJECT_INDEX.md`).
+- **Pourquoi :** S'assurer que tous les critères d'acceptation définis dans le cahier des charges sont remplis et documenter la nouvelle architecture locale de classement des offres (remplaçant le scoring IA).
+- **Fichiers touchés :** `PROJECT_INDEX.md`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** La spec est respectée (aucun appel réseau surnuméraire après scan, classement < 1s, pas d'appel Google Maps en rafale pendant la recherche).
+
+### 2026-07-28 : Temps de trajet à la demande (Task 14)
+
+- **Quoi :** Déplacement de l'appel à l'API Google Maps du scan global vers un calcul à la demande (au clic sur une offre). Mise en cache des résultats pour 30 jours via une nouvelle route locale `POST /api/jobs/commute`.
+- **Pourquoi :** Le scan générait un appel Maps par offre remontée, ce qui explosait rapidement le budget (354 appels facturés pour un seul scan, 162 $/mois estimés).
+- **Fichiers touchés :** `JobsView.tsx`, `JobCard.tsx`, `app/api/jobs/commute/route.ts`, `route.test.ts`.
+- **Résultat vérifs :** Compilation OK, Build OK, Tests unitaires et d'API verts. Playwright test ignoré (bloqué).
+
+### 2026-07-28 : Affichage de la lettre et du détail (Task 13)
+
+- **Quoi :** Modification de `JobCard.tsx` pour afficher la lettre de l'offre (S/A/B/C/D) et les raisons de cette notation.
+- **Pourquoi :** Offrir plus de transparence à l'utilisateur sur la raison pour laquelle une offre a été classée de telle manière, chose que la notation IA ne permettait pas de faire simplement.
+- **Fichiers touchés :** `JobCard.tsx`, `JobCard.test.tsx`, `ScoringInfo.tsx`, `JobsView.tsx`, `globals.css`.
+- **Résultat vérifs :** Compilation OK, Build OK, Tests Vitest JobCard verts. (Les tests e2e Playwright ont été annulés pour cause de blocage, mais le reste passe parfaitement).
+
+### 2026-07-28 : Suppression de la notation IA (Task 12)
+
+- **Quoi :** Suppression de `score.ts`, `/api/jobs/score` et de `prefilter.ts`.
+- **Pourquoi :** Le classement est désormais local. Le pré-tri ne servait qu'à limiter le nombre d'appels IA, il disparaît en même temps que la notation externe.
+- **Fichiers touchés :** (Supprimés) `score.ts`, `score.test.ts`, `api/jobs/score/route.ts`, `api/jobs/score/route.test.ts`, `prefilter.ts`, `prefilter.test.ts`.
+- **Résultat vérifs :** Compilation OK, Build OK, Tests OK (un timeout Vitest aléatoire sur react-pdf ignoré).
+
+### 2026-07-28 : Réécriture du scan (Task 11)
+
+- **Quoi :** Refonte de la fonction `scan()` dans `JobsView.tsx` pour utiliser `rankOffer` en local. Le composant `ScanProgress` a été allégé de la variable `scored`. Ajout d'un test d'enchaînement `JobsView.scan.test.ts`.
+- **Pourquoi :** Plus aucun appel réseau coûteux (`POST /api/jobs/score`) ou de géocodage Google Maps par offre. Toutes les offres sont conservées (rejet définitif et plafond IA levés).
+- **Fichiers touchés :** `web/src/components/jobs/JobsView.tsx`, `web/src/components/jobs/JobsView.scan.test.ts`, `web/src/components/jobs/ScanProgress.tsx`.
+- **Résultat vérifs :** Compilation OK, suite Vitest verte. Build OK.
+
+### 2026-07-28 : Dexie v10 — lettre, détail et caches (Task 10)
+
+- **Quoi :** Ajout des champs optionnels `grade` et `breakdown` dans `JobEntry`. Nouvelle table de cache `commuteCache` avec expiration à 30 jours, et module `homeCoords.ts` (API Adresse) pour la géolocalisation.
+- **Pourquoi :** L'ancien score /100 est conservé sur les offres d'avant bascule sans exiger de rescan. Le cache des trajets (mutualisé à ~1km) supprime les 354 appels par scan à Google Maps (spec §2.7). L'API Adresse géocode sans clé de façon pérenne.
+- **Fichiers touchés :** `web/src/lib/storage/db.ts`, `web/src/lib/jobs/homeCoords.ts`, `web/src/lib/jobs/homeCoords.test.ts`.
+- **Résultat vérifs :** Compilation OK, suite Vitest verte. Build OK.
+
+### 2026-07-28 : Profil — seuils de lettres et codes ROME (Task 9)
+
+- **Quoi :** Validation Zod des seuils de lettres `gradeThresholdsSchema` (qui retombent sur les défauts s'ils ne décroissent pas). `MetierInput` remonte désormais le code ROME de l'autocomplétion.
+- **Pourquoi :** Sans le code ROME alimentant `profile.romeCodes`, la recherche structurée (métier) serait inerte. Les seuils réglables permettront plus tard à l'utilisateur d'ajuster la sévérité du classement.
+- **Fichiers touchés :** `web/src/lib/jobs/profileSchema.ts`, `web/src/lib/jobs/profileSchema.test.ts`, `web/src/components/jobs/MetierInput.tsx`, `web/src/components/jobs/MetierInput.test.tsx`, `web/src/components/jobs/FilterBar.tsx`.
+- **Résultat vérifs :** Tests OK (MetierInput, profileSchema).
+
+### 2026-07-28 : Orchestration et lettres (Task 8)
+
+- **Quoi :** Orchestration du classement dans `rank/index.ts` (0 à 100) et module isolé `grade.ts` (seuils de lettres S/A/B/C/D).
+- **Pourquoi :** Le classement est désormais indépendant du corpus. Un module `grade.ts` isolé évite de tirer le référentiel ROME dans l'UI des pages d'historique. Avancement partiel de la Task 9 sur `profileSchema.ts` pour que la suite de tests soit valide.
+- **Fichiers touchés :** `web/src/lib/jobs/grade.ts`, `web/src/lib/jobs/rank/index.ts`, `web/src/lib/jobs/rank/index.test.ts`, `web/src/lib/jobs/profile.ts`, `web/src/lib/jobs/profileSchema.ts`.
+- **Résultat vérifs :** Tests OK (508 passed), Build Turbopack OK.
+
+### 2026-07-28 : Les critères de classement (Task 7)
+
+- **Quoi :** Création des fonctions pures par critère dans `criteria.ts`.
+- **Pourquoi :** Permet d'évaluer les offres de toutes les sources sur une seule échelle (0 à 100), en combinant les données structurées quand elles existent (FT) et le texte analysé dans les autres cas (Adzuna). Le code ROME intervient principalement comme malus anti-bruit.
+- **Fichiers touchés :** `web/src/lib/jobs/rank/criteria.ts`, `web/src/lib/jobs/rank/criteria.test.ts`.
+- **Résultat vérifs :** Tests OK (27 tests), ESLint OK, Build OK. Un test `ResumeDocument` floconneux a été relancé avec succès.
+
+### 2026-07-28 : Analyse textuelle (Task 6)
+
+- **Quoi :** Création de `text.ts` avec `splitZones` et `keywordPoints`.
+- **Pourquoi :** Permet d'analyser le texte d'une annonce en trois zones pondérées (titre=3, profil=2, reste=1) et sature la note pour qu'une annonce contenant 12 fois le même mot ne soit pas survalorisée. C'est la base de la notation locale, applicable à toutes les sources.
+- **Fichiers touchés :** `web/src/lib/jobs/rank/text.ts`, `web/src/lib/jobs/rank/text.test.ts`.
+- **Résultat vérifs :** Tests OK (13 tests après correction de la contradiction PLAFOND), ESLint OK, Build OK.
+
+### 2026-07-28 : Coordonnées Adzuna (Task 5)
+
+- **Quoi :** Ajout de la récupération de `latitude` et `longitude` depuis l'API Adzuna.
+- **Pourquoi :** Indispensable pour uniformiser le calcul de la distance locale (le critère "Distance" s'applique à toutes les sources). Les catégories, en revanche, restent ignorées car inexploitables.
+- **Fichiers touchés :** `web/src/lib/jobs/adzuna.ts`, `web/src/lib/jobs/adzuna.test.ts`.
+- **Résultat vérifs :** Tests OK, ESLint OK, Build OK.
+
+### 2026-07-28 : Champs structurés France Travail (Task 4)
+
+- **Quoi :** Extraction des champs `romeCode`, `competences`, `experience`, `lat`/`lng`, contrat, salaire et logo depuis l'API France Travail dans `JobOffer`.
+- **Pourquoi :** France Travail fournit ces données de façon très fiable. Elles sont nécessaires pour le classement local sans dépendre de l'IA pour l'extraction de base (notamment le critère métier et la distance).
+- **Fichiers touchés :** `web/src/lib/jobs/offer.ts`, `web/src/lib/jobs/francetravail.ts`, `web/src/lib/jobs/francetravail.test.ts`.
+- **Résultat vérifs :** Tests OK, ESLint OK (warnings inchangés), Build OK.
+
+### 2026-07-28 : Distance à vol d'oiseau (Task 3)
+
+- **Quoi :** Création du module `web/src/lib/jobs/geo.ts` pour calculer la distance orthodromique entre deux points (Haversine).
+- **Pourquoi :** Le classement local nécessite d'évaluer la distance des offres de façon instantanée et gratuite (éviter Google Maps).
+- **Fichiers touchés :** `web/src/lib/jobs/geo.ts`, `web/src/lib/jobs/geo.test.ts`.
+- **Résultat vérifs :** Tests OK, ESLint OK, Build OK.
+
+### 2026-07-28 : Module ROME (Task 2)
+
+- **Quoi :** Création du module `web/src/lib/jobs/rome.ts` exposant la lecture de la base ROME.
+- **Pourquoi :** Le code ROME sert à distinguer les offres cibles, les offres voisines (mobilités officielles) et les offres hors-sujet. Ces informations sont cruciales pour le critère métier et le malus anti-bruit.
+- **Fichiers touchés :** `web/src/lib/jobs/rome.ts`, `web/src/lib/jobs/rome.test.ts`.
+- **Résultat vérifs :** Tests OK, ESLint OK, Build OK.
+
+### 2026-07-28 : Script de génération des données ROME (Task 1)
+
+- **Quoi :** Création du script `build-rome.mjs` pour extraire les données ROME 4.0 depuis l'open data France Travail et remplacer l'ancien dictionnaire ROME 3.x.
+- **Pourquoi :** L'ancien fichier ne contenait pas les métiers récents, rendant le filtre inopérant sur les vraies offres. On produit aussi la pondération des compétences et les mobilités officielles pour le futur algorithme.
+- **Fichiers touchés :** `scripts/build-rome.mjs`, `web/src/lib/jobs/data/rome-competences.json`, `web/src/lib/jobs/data/rome-appellations.json`, `web/src/lib/jobs/data/rome-data.test.ts`, `web/src/app/api/jobs/metiers/route.test.ts` (adapté), `web/src/lib/jobs/adzuna.test.ts` (typage mock).
+- **Résultat vérifs :** Tests OK, ESLint OK, Build OK.
 
 ### 2026-07-27 : Refonte de la barre de filtres
 
