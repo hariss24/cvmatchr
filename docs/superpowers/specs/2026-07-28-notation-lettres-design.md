@@ -150,6 +150,35 @@ de transport**, sans aucun cache. Le profil par défaut a 3 modes.
 Supprimer le coût Gemini sans traiter ce point reviendrait à tripler la facture
 Google Maps.
 
+**Tarif** (vérifié le 28/07/2026) : Distance Matrix est gratuit jusqu'à 5 000
+éléments/mois, puis 10 $ les 1 000. Un appel origine→destination = 1 élément.
+
+| Rythme | Éléments/mois | Coût |
+|---|---|---|
+| 14 scans/mois | 4 956 | 0 $ |
+| 1 scan/jour | 10 620 | **56 $/mois** |
+| 2 scans/jour | 21 240 | **162 $/mois** |
+
+**Coût en temps** : 200 à 500 ms par appel, soit **30 à 45 s ajoutées à chaque
+scan** même en parallèle. La lenteur actuelle n'est donc pas imputable à la seule
+IA.
+
+**Potentiel du cache**, mesuré sur 150 offres réelles : 150 offres → 107 lieux
+distincts, soit 29 % d'économie dès le premier scan. Le gain déterminant est
+cependant la **persistance entre scans** : les recherches portent sur la même
+région, les lieux se répètent. En régime établi (~20 % de lieux nouveaux), on
+tombe à ~71 éléments par scan — sous le seuil gratuit même à raison d'un scan
+quotidien.
+
+Clé de cache : `(adresse domicile, lieu de l'offre arrondi, mode)`. Durée de vie
+30 jours — un temps de trajet entre deux points fixes ne varie pas d'une semaine
+à l'autre.
+
+**Décision confirmée le 28/07/2026** : calcul à la demande à l'ouverture d'une
+offre (§3.6). Le cache rend techniquement viable l'affichage systématique, mais
+il coûterait 30 à 45 s sur les premiers scans et exposerait à la facture en cas
+de changement de région de recherche.
+
 ### 2.8 Contraintes de déploiement
 
 - Fonction Vercel Node.js : **250 Mo** décompressé (5 Go via Fluid Compute). Sans
