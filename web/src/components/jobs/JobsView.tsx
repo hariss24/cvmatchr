@@ -8,9 +8,9 @@ import { toast } from "@/state/uiStore";
 import type { JobOffer } from "@/lib/jobs/francetravail";
 import { EMPTY_PROFILE, type JobSearchProfile } from "@/lib/jobs/profile";
 import { parseProfile } from "@/lib/jobs/profileSchema";
-import { getJobProfile, saveJobProfile } from "@/lib/storage/db";
+import { getJobProfile, saveJobProfile, getCachedCommute, setCachedCommute } from "@/lib/storage/db";
 import { rankOffer, buildRankContext, shouldPersist } from "@/lib/jobs/rank";
-import { geocodeHome } from "@/lib/jobs/homeCoords";
+import { geocodeHome, commuteCacheKey } from "@/lib/jobs/homeCoords";
 import { upsertApplicationForDocument } from "@/lib/applications/store";
 import { getApiUsage, bumpApiUsage } from "@/lib/storage/db";
 import type { SourceId } from "@/lib/jobs/offer";
@@ -76,6 +76,33 @@ export default function JobsView() {
 
   async function reload() {
     setJobs(await listJobs("new"));
+  }
+
+  /**
+   * Temps de trajet d'une offre, calculé au premier affichage puis mémorisé.
+   * Le cache est la raison pour laquelle on peut se permettre l'appel : sans
+   * lui, ce serait 354 appels facturés par scan (spec §2.7).
+   */
+  async function loadCommute(job: JobEntry): Promise<string> {
+    const dest = job.location;
+    if (!dest) return "";
+    const key = commuteCacheKey(profile.homeAddress, dest, profile.commuteModes);
+    const cached = await getCachedCommute(key);
+    if (cached !== null) return cached;
+    try {
+      const res = await fetch("/api/jobs/commute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ destination: dest, profile }),
+      });
+      if (!res.ok) return "";
+      const { commuteText } = (await res.json()) as { commuteText?: string };
+      const text = commuteText ?? "";
+      if (text) await setCachedCommute(key, text);
+      return text;
+    } catch {
+      return "";
+    }
   }
 
   async function scan(p: JobSearchProfile = profile) {
@@ -269,7 +296,7 @@ export default function JobsView() {
       ) : (
         <div className="jobs-list" data-testid="jobs-list">
           {jobs.map((job) => (
-            <JobCard key={job.id} job={job} onAdapt={adapt} onApply={apply} onTrack={track} onDismiss={dismiss} onSeen={seen} />
+            <JobCard key={job.id} job={job} onAdapt={adapt} onApply={apply} onTrack={track} onDismiss={dismiss} onSeen={seen} onCommute={loadCommute} />
           ))}
         </div>
       )}

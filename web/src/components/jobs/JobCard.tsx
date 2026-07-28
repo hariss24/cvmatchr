@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { JobEntry } from "@/lib/storage/db";
 import { gradeOf } from "@/lib/jobs/grade";
 import { BoardIcon } from "./BoardIcon";
@@ -35,7 +35,7 @@ const TRAIN = '<rect x="4" y="3" width="16" height="13" rx="2"/><path d="M4 11h1
  * rendaient la grille illisible (cf. spec §5.3).
  */
 export default function JobCard({
-  job, onAdapt, onApply, onTrack, onDismiss, onSeen,
+  job, onAdapt, onApply, onTrack, onDismiss, onSeen, onCommute,
 }: {
   job: JobEntry;
   onAdapt: (job: JobEntry) => void;
@@ -43,9 +43,21 @@ export default function JobCard({
   onTrack: (job: JobEntry) => void;
   onDismiss: (job: JobEntry) => void;
   onSeen: (job: JobEntry) => void;
+  /** Calcule le trajet à la demande (premier dépliage de l'offre). */
+  onCommute?: (job: JobEntry) => Promise<string>;
 }) {
   const [open, setOpen] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [commute, setCommute] = useState(job.commute);
+
+  // Le trajet réel n'est calculé qu'au dépliage : un appel Google Maps est
+  // facturé, on ne le dépense que si l'offre intéresse vraiment.
+  useEffect(() => {
+    if (!open || commute || !onCommute) return;
+    let vivant = true;
+    void onCommute(job).then((t) => { if (vivant) setCommute(t); });
+    return () => { vivant = false; };
+  }, [open, commute, onCommute, job]);
   // Les offres notées avant la bascule n'ont pas de lettre : on la dérive de
   // leur score, avec les mêmes seuils. Aucun rescan imposé (spec §6).
   const grade = job.grade ?? gradeOf(job.score);
@@ -94,8 +106,8 @@ export default function JobCard({
         <span className={`job-fact${job.salaryLabel ? "" : " job-fact--none"}`}>
           <Icon path={EURO} />{job.salaryLabel || "Salaire non précisé"}
         </span>
-        {job.commute ? (
-          <span className="job-fact job-fact--commute"><Icon path={TRAIN} />{job.commute}</span>
+        {commute ? (
+          <span className="job-fact job-fact--commute"><Icon path={TRAIN} />{commute}</span>
         ) : null}
       </div>
 
