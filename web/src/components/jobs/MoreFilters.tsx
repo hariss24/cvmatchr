@@ -18,14 +18,14 @@ export function MoreFilters({
     <div className="flt-more">
       {/* 1. Compétences */}
       <div className="flt-field">
-        <label className="flt-field__label" htmlFor="flt-skills">Compétences (pré-tri gratuit)</label>
+        <label className="flt-field__label" htmlFor="flt-skills">Vos compétences</label>
         <TagInput
           id="flt-skills"
           values={profile.prefilterKeywords}
           onChange={(v) => set("prefilterKeywords", v)}
           placeholder="Ex. wordpress, seo, analytics"
         />
-        <span className="flt-field__note">Écarte sans IA les offres sans aucun recoupement.</span>
+        <span className="flt-field__note">Le critère le plus lourd du classement. Aucune offre n&apos;est écartée.</span>
       </div>
 
       {/* 2. Mots à exclure */}
@@ -78,36 +78,7 @@ export function MoreFilters({
         </select>
       </div>
 
-      {/* 6. Score minimum */}
-      <div className="flt-field">
-        <label className="flt-field__label" htmlFor="flt-score">Score minimum pour retenir une offre</label>
-        <input
-          id="flt-score"
-          className="flt-text"
-          type="number"
-          min={0}
-          max={100}
-          value={profile.minScore}
-          onChange={(e) => set("minScore", Number(e.target.value))}
-        />
-        <span className="flt-field__note">Sous ce score, l&apos;offre n&apos;est pas enregistrée.</span>
-      </div>
-
-      {/* 7. Offres notées */}
-      <div className="flt-field">
-        <label className="flt-field__label" htmlFor="flt-shortlist">Offres notées / scan</label>
-        <input
-          id="flt-shortlist"
-          className="flt-text"
-          type="number"
-          min={1}
-          max={100}
-          value={profile.aiShortlist}
-          onChange={(e) => set("aiShortlist", Number(e.target.value))}
-        />
-      </div>
-
-      {/* 8. Qualification */}
+      {/* 6. Qualification */}
       <div className="flt-field">
         <label className="flt-field__label" htmlFor="flt-qual">Qualification</label>
         <select
@@ -122,7 +93,7 @@ export function MoreFilters({
         </select>
       </div>
 
-      {/* 9. Codes ROME */}
+      {/* 7. Codes ROME */}
       <div className="flt-field">
         <label className="flt-field__label" htmlFor="flt-rome">Codes ROME (optionnel)</label>
         <TagInput
@@ -133,7 +104,7 @@ export function MoreFilters({
         />
       </div>
 
-      {/* 10. Adresse de départ */}
+      {/* 8. Adresse de départ */}
       <div className="flt-field flt-field--wide">
         <label className="flt-field__label" htmlFor="flt-address">Adresse de départ (calcul du trajet)</label>
         <input
@@ -143,19 +114,6 @@ export function MoreFilters({
           value={profile.homeAddress}
           onChange={(e) => set("homeAddress", e.target.value)}
           placeholder="Ex. 10 rue de Paris, 75012 Paris"
-        />
-      </div>
-
-      {/* 11. Résumé candidat */}
-      <div className="flt-field flt-field--wide">
-        <label className="flt-field__label" htmlFor="flt-summary">Résumé candidat (pour la notation IA)</label>
-        <textarea
-          id="flt-summary"
-          className="flt-text flt-text--area"
-          rows={5}
-          value={profile.candidateSummary}
-          onChange={(e) => set("candidateSummary", e.target.value)}
-          placeholder="Titre, formation, expériences, compétences clés…"
         />
       </div>
     </div>

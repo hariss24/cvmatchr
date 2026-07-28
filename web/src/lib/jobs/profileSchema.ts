@@ -8,13 +8,6 @@ const locationSchema = z.object({
   radiusKm: z.number().min(0).max(200).catch(10),
 });
 
-const criterionSchema = z.object({
-  key: z.string(),
-  label: z.string(),
-  max: z.number(),
-  description: z.string(),
-});
-
 const sourcesSchema = z.object({
   francetravail: z.boolean().catch(EMPTY_PROFILE.sources.francetravail),
   adzuna: z.boolean().catch(EMPTY_PROFILE.sources.adzuna),
@@ -57,12 +50,8 @@ export const jobSearchProfileSchema = z.object({
   excludedWords: z.array(z.string()).catch(EMPTY_PROFILE.excludedWords),
   salaireMin: z.number().positive().nullable().catch(EMPTY_PROFILE.salaireMin),
   periodeSalaire: z.enum(["M", "A", "H"]).catch(EMPTY_PROFILE.periodeSalaire),
-  minScore: z.number().int().min(0).max(100).catch(EMPTY_PROFILE.minScore),
   maxDescriptionChars: z.number().int().min(500).max(10000).catch(EMPTY_PROFILE.maxDescriptionChars),
-  candidateSummary: z.string().catch(EMPTY_PROFILE.candidateSummary),
-  scoringCriteria: z.array(criterionSchema).catch(EMPTY_PROFILE.scoringCriteria),
   prefilterKeywords: z.array(z.string()).catch(EMPTY_PROFILE.prefilterKeywords),
-  aiShortlist: z.number().int().min(1).max(100).catch(EMPTY_PROFILE.aiShortlist),
   sources: sourcesSchema,
   gradeThresholds: gradeThresholdsSchema,
 });

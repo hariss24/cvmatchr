@@ -9,7 +9,7 @@ describe("resolveProfile", () => {
   it("extrait et valide body.profile", () => {
     const p = resolveProfile({ profile: { keywords: ["Webmaster"] } });
     expect(p.keywords).toEqual(["Webmaster"]);
-    expect(p.minScore).toBe(70);
+    expect(p.maxAgeDays).toBe(30);
   });
   it("ignore un body sans profile", () => {
     expect(resolveProfile({ offer: {} })).toEqual(EMPTY_PROFILE);

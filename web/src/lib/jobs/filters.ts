@@ -88,10 +88,7 @@ export function moreFiltersCount(p: JobSearchProfile): number {
   if (p.romeCodes.length > 0) n++;
   if (p.salaireMin != null) n++;
   if (p.qualification !== EMPTY_PROFILE.qualification) n++;
-  if (p.minScore !== EMPTY_PROFILE.minScore) n++;
-  if (p.aiShortlist !== EMPTY_PROFILE.aiShortlist) n++;
   if (p.homeAddress !== "") n++;
-  if (p.candidateSummary !== "") n++;
   return n;
 }
 
@@ -108,8 +105,11 @@ export function hasActiveFilters(p: JobSearchProfile): boolean {
 /**
  * « Réinitialiser » remet les FILTRES au défaut, pas la recherche. On ne touche
  * ni au poste, ni au lieu, ni aux sources, ni aux données du candidat (adresse,
- * résumé) : les effacer par un bouton discret serait une perte de travail
- * disproportionnée par rapport à ce que le mot promet.
+ * compétences) : les effacer par un bouton discret serait une perte de travail
+ * disproportionnée par rapport à ce que le mot promet. Les compétences sont
+ * sorties de ce reset avec la bascule en lettres : elles ne trient plus en
+ * amont, elles nourrissent le classement — les vider ferait chuter toutes les
+ * lettres sans que rien ne l'annonce.
  */
 export function resetFilters(p: JobSearchProfile): JobSearchProfile {
   return {
@@ -124,9 +124,6 @@ export function resetFilters(p: JobSearchProfile): JobSearchProfile {
     periodeSalaire: EMPTY_PROFILE.periodeSalaire,
     includeKeywords: EMPTY_PROFILE.includeKeywords,
     excludedWords: EMPTY_PROFILE.excludedWords,
-    prefilterKeywords: EMPTY_PROFILE.prefilterKeywords,
     romeCodes: EMPTY_PROFILE.romeCodes,
-    minScore: EMPTY_PROFILE.minScore,
-    aiShortlist: EMPTY_PROFILE.aiShortlist,
   };
 }

@@ -23,7 +23,7 @@ describe("parseProfile", () => {
   it("garde les champs fournis et complète les manquants", () => {
     const p = parseProfile({ keywords: ["Webmaster"] });
     expect(p.keywords).toEqual(["Webmaster"]);
-    expect(p.minScore).toBe(70);
+    expect(p.maxAgeDays).toBe(30);
   });
 });
 

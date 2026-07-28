@@ -47,7 +47,7 @@ describe("moreFiltersCount", () => {
   });
 
   it("compte chaque réglage qui s'écarte du défaut", () => {
-    const p = { ...EMPTY_PROFILE, salaireMin: 32000, prefilterKeywords: ["seo"], minScore: 80 };
+    const p = { ...EMPTY_PROFILE, salaireMin: 32000, prefilterKeywords: ["seo"], homeAddress: "Paris" };
     expect(moreFiltersCount(p)).toBe(3);
   });
 
@@ -64,7 +64,7 @@ describe("resetFilters", () => {
     location: { kind: "commune" as const, code: "75056", label: "Paris", radiusKm: 20 },
     sources: { francetravail: true, adzuna: true, jsearch: true },
     homeAddress: "10 rue de Paris",
-    candidateSummary: "Webmaster, 5 ans",
+    prefilterKeywords: ["seo", "wordpress"],
     contractTypes: ["MIS"],
     maxAgeDays: 3,
     salaireMin: 32000,
@@ -83,7 +83,9 @@ describe("resetFilters", () => {
     expect(r.location.code).toBe("75056");
     expect(r.sources.adzuna).toBe(true);
     expect(r.homeAddress).toBe("10 rue de Paris");
-    expect(r.candidateSummary).toBe("Webmaster, 5 ans");
+    // Les compétences nourrissent le classement : les vider ferait chuter
+    // toutes les lettres sans prévenir.
+    expect(r.prefilterKeywords).toEqual(["seo", "wordpress"]);
   });
 });
 

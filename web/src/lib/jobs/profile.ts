@@ -21,14 +21,6 @@ export interface LocationFilter {
   radiusKm: number; // rayon km, appliqué seulement si kind === "commune"
 }
 
-/** Un critère de la grille de notation (barème + affichage). */
-export interface ScoringCriterion {
-  key: string;
-  label: string;
-  max: number;
-  description: string;
-}
-
 export interface JobSearchProfile {
   /** Adresse de départ pour le calcul du trajet. */
   homeAddress: string;
@@ -60,32 +52,19 @@ export interface JobSearchProfile {
   salaireMin: number | null;
   /** Période du salaire : "M" (mensuel), "A" (annuel), "H" (horaire). */
   periodeSalaire: "M" | "A" | "H";
-  /** Score minimum pour retenir une offre. */
-  minScore: number;
-  /** Troncature de la description envoyée à l'IA. */
+  /** Troncature de la description rapatriée par les sources. */
   maxDescriptionChars: number;
-  /** Résumé du candidat injecté dans le prompt de scoring. */
-  candidateSummary: string;
-  /** Barème de notation (structuré) : alimente le prompt IA ET l'encart de transparence. */
-  scoringCriteria: ScoringCriterion[];
-  /** Mots-clés de compétences pour le pré-tri gratuit (minuscules). */
+  /**
+   * Compétences du candidat (minuscules) : matière première du critère
+   * « compétences » du classement. Le nom vient de l'ancien pré-tri gratuit ;
+   * il est conservé parce que la clé est persistée dans les profils Dexie.
+   */
   prefilterKeywords: string[];
-  /** Nombre max d'offres envoyées à l'IA par recherche. */
-  aiShortlist: number;
   /** Activation par provider. */
   sources: SourceToggles;
   /** Seuils de conversion score → lettre. Réglables (décision §3.1). */
   gradeThresholds: GradeThresholds;
 }
-
-/** Barème générique par défaut (aucune donnée personnelle). */
-const GENERIC_CRITERIA: ScoringCriterion[] = [
-  { key: "tech", label: "Technique", max: 40, description: "Adéquation avec les compétences visées." },
-  { key: "seniority", label: "Séniorité", max: 20, description: "Adéquation au niveau d'expérience recherché." },
-  { key: "sector", label: "Secteur", max: 15, description: "Pertinence sectorielle." },
-  { key: "geo", label: "Géo (trajet)", max: 15, description: "Ajuste selon les temps de trajet fournis." },
-  { key: "red_flags", label: "Pièges", max: 10, description: "10 = aucun piège (salaire flou, missions imprécises)." },
-];
 
 /** Profil vide — défauts neutres. Aucune donnée personnelle. */
 export const EMPTY_PROFILE: JobSearchProfile = {
@@ -104,12 +83,8 @@ export const EMPTY_PROFILE: JobSearchProfile = {
   excludedWords: ["alternan", "apprenti", "stagiaire", "professionnalisation", "cfa"],
   salaireMin: null,
   periodeSalaire: "M",
-  minScore: 70,
   maxDescriptionChars: 3000,
-  candidateSummary: "",
-  scoringCriteria: GENERIC_CRITERIA,
   prefilterKeywords: [],
-  aiShortlist: 20,
   sources: DEFAULT_SOURCES,
   gradeThresholds: DEFAULT_THRESHOLDS,
 };
