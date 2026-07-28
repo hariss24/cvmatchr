@@ -206,12 +206,19 @@ Pièges :
   service échoue sur certains sous-domaines et renvoie un globe générique **en
   HTTP 404**, donc le repli doit se déclencher sur l'erreur de chargement.
 - Le compteur de quota (table Dexie `apiUsage`) est **local et indicatif**.
-- Les **logos d'entreprise** viennent de l'annuaire Brandfetch (`lib/jobs/logos.ts`),
-  résolu côté serveur pendant la recherche : aucune source ne fournit de logo
-  exploitable. Le serveur n'obtient que le **domaine** — les conditions d'usage de
-  Brandfetch interdisent de télécharger l'image côté serveur et exigent un en-tête
-  `Referer`, donc l'URL du CDN est construite puis chargée par le navigateur.
-  Sans `BRANDFETCH_CLIENT_ID`, l'étape est sautée et les cartes affichent l'initiale.
+- Les **logos d'entreprise** (`lib/jobs/logos.ts`) : aucune source ne fournit de logo
+  exploitable, il faut donc retrouver l'entreprise depuis sa seule raison sociale.
+  **Un nom d'entreprise n'identifie pas une entreprise** : « Nexton » désigne aussi
+  un vendeur pakistanais (`nexton.com.pk`), un éditeur japonais (`nexton-net.jp`) et
+  un lotissement américain (`nexton.com`) — tous réellement nommés ainsi. Annuaires
+  (Brandfetch, Wikidata) comme domaines devinés y tombent. Tout domaine candidat est
+  donc **vérifié** par trois signaux : extension en liste blanche, page d'accueil qui
+  se réclame de l'entreprise, et site visant la France (`.fr` ou `lang="fr"`). Sans
+  confirmation : initiale, jamais de logo approximatif.
+- Le **rendu** du logo revient à Brandfetch, qui le sert bien dès qu'on lui donne le
+  bon domaine. Ses conditions interdisent l'accès programmatique à l'image et exigent
+  un `Referer` : le serveur construit l'URL du CDN, le navigateur la charge. Sans
+  `BRANDFETCH_CLIENT_ID`, l'étape est sautée.
 - Les **offres déjà en base ne sont jamais reclassées** (`JobsView.tsx`, dédoublonnage
   par `jobExists`) : modifier l'algorithme n'a aucun effet visible sur les offres
   existantes, il faut vider le store `jobs` pour le constater.
