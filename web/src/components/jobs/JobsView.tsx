@@ -231,8 +231,15 @@ export default function JobsView() {
   return (
     <div className="jobs-view">
       <ScoringInfo
-        criteria={profile.scoringCriteria.map(({ label, max, description }) => ({ label, max, description }))}
-        minScore={profile.minScore}
+        criteria={[
+          { label: "Compétences & missions", max: 45, description: "Ce que la description dit vraiment des missions et des compétences attendues." },
+          { label: "Métier", max: 20, description: "Code métier officiel de l'offre et intitulé du poste." },
+          { label: "Distance", max: 15, description: "Distance à vol d'oiseau depuis ton adresse." },
+          { label: "Contrat & salaire", max: 10, description: "Type de contrat voulu et salaire annoncé." },
+          { label: "Expérience", max: 10, description: "Expérience exigée face à ton niveau." },
+          { label: "Malus", max: 0, description: "Métier hors-sujet (−20) et signaux négatifs (−15)." },
+        ]}
+        thresholds={profile.gradeThresholds}
       />
 
       {/* La barre n'est montée qu'une fois le profil lu : `LocationInput` fige

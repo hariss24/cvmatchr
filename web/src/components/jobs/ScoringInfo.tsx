@@ -1,12 +1,14 @@
+import type { GradeThresholds } from "@/lib/jobs/grade";
+
 type Criterion = { label: string; max: number; description: string };
 
 /** Encart dépliable expliquant comment les offres sont notées (grille issue du profil). */
 export default function ScoringInfo({
   criteria,
-  minScore,
+  thresholds,
 }: {
   criteria: Criterion[];
-  minScore: number;
+  thresholds: GradeThresholds;
 }) {
   return (
     <details className="scoring-info" data-testid="scoring-info">
@@ -23,8 +25,9 @@ export default function ScoringInfo({
       </summary>
       <div className="scoring-info__body">
         <p>
-          Un pré-tri par mots-clés écarte les offres hors-sujet, puis une IA (jouant le rôle
-          d&apos;un recruteur) note les autres sur 100 selon cette grille.
+          Les offres sont classées par un algorithme local, sans IA : instantané,
+          gratuit, et surtout reproductible — une même offre obtient toujours la
+          même lettre. Chaque carte indique le détail qui a produit sa note.
         </p>
         <table className="scoring-info__table">
           <thead>
@@ -45,7 +48,9 @@ export default function ScoringInfo({
           </tbody>
         </table>
         <p className="scoring-info__threshold">
-          Seuil de sélection : <strong>{minScore}/100</strong>.
+          Lettres : <strong>S</strong> à partir de {thresholds.S}, <strong>A</strong> à
+          partir de {thresholds.A}, <strong>B</strong> à partir de {thresholds.B},{" "}
+          <strong>C</strong> à partir de {thresholds.C}, <strong>D</strong> en dessous.
         </p>
       </div>
     </details>

@@ -18,6 +18,15 @@ const base: JobEntry = {
 const noop = () => {};
 const handlers = { onAdapt: noop, onApply: noop, onTrack: noop, onDismiss: noop, onSeen: noop };
 
+const entry = (p: Partial<JobEntry> = {}): JobEntry => ({
+  ...base,
+  ...p,
+});
+
+const carte = (e: JobEntry) => (
+  <JobCard job={e} {...handlers} />
+);
+
 describe("JobCard", () => {
   afterEach(() => {
     cleanup();
@@ -27,7 +36,7 @@ describe("JobCard", () => {
     render(<JobCard job={base} {...handlers} />);
     expect(screen.getByText("Webmaster F/H")).toBeInTheDocument();
     expect(screen.getByText("ACME")).toBeInTheDocument();
-    expect(screen.getByText("91")).toBeInTheDocument();
+    expect(screen.getByTestId("job-grade")).toHaveTextContent("S");
     expect(screen.getByText("CDI · Plein temps")).toBeInTheDocument();
     expect(screen.getByText("33–36 k€ / an")).toBeInTheDocument();
   });
@@ -77,5 +86,49 @@ describe("JobCard", () => {
     render(<JobCard job={{ ...base, applicationId: "app-1" }} {...handlers} />);
     fireEvent.click(screen.getByTestId("job-menu-toggle"));
     expect(screen.getByTestId("job-track")).toBeDisabled();
+  });
+});
+
+describe("JobCard — lettre", () => {
+  afterEach(() => cleanup());
+
+  it("affiche la lettre plutôt que le score sur 100", () => {
+    render(carte(entry({ grade: "A", score: 78 })));
+    expect(screen.getByTestId("job-grade")).toHaveTextContent("A");
+    expect(screen.queryByText("/100")).not.toBeInTheDocument();
+  });
+
+  // Migration : les offres notées avant la bascule n'ont pas de lettre stockée.
+  it("dérive la lettre du score pour les offres antérieures", () => {
+    render(carte(entry({ score: 90, grade: undefined })));
+    expect(screen.getByTestId("job-grade")).toHaveTextContent("S");
+  });
+
+  it("affiche le détail par critère quand il existe", () => {
+    render(carte(entry({
+      grade: "A",
+      breakdown: [
+        { key: "metier", label: "Métier", points: 20, max: 20, reason: "Développeur web (métier cible)" },
+        { key: "distance", label: "Distance", points: 15, max: 15, reason: "8 km à vol d'oiseau" },
+      ],
+    })));
+    expect(screen.getByTestId("job-why")).toHaveTextContent("Développeur web (métier cible)");
+    expect(screen.getByTestId("job-why")).toHaveTextContent("8 km");
+  });
+
+  it("n'affiche aucun détail pour une offre antérieure", () => {
+    render(carte(entry({ score: 78 })));
+    expect(screen.queryByTestId("job-why")).not.toBeInTheDocument();
+  });
+
+  it("masque les lignes de malus sans motif", () => {
+    render(carte(entry({
+      grade: "A",
+      breakdown: [
+        { key: "metier", label: "Métier", points: 20, max: 20, reason: "cible" },
+        { key: "signaux", label: "Signaux négatifs", points: 0, max: 0, reason: "" },
+      ],
+    })));
+    expect(screen.getByTestId("job-why")).not.toHaveTextContent("Signaux négatifs");
   });
 });

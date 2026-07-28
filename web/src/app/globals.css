@@ -2748,15 +2748,46 @@ button.go:disabled {
 .job-company__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .job-card__aside { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
-.job-score {
-  display: inline-flex; align-items: baseline; gap: 1px; padding: 4px 10px; border-radius: 999px;
-  background: var(--bg); box-shadow: var(--neu-raised-sm); font-weight: 800; letter-spacing: -0.3px;
+/* Classement en lettres. Remplace le score /100, qui affichait une précision
+   que la notation IA n'a jamais eue. */
+.job-grade {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 7px;
+  border-radius: 9px;
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--bg);
+  background: var(--text);
 }
-.job-score__num { font-size: 14px; }
-.job-score__max { font-size: 9.5px; color: var(--faint); font-weight: 600; }
-.job-score--high { color: var(--apply-text); box-shadow: var(--neu-raised-sm), 0 0 0 1px var(--apply); }
-.job-score--mid { color: var(--orange-text); }
-.job-score--low { color: var(--muted); }
+.job-grade--S { background: var(--orange-text); }
+.job-grade--A { background: var(--text); }
+.job-grade--B { background: var(--muted); }
+.job-grade--C,
+.job-grade--D { color: var(--text); background: var(--line); }
+
+.job-why {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.job-why__item {
+  display: inline-flex;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.job-why__label { font-weight: 600; }
+.job-why__label::after { content: " :"; }
+.job-why__item--malus .job-why__reason { color: var(--orange-text); }
 .job-date { font-size: 11px; color: var(--faint); white-space: nowrap; }
 .job-new {
   font-size: 9px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase;

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { JobEntry } from "@/lib/storage/db";
+import { gradeOf } from "@/lib/jobs/grade";
 import { BoardIcon } from "./BoardIcon";
 
 /** Date de publication relative (« il y a 4 jours ») ou null si absente/invalide. */
@@ -45,7 +46,10 @@ export default function JobCard({
 }) {
   const [open, setOpen] = useState(false);
   const [menu, setMenu] = useState(false);
-  const tier = job.score >= 85 ? "high" : job.score >= 70 ? "mid" : "low";
+  // Les offres notées avant la bascule n'ont pas de lettre : on la dérive de
+  // leur score, avec les mêmes seuils. Aucun rescan imposé (spec §6).
+  const grade = job.grade ?? gradeOf(job.score);
+  const lignes = (job.breakdown ?? []).filter((l) => l.reason !== "");
   const date = relativeDate(job.publishedAt);
 
   return (
@@ -70,9 +74,9 @@ export default function JobCard({
         </div>
 
         <div className="job-card__aside">
-          <span className={`job-score job-score--${tier}`} title="Score de pertinence">
-            <span className="job-score__num">{job.score}</span>
-            <span className="job-score__max">/100</span>
+          <span className={`job-grade job-grade--${grade}`} title="Classement de l'offre"
+            data-testid="job-grade">
+            {grade}
           </span>
           {job.seen === false ? (
             <span className="job-new" data-testid="job-new">Nouveau</span>
@@ -94,6 +98,17 @@ export default function JobCard({
           <span className="job-fact job-fact--commute"><Icon path={TRAIN} />{job.commute}</span>
         ) : null}
       </div>
+
+      {lignes.length > 0 ? (
+        <ul className="job-why" data-testid="job-why">
+          {lignes.map((l) => (
+            <li key={l.key} className={l.points < 0 ? "job-why__item job-why__item--malus" : "job-why__item"}>
+              <span className="job-why__label">{l.label}</span>
+              <span className="job-why__reason">{l.reason}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       {job.jobText ? (
         <>
