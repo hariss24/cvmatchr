@@ -60,7 +60,8 @@ codes `competences[].code` vus sur de vraies offres existent bien parmi les
 **32 021 `code_ogr`** du référentiel. Le rapprochement est donc du code contre
 code, sans NLP.
 
-Structure d'une fiche (encodage **latin-1**, pas UTF-8) :
+Structure d'une fiche (encodage **ISO-8859-15**, pas UTF-8 ; latin-1 passe sans
+erreur mais corrompt `œ`) :
 
 ```
 rome: { code_rome, intitule, code_ogr }

@@ -49,8 +49,12 @@ Ces règles s'appliquent à **toutes** les tâches, sans être répétées à ch
   On ne désactive jamais une règle pour passer.
 - **Tu ne modifies pas un test existant pour le faire passer**, sauf quand ce plan
   l'ordonne explicitement (tâches 11 et 12 le précisent).
-- **Encodage du référentiel ROME : latin-1, pas UTF-8.** Lire ce fichier en UTF-8
-  lève une `UnicodeDecodeError`. Constat de la spec §2.2.
+- **Encodage du référentiel ROME : ISO-8859-15 (latin-9), pas UTF-8.** Lire ce
+  fichier en UTF-8 lève une `UnicodeDecodeError`. Le lire en latin-1 « marche »
+  mais corrompt silencieusement 52 appellations : latin-1 et latin-9 ne diffèrent
+  que sur 8 caractères, dont `œ` (`œuvre` → `½uvre`, `Œnologue` → `¼nologue`).
+  Node ne connaît pas latin-9 comme encodage de `Buffer` — il faut passer par
+  `new TextDecoder("iso-8859-15")`. Constat de la spec §2.2.
 
 ---
 
@@ -113,7 +117,8 @@ Créer `scripts/build-rome.mjs` :
 // Usage : node scripts/build-rome.mjs
 // Produit : web/src/lib/jobs/data/rome-competences.json et rome-appellations.json
 //
-// ⚠️ Les JSON du ZIP sont encodés en latin-1, pas en UTF-8.
+// ⚠️ Les JSON du ZIP sont encodés en ISO-8859-15 (latin-9), pas en UTF-8.
+//    Attention : latin-1 passe sans erreur mais casse « œ » (52 appellations).
 // ⚠️ Le bloc `savoirs` s'ouvre sur `categories`, les deux autres sur `enjeux`.
 
 import { writeFileSync, mkdirSync } from "node:fs";
@@ -147,8 +152,8 @@ const find = (frag) => {
   return join(work, f);
 };
 
-const readLatin1 = (p) => JSON.parse(readFileSync(p, "latin1"));
-const fiches = readLatin1(find("fiche_emploi_metier"));
+const readRome = (p) => JSON.parse(new TextDecoder("iso-8859-15").decode(readFileSync(p)));
+const fiches = readRome(find("fiche_emploi_metier"));
 
 const BLOCS = [
   ["savoir_faire", "enjeux"],
