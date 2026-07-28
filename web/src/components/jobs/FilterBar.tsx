@@ -63,6 +63,14 @@ export function FilterBar({
           <MetierInput
             values={profile.keywords}
             onChange={(k) => set("keywords", k)}
+            /* Le code ROME de l'appellation officielle alimente `romeCodes`, qui
+               porte tout le volet structuré du classement. Sans lui, ni bonus
+               métier ni malus anti-bruit. */
+            onRomeAdd={(rome) =>
+              set("romeCodes", profile.romeCodes.includes(rome)
+                ? profile.romeCodes
+                : [...profile.romeCodes, rome])
+            }
           />
         </div>
         <div className="flt-box flt-box--place">

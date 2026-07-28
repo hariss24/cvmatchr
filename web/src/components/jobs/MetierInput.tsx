@@ -28,9 +28,17 @@ function shortTerm(label: string): string {
 export function MetierInput({
   values,
   onChange,
+  onRomeAdd,
 }: {
   values: string[];
   onChange: (v: string[]) => void;
+  /**
+   * Remonte le code ROME de l'appellation officielle choisie. Sans lui, tout le
+   * volet structuré du classement est inerte : `buildRomeTargets` n'a aucune
+   * cible, donc ni bonus métier ni malus anti-bruit. Optionnel — la saisie
+   * libre (Entrée) reste possible et n'a pas de code.
+   */
+  onRomeAdd?: (rome: string) => void;
 }) {
   const [draft, setDraft] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -127,7 +135,7 @@ export function MetierInput({
           <ul className="loc-suggestions" role="listbox">
             {suggestions.map((s) => (
               <li key={`${s.rome}-${s.label}`}>
-                <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => add(shortTerm(s.label))}>
+                <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => { onRomeAdd?.(s.rome); add(shortTerm(s.label)); }}>
                   <span>{s.label}</span>
                   <span className="loc-kind">{s.rome}</span>
                 </button>

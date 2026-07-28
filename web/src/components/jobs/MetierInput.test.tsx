@@ -44,3 +44,35 @@ describe("MetierInput — repli des postes", () => {
     expect(screen.queryByText("Webmaster")).not.toBeInTheDocument();
   });
 });
+
+describe("MetierInput — code ROME", () => {
+  afterEach(() => cleanup());
+
+  it("remonte le code ROME de l'appellation choisie", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      json: async () => ({ results: [{ label: "Développeur / Développeuse web", rome: "M1855" }] }),
+    }) as unknown as typeof fetch;
+
+    const onChange = vi.fn();
+    const onRomeAdd = vi.fn();
+    render(<MetierInput values={[]} onChange={onChange} onRomeAdd={onRomeAdd} />);
+
+    fireEvent.change(screen.getByRole("textbox", { name: "Poste recherché" }), {
+      target: { value: "developpeur" },
+    });
+    const suggestion = await screen.findByText("Développeur / Développeuse web");
+    fireEvent.click(suggestion);
+
+    expect(onRomeAdd).toHaveBeenCalledWith("M1855");
+    expect(onChange).toHaveBeenCalled();
+  });
+
+  it("n'exige pas le rappel : la saisie libre reste possible sans code", () => {
+    const onChange = vi.fn();
+    render(<MetierInput values={[]} onChange={onChange} />);
+    const champ = screen.getByRole("textbox", { name: "Poste recherché" });
+    fireEvent.change(champ, { target: { value: "webmarketing" } });
+    fireEvent.keyDown(champ, { key: "Enter" });
+    expect(onChange).toHaveBeenCalledWith(["webmarketing"]);
+  });
+});

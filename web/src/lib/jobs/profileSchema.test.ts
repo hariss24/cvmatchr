@@ -43,3 +43,25 @@ describe("sources", () => {
     expect(parseProfile({ sources: "oui" }).sources.francetravail).toBe(true);
   });
 });
+
+describe("gradeThresholds", () => {
+  it("complète un profil ancien avec les seuils par défaut", () => {
+    const p = parseProfile({ keywords: ["webmaster"] });
+    expect(p.gradeThresholds).toEqual({ S: 85, A: 70, B: 55, C: 40 });
+  });
+
+  it("conserve des seuils personnalisés valides", () => {
+    const p = parseProfile({ gradeThresholds: { S: 90, A: 75, B: 60, C: 45 } });
+    expect(p.gradeThresholds).toEqual({ S: 90, A: 75, B: 60, C: 45 });
+  });
+
+  it("retombe sur les défauts si les seuils sont invalides", () => {
+    const p = parseProfile({ gradeThresholds: { S: "oui", A: 70, B: 55, C: 40 } });
+    expect(p.gradeThresholds).toEqual({ S: 85, A: 70, B: 55, C: 40 });
+  });
+
+  it("retombe sur les défauts si les seuils ne décroissent pas", () => {
+    const p = parseProfile({ gradeThresholds: { S: 40, A: 55, B: 70, C: 85 } });
+    expect(p.gradeThresholds).toEqual({ S: 85, A: 70, B: 55, C: 40 });
+  });
+});
