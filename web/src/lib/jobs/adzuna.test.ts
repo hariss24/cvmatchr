@@ -80,3 +80,45 @@ describe("searchAdzuna", () => {
     expect(m).not.toHaveBeenCalled();
   });
 });
+
+describe("adzuna — coordonnées", () => {
+  it("reporte latitude et longitude quand elles sont présentes", async () => {
+    const brut = {
+      id: "12",
+      title: "Webmaster",
+      description: "Mission.",
+      redirect_url: "https://ex.fr/12",
+      company: { display_name: "ACME" },
+      location: { display_name: "Paris" },
+      latitude: 48.86,
+      longitude: 2.35,
+    };
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ results: [brut] }),
+    }) as unknown as typeof fetch;
+
+    const { offers } = await searchAdzuna(
+      parseProfile({ ...hariss, keywords: ["webmaster"] }),
+      { appId: "a", appKey: "b" },
+    );
+    expect(offers[0].lat).toBe(48.86);
+    expect(offers[0].lng).toBe(2.35);
+  });
+
+  it("laisse les coordonnées absentes sur les 12 % d'offres sans GPS", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        results: [{ id: "13", title: "X", redirect_url: "https://ex.fr/13" }],
+      }),
+    }) as unknown as typeof fetch;
+
+    const { offers } = await searchAdzuna(
+      parseProfile({ ...hariss, keywords: ["x"] }),
+      { appId: "a", appKey: "b" },
+    );
+    expect(offers[0].lat).toBeUndefined();
+    expect(offers[0].lng).toBeUndefined();
+  });
+});

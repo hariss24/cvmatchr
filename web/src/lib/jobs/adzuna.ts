@@ -26,6 +26,8 @@ interface RawAdzuna {
   salary_max?: number | null;
   contract_type?: string;  // "permanent" | "contract"
   contract_time?: string;  // "full_time" | "part_time"
+  latitude?: number;
+  longitude?: number;
 }
 
 /** `where` attend un nom de lieu en clair : on retire le code postal entre parenthèses. */
@@ -111,6 +113,8 @@ export async function searchAdzuna(
         boardName: "Adzuna",
         contractLabel: contractLabel(o),
         salaryLabel: yearlySalaryLabel(o.salary_min, o.salary_max),
+        ...(typeof o.latitude === "number" ? { lat: o.latitude } : {}),
+        ...(typeof o.longitude === "number" ? { lng: o.longitude } : {}),
       });
     }
   }
