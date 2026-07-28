@@ -1,15 +1,7 @@
-import type { GradeThresholds } from "@/lib/jobs/grade";
-
 type Criterion = { label: string; max: number; description: string };
 
-/** Encart dépliable expliquant comment les offres sont notées (grille issue du profil). */
-export default function ScoringInfo({
-  criteria,
-  thresholds,
-}: {
-  criteria: Criterion[];
-  thresholds: GradeThresholds;
-}) {
+/** Encart dépliable expliquant comment les offres sont classées (grille issue du profil). */
+export default function ScoringInfo({ criteria }: { criteria: Criterion[] }) {
   return (
     <details className="scoring-info" data-testid="scoring-info">
       <summary className="scoring-info__summary">
@@ -21,13 +13,15 @@ export default function ScoringInfo({
           </svg>
           Offres issues des sources cochées dans «&nbsp;Où chercher&nbsp;»
         </span>
-        <span className="scoring-info__toggle">Comment sont-elles notées&nbsp;?</span>
+        <span className="scoring-info__toggle">Comment sont-elles classées&nbsp;?</span>
       </summary>
       <div className="scoring-info__body">
         <p>
-          Les offres sont classées par un algorithme local, sans IA : instantané,
-          gratuit, et surtout reproductible — une même offre obtient toujours la
-          même lettre. Chaque carte indique le détail qui a produit sa note.
+          Les offres sont triées de la plus pertinente à la moins pertinente par un
+          algorithme local, sans IA : instantané, gratuit, et surtout reproductible —
+          une même offre se place toujours au même rang. Aucune note n&apos;est
+          affichée : c&apos;est l&apos;ordre de la liste qui la dit. Chaque carte
+          indique le détail qui a déterminé son rang.
         </p>
         <table className="scoring-info__table">
           <thead>
@@ -48,9 +42,9 @@ export default function ScoringInfo({
           </tbody>
         </table>
         <p className="scoring-info__threshold">
-          Lettres : <strong>S</strong> à partir de {thresholds.S}, <strong>A</strong> à
-          partir de {thresholds.A}, <strong>B</strong> à partir de {thresholds.B},{" "}
-          <strong>C</strong> à partir de {thresholds.C}, <strong>D</strong> en dessous.
+          Un critère que la source ne permet pas de mesurer sort du calcul au lieu de
+          compter zéro : une annonce n&apos;est pas pénalisée pour une description que
+          le site d&apos;origine a tronquée.
         </p>
       </div>
     </details>

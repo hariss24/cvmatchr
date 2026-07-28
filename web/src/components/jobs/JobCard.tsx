@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import type { JobEntry } from "@/lib/storage/db";
-import { gradeOf } from "@/lib/jobs/grade";
 import { BoardIcon } from "./BoardIcon";
 import { CompanyLogo } from "./CompanyLogo";
 
@@ -59,9 +58,10 @@ export default function JobCard({
     void onCommute(job).then((t) => { if (vivant) setCommute(t); });
     return () => { vivant = false; };
   }, [open, commute, onCommute, job]);
-  // Les offres notées avant la bascule n'ont pas de lettre : on la dérive de
-  // leur score, avec les mêmes seuils. Aucun rescan imposé (spec §6).
-  const grade = job.grade ?? gradeOf(job.score);
+  // La lettre n'est plus affichée : elle sert au tri, pas à l'étiquetage. Une
+  // note visible invite à discuter la note ; l'ordre de la liste dit la même
+  // chose sans donner de fausse précision. Elle reste calculée et stockée — le
+  // tri, et un éventuel filtre, s'appuient dessus.
   const lignes = (job.breakdown ?? []).filter((l) => l.reason !== "");
   const date = relativeDate(job.publishedAt);
 
@@ -82,10 +82,6 @@ export default function JobCard({
         </div>
 
         <div className="job-card__aside">
-          <span className={`job-grade job-grade--${grade}`} title="Classement de l'offre"
-            data-testid="job-grade">
-            {grade}
-          </span>
           {job.seen === false ? (
             <span className="job-new" data-testid="job-new">Nouveau</span>
           ) : date ? (

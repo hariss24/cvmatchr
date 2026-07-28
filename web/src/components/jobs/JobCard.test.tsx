@@ -32,11 +32,10 @@ describe("JobCard", () => {
     cleanup();
   });
 
-  it("affiche titre, entreprise, score et faits", () => {
+  it("affiche titre, entreprise et faits", () => {
     render(<JobCard job={base} {...handlers} />);
     expect(screen.getByText("Webmaster F/H")).toBeInTheDocument();
     expect(screen.getByText("ACME")).toBeInTheDocument();
-    expect(screen.getByTestId("job-grade")).toHaveTextContent("S");
     expect(screen.getByText("CDI · Plein temps")).toBeInTheDocument();
     expect(screen.getByText("33–36 k€ / an")).toBeInTheDocument();
   });
@@ -49,29 +48,25 @@ describe("JobCard", () => {
     expect(screen.getByText("Paris")).toBeInTheDocument();
   });
 
-  it("affiche le logo fourni par la source en priorité", () => {
+  it("affiche le logo résolu à la recherche", () => {
     render(<JobCard job={{ ...base, logoUrl: "https://l/acme.png" }} {...handlers} />);
     expect(screen.getByTestId("job-logo-img")).toHaveAttribute("src", "https://l/acme.png");
   });
 
-  // Sans logo de la source — le cas de la quasi-totalité des offres — on tente le
-  // favicon du site deviné depuis la raison sociale plutôt que d'afficher tout de
-  // suite une lettre grise. L'initiale reste le dernier recours, testé plus bas.
-  it("retombe sur le favicon du domaine deviné quand la source n'en fournit pas", () => {
-    render(<JobCard job={base} {...handlers} />);
-    expect(screen.getByTestId("job-logo-img")).toHaveAttribute(
-      "src",
-      "https://icons.duckduckgo.com/ip3/acme.fr.ico",
-    );
+  it("retombe sur l'initiale sans logo, et si l'image ne charge pas", () => {
+    const { rerender } = render(<JobCard job={base} {...handlers} />);
+    expect(screen.getByTestId("job-logo-initial")).toHaveTextContent("A");
+
+    rerender(<JobCard job={{ ...base, logoUrl: "https://l/casse.png" }} {...handlers} />);
+    fireEvent.error(screen.getByTestId("job-logo-img"));
+    expect(screen.getByTestId("job-logo-initial")).toHaveTextContent("A");
   });
 
-  it("finit sur l'initiale quand toutes les pistes échouent", () => {
+  // La lettre sert au tri, pas à l'étiquetage : elle reste en base mais ne
+  // s'affiche plus. C'est l'ordre de la liste qui porte l'information.
+  it("n'affiche aucune lettre de classement", () => {
     render(<JobCard job={base} {...handlers} />);
-    // Deux replis à épuiser : .fr puis .com.
-    fireEvent.error(screen.getByTestId("job-logo-img"));
-    fireEvent.error(screen.getByTestId("job-logo-img"));
-    expect(screen.queryByTestId("job-logo-img")).toBeNull();
-    expect(screen.getByTestId("job-logo-initial")).toHaveTextContent("A");
+    expect(screen.queryByTestId("job-grade")).toBeNull();
   });
 
   it("n'expose que deux actions, le reste dans le menu", () => {
@@ -108,19 +103,16 @@ describe("JobCard", () => {
   });
 });
 
-describe("JobCard — lettre", () => {
+describe("JobCard — classement", () => {
   afterEach(() => cleanup());
 
-  it("affiche la lettre plutôt que le score sur 100", () => {
+  // Ni lettre ni score : la carte n'affiche aucune note, dans un sens comme dans
+  // l'autre. Le rang dans la liste est la seule expression du classement.
+  it("n'affiche ni lettre ni score chiffré", () => {
     render(carte(entry({ grade: "A", score: 78 })));
-    expect(screen.getByTestId("job-grade")).toHaveTextContent("A");
+    expect(screen.queryByTestId("job-grade")).toBeNull();
     expect(screen.queryByText("/100")).not.toBeInTheDocument();
-  });
-
-  // Migration : les offres notées avant la bascule n'ont pas de lettre stockée.
-  it("dérive la lettre du score pour les offres antérieures", () => {
-    render(carte(entry({ score: 90, grade: undefined })));
-    expect(screen.getByTestId("job-grade")).toHaveTextContent("S");
+    expect(screen.queryByText("78")).not.toBeInTheDocument();
   });
 
   it("affiche le détail par critère quand il existe", () => {

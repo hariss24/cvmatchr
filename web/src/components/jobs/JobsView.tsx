@@ -266,7 +266,6 @@ export default function JobsView() {
           { label: "Expérience", max: 10, description: "Expérience exigée face à ton niveau." },
           { label: "Malus", max: 0, description: "Métier hors-sujet (−20) et signaux négatifs (−15)." },
         ]}
-        thresholds={profile.gradeThresholds}
       />
 
       {/* La barre n'est montée qu'une fois le profil lu : `LocationInput` fige
