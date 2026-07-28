@@ -7,6 +7,8 @@ import type { UserProfile } from "@/lib/profile/profile";
 import type { JobSearchProfile } from "@/lib/jobs/profile";
 import type { Application } from "@/lib/applications/types";
 import type { SourceId } from "@/lib/jobs/offer";
+import { GRADE_ORDER, type Grade } from "@/lib/jobs/grade";
+import type { Ligne } from "@/lib/jobs/rank/criteria";
 
 // ---------------------------------------------------------------------------
 // TYPES
@@ -80,6 +82,10 @@ export interface JobEntry {
   contractLabel?: string;
   /** "33–36 k€ / an" ; absent/"" → « Salaire non précisé ». */
   salaryLabel?: string;
+  /** Lettre de classement. Absent = offre notée avant la bascule (score /100 seul). */
+  grade?: Grade;
+  /** Détail par critère, pour afficher le POURQUOI que l'IA ne fournissait pas. */
+  breakdown?: Ligne[];
 }
 
 // ---------------------------------------------------------------------------
@@ -96,6 +102,7 @@ export class AppDatabase extends Dexie {
   jobProfile!: Table<{ id: string; profile: JobSearchProfile }, string>; // Primary key: id (singleton "me")
   applications!: Table<Application, string>; // Primary key: id
   apiUsage!: Table<{ key: string; count: number }, string>; // Primary key: key
+  commuteCache!: Table<{ key: string; text: string; at: number }, string>;
 
   constructor() {
     // Nouveau nom pour éviter les collisions si on lance sur le même port que Flask
@@ -162,6 +169,15 @@ export class AppDatabase extends Dexie {
     // donc aucun upgrade n'est nécessaire. Nouvelle table de comptage d'appels.
     this.version(9).stores({
       apiUsage: "key",
+    });
+
+    // v10 : classement par lettres. `grade` et `breakdown` sont optionnels — les
+    // offres existantes gardent leur score /100 et leur lettre est dérivée à la
+    // lecture (aucun rescan imposé, spec §6). Nouvelle table : cache des temps
+    // de trajet, qui ramène Google Maps de 354 appels par scan à quelques-uns
+    // par mois.
+    this.version(10).stores({
+      commuteCache: "key",
     });
   }
 }
@@ -362,6 +378,43 @@ export async function markJobSeen(id: string) {
   } catch (e) {
     console.warn("markJobSeen error:", e);
   }
+}
+
+/** Durée de validité du cache : un trajet entre deux points fixes ne bouge pas. */
+const COMMUTE_TTL_MS = 30 * 24 * 3600 * 1000;
+
+/** Temps de trajet mémorisé, ou null si absent/périmé. */
+export async function getCachedCommute(key: string): Promise<string | null> {
+  try {
+    const row = await db.commuteCache.get(key);
+    if (!row) return null;
+    if (Date.now() - row.at > COMMUTE_TTL_MS) return null;
+    return row.text;
+  } catch (e) {
+    console.warn("getCachedCommute error:", e);
+    return null;
+  }
+}
+
+export async function setCachedCommute(key: string, text: string): Promise<void> {
+  try {
+    await db.commuteCache.put({ key, text, at: Date.now() });
+  } catch (e) {
+    console.warn("setCachedCommute error:", e);
+  }
+}
+
+/**
+ * Offres retenues d'au moins la lettre `min`, meilleures d'abord.
+ *
+ * Toutes les offres sont désormais conservées (le classement est gratuit) :
+ * c'est le filtre d'affichage, et non plus un rejet définitif, qui décide de ce
+ * qu'on montre.
+ */
+export async function listJobsByGrade(min: Grade): Promise<JobEntry[]> {
+  const plafond = GRADE_ORDER.indexOf(min);
+  const all = await listJobs("new");
+  return all.filter((j) => GRADE_ORDER.indexOf(j.grade ?? "D") <= plafond);
 }
 
 // ---------------------------------------------------------------------------
