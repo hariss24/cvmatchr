@@ -15,7 +15,7 @@ describe("GET /api/jobs/metiers", () => {
     const res = await GET(req("referenceur"));
     const { results } = await res.json();
     expect(results.length).toBeGreaterThan(0);
-    expect(results).toContainEqual({ label: "Référenceur / Référenceuse web", rome: "E1402" });
+    expect(results).toContainEqual({ label: "Référenceur / Référenceuse SEO", rome: "E1405" });
     // Code ROME au bon format.
     for (const r of results) expect(r.rome).toMatch(/^[A-Z]\d{4}$/);
   });
@@ -27,9 +27,9 @@ describe("GET /api/jobs/metiers", () => {
   });
 
   it("gère les requêtes multi-mots malgré la forme « Masculin / Féminin »", async () => {
-    // « Chargé / Chargée de communication » : les mots ne sont pas contigus.
+    // « Chargé / Chargée de communication digitale » : les mots ne sont pas contigus.
     const res = await GET(req("chargé de communication"));
     const labels = (await res.json()).results.map((r: { label: string }) => r.label);
-    expect(labels).toContain("Chargé / Chargée de communication");
+    expect(labels).toContain("Chargé / Chargée de communication digitale");
   });
 });

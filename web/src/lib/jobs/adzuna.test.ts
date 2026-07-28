@@ -8,7 +8,7 @@ afterEach(() => vi.unstubAllGlobals());
 const creds = { appId: "id", appKey: "key" };
 
 function stub(results: unknown[]) {
-  const m = vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ results }) }));
+  const m = vi.fn(async (_url: string, _init?: RequestInit) => ({ ok: true, status: 200, json: async () => ({ results }) }));
   vi.stubGlobal("fetch", m);
   return m;
 }
