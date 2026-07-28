@@ -206,6 +206,15 @@ Pièges :
   service échoue sur certains sous-domaines et renvoie un globe générique **en
   HTTP 404**, donc le repli doit se déclencher sur l'erreur de chargement.
 - Le compteur de quota (table Dexie `apiUsage`) est **local et indicatif**.
+- Les **logos d'entreprise** viennent de l'annuaire Brandfetch (`lib/jobs/logos.ts`),
+  résolu côté serveur pendant la recherche : aucune source ne fournit de logo
+  exploitable. Le serveur n'obtient que le **domaine** — les conditions d'usage de
+  Brandfetch interdisent de télécharger l'image côté serveur et exigent un en-tête
+  `Referer`, donc l'URL du CDN est construite puis chargée par le navigateur.
+  Sans `BRANDFETCH_CLIENT_ID`, l'étape est sautée et les cartes affichent l'initiale.
+- Les **offres déjà en base ne sont jamais reclassées** (`JobsView.tsx`, dédoublonnage
+  par `jobExists`) : modifier l'algorithme n'a aucun effet visible sur les offres
+  existantes, il faut vider le store `jobs` pour le constater.
 
 Sans `FT_CLIENT_ID`/`FT_CLIENT_SECRET`/`GOOGLE_MAPS_API_KEY`, l'onglet affiche un
 message de configuration au lieu de chercher (voir `web/README.md`).

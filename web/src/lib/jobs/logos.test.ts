@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { normalizeCompany, pickBrand, withCompanyLogos } from "./logos";
+import { normalizeCompany, pickBrand, logoUrlFor, withCompanyLogos } from "./logos";
 
 const offre = (company: string, logoUrl = "") => ({ company, logoUrl });
 
@@ -11,42 +11,40 @@ describe("normalizeCompany", () => {
 });
 
 describe("pickBrand", () => {
-  // Brandfetch classe par popularité : sans contrôle du nom, chercher « Nexton »
-  // pourrait remonter une marque plus connue et afficher son logo à sa place.
+  // Brandfetch classe par popularité : sans contrôle du nom, chercher « Skolae »
+  // remonterait « Campus Skolae Tours » et afficherait son logo à sa place.
   it("refuse une marque dont le nom ne correspond pas", () => {
-    const res = [{ name: "Nexton Media", domain: "nextonmedia.com", icon: "https://i/x.png" }];
-    expect(pickBrand(res, "Nexton")).toBe("");
+    expect(pickBrand([{ name: "Campus Skolae Tours", domain: "cefim.eu" }], "Skolae")).toBe("");
   });
 
   it("retient la correspondance exacte", () => {
     const res = [
-      { name: "Autre", domain: "autre.com", icon: "https://i/autre.png" },
-      { name: "Nexton", domain: "nexton.fr", icon: "https://i/nexton.png" },
+      { name: "Autre", domain: "autre.com" },
+      { name: "Nexton", domain: "nexton.fr" },
     ];
-    expect(pickBrand(res, "NEXTON")).toBe("https://i/nexton.png");
+    expect(pickBrand(res, "NEXTON")).toBe("nexton.fr");
   });
 
   it("préfère une fiche revendiquée par son propriétaire", () => {
     const res = [
-      { name: "Acme", domain: "acme.io", icon: "https://i/a.png" },
-      { name: "Acme", domain: "acme.com", icon: "https://i/b.png", claimed: true },
+      { name: "Acme", domain: "acme.io" },
+      { name: "Acme", domain: "acme.com", claimed: true },
     ];
-    expect(pickBrand(res, "Acme")).toBe("https://i/b.png");
+    expect(pickBrand(res, "Acme")).toBe("acme.com");
   });
 
-  it("ignore une marque sans icône", () => {
-    expect(pickBrand([{ name: "Acme", domain: "acme.com" }], "Acme")).toBe("");
+  it("ignore une marque sans domaine", () => {
+    expect(pickBrand([{ name: "Acme" }], "Acme")).toBe("");
   });
+});
 
-  // Faute de vrai logo, Brandfetch renvoie une initiale dessinée dans un carré.
-  // L'afficher ferait passer une lettre pour un logo : on préfère notre initiale.
-  it("rejette un lettermark généré à défaut de vrai logo", () => {
-    const res = [{
-      name: "Acme",
-      domain: "acme.com",
-      icon: "https://cdn.brandfetch.io/idX/w/128/h/128/fallback/lettermark/icon.webp?c=cid",
-    }];
-    expect(pickBrand(res, "Acme")).toBe("");
+describe("logoUrlFor", () => {
+  // L'image doit être chargée par le navigateur : Brandfetch redirige toute
+  // requête sans `Referer` vers ses conditions d'usage.
+  it("construit une URL de CDN portant le client ID", () => {
+    expect(logoUrlFor("acme.com", "cid")).toBe(
+      "https://cdn.brandfetch.io/acme.com/w/128/h/128?c=cid",
+    );
   });
 });
 
@@ -64,15 +62,14 @@ describe("withCompanyLogos", () => {
   it("n'interroge qu'une fois par entreprise, quel que soit le nombre d'offres", async () => {
     const fetchMock = vi.fn(async () => ({
       ok: true,
-      json: async () => [{ name: "Acme", domain: "acme.com", icon: "https://i/acme.png" }],
+      json: async () => [{ name: "Acme", domain: "acme.com" }],
     }));
     vi.stubGlobal("fetch", fetchMock);
 
+    const attendu = logoUrlFor("acme.com", "cid");
     const out = await withCompanyLogos([offre("Acme"), offre("ACME SAS"), offre("Acme")], "cid");
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(out.map((o) => o.logoUrl)).toEqual([
-      "https://i/acme.png", "https://i/acme.png", "https://i/acme.png",
-    ]);
+    expect(out.map((o) => o.logoUrl)).toEqual([attendu, attendu, attendu]);
   });
 
   it("laisse intact le logo déjà fourni par la source", async () => {

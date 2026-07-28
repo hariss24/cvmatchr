@@ -45,34 +45,39 @@ export function normalizeCompany(name: string): string {
 }
 
 /**
- * Quand Brandfetch ne connaît pas le vrai logo d'une marque, il renvoie tout de
- * même une image : un « lettermark », c'est-à-dire l'initiale dessinée dans un
- * carré. L'afficher reviendrait à montrer une lettre en la faisant passer pour
- * un logo, avec en prime une requête réseau. On la rejette pour retomber sur
- * l'initiale native, qui au moins s'assume.
- */
-function estLettermark(icon: string): boolean {
-  return icon.includes("/fallback/");
-}
-
-/**
- * Choisit la marque correspondant vraiment au nom cherché.
+ * Choisit le domaine de la marque correspondant vraiment au nom cherché.
  *
  * Brandfetch classe par popularité, pas par exactitude : chercher « Skolae »
  * remonte « Skolae Formation » (domaine abilways.com) et « Campus Skolae Tours ».
  * On exige donc que le nom retourné soit équivalent au nom cherché, et l'on
  * préfère une fiche revendiquée par son propriétaire. Sans correspondance
  * franche, on ne renvoie rien — l'initiale vaut mieux qu'un logo faux.
+ *
+ * On retient le domaine et non le champ `icon` de la réponse : celui-ci est
+ * toujours un « lettermark », l'initiale dessinée dans un carré, y compris pour
+ * des marques dont Brandfetch possède le vrai logo (vérifié sur Decathlon). Le
+ * logo s'obtient au domaine, via le CDN.
  */
 export function pickBrand(results: Marque[], company: string): string {
   const cible = normalizeCompany(company);
   if (!cible) return "";
 
-  const exacts = results.filter(
-    (m) => m.icon && !estLettermark(m.icon) && normalizeCompany(m.name ?? "") === cible,
-  );
+  const exacts = results.filter((m) => m.domain && normalizeCompany(m.name ?? "") === cible);
   const retenu = exacts.find((m) => m.claimed) ?? exacts[0];
-  return retenu?.icon ?? "";
+  return retenu?.domain ?? "";
+}
+
+/**
+ * URL du logo, destinée à une balise `<img>` dans le navigateur.
+ *
+ * Les conditions d'usage de Brandfetch interdisent l'accès programmatique aux
+ * images et exigent un en-tête `Referer` : une requête serveur est redirigée
+ * vers la page des guidelines au lieu de renvoyer l'image. C'est donc bien le
+ * navigateur qui doit la charger — d'où une URL construite ici, mais jamais
+ * suivie ici. Le client ID est public par conception, il vit dans l'URL.
+ */
+export function logoUrlFor(domain: string, clientId: string): string {
+  return `https://cdn.brandfetch.io/${domain}/w/128/h/128?c=${encodeURIComponent(clientId)}`;
 }
 
 async function fetchOne(company: string, clientId: string): Promise<string> {
@@ -107,11 +112,13 @@ export async function withCompanyLogos<T extends { company: string; logoUrl: str
   if (aResoudre.size === 0) return offers;
 
   const entrees = [...aResoudre.entries()];
-  const trouves = await Promise.all(
+  const domaines = await Promise.all(
     entrees.map(([, nom]) => fetchOne(nom, clientId).catch(() => "")),
   );
 
-  const parCle = new Map(entrees.map(([cle], i) => [cle, trouves[i]]));
+  const parCle = new Map(
+    entrees.map(([cle], i) => [cle, domaines[i] ? logoUrlFor(domaines[i], clientId) : ""]),
+  );
   return offers.map((o) =>
     o.logoUrl ? o : { ...o, logoUrl: parCle.get(normalizeCompany(o.company)) ?? "" },
   );
