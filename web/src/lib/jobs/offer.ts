@@ -28,6 +28,24 @@ export interface JobOffer {
   contractLabel: string;
   /** "33–36 k€ / an" ; "" si non précisé. */
   salaryLabel: string;
+
+  // --- Champs structurés, fournis par France Travail uniquement. -------------
+  // Absents chez Adzuna et JSearch, qui n'exposent aucune taxonomie métier
+  // exploitable (spec §2.6). Le classement a donc une voie textuelle de repli
+  // pour chaque critère qui s'appuie dessus.
+
+  /** Code ROME 4.0 officiel de l'offre (100 % des offres France Travail). */
+  romeCode?: string;
+  /** Compétences codifiées ; `exigence` vaut "E" (exigée) ou "S" (souhaitée). */
+  competences?: { code: string; exigence: string }[];
+  /** "D" débutant accepté, "S" expérience souhaitée, "E" expérience exigée. */
+  experienceExige?: string;
+  /** Années d'expérience extraites de `experienceLibelle` ("3 An(s)" → 3). */
+  experienceYears?: number;
+  /** Latitude du lieu de travail, pour la distance locale. */
+  lat?: number;
+  /** Longitude du lieu de travail. */
+  lng?: number;
 }
 
 /**

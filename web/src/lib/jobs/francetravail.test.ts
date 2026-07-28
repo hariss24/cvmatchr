@@ -98,3 +98,62 @@ describe("search", () => {
     expect(out.calls).toBe(2);
   });
 });
+
+describe("mapOffer — champs structurés", () => {
+  const brut = {
+    id: "77",
+    intitule: "Développeur web",
+    description: "Mission.",
+    dateCreation: "2026-07-01T09:00:00Z",
+    entreprise: { nom: "ACME", logo: "https://ex.fr/logo.png" },
+    lieuTravail: { libelle: "75 - Paris", latitude: 48.86, longitude: 2.35 },
+    origineOffre: { urlOrigine: "https://ex.fr/77" },
+    romeCode: "M1855",
+    competences: [
+      { code: "100341", libelle: "Procédures", exigence: "E" },
+      { code: "300374", libelle: "Valoriser", exigence: "S" },
+    ],
+    experienceExige: "E",
+    experienceLibelle: "3 An(s)",
+    typeContratLibelle: "CDI",
+    salaire: { libelle: "Annuel de 34000.0 Euros sur 12 mois" },
+  };
+
+  it("reporte le code ROME et les compétences codifiées", () => {
+    const o = mapOffer(brut, 3000);
+    expect(o.romeCode).toBe("M1855");
+    expect(o.competences).toEqual([
+      { code: "100341", exigence: "E" },
+      { code: "300374", exigence: "S" },
+    ]);
+  });
+
+  it("extrait les coordonnées et le logo d'entreprise", () => {
+    const o = mapOffer(brut, 3000);
+    expect(o.lat).toBe(48.86);
+    expect(o.lng).toBe(2.35);
+    expect(o.logoUrl).toBe("https://ex.fr/logo.png");
+  });
+
+  it("reporte l'expérience et en extrait le nombre d'années", () => {
+    const o = mapOffer(brut, 3000);
+    expect(o.experienceExige).toBe("E");
+    expect(o.experienceYears).toBe(3);
+  });
+
+  it("remplit contrat et salaire, jusqu'ici toujours vides", () => {
+    const o = mapOffer(brut, 3000);
+    expect(o.contractLabel).toBe("CDI");
+    expect(o.salaryLabel).toBe("Annuel de 34000.0 Euros sur 12 mois");
+  });
+
+  // 13 % des offres n'ont pas de compétences, 4 % pas de salaire (spec §2.1).
+  it("survit à une offre dépourvue de champs structurés", () => {
+    const o = mapOffer({ id: "8", intitule: "X" }, 3000);
+    expect(o.romeCode).toBeUndefined();
+    expect(o.competences).toBeUndefined();
+    expect(o.lat).toBeUndefined();
+    expect(o.logoUrl).toBe("");
+    expect(o.experienceYears).toBeUndefined();
+  });
+});

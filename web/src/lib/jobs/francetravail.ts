@@ -14,9 +14,14 @@ export interface RawOffer {
   alternance?: boolean;
   typeContratLibelle?: string;
   dateCreation?: string;
-  entreprise?: { nom?: string };
+  entreprise?: { nom?: string; logo?: string };
   lieuTravail?: { libelle?: string; latitude?: number; longitude?: number };
   origineOffre?: { urlOrigine?: string };
+  romeCode?: string;
+  competences?: { code?: string; libelle?: string; exigence?: string }[];
+  experienceExige?: string;
+  experienceLibelle?: string;
+  salaire?: { libelle?: string };
 }
 
 import type { JobOffer } from "./offer";
@@ -123,22 +128,41 @@ function commuteDestination(offer: RawOffer): string {
   return lieu.libelle ?? "";
 }
 
+/** « 3 An(s) » → 3 ; undefined si le libellé n'annonce pas d'années. */
+function experienceYears(libelle?: string): number | undefined {
+  const m = /(\d+)\s*an/i.exec(libelle ?? "");
+  return m ? Number(m[1]) : undefined;
+}
+
 export function mapOffer(offer: RawOffer, maxDescriptionChars: number): JobOffer {
+  const lieu = offer.lieuTravail;
+  const competences = (offer.competences ?? [])
+    .filter((c): c is { code: string; exigence?: string } => Boolean(c.code))
+    .map((c) => ({ code: c.code, exigence: c.exigence ?? "S" }));
+
   return {
     id: offer.id ?? "",
     source: "francetravail",
     title: offer.intitule ?? "",
     company: offer.entreprise?.nom ?? "",
-    location: offer.lieuTravail?.libelle ?? "",
+    location: lieu?.libelle ?? "",
     commuteDestination: commuteDestination(offer),
     url: offer.origineOffre?.urlOrigine ?? "",
     jobText: (offer.description ?? "").slice(0, maxDescriptionChars),
     publishedAt: offer.dateCreation ?? "",
-    logoUrl: "",
+    logoUrl: offer.entreprise?.logo ?? "",
     boardDomain: "",
     boardName: "France Travail",
-    contractLabel: "",
-    salaryLabel: "",
+    contractLabel: offer.typeContratLibelle ?? "",
+    salaryLabel: offer.salaire?.libelle ?? "",
+    ...(offer.romeCode ? { romeCode: offer.romeCode } : {}),
+    ...(competences.length > 0 ? { competences } : {}),
+    ...(offer.experienceExige ? { experienceExige: offer.experienceExige } : {}),
+    ...(experienceYears(offer.experienceLibelle) !== undefined
+      ? { experienceYears: experienceYears(offer.experienceLibelle) }
+      : {}),
+    ...(typeof lieu?.latitude === "number" ? { lat: lieu.latitude } : {}),
+    ...(typeof lieu?.longitude === "number" ? { lng: lieu.longitude } : {}),
   };
 }
 
