@@ -52,6 +52,31 @@ describe("POST /api/editor-chat", () => {
     expect(sent[1].role).toBe("assistant");
   });
 
+  // Le modèle décroche de l'enveloppe JSON dès qu'une demande n'appelle aucune retouche
+  // (« qu'est-ce que j'écris dans ce champ ? ») : il répond en prose. C'est une réponse
+  // utile mal emballée, pas une panne — l'afficher vaut mieux que « JSON malformé ».
+  it("rend la prose telle quelle quand la réponse n'est pas du JSON", async () => {
+    mockComplete.mockResolvedValue("Pour répondre à cette question, mets en avant ton pilotage de projet.");
+
+    const res = await POST(req({ messages: [{ role: "user", content: "j'écris quoi ?" }], doc_json: {} }));
+
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.reply).toBe("Pour répondre à cette question, mets en avant ton pilotage de projet.");
+    expect(data.proposals).toEqual([]);
+  });
+
+  it("récupère le JSON même noyé dans du texte", async () => {
+    mockComplete.mockResolvedValue(
+      'Voici ma proposition :\n{"reply":"Fait.","proposals":[]}\nDis-moi si ça convient.',
+    );
+
+    const res = await POST(req({ messages: [{ role: "user", content: "améliore" }], doc_json: {} }));
+
+    const data = await res.json();
+    expect(data.reply).toBe("Fait.");
+  });
+
   it("exige au moins un message", async () => {
     const res = await POST(req({ messages: [], doc_json: {} }));
     expect(res.status).toBe(400);

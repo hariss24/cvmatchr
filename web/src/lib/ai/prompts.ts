@@ -340,6 +340,14 @@ export const SYSTEM_EDITOR_CHAT =
   '{"reply":"Message court (1-3 phrases)","proposals":[{"id":"p1","title":"Titre court",' +
   '"summary":"Ce qui change (1-2 phrases)","json":{...}}]}' + "\n\n" +
   "CONTRAINTES :\n" +
+  // « Décrivez votre expérience la plus en lien avec notre offre » : le candidat veut un
+  // texte à recopier sur le site du recruteur, pas une retouche de son CV. Faute de canal
+  // pour ça, le modèle emballait sa réponse en propositions de document, que la garde
+  // anti-vidage rejetait — il annonçait deux approches et n'en affichait aucune.
+  "- Si l'utilisateur demande un texte à utiliser AILLEURS que dans le document " +
+  "(réponse à un champ de formulaire de candidature, message à un recruteur), rédige ce " +
+  "texte directement dans 'reply' et laisse proposals=[]. 'proposals' ne sert QU'À " +
+  "proposer une nouvelle version du document affiché.\n" +
   "- Maximum 2 propositions (sauf demande explicite).\n" +
   "- Si aucun changement utile n'est possible sans inventer du contenu, proposals=[] et explique dans reply.\n" +
   "- 'json' = document JSON COMPLET (pas un extrait), respectant le même schéma que l'entrée.\n" +

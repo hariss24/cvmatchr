@@ -51,7 +51,23 @@ export async function POST(req: Request): Promise<Response> {
 
   try {
     const raw = await complete(augmented, SYSTEM_EDITOR_CHAT, userKey);
-    const result = parseAiJson(raw);
+
+    // Le modèle lâche l'enveloppe JSON dès qu'une demande n'appelle aucune retouche du
+    // document (« qu'est-ce que j'écris dans ce champ ? ») : il répond en prose. Sa
+    // réponse est utile, seulement mal emballée — l'afficher vaut mieux que de renvoyer
+    // « JSON malformé », qui donnait un chat cassé pour une réponse en réalité correcte.
+    let result: unknown;
+    try {
+      result = parseAiJson(raw);
+    } catch {
+      // Objet JSON noyé dans du texte : on le récupère plutôt que de perdre les propositions.
+      try {
+        result = parseAiJson(raw.slice(raw.indexOf("{"), raw.lastIndexOf("}") + 1));
+      } catch {
+        return NextResponse.json({ reply: raw.trim().slice(0, 2000), proposals: [] });
+      }
+    }
+
     if (
       typeof result !== "object" ||
       result === null ||
@@ -85,7 +101,8 @@ export async function POST(req: Request): Promise<Response> {
     }
 
     return NextResponse.json({
-      reply: String(r.reply ?? "").slice(0, 1000),
+      // 1000 coupait au milieu d'un texte rédigé pour un champ de formulaire.
+      reply: String(r.reply ?? "").slice(0, 2000),
       proposals,
     });
   } catch (err) {
