@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { listJobs, saveJob, markJobSeen, jobExists, setJobStatus, type JobEntry } from "@/lib/storage/db";
+import { listJobs, saveJob, markJobSeen, jobExists, jobKeys, setJobStatus, type JobEntry } from "@/lib/storage/db";
+import { normKey } from "@/lib/applications/normKey";
 import { useDocStore } from "@/state/docStore";
 import { toast } from "@/state/uiStore";
 import type { JobOffer } from "@/lib/jobs/francetravail";
@@ -49,9 +50,11 @@ export default function JobsView() {
   const setRole = useDocStore((s) => s.setRole);
   const router = useRouter();
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Logos déjà résolus pour cette page ; `""` marque une entreprise sans logo trouvé. */
+  const logosConnus = useRef(new Map<string, string>());
 
   useEffect(() => {
-    listJobs("new").then(setJobs);
+    void reload();
     getApiUsage().then(setUsage);
     getJobProfile().then((p) => {
       // Le profil persisté peut dater d'avant l'ajout d'un champ (ex. `sources`,
@@ -61,6 +64,9 @@ export default function JobsView() {
       if (p) setProfile(parseProfile(p));
       setProfileLoaded(true);
     });
+    // Au montage seulement. `reload` est redéfinie à chaque rendu ; la mettre en
+    // dépendance relancerait la liste — et la résolution des logos — sans fin.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /** Édition du profil avec sauvegarde automatique (debounce 400 ms). */
@@ -75,7 +81,54 @@ export default function JobsView() {
   const canScan = profile.keywords.length >= 1;
 
   async function reload() {
-    setJobs(await listJobs("new"));
+    const liste = await listJobs("new");
+    setJobs(liste);
+    void completerLogos(liste);
+  }
+
+  /**
+   * Va chercher les logos manquants une fois les offres à l'écran.
+   *
+   * Résoudre un logo demande de visiter des pages d'accueil — ~9 s pour une
+   * cinquantaine d'entreprises inconnues. Tant que c'était fait pendant la
+   * recherche, la liste attendait cet ornement pour s'afficher.
+   *
+   * Le déport répare au passage un angle mort : le scan écarte les offres déjà
+   * en base, donc celles enregistrées avant l'arrivée des logos n'en auraient
+   * jamais reçu. Ici on part de ce qui est affiché, sans se soucier de la date
+   * d'entrée — un simple retour sur la page suffit à les rattraper.
+   */
+  async function completerLogos(liste: JobEntry[]) {
+    const sansLogo = [...new Set(liste.filter((j) => !j.logoUrl && j.company.trim()).map((j) => j.company))];
+    const inconnues = sansLogo.filter((c) => !logosConnus.current.has(c));
+
+    if (inconnues.length > 0) {
+      // Le résultat est mémorisé, échecs compris : sans ça, une entreprise
+      // introuvable serait redemandée à chaque rechargement de la liste.
+      inconnues.forEach((c) => logosConnus.current.set(c, ""));
+      try {
+        const res = await fetch("/api/jobs/logos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ companies: inconnues }),
+        });
+        if (res.ok) {
+          const { logos } = (await res.json()) as { logos?: Record<string, string> };
+          for (const [nom, url] of Object.entries(logos ?? {})) logosConnus.current.set(nom, url);
+        }
+      } catch {
+        // Un logo manquant ne doit jamais remonter comme une panne.
+      }
+    }
+
+    // Appliqué depuis la mémoire, et pas seulement depuis la réponse : un scan
+    // qui ramène une entreprise déjà résolue doit en profiter sans redemander.
+    const url = (j: JobEntry) => (j.logoUrl ? "" : logosConnus.current.get(j.company) || "");
+    const aPatcher = liste.filter((j) => url(j));
+    if (aPatcher.length === 0) return;
+
+    await Promise.all(aPatcher.map((j) => saveJob({ ...j, logoUrl: url(j) })));
+    setJobs((actuels) => actuels.map((j) => (url(j) ? { ...j, logoUrl: url(j) } : j)));
   }
 
   /**
@@ -105,84 +158,125 @@ export default function JobsView() {
     }
   }
 
+  /**
+   * Interroge un sous-ensemble de sources, puis classe et enregistre ce qu'il en
+   * revient. Rendu à part du reste du scan pour que chaque groupe s'affiche dès
+   * qu'il répond, sans attendre les autres.
+   *
+   * `vues` porte les clés `normKey` déjà retenues : le serveur ne dédoublonne
+   * qu'à l'intérieur d'un même appel, donc c'est ici que se joue la fusion entre
+   * une offre France Travail et sa republication sur JSearch.
+   */
+  async function scanGroupe(
+    p: JobSearchProfile,
+    sources: JobSearchProfile["sources"],
+    ctx: ReturnType<typeof buildRankContext>,
+    vues: Set<string>,
+  ): Promise<number> {
+    const res = await fetch("/api/jobs/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profile: { ...p, sources } }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      if (data.error === "config") setConfigMsg(data.message);
+      else toast(data.error || "Échec de la recherche d'offres.", "error");
+      return 0;
+    }
+
+    const offers: JobOffer[] = data.offers ?? [];
+
+    // Compteur de quota : local et indicatif, il mesure ce que CE navigateur
+    // a consommé, pas ce que le fournisseur a facturé.
+    if (data.calls) {
+      await bumpApiUsage(data.calls);
+      setUsage(await getApiUsage());
+    }
+
+    // Une source en panne ne fait pas échouer la recherche : on le dit sans bloquer.
+    const failed: SourceId[] = data.failed ?? [];
+    if (failed.length > 0) {
+      const names = failed.map((s: SourceId) => SOURCES.find((x) => x.id === s)?.label ?? s).join(", ");
+      toast(`Source(s) indisponible(s) : ${names}. Les autres résultats sont affichés.`, "error");
+    }
+
+    const maintenant = Date.now();
+    let retained = 0;
+
+    for (const offer of offers) {
+      if (!offer.id || (await jobExists(offer.id))) continue; // déjà en base, par id
+      const cle = normKey(offer.company, offer.title);
+      if (cle && vues.has(cle)) continue; // même offre, autre source
+      if (cle) vues.add(cle);
+
+      const result = rankOffer(offer, p, ctx, maintenant);
+      if (!shouldPersist(result, p)) continue;
+      await saveJob({
+        id: offer.id,
+        createdAt: maintenant,
+        title: offer.title,
+        company: offer.company,
+        location: offer.location,
+        commute: "", // calculé à la demande à l'ouverture de l'offre
+        score: result.score,
+        grade: result.grade,
+        breakdown: result.breakdown,
+        url: offer.url,
+        jobText: offer.jobText,
+        publishedAt: offer.publishedAt,
+        status: "new",
+        seen: false,
+        source: offer.source,
+        logoUrl: offer.logoUrl,
+        boardDomain: offer.boardDomain,
+        boardName: offer.boardName,
+        contractLabel: offer.contractLabel,
+        salaryLabel: offer.salaryLabel,
+      });
+      retained++;
+    }
+
+    await reload();
+    return retained;
+  }
+
   async function scan(p: JobSearchProfile = profile) {
     setScanning(true);
     setConfigMsg(null);
     setProgress({ ...ZERO, phase: "Recherche des offres…" });
     try {
-      const res = await fetch("/api/jobs/search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ profile: p }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        if (data.error === "config") setConfigMsg(data.message);
-        else toast(data.error || "Échec de la recherche d'offres.", "error");
+      // Les sources ne répondent pas à la même vitesse : France Travail et Adzuna
+      // en ~0,5 s, JSearch en ~16 s (leur API met ~5 s par mot-clé). Les attendre
+      // ensemble faisait patienter devant un écran vide pour des offres déjà
+      // disponibles. On les interroge donc en deux groupes, affichés séparément.
+      const groupes = [
+        { francetravail: p.sources.francetravail, adzuna: p.sources.adzuna, jsearch: false },
+        { francetravail: false, adzuna: false, jsearch: p.sources.jsearch },
+      ].filter((s) => s.francetravail || s.adzuna || s.jsearch);
+
+      if (groupes.length === 0) {
+        setConfigMsg("Aucune source sélectionnée. Coche au moins une source dans « Où chercher ».");
         return;
       }
-
-      const offers: JobOffer[] = data.offers ?? [];
-
-      // Compteur de quota : local et indicatif, il mesure ce que CE navigateur
-      // a consommé, pas ce que le fournisseur a facturé.
-      if (data.calls) {
-        await bumpApiUsage(data.calls);
-        setUsage(await getApiUsage());
-      }
-
-      // Une source en panne ne fait pas échouer la recherche : on le dit sans bloquer.
-      const failed: SourceId[] = data.failed ?? [];
-      if (failed.length > 0) {
-        const names = failed.map((s: SourceId) => SOURCES.find((x) => x.id === s)?.label ?? s).join(", ");
-        toast(`Source(s) indisponible(s) : ${names}. Les autres résultats sont affichés.`, "error");
-      }
-
-      // Écarter les offres déjà en base (dédoublonnage local).
-      const fresh: JobOffer[] = [];
-      for (const o of offers) {
-        if (o.id && !(await jobExists(o.id))) fresh.push(o);
-      }
-
-      setProgress({ phase: "Classement des offres…", found: fresh.length, retained: 0 });
 
       // Une seule requête de géocodage pour tout le scan, et seulement si une
       // adresse est renseignée. Sans domicile, le critère de distance reste neutre.
       const home = await geocodeHome(p.homeAddress);
       const ctx = buildRankContext(p, home);
-      const maintenant = Date.now();
+      const vues = await jobKeys();
 
-      let retained = 0;
-      for (const offer of fresh) {
-        const result = rankOffer(offer, p, ctx, maintenant);
-        if (!shouldPersist(result, p)) continue;
-        await saveJob({
-          id: offer.id,
-          createdAt: maintenant,
-          title: offer.title,
-          company: offer.company,
-          location: offer.location,
-          commute: "", // calculé à la demande à l'ouverture de l'offre
-          score: result.score,
-          grade: result.grade,
-          breakdown: result.breakdown,
-          url: offer.url,
-          jobText: offer.jobText,
-          publishedAt: offer.publishedAt,
-          status: "new",
-          seen: false,
-          source: offer.source,
-          logoUrl: offer.logoUrl,
-          boardDomain: offer.boardDomain,
-          boardName: offer.boardName,
-          contractLabel: offer.contractLabel,
-          salaryLabel: offer.salaryLabel,
-        });
-        retained++;
-      }
+      let retenues = 0;
+      await Promise.all(
+        groupes.map((sources) =>
+          scanGroupe(p, sources, ctx, vues).then((n) => {
+            retenues += n;
+            setProgress({ phase: "Classement des offres…", found: retenues, retained: retenues });
+          }),
+        ),
+      );
 
-      setProgress({ phase: "Terminé", found: fresh.length, retained });
-      await reload();
+      setProgress({ phase: "Terminé", found: retenues, retained: retenues });
     } catch {
       toast("Erreur réseau pendant la recherche.", "error");
     } finally {

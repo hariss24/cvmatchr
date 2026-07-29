@@ -5,7 +5,6 @@ import { searchAdzuna } from "@/lib/jobs/adzuna";
 import { searchJSearch } from "@/lib/jobs/jsearch";
 import { dedupeOffers } from "@/lib/jobs/dedupe";
 import { matchesIncludeKeywords } from "@/lib/jobs/includeFilter";
-import { withCompanyLogos } from "@/lib/jobs/logos";
 import type { JobOffer, SourceId } from "@/lib/jobs/offer";
 
 // Appels réseau sortants : runtime Node.js.
@@ -88,12 +87,11 @@ export async function POST(req: Request): Promise<Response> {
     }
   });
 
-  const retenues = dedupeOffers(merged).filter((o) => matchesIncludeKeywords(o, profile.includeKeywords));
+  const offers = dedupeOffers(merged).filter((o) => matchesIncludeKeywords(o, profile.includeKeywords));
 
-  // Après le dédoublonnage : une offre présente sur deux sources a pu récupérer
-  // le logo de l'autre, inutile d'aller le chercher. Sans clé Brandfetch, cette
-  // étape est sautée et les cartes retombent sur l'initiale.
-  const offers = await withCompanyLogos(retenues, process.env.BRANDFETCH_CLIENT_ID);
-
+  // Les logos ne sont plus résolus ici : les retrouver demande de visiter des
+  // pages d'accueil, ~9 s pour une cinquantaine d'entreprises inconnues, et rien
+  // ne justifie de retenir toutes les offres à l'écran pour un ornement. Le client
+  // les réclame après affichage, à `/api/jobs/logos`.
   return NextResponse.json({ offers, calls, failed });
 }

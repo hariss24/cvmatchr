@@ -1,10 +1,8 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   normalizeCompany, tldPlausible, domaineProche, domainCandidates, titreConfirme,
-  logoUrlFor, resolveDomain, withCompanyLogos,
+  logoUrlFor, resolveDomain, logoUrlsFor,
 } from "./logos";
-
-const offre = (company: string, logoUrl = "") => ({ company, logoUrl });
 
 /**
  * Sert de faux internet : une page par domaine, tout le reste injoignable.
@@ -81,6 +79,19 @@ describe("domainCandidates", () => {
   it("ne propose rien d'exploitable pour un nom trop court", () => {
     expect(domainCandidates("AB")).toEqual([]);
   });
+
+  // `h3campusgroupe.fr` n'existe pas, `h3campus.fr` oui. Une raison sociale porte
+  // son mot de queue, son domaine presque jamais.
+  it("réessaie sans le mot de queue générique", () => {
+    expect(domainCandidates("H3 CAMPUS GROUPE")).toContain("h3campus.fr");
+    expect(domainCandidates("PEPSICO FRANCE")).toContain("pepsico.fr");
+  });
+
+  // Élagué, « Fed Group » donne « fed » — trop court pour désigner quiconque.
+  it("n'élague pas jusqu'à un reste banal", () => {
+    expect(domainCandidates("Fed Group")).not.toContain("fed.fr");
+    expect(domainCandidates("POP France")).not.toContain("pop.fr");
+  });
 });
 
 describe("titreConfirme", () => {
@@ -100,6 +111,10 @@ describe("titreConfirme", () => {
   it("refuse un site sans rapport", () => {
     expect(titreConfirme("Bienvenue chez Dupont SA", "Skolae")).toBe(false);
   });
+
+  it("reconnaît le nom privé de son mot de queue", () => {
+    expect(titreConfirme("H3 Campus — école supérieure", "H3 CAMPUS GROUPE")).toBe(true);
+  });
 });
 
 describe("resolveDomain", () => {
@@ -107,7 +122,7 @@ describe("resolveDomain", () => {
 
   it("retient le domaine deviné que le site confirme", async () => {
     stubWeb({ "skolae.fr": "<title>Skolae</title>" });
-    expect(await resolveDomain("SKOLAE", "cid")).toBe("skolae.fr");
+    expect((await resolveDomain("SKOLAE", "cid")).domain).toBe("skolae.fr");
   });
 
   it("retient une suggestion d'annuaire indevinable", async () => {
@@ -115,7 +130,7 @@ describe("resolveDomain", () => {
       { "covea.com": '<html lang="fr"><title>Groupe Covéa - Mutualiser nos forces</title>' },
       { "Groupe Covéa": [{ name: "Groupe Covéa", domain: "covea.com" }] },
     );
-    expect(await resolveDomain("Groupe Covéa", "cid")).toBe("covea.com");
+    expect((await resolveDomain("Groupe Covéa", "cid")).domain).toBe("covea.com");
   });
 
   // `thea.com` s'affiche en anglais, `decathlon.fr` répond 403 : exiger une visite
@@ -123,7 +138,7 @@ describe("resolveDomain", () => {
   // leur nom exact — et qui ont donc, elles, un logo au CDN.
   it("retient un domaine d'annuaire sans visiter son site", async () => {
     const appels = stubWeb({}, { "Laboratoires Théa": [{ name: "Laboratoires Théa", domain: "thea.com" }] });
-    expect(await resolveDomain("Laboratoires Théa", "cid")).toBe("thea.com");
+    expect((await resolveDomain("Laboratoires Théa", "cid")).domain).toBe("thea.com");
     expect(appels).not.toContain("https://thea.com");
   });
 
@@ -135,13 +150,13 @@ describe("resolveDomain", () => {
       "nexton.com": '<html lang="en"><title>Nexton | Master-Planned Community in Summerville, SC</title>',
       "fabgroup.com": '<html lang="it-IT"><title>FAB Group - Componenti per industria del mobile</title>',
     });
-    expect(await resolveDomain("Nexton", "cid")).toBe("");
-    expect(await resolveDomain("Fab Group", "cid")).toBe("");
+    expect((await resolveDomain("Nexton", "cid")).domain).toBe("");
+    expect((await resolveDomain("Fab Group", "cid")).domain).toBe("");
   });
 
   it("dispense un .fr de prouver sa langue", async () => {
     stubWeb({ "teaminside.fr": "<title>Teaminside : 100% digitale</title>" });
-    expect(await resolveDomain("TEAM INSIDE", "cid")).toBe("teaminside.fr");
+    expect((await resolveDomain("TEAM INSIDE", "cid")).domain).toBe("teaminside.fr");
   });
 
   // Le scénario complet du faux logo : l'annuaire propose l'homonyme pakistanais,
@@ -152,25 +167,25 @@ describe("resolveDomain", () => {
       { "nexton.com.pk": "<title>Baby &amp; kids Products in Pakistan | Nexton®</title>" },
       { Nexton: [{ name: "Nexton", domain: "nexton.com.pk" }] },
     );
-    expect(await resolveDomain("Nexton", "cid")).toBe("");
+    expect((await resolveDomain("Nexton", "cid")).domain).toBe("");
     expect(appels.some((u) => u.includes("nexton.com.pk"))).toBe(false);
   });
 
   it("ne retient pas un domaine dont le site ne parle pas de l'entreprise", async () => {
     stubWeb({ "acme.fr": "<title>Domaine à vendre</title>" });
-    expect(await resolveDomain("Acme", "cid")).toBe("");
+    expect((await resolveDomain("Acme", "cid")).domain).toBe("");
   });
 
   // Un `.fr` au nom de l'entreprise qui répond 403 est une enseigne qui se protège
   // des robots, pas un domaine parké : ceux-là servent leur page de vente en 200.
   it("accepte un .fr qui bloque les robots", async () => {
     stubWeb({ "decathlon.fr": null });
-    expect(await resolveDomain("Decathlon", "cid")).toBe("decathlon.fr");
+    expect((await resolveDomain("Decathlon", "cid")).domain).toBe("decathlon.fr");
   });
 
   it("n'accorde pas la même indulgence à un .com muet", async () => {
     stubWeb({ "nexton.com": null });
-    expect(await resolveDomain("Nexton", "cid")).toBe("");
+    expect((await resolveDomain("Nexton", "cid")).domain).toBe("");
   });
 
   // L'annuaire ne tranche pas les homonymes : pour « Fab Group », il donne le
@@ -180,38 +195,46 @@ describe("resolveDomain", () => {
       { "fab-group.fr": "<title>Fab Group, agence conseil</title>" },
       { "Fab Group": [{ name: "Fab Group", domain: "fabgroup.com" }] },
     );
-    expect(await resolveDomain("Fab Group", "cid")).toBe("fab-group.fr");
+    expect((await resolveDomain("Fab Group", "cid")).domain).toBe("fab-group.fr");
   });
 });
 
-describe("withCompanyLogos", () => {
+describe("logoUrlFor", () => {
+  // Brandfetch sert une image *vide*, jamais 404, pour un domaine qu'il ignore :
+  // le repli sur l'initiale ne peut pas se déclencher et la carte reste blanche.
+  // Le service de favicons, lui, répond 404 — et couvre les PME que Brandfetch
+  // ignore (`primark.fr`, `h3campus.fr`). D'où le fournisseur choisi selon la
+  // provenance du domaine.
+  it("prend Brandfetch pour un domaine que l'annuaire a nommé", () => {
+    expect(logoUrlFor("thea.com", "cid", true)).toContain("cdn.brandfetch.io/thea.com");
+  });
+
+  it("prend le favicon pour un domaine deviné puis vérifié", () => {
+    const url = logoUrlFor("primark.fr", "cid", false);
+    expect(url).toContain("google.com/s2/favicons");
+    expect(url).toContain("primark.fr");
+  });
+});
+
+describe("logoUrlsFor", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it("ne touche à rien sans clé configurée", async () => {
+  it("ne résout rien sans clé configurée", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
-    const out = await withCompanyLogos([offre("Acme")], undefined);
-    expect(out[0].logoUrl).toBe("");
+    expect(await logoUrlsFor(["Acme"], undefined)).toEqual({});
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("laisse intact le logo déjà fourni par la source", async () => {
-    const appels = stubWeb({});
-    const out = await withCompanyLogos([offre("Acme", "https://source/logo.png")], "cid");
-    expect(out[0].logoUrl).toBe("https://source/logo.png");
-    expect(appels).toHaveLength(0);
-  });
-
-  it("construit l'URL du CDN pour un domaine confirmé", async () => {
+  it("ne résout qu'une fois deux graphies d'une même entreprise", async () => {
     stubWeb({ "skolae.fr": '<html lang="fr-FR"><title>Skolae</title>' });
-    const out = await withCompanyLogos([offre("SKOLAE"), offre("Skolae SAS")], "cid");
-    expect(out[0].logoUrl).toBe(logoUrlFor("skolae.fr", "cid"));
-    expect(out[1].logoUrl).toBe(logoUrlFor("skolae.fr", "cid"));
+    const logos = await logoUrlsFor(["SKOLAE", "Skolae SAS"], "cid");
+    expect(logos["SKOLAE"]).toBe(logoUrlFor("skolae.fr", "cid", false));
+    expect(logos["Skolae SAS"]).toBe(logos["SKOLAE"]);
   });
 
-  it("laisse l'offre sans logo quand rien n'est confirmé", async () => {
+  it("omet l'entreprise dont rien n'est confirmé", async () => {
     stubWeb({});
-    const out = await withCompanyLogos([offre("Introuvable SARL")], "cid");
-    expect(out[0].logoUrl).toBe("");
+    expect(await logoUrlsFor(["Introuvable SARL"], "cid")).toEqual({});
   });
 });

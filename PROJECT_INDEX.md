@@ -220,10 +220,23 @@ Pièges :
   pas les homonymes (pour « Fab Group » il propose un fabricant de meubles italien).
   Sans confirmation : initiale, jamais de logo approximatif.
 - **Le CDN Brandfetch ne renvoie jamais 404** : pour un domaine qu'il ne connaît pas,
-  il sert une image *vide* de 128×128. Le repli sur l'initiale, déclenché par l'erreur
-  de chargement, ne peut donc pas s'appliquer — un domaine réel mais absent du
-  répertoire (`primark.fr`, `tecnoglobe.fr`) donne une tuile blanche. C'est le prix
-  assumé de la vérification côté site : neutre à l'œil, jamais trompeur.
+  il sert une image *vide* de 128×128, donc le repli sur l'initiale — déclenché par
+  l'erreur de chargement — ne peut pas s'appliquer. D'où le choix du fournisseur
+  selon la provenance du domaine (`logoUrlFor`) : Brandfetch pour un domaine que
+  l'annuaire a nommé (il a forcément un logo), **le service de favicons de Google**
+  pour un domaine deviné puis vérifié (il couvre les PME que Brandfetch ignore et
+  répond 404 quand il ne sait pas).
+- **Les logos ne sont pas résolus par `/api/jobs/search`** mais par `/api/jobs/logos`,
+  appelée par le client une fois les offres affichées : la résolution demande de
+  visiter des pages d'accueil (~9 s pour 50 entreprises inconnues) et retardait tout
+  l'affichage. Effet de bord voulu : cette route ignore d'où viennent les entreprises,
+  donc les offres **déjà en base** — que le scan écarte par dédoublonnage et qui
+  restaient sans logo à jamais — sont rattrapées au simple retour sur la page.
+- **Le scan interroge les sources en deux groupes** (`JobsView.scanGroupe`) : France
+  Travail + Adzuna (~1 s), puis JSearch (~16 s, ~5 s par mot-clé chez eux). Chaque
+  groupe s'affiche dès qu'il répond. Conséquence : le dédoublonnage inter-source ne
+  peut plus être fait par le serveur d'un seul coup, il se joue côté client sur les
+  clés `normKey` déjà en base (`jobKeys`).
 - Le **rendu** du logo revient à Brandfetch, qui le sert bien dès qu'on lui donne le
   bon domaine. Ses conditions interdisent l'accès programmatique à l'image et exigent
   un `Referer` : le serveur construit l'URL du CDN, le navigateur la charge. Sans

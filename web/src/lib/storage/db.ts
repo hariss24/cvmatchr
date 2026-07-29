@@ -8,6 +8,7 @@ import type { JobSearchProfile } from "@/lib/jobs/profile";
 import type { Application } from "@/lib/applications/types";
 import type { SourceId } from "@/lib/jobs/offer";
 import { GRADE_ORDER, type Grade } from "@/lib/jobs/grade";
+import { normKey } from "@/lib/applications/normKey";
 import type { Ligne } from "@/lib/jobs/rank/criteria";
 
 // ---------------------------------------------------------------------------
@@ -328,6 +329,23 @@ export async function saveJob(entry: JobEntry) {
     await db.jobs.put(entry);
   } catch (e) {
     console.warn("saveJob error:", e);
+  }
+}
+
+/**
+ * Clés `normKey` de toutes les offres en base, statuts confondus.
+ *
+ * Sert au dédoublonnage inter-source du scan. Les statuts sont confondus à
+ * dessein : une offre écartée ne doit pas revenir sous l'identifiant d'une autre
+ * source.
+ */
+export async function jobKeys(): Promise<Set<string>> {
+  try {
+    const all = await db.jobs.toArray();
+    return new Set(all.map((j) => normKey(j.company, j.title)).filter(Boolean));
+  } catch (e) {
+    console.warn("jobKeys error:", e);
+    return new Set();
   }
 }
 
