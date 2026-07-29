@@ -9,6 +9,7 @@ import {
   SYSTEM_TEXT_TO_RESUME,
   SYSTEM_EDITOR_CHAT,
   HUMAN_TONE_RULE,
+  CONCISION_RULE,
   LETTER_FIELDS_RULE,
   tailorResumeSystem,
   type TailorLevel,
@@ -87,6 +88,24 @@ describe("prompts — cohérence des niveaux (pas de contradiction base/niveau)"
       expect(sys, level).toContain("1 PAGE");
       expect(sys, level).toContain("Mot clé — Description");
     }
+  });
+
+  // La concision fait gagner de la hauteur de page, mais « subtil » promet à
+  // l'utilisateur de ne rien raccourcir : les deux consignes ensemble laisseraient le
+  // modèle arbitrer seul. Elle ne part qu'avec les niveaux qui réécrivent déjà.
+  it("la concision accompagne les niveaux qui réécrivent, jamais 'peu'", () => {
+    expect(tailorResumeSystem("peu")).not.toContain("CONCISION");
+    expect(tailorResumeSystem("peu")).toContain("PAS D'ÉLAGAGE");
+    for (const level of ["adapte", "hyper"] as const) {
+      expect(tailorResumeSystem(level), level).toContain("CONCISION");
+    }
+  });
+
+  // Raccourcir ne doit jamais devenir un prétexte à jeter un fait : c'est l'emballage
+  // qu'on retire, pas le contenu.
+  it("la concision interdit explicitement de perdre une information", () => {
+    expect(CONCISION_RULE).toContain("JAMAIS à supprimer un fait");
+    expect(CONCISION_RULE).toContain("à information égale");
   });
 
   it("tous les niveaux JSON protègent les résultats chiffrés et la séniorité", () => {

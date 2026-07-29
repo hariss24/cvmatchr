@@ -331,6 +331,20 @@ Modales de référence : `TailorModal.tsx`, `PackModal.tsx` (Pack candidature : 
   (proposer une clé personnelle via ⚙️ Paramètres).
 - **`TODO.md`** liste encore en priorité haute un « Nettoyage et stabilisation
   globale post-migration » — ne pas supposer que tout est figé/nettoyé.
+- **Nom du PDF ≠ contenu de la barre meta** : `lib/pdfgen/filename.ts` ne retient
+  que le type de document et le poste (`CV_Chef_de_projet`), plus la date en
+  option. L'entreprise reste saisie et stockée — elle sert au suivi de
+  candidature et à l'historique — mais n'entre pas dans le nom du fichier, pas
+  plus que le nom du candidat. Ne pas les y remettre « pour être complet » : le
+  nom devenait illisible.
+- **`useAutoDraft` ne restaure pas une entreprise/un poste déjà posés** : arriver
+  par « Adapter mon CV » depuis l'onglet Offres écrit la meta de l'offre AVANT de
+  naviguer vers l'éditeur ; le brouillon, restauré aveuglément, l'écrasait avec
+  celle de la candidature précédente. Le drapeau est lu avant tout `await` — le
+  store bouge pendant le chargement du brouillon.
+- **`AtsPanel` garde sa dernière analyse hors de React** (`derniere`, module) :
+  `TailorModal` démonte son contenu à la fermeture, et le rapport repartait avec.
+  Il est indexé par le texte de l'offre — une autre offre ne le récupère jamais.
 
 ---
 

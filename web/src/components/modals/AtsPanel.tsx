@@ -28,6 +28,16 @@ import { toast } from "@/state/uiStore";
 
 const scoreClass = (s: number) => (s >= 70 ? "ats-ok" : s >= 45 ? "ats-mid" : "ats-low");
 
+/**
+ * Dernière analyse, conservée hors de React.
+ *
+ * `TailorModal` se démonte à la fermeture : l'analyse vivait dans l'état local du
+ * panneau et partait avec lui, obligeant à relancer un appel IA pour la même offre.
+ * Elle est retenue avec l'offre qui l'a produite — rouvrir la modale la retrouve,
+ * mais une AUTRE offre ne récupère jamais le rapport de la précédente.
+ */
+let derniere: { jobDesc: string; report: AtsReport; priorities: Priority[]; byAi: boolean } | null = null;
+
 type AiResponse = {
   job_title: string;
   requirements: Requirement[];
@@ -90,9 +100,10 @@ function Priorities({ items }: { items: Priority[] }) {
 }
 
 export default function AtsPanel({ jobDesc }: { jobDesc: string }) {
-  const [report, setReport] = useState<AtsReport | null>(null);
-  const [priorities, setPriorities] = useState<Priority[]>([]);
-  const [byAi, setByAi] = useState(false);
+  const reprise = derniere?.jobDesc === jobDesc.trim() ? derniere : null;
+  const [report, setReport] = useState<AtsReport | null>(reprise?.report ?? null);
+  const [priorities, setPriorities] = useState<Priority[]>(reprise?.priorities ?? []);
+  const [byAi, setByAi] = useState(reprise?.byAi ?? false);
   const [busy, setBusy] = useState(false);
 
   const docType = useDocStore((s) => s.docType);
@@ -114,6 +125,14 @@ export default function AtsPanel({ jobDesc }: { jobDesc: string }) {
     return { resume: json as Resume, desc, role };
   };
 
+  /** Affiche le rapport et le retient pour la prochaine ouverture de la modale. */
+  const garder = (jobDesc: string, report: AtsReport, priorities: Priority[], byAi: boolean) => {
+    setReport(report);
+    setPriorities(priorities);
+    setByAi(byAi);
+    derniere = { jobDesc, report, priorities, byAi };
+  };
+
   const runAi = async () => {
     const input = inputs();
     if (!input) return;
@@ -124,13 +143,10 @@ export default function AtsPanel({ jobDesc }: { jobDesc: string }) {
         job_desc: input.desc,
         role: input.role,
       });
-      setReport(analyzeWithRequirements(input.resume, res.requirements, input.role || res.job_title));
-      setPriorities(res.priorities);
-      setByAi(true);
+      const rapport = analyzeWithRequirements(input.resume, res.requirements, input.role || res.job_title);
+      garder(input.desc, rapport, res.priorities, true);
     } catch {
-      setReport(analyzeResumeAts(input.resume, input.desc, input.role));
-      setPriorities([]);
-      setByAi(false);
+      garder(input.desc, analyzeResumeAts(input.resume, input.desc, input.role), [], false);
       toast("Analyse IA indisponible — score algorithmique local affiché.", "info");
     } finally {
       setBusy(false);

@@ -5,6 +5,7 @@ import { useDocStore } from "@/state/docStore";
 import { DEFAULT_RESUME, type Resume, type Letter, type DocType } from "@/lib/resume/schema";
 import type { DocData } from "@/state/docStore";
 import { generateResumePdfBlob, generateLetterPdfBlob } from "@/lib/pdfgen/generatePdf";
+import { buildPdfFilename } from "@/lib/pdfgen/filename";
 // import removed
 import { toast, uiAlert, uiConfirm } from "@/state/uiStore";
 import { saveHistoryEntry, loadProfile } from "@/lib/storage/db";
@@ -16,25 +17,10 @@ import MobileMenu from "@/components/layout/MobileMenu";
 import SegmentedNav from "@/components/layout/SegmentedNav";
 import UserMenu from "@/components/layout/UserMenu";
 
-function slug(s: string): string {
-  return s.trim()
-    .normalize("NFD").replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-zA-Z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-}
-
 /** Nom de la personne selon le type : `sender_name` pour une lettre, `name` pour un CV (M3). */
 function personNameFor(docType: DocType, json: DocData): string {
   const name = docType === "Lettre" ? (json as Letter).sender_name : (json as Resume).name;
   return name?.trim() || docType;
-}
-
-function buildFilename(name: string, docType: string, company: string, role: string, includeDate: boolean): string {
-  const parts = [slug(name), slug(docType)];
-  if (company) parts.push(slug(company));
-  if (role) parts.push(slug(role));
-  if (includeDate) parts.push(new Date().toISOString().slice(0, 10));
-  return parts.filter(Boolean).join("_");
 }
 
 /**
@@ -46,7 +32,6 @@ export default function TopBar() {
   const docType = useDocStore((s) => s.docType);
   const templateId = useDocStore((s) => s.templateId);
   const json = useDocStore((s) => s.json);
-  const company = useDocStore((s) => s.company);
   const role = useDocStore((s) => s.role);
   const includeDate = useDocStore((s) => s.includeDate);
   const setJson = useDocStore((s) => s.setJson);
@@ -55,8 +40,7 @@ export default function TopBar() {
   const [chatOpen, setChatOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const personName = personNameFor(docType, json);
-  const filename = buildFilename(personName, docType, company, role, includeDate);
+  const filename = buildPdfFilename(docType, role, includeDate);
 
   const toggleTheme = () => {
     const isDark = document.documentElement.getAttribute("data-theme") === "dark";
@@ -82,7 +66,9 @@ export default function TopBar() {
     const { company, role, includeDate, docType: currentDocType, json: currentJson } = useDocStore.getState();
     const name = personNameFor(currentDocType, currentJson);
 
-    const filename = buildFilename(name, currentDocType, company, role, includeDate);
+    // L'entreprise reste dans le store (suivi de candidature, historique) mais ne
+    // rentre plus dans le nom du fichier, qui devenait interminable.
+    const filename = buildPdfFilename(currentDocType, role, includeDate);
     isConverting.current = true;
     setBusy(true);
     try {

@@ -208,6 +208,36 @@ export const RESUME_TAILOR_RULES: Record<TailorLevel, string> = {
     "entreprises du parcours ou les diplômes.\n",
 };
 
+/**
+ * Concision du CV. Elle mérite sa propre règle parce que la longueur d'une ligne a
+ * ici un coût physique : une puce qui déborde pousse le CV sur une deuxième page.
+ *
+ * Le modèle a un biais inverse — il paraphrase le terme métier (« analyse de la
+ * performance » là où le métier dit « analyse de KPI ») et allonge par politesse.
+ * La règle vise donc la LONGUEUR À INFORMATION ÉGALE, jamais la coupe d'un fait :
+ * c'est l'emballage qu'on retire, pas le contenu.
+ */
+export const CONCISION_RULE =
+  "CONCISION — CHAQUE LIGNE COÛTE DE LA HAUTEUR DE PAGE :\n" +
+  "Le CV doit tenir sur une page. Tu écris donc le texte le plus COURT qui dit " +
+  "EXACTEMENT la même chose. Cette règle ne t'autorise JAMAIS à supprimer un fait, un " +
+  "chiffre, un outil ou une responsabilité : à information égale, tu choisis la " +
+  "formulation la plus brève.\n" +
+  "- Le terme métier plutôt que sa paraphrase : « analyse de KPI » et non « analyse de " +
+  "la performance », « reporting » et non « réalisation de rapports d'activité », " +
+  "« recrutement » et non « participation au processus de recrutement ».\n" +
+  "- Les sigles usuels du métier sont admis quand ils sont universellement lus dans le " +
+  "secteur (KPI, ROI, CRM, SEO, RH, B2B, CA). Un sigle obscur ou interne, jamais.\n" +
+  "- Coupe les amorces creuses : « participation à », « en charge de », « dans le cadre " +
+  "de », « mise en place d'une démarche de », « contribution à ». Commence par le verbe " +
+  "d'action ou par le résultat.\n" +
+  "- Une puce d'expérience = une idée, idéalement moins de 120 caractères. Deux idées " +
+  "dans une puce font deux puces, ou une seule si la seconde est accessoire.\n" +
+  "- Pas d'adjectif décoratif (« véritable », « complet », « approfondi », « divers », " +
+  "« multiple ») : il occupe de la place sans rien apprendre.\n" +
+  "TEST AVANT DE RENVOYER CHAQUE LIGNE : peux-tu retirer un mot sans perdre une " +
+  "information ? Alors retire-le.\n\n";
+
 export const SYSTEM_TAILOR_RESUME_BASE =
   "Tu es un expert en optimisation de CV. Tu reçois un CV au format JSON structuré et une " +
   "offre d'emploi. Tu renvoies le MÊME CV au format JSON, adapté à l'offre.\n\n" +
@@ -247,8 +277,17 @@ export const SYSTEM_TAILOR_RESUME_TAIL =
 
 /** Assemble le prompt système d'adaptation JSON selon le niveau (port de `tailor_resume`). */
 export function tailorResumeSystem(level: TailorLevel): string {
-  const rules = RESUME_TAILOR_RULES[level] ?? RESUME_TAILOR_RULES.adapte;
-  return SYSTEM_TAILOR_RESUME_BASE + rules + HUMAN_TONE_RULE + SYSTEM_TAILOR_RESUME_TAIL;
+  const known = level in RESUME_TAILOR_RULES ? level : "adapte";
+  const rules = RESUME_TAILOR_RULES[known];
+  // Le niveau « subtil » promet de ne rien raccourcir : lui joindre la règle de
+  // concision serait une consigne contre l'autre, et le modèle tranche au hasard.
+  // Elle ne part donc qu'avec les niveaux qui réécrivent déjà le CV.
+  //
+  // Elle arrive APRÈS le ton : `HUMAN_TONE_RULE` demande d'alterner phrases courtes
+  // et longues — juste pour une lettre, néfaste pour une puce de CV, où c'est la
+  // brièveté qui tranche. La dernière consigne lue est celle qui pèse.
+  const concision = known === "peu" ? "" : CONCISION_RULE;
+  return SYSTEM_TAILOR_RESUME_BASE + rules + HUMAN_TONE_RULE + concision + SYSTEM_TAILOR_RESUME_TAIL;
 }
 
 // ---- chat éditeur (port de _SYSTEM_EDITOR_CHAT, ai_engine.py) ----------------

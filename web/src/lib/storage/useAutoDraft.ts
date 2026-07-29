@@ -14,15 +14,23 @@ export function useAutoDraft() {
     async function init() {
       if (isLoaded.current) return;
       const docType = useDocStore.getState().docType;
-      
+
+      // « Adapter mon CV » depuis l'onglet Offres pose l'entreprise et le poste de
+      // l'offre AVANT de naviguer ici. Le brouillon, lui, porte ceux de la
+      // candidature précédente : restauré aveuglément, il les écrasait et le PDF
+      // sortait au nom de l'ancien poste. Une valeur déjà posée fait donc foi —
+      // lu maintenant, avant tout `await`, car le store bouge pendant le chargement.
+      const posee = useDocStore.getState();
+      const garderMeta = { company: !!posee.company.trim(), role: !!posee.role.trim() };
+
       try {
         const draft = await loadDraft(`draft-${docType}`);
         if (draft) {
           useDocStore.setState({
             json: draft.json,
             templateId: draft.templateId || "sobre",
-            ...(draft.company !== undefined ? { company: draft.company } : {}),
-            ...(draft.role !== undefined ? { role: draft.role } : {}),
+            ...(draft.company !== undefined && !garderMeta.company ? { company: draft.company } : {}),
+            ...(draft.role !== undefined && !garderMeta.role ? { role: draft.role } : {}),
           });
         } else if (docType === "CV" || docType === "Maître") {
           const profile = await loadProfile();
