@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import UiHost from "@/components/ui/UiHost";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -40,6 +41,7 @@ export default function RootLayout({
         />
         {children}
         <UiHost />
+        <Analytics />
       </body>
     </html>
   );
