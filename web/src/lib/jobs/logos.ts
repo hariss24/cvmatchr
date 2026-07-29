@@ -15,12 +15,27 @@
  *    `nexton-group.com`. Exiger que le nom corresponde exactement ne protège de
  *    rien : les trois s'appellent réellement « Nexton ».
  *
- * Le nom d'une entreprise n'identifie donc pas l'entreprise. Ce module ne fait
- * plus confiance à un annuaire : il **vérifie**. Tout domaine candidat, d'où
- * qu'il vienne, doit être confirmé par trois signaux indépendants — une
- * extension plausible, une page d'accueil qui se réclame de cette entreprise, et
- * un site qui s'adresse au marché français. Sans confirmation, pas de logo :
- * l'initiale.
+ * Le nom d'une entreprise n'identifie donc pas l'entreprise. Aucun domaine n'est
+ * donc pris au mot : tous passent d'abord deux filtres gratuits — une extension
+ * plausible (`tldPlausible`) et un domaine qui épouse le nom (`domaineProche`).
+ * Ces deux-là suffisent d'ailleurs à barrer les deux échecs racontés plus haut :
+ * `nexton.com.pk` tombe sur l'extension, `escpbachelorblog.com` sur le nom.
+ *
+ * Au-delà, deux régimes, parce que les candidats n'ont pas la même provenance :
+ *
+ * - **Deviné** à partir du nom : rien ne le cautionne, donc on visite sa page
+ *   d'accueil, et la preuve de langue écarte les homonymes (`nexton.com`,
+ *   quartier résidentiel de Caroline du Sud). C'est la preuve la plus directe,
+ *   donc elle passe en premier.
+ * - **Nommé par l'annuaire**, sous le nom exact de l'entreprise, quand aucun
+ *   deviné n'a convaincu : on le retient sans le visiter. Exiger cette visite ne
+ *   protégeait de rien et coûtait cher — `thea.com` s'affiche en anglais,
+ *   `decathlon.fr` et `cbre.fr` répondent 403 aux robots, `pepsico.fr` n'a pas de
+ *   titre lisible. Toutes perdaient leur logo alors que l'annuaire les connaît. Or
+ *   c'est justement cette connaissance qui compte : un domaine qu'il référence a un
+ *   logo au CDN, là où un domaine inventé n'y renvoie qu'une tuile blanche.
+ *
+ * Sans confirmation, pas de logo : l'initiale.
  *
  * Le rendu du logo, lui, revient à Brandfetch, qui le sert très bien dès lors
  * qu'on lui donne le bon domaine (`logoUrlFor`).
@@ -143,7 +158,7 @@ function viseLaFrance(domain: string, html: string): boolean {
   return lang === "fr";
 }
 
-/** Page d'accueil ; "" si le site est injoignable. */
+/** Page d'accueil ; "" si le serveur refuse de la livrer. */
 async function fetchAccueil(domain: string, signal: AbortSignal): Promise<string> {
   const res = await fetch(`https://${domain}`, {
     signal,
@@ -160,7 +175,15 @@ async function siteConfirme(domain: string, company: string): Promise<boolean> {
   const minuteur = setTimeout(() => ctrl.abort(), 6000);
   try {
     const html = await fetchAccueil(domain, ctrl.signal);
-    if (!html || !viseLaFrance(domain, html)) return false;
+
+    // Les grandes enseignes se défendent contre les robots : `decathlon.fr`,
+    // `cbre.fr` et `manpower.fr` répondent 403 sans une ligne de HTML. Faute de
+    // preuve, elles perdaient toutes leur logo. Or un serveur qui répond, sur un
+    // `.fr` qui porte déjà le nom de l'entreprise, est tout sauf un domaine parké :
+    // ceux-là répondent 200 et affichent tranquillement leur page de vente.
+    if (!html) return domain.toLowerCase().endsWith(".fr");
+
+    if (!viseLaFrance(domain, html)) return false;
     const titre = /<title[^>]*>([^<]{0,200})/i.exec(html)?.[1]?.trim() ?? "";
     return titreConfirme(titre, company);
   } catch {
@@ -188,24 +211,28 @@ async function domainesAnnuaire(company: string, clientId: string): Promise<stri
  * Domaine officiel d'une entreprise, ou "" si rien n'a pu être confirmé.
  *
  * L'annuaire passe en premier : quand il a raison, il trouve des domaines
- * qu'aucune règle ne saurait deviner (`escp.eu` pour « ESCP Business School »).
- * Les candidats devinés prennent le relais, et couvrent les PME absentes des
- * annuaires. Dans les deux cas la confirmation est la même, donc une mauvaise
- * suggestion coûte une requête, jamais un faux logo.
+ * qu'aucune règle ne saurait deviner (`escp.eu` pour « ESCP Business School »),
+ * et il les donne sous le nom exact de l'entreprise. Les candidats devinés
+ * prennent le relais, et couvrent les PME qu'aucun annuaire ne connaît — eux
+ * seuls doivent faire leurs preuves, faute de caution.
  */
 export async function resolveDomain(company: string, clientId: string): Promise<string> {
-  // L'annuaire est borné à ses trois premières suggestions : au-delà il s'éloigne
-  // du nom cherché, et il ne doit pas évincer les candidats devinés, qui couvrent
-  // les PME qu'il ne connaît pas.
-  const annuaire = (await domainesAnnuaire(company, clientId).catch(() => [])).slice(0, 3);
-  const candidats = [...new Set([...annuaire, ...domainCandidates(company)])].filter(
-    (d) => tldPlausible(d) && domaineProche(d, company),
-  );
+  const recevable = (d: string) => tldPlausible(d) && domaineProche(d, company);
 
-  for (const d of candidats) {
+  // Les devinés passent en premier : un site français qui se réclame de l'entreprise
+  // est la preuve la plus directe qui soit, et elle départage ce que l'annuaire
+  // confond. Pour « Fab Group », il propose `fabgroup.com`, un fabricant de meubles
+  // italien, quand `fab-group.fr` répond en français au bon nom.
+  for (const d of domainCandidates(company).filter(recevable)) {
     if (await siteConfirme(d, company)) return d;
   }
-  return "";
+
+  // À défaut, l'annuaire, borné à ses trois premières suggestions : au-delà il
+  // s'éloigne du nom cherché.
+  const annuaire = (await domainesAnnuaire(company, clientId).catch(() => []))
+    .slice(0, 3)
+    .filter(recevable);
+  return annuaire[0] ?? "";
 }
 
 /**

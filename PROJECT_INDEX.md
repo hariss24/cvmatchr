@@ -211,10 +211,19 @@ Pièges :
   **Un nom d'entreprise n'identifie pas une entreprise** : « Nexton » désigne aussi
   un vendeur pakistanais (`nexton.com.pk`), un éditeur japonais (`nexton-net.jp`) et
   un lotissement américain (`nexton.com`) — tous réellement nommés ainsi. Annuaires
-  (Brandfetch, Wikidata) comme domaines devinés y tombent. Tout domaine candidat est
-  donc **vérifié** par trois signaux : extension en liste blanche, page d'accueil qui
-  se réclame de l'entreprise, et site visant la France (`.fr` ou `lang="fr"`). Sans
-  confirmation : initiale, jamais de logo approximatif.
+  (Brandfetch, Wikidata) comme domaines devinés y tombent. Tout candidat passe donc
+  deux filtres gratuits — extension en liste blanche, domaine qui épouse le nom —
+  puis, selon sa provenance : un **domaine deviné** doit être confirmé par sa page
+  d'accueil (titre au nom de l'entreprise, site visant la France) ; un **domaine
+  nommé par l'annuaire** est retenu sans visite, sa présence au répertoire valant
+  caution. Les devinés sont essayés en premier, parce que l'annuaire ne départage
+  pas les homonymes (pour « Fab Group » il propose un fabricant de meubles italien).
+  Sans confirmation : initiale, jamais de logo approximatif.
+- **Le CDN Brandfetch ne renvoie jamais 404** : pour un domaine qu'il ne connaît pas,
+  il sert une image *vide* de 128×128. Le repli sur l'initiale, déclenché par l'erreur
+  de chargement, ne peut donc pas s'appliquer — un domaine réel mais absent du
+  répertoire (`primark.fr`, `tecnoglobe.fr`) donne une tuile blanche. C'est le prix
+  assumé de la vérification côté site : neutre à l'œil, jamais trompeur.
 - Le **rendu** du logo revient à Brandfetch, qui le sert bien dès qu'on lui donne le
   bon domaine. Ses conditions interdisent l'accès programmatique à l'image et exigent
   un `Referer` : le serveur construit l'URL du CDN, le navigateur la charge. Sans

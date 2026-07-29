@@ -6,8 +6,11 @@ import {
 
 const offre = (company: string, logoUrl = "") => ({ company, logoUrl });
 
-/** Sert de faux internet : une page par domaine, tout le reste injoignable. */
-function stubWeb(sites: Record<string, string>, annuaire: Record<string, unknown[]> = {}) {
+/**
+ * Sert de faux internet : une page par domaine, tout le reste injoignable.
+ * `null` en guise de page = un serveur qui répond mais refuse de la livrer (403).
+ */
+function stubWeb(sites: Record<string, string | null>, annuaire: Record<string, unknown[]> = {}) {
   const appels: string[] = [];
   vi.stubGlobal("fetch", vi.fn(async (url: string) => {
     appels.push(url);
@@ -18,6 +21,7 @@ function stubWeb(sites: Record<string, string>, annuaire: Record<string, unknown
     const domaine = url.replace("https://", "").replace(/\/$/, "");
     const html = sites[domaine];
     if (html === undefined) throw new Error("injoignable");
+    if (html === null) return { ok: false, text: async () => "" };
     return { ok: true, text: async () => html };
   }));
   return appels;
@@ -114,6 +118,15 @@ describe("resolveDomain", () => {
     expect(await resolveDomain("Groupe Covéa", "cid")).toBe("covea.com");
   });
 
+  // `thea.com` s'affiche en anglais, `decathlon.fr` répond 403 : exiger une visite
+  // de la page d'accueil privait de logo des marques que l'annuaire connaît par
+  // leur nom exact — et qui ont donc, elles, un logo au CDN.
+  it("retient un domaine d'annuaire sans visiter son site", async () => {
+    const appels = stubWeb({}, { "Laboratoires Théa": [{ name: "Laboratoires Théa", domain: "thea.com" }] });
+    expect(await resolveDomain("Laboratoires Théa", "cid")).toBe("thea.com");
+    expect(appels).not.toContain("https://thea.com");
+  });
+
   // Deux homonymes réels que l'extension ne peut pas départager : `nexton.com`
   // est un quartier résidentiel américain, `fabgroup.com` un fabricant italien.
   // Leur titre parle bien de l'entreprise cherchée ; seule la langue les trahit.
@@ -146,6 +159,28 @@ describe("resolveDomain", () => {
   it("ne retient pas un domaine dont le site ne parle pas de l'entreprise", async () => {
     stubWeb({ "acme.fr": "<title>Domaine à vendre</title>" });
     expect(await resolveDomain("Acme", "cid")).toBe("");
+  });
+
+  // Un `.fr` au nom de l'entreprise qui répond 403 est une enseigne qui se protège
+  // des robots, pas un domaine parké : ceux-là servent leur page de vente en 200.
+  it("accepte un .fr qui bloque les robots", async () => {
+    stubWeb({ "decathlon.fr": null });
+    expect(await resolveDomain("Decathlon", "cid")).toBe("decathlon.fr");
+  });
+
+  it("n'accorde pas la même indulgence à un .com muet", async () => {
+    stubWeb({ "nexton.com": null });
+    expect(await resolveDomain("Nexton", "cid")).toBe("");
+  });
+
+  // L'annuaire ne tranche pas les homonymes : pour « Fab Group », il donne le
+  // fabricant de meubles italien. Un site français au bon nom passe donc devant.
+  it("préfère un site français confirmé à la suggestion de l'annuaire", async () => {
+    stubWeb(
+      { "fab-group.fr": "<title>Fab Group, agence conseil</title>" },
+      { "Fab Group": [{ name: "Fab Group", domain: "fabgroup.com" }] },
+    );
+    expect(await resolveDomain("Fab Group", "cid")).toBe("fab-group.fr");
   });
 });
 
