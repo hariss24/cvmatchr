@@ -16,6 +16,7 @@ import type { JobSearchProfile } from "./profile";
 import { type JobOffer, yearlySalaryLabel } from "./offer";
 import { hostnameOf } from "./board";
 import { isExcludedText } from "./exclude";
+import { parVagues, fetchDelai } from "./reseau";
 
 const SEARCH_URL = "https://api.openwebninja.com/jsearch/search-v2";
 
@@ -49,6 +50,33 @@ function placeName(label: string): string {
   return label.replace(/\s*\(.*\)\s*$/, "").trim();
 }
 
+/** Offres brutes pour un mot-clé ; [] si la requête échoue, expire ou est refusée. */
+async function chercheMotCle(
+  keyword: string,
+  place: string,
+  profile: JobSearchProfile,
+  apiKey: string,
+): Promise<RawJSearch[]> {
+  const params = new URLSearchParams({
+    query: place ? `${keyword} en ${place}` : keyword,
+    country: "fr",
+    language: "fr",
+    date_posted: datePosted(profile.maxAgeDays),
+    num_pages: "1",
+  });
+
+  try {
+    const res = await fetchDelai(`${SEARCH_URL}?${params}`, {
+      headers: { "x-api-key": apiKey, Accept: "application/json" },
+    });
+    if (!res.ok) return [];
+    return ((await res.json()) as { data?: { jobs?: RawJSearch[] } }).data?.jobs ?? [];
+  } catch {
+    // Panne réseau ou délai dépassé : ce mot-clé ne rapporte rien, les autres continuent.
+    return [];
+  }
+}
+
 /**
  * Une requête par mot-clé, résultats fusionnés et dédoublonnés par id.
  * Une requête en échec renvoie [] sans faire échouer les autres.
@@ -62,28 +90,15 @@ export async function searchJSearch(
   const place = placeName(profile.location.label);
   const seen = new Set<string>();
   const offers: JobOffer[] = [];
-  let calls = 0;
 
-  for (const keyword of profile.keywords) {
-    const params = new URLSearchParams({
-      query: place ? `${keyword} en ${place}` : keyword,
-      country: "fr",
-      language: "fr",
-      date_posted: datePosted(profile.maxAgeDays),
-      num_pages: "1",
-    });
+  const parMotCle = await parVagues(profile.keywords, (k) =>
+    chercheMotCle(k, place, profile, creds.apiKey),
+  );
 
-    calls++;
-    let raw: RawJSearch[] = [];
-    try {
-      const res = await fetch(`${SEARCH_URL}?${params}`, {
-        headers: { "x-api-key": creds.apiKey, Accept: "application/json" },
-      });
-      if (res.ok) raw = ((await res.json()) as { data?: { jobs?: RawJSearch[] } }).data?.jobs ?? [];
-    } catch {
-      // Panne réseau ponctuelle : cette requête ne rapporte rien, les autres continuent.
-    }
+  // Le quota se compte en requêtes émises, échecs compris.
+  const calls = profile.keywords.length;
 
+  for (const raw of parMotCle) {
     for (const o of raw) {
       const id = o.job_id ? `jsearch-${o.job_id}` : "";
       if (!id || seen.has(id)) continue;

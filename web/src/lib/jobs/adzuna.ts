@@ -9,6 +9,7 @@
 import type { JobSearchProfile } from "./profile";
 import { type JobOffer, yearlySalaryLabel } from "./offer";
 import { hostnameOf } from "./board";
+import { parVagues, fetchDelai } from "./reseau";
 import { isExcludedText } from "./exclude";
 
 const SEARCH_URL = "https://api.adzuna.com/v1/api/jobs/fr/search/1";
@@ -56,9 +57,8 @@ export async function searchAdzuna(
 
   const seen = new Set<string>();
   const offers: JobOffer[] = [];
-  let calls = 0;
 
-  for (const keyword of profile.keywords) {
+  const parMotCle = await parVagues(profile.keywords, async (keyword) => {
     const params = new URLSearchParams({
       app_id: creds.appId,
       app_key: creds.appKey,
@@ -82,15 +82,20 @@ export async function searchAdzuna(
     }
     if (profile.salaireMin != null) params.set("salary_min", String(profile.salaireMin));
 
-    calls++;
-    let raw: RawAdzuna[] = [];
     try {
-      const res = await fetch(`${SEARCH_URL}?${params}`, { headers: { Accept: "application/json" } });
-      if (res.ok) raw = ((await res.json()) as { results?: RawAdzuna[] }).results ?? [];
+      const res = await fetchDelai(`${SEARCH_URL}?${params}`, { headers: { Accept: "application/json" } });
+      if (!res.ok) return [];
+      return ((await res.json()) as { results?: RawAdzuna[] }).results ?? [];
     } catch {
-      // Panne réseau ponctuelle : cette requête ne rapporte rien, les autres continuent.
+      // Panne réseau ou délai dépassé : ce mot-clé ne rapporte rien, les autres continuent.
+      return [] as RawAdzuna[];
     }
+  });
 
+  // Le quota se compte en requêtes émises, échecs compris.
+  const calls = profile.keywords.length;
+
+  for (const raw of parMotCle) {
     for (const o of raw) {
       const id = o.id ? `adzuna-${o.id}` : "";
       if (!id || seen.has(id)) continue;

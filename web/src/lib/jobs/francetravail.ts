@@ -5,6 +5,7 @@
 
 import type { JobSearchProfile } from "./profile";
 import { isExcludedText } from "./exclude";
+import { parVagues, fetchDelai } from "./reseau";
 
 /** Offre brute renvoyée par l'API France Travail (champs utilisés uniquement). */
 export interface RawOffer {
@@ -101,7 +102,7 @@ async function fetchOffers(
     params.set("periodeSalaire", profile.periodeSalaire);
   }
 
-  const res = await fetch(`${SEARCH_URL}?${params}`, {
+  const res = await fetchDelai(`${SEARCH_URL}?${params}`, {
     headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
   });
   if (res.status !== 200 && res.status !== 206) return [];
@@ -188,11 +189,17 @@ export async function search(
     const all: JobOffer[] = [];
     const seen = new Set<string>();
 
-    let calls = 0;
+    // Chaque mot-clé attrape sa propre panne : sans ce `catch`, une seule requête
+    // en échec remonterait au `try` englobant et emporterait toute la source, y
+    // compris les résultats des mots-clés qui ont abouti.
+    const parMotCle = await parVagues(profile.keywords, (kw) =>
+      fetchOffers(token, kw, profile).catch(() => [] as RawOffer[]),
+    );
 
-    for (const kw of profile.keywords) {
-      calls++;
-      const raw = await fetchOffers(token, kw, profile);
+    // Le quota se compte en requêtes émises, échecs compris.
+    const calls = profile.keywords.length;
+
+    for (const raw of parMotCle) {
       for (const r of raw) {
         if (r.id && !seen.has(r.id) && !isExcluded(r, profile.excludedWords)) {
           seen.add(r.id);

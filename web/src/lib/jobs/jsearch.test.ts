@@ -81,6 +81,46 @@ describe("searchJSearch", () => {
     expect((await searchJSearch(p, creds)).offers).toEqual([]);
   });
 
+  // En série, huit postes recherchés faisaient durer le scan 44 s à ~5 s la requête.
+  // De front, mais pas tous à la fois : l'API refuse la rafale en 429.
+  it("ne lance jamais plus de 4 requêtes de front", async () => {
+    let vol = 0;
+    let pic = 0;
+    vi.stubGlobal("fetch", vi.fn(async () => {
+      pic = Math.max(pic, ++vol);
+      await new Promise((r) => setTimeout(r, 5));
+      vol--;
+      return { ok: true, status: 200, json: async () => ({ data: { jobs: [] } }) };
+    }));
+
+    const profile = parseProfile({ ...hariss, keywords: ["a", "b", "c", "d", "e", "f", "g", "h"] });
+    const { calls } = await searchJSearch(profile, creds);
+
+    expect(pic).toBe(4);
+    expect(calls).toBe(8); // le quota se compte en requêtes émises, pas en vagues
+  });
+
+  it("abandonne une requête restée en suspens sans perdre les autres", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal("fetch", vi.fn((url: string, init: { signal: AbortSignal }) =>
+      url.includes("bloque")
+        ? new Promise((_, rejeter) => init.signal.addEventListener("abort", () => rejeter(new Error("abort"))))
+        : Promise.resolve({
+            ok: true, status: 200,
+            json: async () => ({ data: { jobs: [{ job_id: "ok", job_title: "Webmaster" }] } }),
+          }),
+    ));
+
+    const profile = parseProfile({ ...hariss, keywords: ["bloque", "webmaster"] });
+    const promesse = searchJSearch(profile, creds);
+    await vi.advanceTimersByTimeAsync(15_000);
+    const { offers } = await promesse;
+
+    expect(offers).toHaveLength(1);
+    expect(offers[0].title).toBe("Webmaster");
+    vi.useRealTimers();
+  });
+
   it("renvoie 0 offre et 0 appel sans mot-clé", async () => {
     const m = stub([]);
     const p = parseProfile({ ...hariss, keywords: [] });

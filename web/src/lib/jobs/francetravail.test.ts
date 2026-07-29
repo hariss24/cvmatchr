@@ -30,6 +30,28 @@ describe("isExcluded", () => {
   });
 });
 
+describe("search", () => {
+  // Le `try` de `search` englobe toute la source : sans rattrapage par mot-clé, une
+  // seule requête en échec emporterait les résultats de tous les autres.
+  it("garde les résultats des mots-clés qui aboutissent malgré un échec", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      if (url.includes("connexion")) return { ok: true, json: async () => ({ access_token: "t" }) };
+      if (url.includes("motsCles=bloque")) throw new Error("panne réseau");
+      return {
+        status: 200,
+        json: async () => ({ resultats: [{ id: "42", intitule: "Webmaster", typeContratLibelle: "CDI" }] }),
+      };
+    }));
+
+    const profile = parseProfile({ ...hariss, keywords: ["bloque", "webmaster"] });
+    const { offers, calls } = await search(profile, { clientId: "id", clientSecret: "s" });
+
+    expect(offers).toHaveLength(1);
+    expect(offers[0].title).toBe("Webmaster");
+    expect(calls).toBe(2);
+  });
+});
+
 describe("mapOffer", () => {
   it("normalise, tronque et déduit la destination (coordonnées prioritaires)", () => {
     const raw: RawOffer = {
