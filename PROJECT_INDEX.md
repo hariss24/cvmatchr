@@ -337,6 +337,16 @@ Modales de référence : `TailorModal.tsx`, `PackModal.tsx` (Pack candidature : 
   candidature et à l'historique — mais n'entre pas dans le nom du fichier, pas
   plus que le nom du candidat. Ne pas les y remettre « pour être complet » : le
   nom devenait illisible.
+- **Adapter sans CV Maître** : `loadMasterResume()` renvoie `null` quand
+  `draft-Maître` est absent ou vide, et `TailorModal` retombe alors sur le CV
+  affiché — donc sur le CV réécrit pour l'offre précédente, que l'IA réécrit à
+  nouveau (dérive cumulative). La retombée est désormais annoncée dans la modale
+  et dans le toast final ; ne pas la re-silencer.
+- **Adapter depuis le type « CV Principal »** : le résultat n'écrase jamais le
+  Maître — `TailorModal` écrit `draft-CV` puis bascule le `docType` sur « CV ».
+  L'ordre compte : `useAutoDraft` recharge le brouillon au changement de type, donc
+  poser le document d'abord et basculer ensuite ferait écraser l'adaptation par
+  l'ancien brouillon. La meta (`company`/`role`) part dans le même `saveDraft`.
 - **`useAutoDraft` ne restaure pas une entreprise/un poste déjà posés** : arriver
   par « Adapter mon CV » depuis l'onglet Offres écrit la meta de l'offre AVANT de
   naviguer vers l'éditeur ; le brouillon, restauré aveuglément, l'écrasait avec

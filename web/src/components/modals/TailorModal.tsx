@@ -10,7 +10,8 @@ import JobExtractor from "./JobExtractor";
 import AtsPanel from "./AtsPanel";
 import { useRouter } from "next/navigation";
 import DiffModal from "./DiffModal";
-import { loadMasterResume } from "@/lib/storage/master";
+import { loadMasterResume, saveMasterResume } from "@/lib/storage/master";
+import { saveDraft } from "@/lib/storage/db";
 import { resolveMeta, buildAdaptedLetter } from "@/lib/letter/adapt";
 import { LETTER_TONES, loadLetterTone, saveLetterTone, type LetterTone } from "@/lib/letter/tone";
 import type { Resume, Letter } from "@/lib/resume/schema";
@@ -54,6 +55,9 @@ export default function TailorModal({
   const [level, setLevel] = useState<TailorLevel>("adapte");
   const [tone, setTone] = useState<LetterTone>(loadLetterTone);
   const [useMaster, setUseMaster] = useState(true);
+  // `null` = pas encore su. Sans CV Maître, l'adaptation retombe en silence sur le CV
+  // affiché : on veut pouvoir le dire AVANT le clic, pas le laisser deviner.
+  const [masterExists, setMasterExists] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
   const [diffOpen, setDiffOpen] = useState(false);
   const tailorBefore = useDocStore((s) => s.tailorBefore);
@@ -63,6 +67,14 @@ export default function TailorModal({
   useEffect(() => {
     if (useDocStore.getState().pendingJobDesc) useDocStore.getState().setPendingJobDesc(null);
   }, []);
+
+  // À chaque ouverture : le CV Maître a pu être créé ou vidé entre deux passages.
+  useEffect(() => {
+    if (!open) return;
+    let vivant = true;
+    void loadMasterResume().then((m) => { if (vivant) setMasterExists(!!m); });
+    return () => { vivant = false; };
+  }, [open]);
 
   // ---- Bottom sheet à ressort (design « Refonte Atelier ») ----
   const sheetRef = useRef<HTMLDivElement | null>(null);
@@ -288,12 +300,35 @@ export default function TailorModal({
         throw new Error("Le CV adapté reçu est vide — CV conservé.");
       }
 
-      const { json, templateId, setTailorBefore } = useDocStore.getState();
+      const { json, templateId, company, role, setTailorBefore } = useDocStore.getState();
       setTailorBefore({ json, templateId });
 
-      setJson({ ...adapted, photo: originalPhoto || (json as Resume).photo || "" });
+      const resultat = { ...adapted, photo: originalPhoto || (json as Resume).photo || "" };
+
+      if (docType === "Maître") {
+        // Le CV Principal est la base de toutes les adaptations : y écrire le résultat
+        // détruirait la source même dont on vient de partir. Le CV adapté atterrit donc
+        // dans le CV, et le Principal reste tel quel.
+        //
+        // Le brouillon est écrit AVANT la bascule : `useAutoDraft` recharge `draft-CV`
+        // dès que le type change, donc il restaure exactement ce qu'on vient d'y mettre.
+        // Poser le document puis basculer ferait l'inverse — sa restauration, plus tardive,
+        // écraserait l'adaptation. La meta voyage avec, sinon le brouillon rendrait
+        // l'entreprise et le poste de la candidature précédente.
+        await saveDraft({ id: "draft-CV", json: resultat, templateId, company, role, updatedAt: Date.now() });
+        useDocStore.setState({ docType: "CV" });
+      } else {
+        setJson(resultat);
+      }
+
       toast(
-        master ? "CV adapté depuis le CV Maître." : "CV adapté avec succès.",
+        docType === "Maître"
+          ? "CV adapté — ton CV Principal est resté intact."
+          : master
+            ? "CV adapté depuis le CV Principal."
+            : useMaster
+              ? "CV adapté à partir du CV affiché — aucun CV Principal enregistré."
+              : "CV adapté avec succès.",
         "success",
       );
 
@@ -303,6 +338,17 @@ export default function TailorModal({
     } finally {
       setBusy(false);
     }
+  };
+
+  /**
+   * Promeut le CV affiché en CV Principal. Offert seulement quand il n'y en a aucun,
+   * donc sans risque d'écraser une base existante.
+   */
+  const enregistrerMaitre = async () => {
+    const { json, templateId } = useDocStore.getState();
+    await saveMasterResume(json as Resume, templateId);
+    setMasterExists(true);
+    toast("CV Principal enregistré — les prochaines adaptations partiront de lui.", "success");
   };
 
   // Blocs partagés CV / lettre, composés différemment par chaque mode.
@@ -443,7 +489,11 @@ export default function TailorModal({
               >
                 <div className="ui-switch-label">
                   <span className="ui-switch-title">Utiliser le CV Principal</span>
-                  <span className="ui-switch-hint">Recommandé si disponible</span>
+                  <span className="ui-switch-hint">
+                    {masterExists === false
+                      ? "Aucun CV Principal — l'adaptation partira du CV affiché"
+                      : "Recommandé si disponible"}
+                  </span>
                 </div>
                 <button
                   type="button"
@@ -456,6 +506,18 @@ export default function TailorModal({
                   <div className="ui-switch-knob" />
                 </button>
               </div>
+
+              {masterExists === false ? (
+                <button
+                  type="button"
+                  className="neu-btn-sm"
+                  disabled={busy}
+                  onClick={enregistrerMaitre}
+                  style={{ alignSelf: "flex-start" }}
+                >
+                  Enregistrer ce CV comme CV Principal
+                </button>
+              ) : null}
 
               <AtsPanel jobDesc={jobDesc} />
             </>
