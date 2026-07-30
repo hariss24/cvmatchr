@@ -2,9 +2,10 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type AiProvider = "gemini" | "anthropic";
-export type AiModel = 
-  | "gemini-3.1-flash-lite" // Default for Gemini
-  | "gemini-1.5-pro" 
+export type AiModel =
+  | "gemini-3.1-flash" // Défaut : voir le commentaire de `activeModel`
+  | "gemini-3.1-flash-lite"
+  | "gemini-1.5-pro"
   | "claude-haiku-4-5-20251001" // Default for Anthropic
   | "claude-3-5-sonnet";
 
@@ -43,7 +44,11 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
     (set) => ({
       geminiKey: "",
       anthropicKey: "",
-      activeModel: "gemini-3.1-flash-lite", // Default model
+      // `flash-lite` était le défaut, et il recopiait mot pour mot le modèle de ton
+      // du prompt de lettre — jusqu'aux amorces de phrase que ce prompt lui interdit
+      // explicitement. Toutes les lettres sortaient identiques. `flash` tient les
+      // consignes négatives, pour un coût du même ordre.
+      activeModel: "gemini-3.1-flash",
       creativity: 0.7,
       globalPrompt: "",
 
@@ -65,6 +70,19 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
     }),
     {
       name: "cv-tailor-settings",
+      // Le réglage est persisté : changer la valeur par défaut ne déplace pas ceux
+      // qui ont déjà lancé l'app. Sans cette migration, `flash-lite` — et ses lettres
+      // toutes identiques — resterait en place indéfiniment. Un choix délibéré pour
+      // `flash-lite` est perdu ; il se refait en deux clics, là où l'inverse serait
+      // invisible.
+      version: 1,
+      migrate: (state, version) => {
+        const s = state as Partial<SettingsState>;
+        if (version < 1 && s.activeModel === "gemini-3.1-flash-lite") {
+          return { ...s, activeModel: "gemini-3.1-flash" } as SettingsState & SettingsActions;
+        }
+        return s as SettingsState & SettingsActions;
+      },
     }
   )
 );

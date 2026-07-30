@@ -88,8 +88,9 @@ export default function SettingsPage() {
                   onChange={(v) => settings.setActiveModel(v)}
                   style={{ width: "100%" }}
                   options={[
-                    { value: "gemini-3.1-flash-lite", label: "Gemini 3.1 Flash (Rapide & Par défaut)", group: "Modèles Google (Gemini)" },
-                    { value: "gemini-1.5-pro", label: "Gemini 1.5 Pro (Puissant)", group: "Modèles Google (Gemini)" },
+                    { value: "gemini-3.1-flash", label: "Gemini 3.1 Flash (Par défaut — recommandé)", group: "Modèles Google (Gemini)" },
+                    { value: "gemini-3.1-flash-lite", label: "Gemini 3.1 Flash Lite (Le moins cher)", group: "Modèles Google (Gemini)" },
+                    { value: "gemini-1.5-pro", label: "Gemini 1.5 Pro (Génération précédente)", group: "Modèles Google (Gemini)" },
                     { value: "claude-3-5-sonnet", label: "Claude 3.5 Sonnet (Très intelligent)", group: "Modèles Anthropic (Claude)" },
                     { value: "claude-haiku-4-5-20251001", label: "Claude 3.5 Haiku (Ultra rapide)", group: "Modèles Anthropic (Claude)" },
                   ]}

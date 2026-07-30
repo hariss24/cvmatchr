@@ -69,7 +69,7 @@ describe("POST /api/adapt-letter", () => {
     expect(mockComplete.mock.calls[0][1]).toContain("FACTUEL ET CONCRET");
 
     await POST(req({ letter_body: "ma lettre", job_desc: "offre", tone: "n'importe quoi" }));
-    expect(mockComplete.mock.calls[1][1]).toContain("AUTHENTIQUE ET PERSONNEL");
+    expect(mockComplete.mock.calls[1][1]).toContain("AUTHENTIQUE, PERSONNEL ET HUMAIN");
   });
 
   it("400 si lettre ou offre manquante", async () => {

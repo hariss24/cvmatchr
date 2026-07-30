@@ -174,17 +174,34 @@ describe('prompts — adapt letter / extract meta', () => {
     expect(adapte).toContain("n'est pas « sa voix »");
   });
 
-  it("chaque registre porte son modèle de ton et garde les règles communes", () => {
+  it("chaque registre porte son exemple de ton et garde les règles communes", () => {
     for (const tone of TONES) {
       const sys = adaptLetterSystem(tone, "adapte");
       expect(sys, tone).toContain("REGISTRE DEMANDÉ");
-      expect(sys, tone).toContain("MODÈLE DE TON");
       expect(sys, tone).toContain("TONALITÉ");
       expect(sys, tone).toContain("INTERDICTION ABSOLUE DE LAISSER UN TROU");
       expect(sys, tone).toContain("NE RECOPIE PAS LE VOCABULAIRE DE L'OFFRE");
     }
     expect(adaptLetterSystem("factuel", "adapte")).toContain("FACTUEL ET CONCRET");
-    expect(adaptLetterSystem("humain", "adapte")).toContain("AUTHENTIQUE ET PERSONNEL");
+    expect(adaptLetterSystem("humain", "adapte")).toContain("AUTHENTIQUE, PERSONNEL ET HUMAIN");
+  });
+
+  // `flash-lite` recopiait la lettre-exemple en entier, amorces comprises, et la servait
+  // au recruteur comme l'expérience du candidat. Un exemple assez long pour faire un
+  // squelette de lettre EST un squelette de lettre : chaque registre décrit donc sa
+  // mécanique et ne montre plus que des fragments.
+  it("aucun registre ne contient de lettre-exemple complète", () => {
+    for (const tone of TONES) {
+      const sys = adaptLetterSystem(tone, "adapte");
+      expect(sys, tone).toContain("MÉCANIQUE À REPRODUIRE");
+      // Aucun fragment d'exemple ne doit atteindre la longueur d'un paragraphe.
+      const fragments = sys.match(/«[^»]+»/g) ?? [];
+      expect(fragments.length, tone).toBeGreaterThan(0);
+      for (const f of fragments) expect(f.length, `${tone} : ${f}`).toBeLessThan(120);
+    }
+    // La phrase de bouchage qui se retrouvait telle quelle dans les lettres envoyées.
+    expect(adaptLetterSystem("humain", "adapte"))
+      .not.toContain("transformer des besoins métiers en résultats concrets");
   });
 
   // Le registre est le signal qui doit dominer : il passe AVANT les règles. Placé après une

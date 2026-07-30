@@ -7,7 +7,7 @@ import { useSettingsStore, type AiModel } from "@/state/settingsStore";
  */
 
 // Legacy exports for backward compatibility (some components might use GEMINI_MODEL)
-export const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.1-flash-lite";
+export const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.1-flash";
 const ANTHROPIC_MAX_TOKENS = 8192;
 
 export type ChatRole = "user" | "assistant";
@@ -33,7 +33,7 @@ export function requireActiveKey(overrideKey?: string | null): { key: string; pr
     const provider = isAnthropicKey(overrideKey) ? "anthropic" : "gemini";
     let model = activeModel;
     if (provider === "anthropic" && !model.startsWith("claude-")) model = "claude-haiku-4-5-20251001";
-    if (provider === "gemini" && !model.startsWith("gemini-")) model = "gemini-3.1-flash-lite";
+    if (provider === "gemini" && !model.startsWith("gemini-")) model = "gemini-3.1-flash";
     return { key: overrideKey, provider, model: model as AiModel };
   }
 

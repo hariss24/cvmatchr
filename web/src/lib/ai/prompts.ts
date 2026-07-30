@@ -411,6 +411,19 @@ export const SYSTEM_ATS_SCORE =
  * à écrire, et trois règles seulement, produit du premier coup le registre attendu.
  * D'où la règle de maintenance : ici on MONTRE (modèle de ton par registre), on n'accumule
  * pas d'interdits. Toute règle ajoutée dilue les autres.
+ *
+ * SUITE DE L'HISTOIRE, ET SECONDE LEÇON. Le registre « humain » a longtemps porté un modèle
+ * de ton qui était une lettre entière. `gemini-3.1-flash-lite` la recopiait telle quelle —
+ * amorces comprises, alors que la consigne les excluait mot pour mot. Toutes les lettres
+ * sortaient avec le même squelette, et « j'ai surtout appris à transformer des besoins
+ * métiers en résultats concrets », phrase de bouchage de l'exemple, se retrouvait servie au
+ * recruteur comme l'expérience du candidat.
+ *
+ * Un petit modèle recopie ce qu'on lui montre en entier. La parade n'est pas de retirer
+ * l'exemple — la première expérience a montré que sans lui, c'est pire — mais de ne plus
+ * lui en donner un seul de bout en bout : la MÉCANIQUE est décrite, et le registre est
+ * montré par de courts fragments alternatifs, trop brefs pour faire un squelette. Règle de
+ * maintenance qui s'ajoute à la précédente : jamais de lettre complète en exemple.
  */
 
 export type LetterMission = "adapte" | "redige";
@@ -439,38 +452,62 @@ const LETTER_MISSIONS: Record<LetterMission, string> = {
  */
 const LETTER_TONE_RULES: Record<LetterTone, string> = {
   humain:
-    "REGISTRE DEMANDÉ — AUTHENTIQUE ET PERSONNEL.\n" +
+    "REGISTRE DEMANDÉ — AUTHENTIQUE, PERSONNEL ET HUMAIN.\n" +
     "Écris comme le candidat parlerait au recruteur en face de lui. Phrases courtes, « je » " +
     "direct, aucun préambule cérémonieux. Ce qui doit ressortir : ce qu'il a fait concrètement, " +
     "et ce qui lui plaît dans ce poste.\n" +
-    "MODÈLE DE TON — imite la TOURNURE, jamais les faits ni les amorces de phrase :\n" +
-    "« Je vous contacte pour le poste de A chez B. Je connais déjà bien ce type d'environnement " +
-    "pour y avoir travaillé, et je pense pouvoir vous être utile assez vite.\n" +
-    "Chez C et D, j'ai surtout appris à transformer des besoins métiers en résultats concrets. " +
-    "Sur mon dernier projet, j'ai fait progresser E. Pour y arriver, j'ai jonglé entre plusieurs " +
-    "casquettes : F, G et H.\n" +
-    "J'aimerais beaucoup vous parler de la façon dont je peux vous aider. Si vous avez un moment, " +
-    "je serais ravi d'en discuter de vive voix. »\n\n",
+    "MÉCANIQUE À REPRODUIRE — c'est la CONSTRUCTION des phrases qui compte ; les mots, eux, " +
+    "doivent sortir du CV du candidat :\n" +
+    "1. Ouvrir sur le poste nommé, puis dire sobrement ce qui rattache déjà le candidat à cette " +
+    "entreprise ou à ce métier. Aucun compliment sur l'entreprise.\n" +
+    "2. Nommer les employeurs, puis accrocher chaque résultat à l'action qui l'a produit — " +
+    "l'action d'abord, le chiffre ensuite. Les outils ferment la phrase, comme des moyens ; " +
+    "jamais de liste détachée.\n" +
+    "3. Relier une habitude de travail d'aujourd'hui à ce que le poste demande.\n" +
+    "4. Clore en proposant un échange, sans se rabaisser ni remercier par avance.\n" +
+    "REGISTRE, PAR L'EXEMPLE — trois ouvertures et trois clôtures possibles. Elles montrent le " +
+    "niveau de langue attendu : n'en recopie AUCUNE, écris celle du candidat.\n" +
+    "Ouvrir : « Je vous écris pour le poste de A. » · « Votre annonce de A m'a arrêté sur un " +
+    "point : B. » · « A chez B, c'est exactement le poste que je cherche, et voici pourquoi. »\n" +
+    "Clore : « On en parle ? » · « Je peux vous détailler tout ça de vive voix. » · « Dites-moi " +
+    "si vous voulez qu'on en discute. »\n\n",
   equilibre:
     "REGISTRE DEMANDÉ — ÉQUILIBRÉ.\n" +
     "La lettre dit qui il est ET ce qu'il sait faire. Ouverture directe sur sa motivation, corps " +
     "appuyé sur des faits du CV, conclusion accrochée à quelque chose de concret.\n" +
-    "MODÈLE DE TON — imite la TOURNURE, jamais les faits ni les amorces de phrase :\n" +
-    "« Votre poste de A m'intéresse parce qu'il touche à ce que je fais depuis B ans : C.\n" +
-    "Chez D, j'ai pris en charge E, et le résultat a été F. J'y ai aussi appris à travailler avec " +
-    "G, ce que votre annonce demande explicitement. Côté outils, j'utilise H et I au quotidien.\n" +
-    "Ce qui m'attire ici, c'est J. Je serais content d'en parler avec vous. »\n\n",
+    "MÉCANIQUE À REPRODUIRE — c'est la CONSTRUCTION des phrases qui compte ; les mots, eux, " +
+    "doivent sortir du CV du candidat :\n" +
+    "1. Ouvrir sur ce qui, dans le poste, recoupe ce qu'il fait déjà. La motivation s'énonce par " +
+    "le métier, pas par l'enthousiasme.\n" +
+    "2. Un employeur, ce qu'il y a pris en charge, le résultat obtenu. Puis une compétence acquise " +
+    "là-bas que l'annonce réclame, nommée comme telle.\n" +
+    "3. Les outils du quotidien en une phrase à part, énoncés sans les vanter.\n" +
+    "4. Clore sur ce qui l'attire précisément ici, puis proposer l'échange.\n" +
+    "REGISTRE, PAR L'EXEMPLE — trois ouvertures et trois clôtures possibles. Elles montrent le " +
+    "niveau de langue attendu : n'en recopie AUCUNE, écris celle du candidat.\n" +
+    "Ouvrir : « Votre poste de A recoupe ce que je fais depuis B. » · « Ce poste m'intéresse pour " +
+    "une raison précise : C. » · « Le cœur de votre annonce, c'est mon quotidien. »\n" +
+    "Clore : « Ce qui m'attire ici, c'est A. » · « Je serais content d'en parler avec vous. » · " +
+    "« J'aimerais comprendre comment vous abordez A. »\n\n",
   factuel:
     "REGISTRE DEMANDÉ — FACTUEL ET CONCRET.\n" +
     "Le candidat veut prouver, pas séduire. Chaque paragraphe s'appuie sur un fait du CV : une " +
     "mission, un outil, un résultat chiffré. Aucun adjectif sur soi-même (« rigoureux », " +
     "« motivé ») — un fait à la place, ou rien.\n" +
-    "MODÈLE DE TON — imite la TOURNURE, jamais les faits ni les amorces de phrase :\n" +
-    "« Je postule au poste de A. Mon parcours couvre l'essentiel de ce que vous demandez : B, C " +
-    "et D.\n" +
-    "Chez E, j'ai fait passer F de G à H en faisant I. J'y produis aussi J, avec K. Chez L, " +
-    "j'avais la charge de M.\n" +
-    "Je suis disponible à partir de N. »\n\n",
+    "MÉCANIQUE À REPRODUIRE — c'est la CONSTRUCTION des phrases qui compte ; les mots, eux, " +
+    "doivent sortir du CV du candidat :\n" +
+    "1. Annoncer le poste, puis dire en une phrase ce que le parcours couvre parmi les demandes " +
+    "de l'annonce.\n" +
+    "2. Par employeur : le chiffre attaché au moyen qui l'a produit — « j'ai fait passer X de Y à " +
+    "Z en faisant W ». Puis les livrables réguliers, avec l'outil qui les produit.\n" +
+    "3. Terminer sur un fait utile au recruteur — disponibilité, mobilité — jamais sur une " +
+    "formule de politesse.\n" +
+    "REGISTRE, PAR L'EXEMPLE — trois ouvertures et trois clôtures possibles. Elles montrent le " +
+    "niveau de langue attendu : n'en recopie AUCUNE, écris celle du candidat.\n" +
+    "Ouvrir : « Je postule au poste de A. » · « Mon parcours couvre B, C et D. » · « Votre " +
+    "annonce demande A ; voici ce que j'ai fait. »\n" +
+    "Clore : « Je suis disponible à partir de A. » · « Je peux commencer sous A. » · « Mon CV " +
+    "détaille le reste. »\n\n",
 };
 
 const ADAPT_LETTER_RULES =
