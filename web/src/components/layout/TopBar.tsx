@@ -2,15 +2,15 @@
 
 import { useCallback, useEffect, useState, useRef } from "react";
 import { useDocStore } from "@/state/docStore";
-import { DEFAULT_RESUME, type Resume, type Letter, type DocType } from "@/lib/resume/schema";
+import { type Resume, type Letter, type DocType } from "@/lib/resume/schema";
 import type { DocData } from "@/state/docStore";
 import { generateResumePdfBlob, generateLetterPdfBlob } from "@/lib/pdfgen/generatePdf";
 import { buildPdfFilename } from "@/lib/pdfgen/filename";
 // import removed
 import { toast, uiAlert, uiConfirm } from "@/state/uiStore";
-import { saveHistoryEntry, loadProfile } from "@/lib/storage/db";
+import { saveHistoryEntry } from "@/lib/storage/db";
+import { startNewResume } from "@/lib/storage/newResume";
 import { upsertApplicationForDocument, pruneAnonymousShelf } from "@/lib/applications/store";
-import { applyProfileToResume } from "@/lib/profile/profile";
 import { takeSnapshot } from "@/lib/storage/snapshots";
 import ChatPanel from "@/components/modals/ChatPanel";
 import MobileMenu from "@/components/layout/MobileMenu";
@@ -34,7 +34,6 @@ export default function TopBar() {
   const json = useDocStore((s) => s.json);
   const role = useDocStore((s) => s.role);
   const includeDate = useDocStore((s) => s.includeDate);
-  const setJson = useDocStore((s) => s.setJson);
   const [busy, setBusy] = useState(false);
   const isConverting = useRef(false);
   const [chatOpen, setChatOpen] = useState(false);
@@ -51,11 +50,7 @@ export default function TopBar() {
 
   const onNewCv = async () => {
     if (!(await uiConfirm("Repartir d'un CV vierge ? Le contenu actuel sera remplacé.", "Nouveau CV"))) return;
-    const profile = await loadProfile();
-    setJson(applyProfileToResume(structuredClone(DEFAULT_RESUME), profile));
-    const { setCompany, setRole } = useDocStore.getState();
-    setCompany("");
-    setRole("");
+    await startNewResume();
     toast("Nouveau CV.", "success");
   };
 
