@@ -13,7 +13,6 @@ export function useAutoDraft() {
     // 1. Initial load for the default docType
     async function init() {
       if (isLoaded.current) return;
-      const docType = useDocStore.getState().docType;
 
       // « Adapter mon CV » depuis l'onglet Offres pose l'entreprise et le poste de
       // l'offre AVANT de naviguer ici. Le brouillon, lui, porte ceux de la
@@ -24,21 +23,36 @@ export function useAutoDraft() {
       const garderMeta = { company: !!posee.company.trim(), role: !!posee.role.trim() };
 
       try {
-        const draft = await loadDraft(`draft-${docType}`);
-        if (draft) {
-          useDocStore.setState({
-            json: draft.json,
-            templateId: draft.templateId || "sobre",
-            ...(draft.company !== undefined && !garderMeta.company ? { company: draft.company } : {}),
-            ...(draft.role !== undefined && !garderMeta.role ? { role: draft.role } : {}),
-          });
-        } else if (docType === "CV" || docType === "Maître") {
-          const profile = await loadProfile();
-          if (profile) {
+        // Le type peut changer PENDANT ce chargement : l'utilisateur clique
+        // « Lettre » avant que le brouillon initial soit revenu. La souscription
+        // ignore ce changement tant que `isLoaded` est faux, donc personne d'autre
+        // ne le rattraperait — le CV atterrissait dans le document lettre, et
+        // l'auto-sauvegarde le figeait aussitôt dans `draft-Lettre`. On recharge
+        // donc le brouillon du type réellement affiché, borné à trois essais pour
+        // qu'un clic frénétique ne boucle pas.
+        for (let essai = 0; essai < 3; essai++) {
+          const docType = useDocStore.getState().docType;
+          const draft = await loadDraft(`draft-${docType}`);
+          if (useDocStore.getState().docType !== docType) continue;
+
+          if (draft) {
             useDocStore.setState({
-              json: applyProfileToResume(useDocStore.getState().json as Resume, profile),
+              json: draft.json,
+              templateId: draft.templateId || "sobre",
+              ...(draft.company !== undefined && !garderMeta.company ? { company: draft.company } : {}),
+              ...(draft.role !== undefined && !garderMeta.role ? { role: draft.role } : {}),
             });
+          } else if (docType === "CV" || docType === "Maître") {
+            const profile = await loadProfile();
+            // Le profil s'applique au document AFFICHÉ : si le type a changé
+            // entre-temps, ce n'est plus un CV et le greffer dessus le corromprait.
+            if (profile && useDocStore.getState().docType === docType) {
+              useDocStore.setState({
+                json: applyProfileToResume(useDocStore.getState().json as Resume, profile),
+              });
+            }
           }
+          break;
         }
       } catch (e) {
         console.warn("Failed to load draft:", e);
