@@ -1,0 +1,202 @@
+name: Boucle autonome
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      role:
+        description: "Forcer un rôle (vide = choix automatique)"
+        required: false
+        default: ""
+
+concurrency:
+  group: boucle-autonome
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  reveil:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.LOOP_GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: web/package-lock.json
+
+      - name: Tests des scripts de la boucle
+        run: node --test ".claude/loop/bin/*.test.mjs"
+
+      # État de la PR courante de la boucle. Une seule PR ouverte à la fois :
+      # on prend la plus récente sur une branche `claude/…`.
+      - name: État de la PR courante
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.LOOP_GITHUB_TOKEN }}
+        run: |
+          brut=$(gh pr list --state open --limit 1 --json number,isDraft,createdAt,statusCheckRollup,headRefName \
+                   --jq '[.[] | select(.headRefName | startswith("claude/"))] | .[0] // empty')
+          if [ -z "$brut" ]; then
+            echo "pr=null" >> "$GITHUB_OUTPUT"
+            echo "numero=" >> "$GITHUB_OUTPUT"
+            echo "Aucune PR de la boucle ouverte."
+          else
+            echo "$brut" > /tmp/pr.json
+            node -e '
+              const pr = require("/tmp/pr.json");
+              const etats = (pr.statusCheckRollup ?? []).map((c) => c.conclusion ?? c.state);
+              const rouge = etats.some((e) => e === "FAILURE" || e === "TIMED_OUT" || e === "CANCELLED");
+              const heures = (Date.now() - Date.parse(pr.createdAt)) / 3600000;
+              const out = { rouge, heures, brouillon: pr.isDraft };
+              process.stdout.write(`pr=${JSON.stringify(out)}\nnumero=${pr.number}\n`);
+            ' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Choix du rôle
+        id: role
+        run: |
+          if [ -n "${{ github.event.inputs.role }}" ]; then
+            echo "role=${{ github.event.inputs.role }}" >> "$GITHUB_OUTPUT"
+          else
+            node .claude/loop/bin/choisir-role.mjs --pr '${{ steps.pr.outputs.pr }}' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Mandat du rôle
+        id: mandat
+        if: steps.role.outputs.role != 'Pause'
+        run: |
+          case "${{ steps.role.outputs.role }}" in
+            "Éclaireur")  echo "fichier=.claude/loop/roles/eclaireur.md" >> "$GITHUB_OUTPUT" ;;
+            "Architecte") echo "fichier=.claude/loop/roles/architecte.md" >> "$GITHUB_OUTPUT" ;;
+            "Bâtisseur")  echo "fichier=.claude/loop/roles/batisseur.md" >> "$GITHUB_OUTPUT" ;;
+            "Gardien")    echo "fichier=.claude/loop/roles/gardien.md" >> "$GITHUB_OUTPUT" ;;
+            *) echo "Rôle inconnu : ${{ steps.role.outputs.role }}" && exit 1 ;;
+          esac
+
+      - name: Branche de travail
+        id: branche
+        if: steps.role.outputs.role != 'Pause'
+        run: |
+          if [ -n "${{ steps.pr.outputs.numero }}" ]; then
+            nom=$(gh pr view ${{ steps.pr.outputs.numero }} --json headRefName --jq .headRefName)
+            git checkout "$nom"
+            # Le propriétaire gagne toujours : on se rebase sur son travail. En cas de
+            # conflit on abandonne la branche au lieu de forcer quoi que ce soit — le
+            # chantier repartira du backlog, aucun travail humain n'est écrasé.
+            if ! git rebase origin/main; then
+              git rebase --abort
+              gh pr close "${{ steps.pr.outputs.numero }}" \
+                --comment "Conflit avec main après un changement du propriétaire. Branche abandonnée, le chantier retourne au backlog."
+              nom="claude/reveil-$(date -u +%Y%m%d-%H%M)"
+              git checkout origin/main -B "$nom"
+            fi
+          else
+            nom="claude/reveil-$(date -u +%Y%m%d-%H%M)"
+            git checkout -b "$nom"
+          fi
+          echo "nom=$nom" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.LOOP_GITHUB_TOKEN }}
+
+      - name: Dépendances
+        if: steps.role.outputs.role != 'Pause'
+        working-directory: web
+        run: npm ci
+
+      - name: Identité des commits de la boucle
+        if: steps.role.outputs.role != 'Pause'
+        run: |
+          git config user.name "Boucle CVMatchr"
+          git config user.email "boucle@cvmatchr.local"
+
+      - name: Réveil de Claude
+        if: steps.role.outputs.role != 'Pause'
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Tu es réveillé pour jouer le rôle « ${{ steps.role.outputs.role }} » de la
+            boucle autonome de CVMatchr.
+
+            Lis dans cet ordre, en entier :
+            1. .claude/loop/MISSION.md
+            2. .claude/loop/ETAT.md
+            3. .claude/loop/BACKLOG.md
+            4. ${{ steps.mandat.outputs.fichier }}
+
+            Applique ton mandat à la lettre. Ne lis jamais tout le dépôt : uniquement
+            les fichiers dont ton mandat a besoin.
+
+            Tu committes en local. Tu ne pousses pas, tu n'ouvres pas de PR, tu ne
+            fusionnes rien : le workflow s'en charge après avoir vérifié ton périmètre.
+
+      # Le garde-fou passe APRÈS Claude et AVANT le push : une violation ne quitte
+      # jamais le runner.
+      - name: Vérification du périmètre
+        if: steps.role.outputs.role != 'Pause'
+        run: git diff --name-only origin/main...HEAD | node .claude/loop/bin/verifier-perimetre.mjs
+
+      - name: Y a-t-il quelque chose à pousser ?
+        id: travail
+        if: steps.role.outputs.role != 'Pause'
+        run: |
+          if [ -z "$(git log origin/main..HEAD --oneline)" ]; then
+            echo "rien=oui" >> "$GITHUB_OUTPUT"
+          else
+            echo "rien=non" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push
+        if: steps.role.outputs.role != 'Pause' && steps.travail.outputs.rien == 'non'
+        run: git push --set-upstream origin "${{ steps.branche.outputs.nom }}"
+
+      - name: Ouverture ou mise à jour de la PR
+        if: steps.role.outputs.role != 'Pause' && steps.travail.outputs.rien == 'non'
+        env:
+          GH_TOKEN: ${{ secrets.LOOP_GITHUB_TOKEN }}
+        run: |
+          if [ -z "${{ steps.pr.outputs.numero }}" ]; then
+            gh pr create \
+              --base main \
+              --head "${{ steps.branche.outputs.nom }}" \
+              --title "Boucle — ${{ steps.role.outputs.role }} du $(date -u +%d/%m/%Y)" \
+              --body "Réveil automatique. Rôle joué : ${{ steps.role.outputs.role }}.
+
+          Voir \`.claude/loop/journal/\` pour le compte rendu et \`.claude/loop/ETAT.md\`
+          pour l'état de la boucle.
+
+          🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+          fi
+
+      # `--auto` confie la fusion à GitHub : elle n'aura lieu que lorsque les
+      # vérifications EXIGÉES par la protection de branche seront vertes. Sans cette
+      # protection (Task 6), GitHub fusionnerait immédiatement.
+      - name: Demande de fusion automatique
+        if: steps.role.outputs.role != 'Pause' && steps.travail.outputs.rien == 'non'
+        env:
+          GH_TOKEN: ${{ secrets.LOOP_GITHUB_TOKEN }}
+        run: |
+          numero="${{ steps.pr.outputs.numero }}"
+          [ -z "$numero" ] && numero=$(gh pr view --json number --jq .number)
+          if [ "$(gh pr view "$numero" --json isDraft --jq .isDraft)" = "true" ]; then
+            echo "PR en brouillon : plan inachevé, pas de fusion automatique."
+          else
+            gh pr merge "$numero" --auto --squash
+          fi
+
+      - name: Compte rendu
+        if: always()
+        run: |
+          echo "Rôle : ${{ steps.role.outputs.role }}"
+          echo "Branche : ${{ steps.branche.outputs.nom }}"
+          echo "PR : ${{ steps.pr.outputs.numero }}"

@@ -21,6 +21,10 @@ jobs:
           cache: "npm"
           cache-dependency-path: web/package-lock.json
 
+      - name: Tests des scripts de la boucle
+        working-directory: .
+        run: node --test ".claude/loop/bin/*.test.mjs"
+
       - name: Install dependencies
         run: npm ci
 
