@@ -188,6 +188,20 @@ jobs:
         run: |
           numero="${{ steps.pr.outputs.numero }}"
           [ -z "$numero" ] && numero=$(gh pr view --json number --jq .number)
+
+          # `--auto` ne diffère la fusion que s'il existe une vérification EXIGÉE par la
+          # protection de branche. Sans elle, GitHub fusionne immédiatement, avant même
+          # que la CI ait répondu — la boucle enverrait du code non testé en production.
+          # On refuse donc d'armer la fusion tant que la protection n'est pas en place.
+          exigees=$(gh api "repos/${{ github.repository }}/branches/main/protection/required_status_checks" \
+                      --jq '.contexts // [] | join(",")' 2>/dev/null || echo "")
+          if ! echo "$exigees" | grep -q "test-web"; then
+            echo "::warning::Fusion automatique NON armée : la protection de la branche main"
+            echo "::warning::n'exige pas le contrôle « test-web ». Voir la Task 6 du plan."
+            echo "La PR #$numero reste ouverte et attend une fusion manuelle."
+            exit 0
+          fi
+
           if [ "$(gh pr view "$numero" --json isDraft --jq .isDraft)" = "true" ]; then
             echo "PR en brouillon : plan inachevé, pas de fusion automatique."
           else
