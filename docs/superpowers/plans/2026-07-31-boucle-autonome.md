@@ -545,7 +545,7 @@ test("les sections absentes valent vide", () => {
 - [ ] **Étape 2 : lancer les tests pour vérifier qu'ils échouent**
 
 ```bash
-node --test .claude/loop/bin/
+node --test ".claude/loop/bin/*.test.mjs"
 ```
 
 Attendu : ÉCHEC, `Cannot find module` sur `./choisir-role.mjs`.
@@ -637,7 +637,7 @@ if (process.argv[1]?.endsWith("choisir-role.mjs")) {
 - [ ] **Étape 4 : lancer les tests pour vérifier qu'ils passent**
 
 ```bash
-node --test .claude/loop/bin/
+node --test ".claude/loop/bin/*.test.mjs"
 ```
 
 Attendu : `pass 17`, `fail 0`.
@@ -746,7 +746,7 @@ test("les séparateurs Windows sont reconnus", () => {
 - [ ] **Étape 2 : lancer les tests pour vérifier qu'ils échouent**
 
 ```bash
-node --test .claude/loop/bin/
+node --test ".claude/loop/bin/*.test.mjs"
 ```
 
 Attendu : ÉCHEC, `Cannot find module` sur `./verifier-perimetre.mjs`.
@@ -796,7 +796,7 @@ if (process.argv[1]?.endsWith("verifier-perimetre.mjs")) {
 - [ ] **Étape 4 : lancer les tests pour vérifier qu'ils passent**
 
 ```bash
-node --test .claude/loop/bin/
+node --test ".claude/loop/bin/*.test.mjs"
 ```
 
 Attendu : `pass 27`, `fail 0` (les 17 de la Task 2 plus les 10 de celle-ci).
@@ -1089,7 +1089,7 @@ part et pourrissent. Dans `.github/workflows/web.yml`, insérer entre l'étape
 ```yaml
       - name: Tests des scripts de la boucle
         working-directory: .
-        run: node --test .claude/loop/bin/
+        run: node --test ".claude/loop/bin/*.test.mjs"
 ```
 
 - [ ] **Étape 3 : écrire `.github/workflows/boucle.yml`**
@@ -1132,7 +1132,7 @@ jobs:
           cache-dependency-path: web/package-lock.json
 
       - name: Tests des scripts de la boucle
-        run: node --test .claude/loop/bin/
+        run: node --test ".claude/loop/bin/*.test.mjs"
 
       # État de la PR courante de la boucle. Une seule PR ouverte à la fois :
       # on prend la plus récente sur une branche `claude/…`.
@@ -1317,7 +1317,7 @@ Attendu : `Boucle autonome` apparaît dans la liste. Un YAML invalide n'y figure
 
 ```bash
 cd web && npx tsc --noEmit && npm run lint && npm run test && npm run build
-cd .. && node --test .claude/loop/bin/
+cd .. && node --test ".claude/loop/bin/*.test.mjs"
 ```
 
 Attendu : tout vert, `pass 27` pour les scripts de la boucle.
