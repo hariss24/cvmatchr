@@ -132,6 +132,9 @@ jobs:
           # écrit. L'agent est délibérément permissif ici — ce n'est pas lui qui contient
           # la boucle, c'est `verifier-perimetre.mjs`, qui inspecte son diff juste après.
           claude_args: "--allowedTools Read,Glob,Grep,Write,Edit,Bash,WebFetch,WebSearch,TodoWrite"
+          # Sans ça, le journal ne montre pas ce que l'agent a fait : impossible de
+          # diagnostiquer un réveil qui « réussit » en ne produisant rien.
+          show_full_output: true
           prompt: |
             Tu es réveillé pour jouer le rôle « ${{ steps.role.outputs.role }} » de la
             boucle autonome de CVMatchr.
