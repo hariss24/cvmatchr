@@ -194,9 +194,16 @@ jobs:
             echo "rien=non" >> "$GITHUB_OUTPUT"
           fi
 
+      # `claude-code-action` réécrit les accès git du dépôt pour ses propres commits, et
+      # révoque son jeton en fin d'étape : ceux posés par `checkout` ne survivent pas
+      # (« Invalid username or token » au push). On les réinstalle explicitement ici.
       - name: Push
         if: steps.role.outputs.role != 'Pause' && steps.travail.outputs.rien == 'non'
-        run: git push --set-upstream origin "${{ steps.branche.outputs.nom }}"
+        env:
+          JETON: ${{ secrets.LOOP_GITHUB_TOKEN }}
+        run: |
+          git remote set-url origin "https://x-access-token:${JETON}@github.com/${{ github.repository }}.git"
+          git push --set-upstream origin "${{ steps.branche.outputs.nom }}"
 
       - name: Ouverture ou mise à jour de la PR
         if: steps.role.outputs.role != 'Pause' && steps.travail.outputs.rien == 'non'
