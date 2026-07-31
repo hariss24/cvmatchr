@@ -11,12 +11,16 @@ vi.mock("@/lib/storage/db", () => ({
 }));
 import { loadDraft } from "@/lib/storage/db";
 import { useDocStore } from "@/state/docStore";
+import { DEFAULT_RESUME, DEFAULT_LETTER } from "@/lib/resume/schema";
 import { useAutoDraft } from "./useAutoDraft";
 
 const mockLoad = vi.mocked(loadDraft);
 
-const CV = { name: "Hariss", title: "Webmaster" };
-const LETTRE = { sender_name: "Hariss", body: "Bonjour," };
+// Documents complets : un brouillon stocké porte toujours un document entier, et
+// `Draft.json` est typé `DocData`. Des littéraux partiels compilaient sous Vitest
+// (qui ne vérifie pas les types) mais cassaient `tsc --noEmit`, donc la CI.
+const CV = { ...DEFAULT_RESUME, name: "Hariss", title: "Webmaster" };
+const LETTRE = { ...DEFAULT_LETTER, sender_name: "Hariss", body: "Bonjour," };
 
 beforeEach(() => {
   mockLoad.mockReset();
