@@ -18,3 +18,24 @@ jobs:
 
           echo "— Droits sur le dépôt —"
           gh api "/repos/${{ github.repository }}" --jq '.permissions'
+
+      # Le champ ci-dessus reflète parfois le rôle du compte et non la portée du
+      # jeton. Seul un push réel tranche.
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.LOOP_GITHUB_TOKEN }}
+
+      - name: Essai de push réel sur une branche jetable
+        env:
+          JETON: ${{ secrets.LOOP_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.LOOP_GITHUB_TOKEN }}
+        run: |
+          git config user.name "Diagnostic"
+          git config user.email "diag@cvmatchr.local"
+          git checkout -b claude/diag-jeton
+          echo "essai" > .diag-jeton
+          git add .diag-jeton && git commit -m "essai de push"
+          git remote set-url origin "https://x-access-token:${JETON}@github.com/${{ github.repository }}.git"
+          git push origin claude/diag-jeton
+          echo "PUSH RÉUSSI — le jeton écrit."
+          git push origin --delete claude/diag-jeton
