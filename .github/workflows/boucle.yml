@@ -127,6 +127,11 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Sans cette ligne, l'action applique sa liste d'outils par défaut : le premier
+          # réveil réel a tourné 39 tours pour 15 refus de permission et zéro fichier
+          # écrit. L'agent est délibérément permissif ici — ce n'est pas lui qui contient
+          # la boucle, c'est `verifier-perimetre.mjs`, qui inspecte son diff juste après.
+          claude_args: "--allowedTools Read,Glob,Grep,Write,Edit,Bash,WebFetch,WebSearch,TodoWrite"
           prompt: |
             Tu es réveillé pour jouer le rôle « ${{ steps.role.outputs.role }} » de la
             boucle autonome de CVMatchr.
