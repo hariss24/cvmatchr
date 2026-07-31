@@ -31,8 +31,10 @@ npm ajoutée.**
   configuré sur `src/**/*.test.{ts,tsx}` uniquement et ne les verra jamais ; ils sont
   testés par `node --test`.
 - **Fichiers interdits en écriture à la boucle :** `.github/workflows/`,
-  `.claude/loop/MISSION.md`, `.claude/loop/roles/`, tout `.env*`, et la branche `main`.
-  Cette liste est appliquée par un script, pas par la bonne volonté de l'agent.
+  `.claude/loop/MISSION.md`, `.claude/loop/roles/`, `.claude/loop/bin/`, tout `.env*`,
+  et la branche `main`. Cette liste est appliquée par un script, pas par la bonne
+  volonté de l'agent — le script s'y protège lui-même, sans quoi la boucle pourrait le
+  désarmer et la version désarmée validerait son propre diff.
 - **Encodage UTF-8 sans BOM**, fins de ligne LF pour tous les fichiers créés.
 - Le dépôt a `main` protégée par le déploiement Vercel : **aucun push direct sur `main`**
   dans tout ce plan.
@@ -206,8 +208,12 @@ backlog portant `[feu vert requis]` sans `!ok` est invisible pour le Bâtisseur.
 ## Interdits absolus
 
 La boucle ne modifie jamais : `.github/workflows/`, `.claude/loop/MISSION.md`,
-`.claude/loop/roles/`, tout fichier `.env*`. Elle ne pousse jamais sur `main`.
-Elle décide librement **comment** atteindre le but, jamais **quel** but.
+`.claude/loop/roles/`, `.claude/loop/bin/`, tout fichier `.env*`. Elle ne pousse jamais
+sur `main`. Elle décide librement **comment** atteindre le but, jamais **quel** but.
+
+Si tu penses qu'un de ces fichiers doit changer, écris une ligne dans `BACKLOG.md`,
+section « Idées », adressée au propriétaire. Ne le modifie pas toi-même : un script
+(`bin/verifier-perimetre.mjs`) refusera ton diff et le réveil sera perdu.
 
 ## Règles héritées du dépôt
 
@@ -615,6 +621,13 @@ test("réécrire ses propres mandats est refusé", () => {
   assert.deepEqual(fichiersInterdits([".claude/loop/roles/batisseur.md"]), [".claude/loop/roles/batisseur.md"]);
 });
 
+// Sans cette règle, la boucle pourrait affaiblir le garde-fou, et la version
+// affaiblie validerait le diff qui l'a affaiblie.
+test("désarmer son propre garde-fou est refusé", () => {
+  const chemins = [".claude/loop/bin/verifier-perimetre.mjs", ".claude/loop/bin/choisir-role.mjs"];
+  assert.deepEqual(fichiersInterdits(chemins), chemins);
+});
+
 test("toucher à un fichier d'environnement est refusé", () => {
   const chemins = ["web/.env.local", ".env", "web/.env.production"];
   assert.deepEqual(fichiersInterdits(chemins), chemins);
@@ -654,6 +667,9 @@ export const CHEMINS_INTERDITS = [
   /^\.github\/workflows\//,
   /^\.claude\/loop\/MISSION\.md$/,
   /^\.claude\/loop\/roles\//,
+  // Ce script est son propre moteur : s'il était modifiable, la boucle pourrait
+  // se désarmer, et la version désarmée validerait le diff qui l'a désarmée.
+  /^\.claude\/loop\/bin\//,
   /(^|\/)\.env($|\.)/,
 ];
 
@@ -684,7 +700,7 @@ if (process.argv[1]?.endsWith("verifier-perimetre.mjs")) {
 node --test .claude/loop/bin/
 ```
 
-Attendu : `pass 26`, `fail 0` (les 17 de la Task 2 plus les 9 de celle-ci).
+Attendu : `pass 27`, `fail 0` (les 17 de la Task 2 plus les 10 de celle-ci).
 
 - [ ] **Étape 5 : vérifier l'interface ligne de commande**
 
@@ -1205,7 +1221,7 @@ cd web && npx tsc --noEmit && npm run lint && npm run test && npm run build
 cd .. && node --test .claude/loop/bin/
 ```
 
-Attendu : tout vert, `pass 26` pour les scripts de la boucle.
+Attendu : tout vert, `pass 27` pour les scripts de la boucle.
 
 - [ ] **Étape 6 : commit**
 
