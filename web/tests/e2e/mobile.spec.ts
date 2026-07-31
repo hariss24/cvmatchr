@@ -18,7 +18,8 @@ test.describe("mobile", () => {
     const menu = page.locator(".mobile-menu");
     await expect(menu).toBeVisible();
     await expect(menu.getByRole("link", { name: "Offres" })).toBeVisible();
-    await expect(menu.getByRole("link", { name: "Historique" })).toBeVisible();
+    // « Historique » a été absorbée par « Candidatures » (commit d0d9082, 25/07).
+    await expect(menu.getByRole("link", { name: "Candidatures" })).toBeVisible();
     await expect(menu.getByRole("button", { name: "Nouveau CV" })).toBeVisible();
     await expect(menu.getByRole("link", { name: "Paramètres & Dashboard" })).toBeVisible();
 
@@ -52,17 +53,22 @@ test.describe("mobile", () => {
     // Le CTA « Adapter à une offre » est visible sans scroller (barre épinglée).
     await expect(page.getByRole("button", { name: "Adapter à une offre" })).toBeInViewport();
   });
-  test("le header de l'Historique tient dans l'écran (navigation et thème accessibles)", async ({ page }) => {
-    await page.goto("/history");
+  test("le header de Mes candidatures tient dans l'écran (actions et navigation accessibles)", async ({ page }) => {
+    // « Historique » a été absorbée par « Candidatures » (commit d0d9082, 25/07) :
+    // /history redirige désormais vers /candidatures.
+    await page.goto("/candidatures");
 
     // Toutes les actions du header sont entièrement visibles dans le viewport.
-    for (const name of ["↑ Importer", "↓ Exporter"]) {
-      await expect(page.getByRole("button", { name })).toBeInViewport({ ratio: 1 });
-    }
-    // La nav segmentée remplace le lien « Retour » : l'Éditeur reste accessible.
-    await expect(page.getByRole("link", { name: "Éditeur" })).toBeInViewport({ ratio: 1 });
-    // Le switcher de thème n'apparaît pas sur mobile (il vit dans le menu ☰ de l'éditeur).
-    await expect(page.locator("#btn-theme")).toBeHidden();
+    await expect(page.getByRole("button", { name: "Ajouter" })).toBeInViewport({ ratio: 1 });
+    await expect(page.getByRole("link", { name: "Retour" })).toBeInViewport({ ratio: 1 });
+
+    // Sur les pages secondaires (Historique, Offres), la nav segmentée n'est PAS
+    // masquée sur mobile : elle reflue en pleine largeur sous le header au lieu
+    // de disparaître (cf. globals.css `.topbar--secondary .topbar-center`,
+    // @media max-width: 900px). Seule la topbar principale (éditeur) la cache.
+    const nav = page.locator(".topbar-center");
+    await expect(nav).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Candidatures" })).toBeInViewport({ ratio: 1 });
 
     // Et la page ne défile pas horizontalement.
     const overflow = await page.evaluate(
