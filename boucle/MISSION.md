@@ -48,8 +48,8 @@ backlog portant `[feu vert requis]` sans `!ok` est invisible pour le Bâtisseur.
 
 ## Interdits absolus
 
-La boucle ne modifie jamais : `.github/workflows/`, `.claude/loop/MISSION.md`,
-`.claude/loop/roles/`, `.claude/loop/bin/`, tout fichier `.env*`. Elle ne pousse jamais
+La boucle ne modifie jamais : `.github/workflows/`, `boucle/MISSION.md`,
+`boucle/roles/`, `boucle/bin/`, tout fichier `.env*`. Elle ne pousse jamais
 sur `main`. Elle décide librement **comment** atteindre le but, jamais **quel** but.
 
 Si tu penses qu'un de ces fichiers doit changer, écris une ligne dans `BACKLOG.md`,

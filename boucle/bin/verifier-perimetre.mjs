@@ -6,11 +6,11 @@
  */
 export const CHEMINS_INTERDITS = [
   /^\.github\/workflows\//,
-  /^\.claude\/loop\/MISSION\.md$/,
-  /^\.claude\/loop\/roles\//,
+  /^boucle\/MISSION\.md$/,
+  /^boucle\/roles\//,
   // Ce script est son propre moteur : s'il était modifiable, la boucle pourrait
   // se désarmer, et la version désarmée validerait le diff qui l'a désarmée.
-  /^\.claude\/loop\/bin\//,
+  /^boucle\/bin\//,
   /(^|\/)\.env($|\.)/,
 ];
 

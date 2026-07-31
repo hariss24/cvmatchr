@@ -8,7 +8,7 @@ test("le code applicatif passe", () => {
 });
 
 test("les fichiers de suivi de la boucle passent", () => {
-  const chemins = [".claude/loop/BACKLOG.md", ".claude/loop/ETAT.md", ".claude/loop/journal/2026-08-01.md"];
+  const chemins = ["boucle/BACKLOG.md", "boucle/ETAT.md", "boucle/journal/2026-08-01.md"];
   assert.deepEqual(fichiersInterdits(chemins), []);
 });
 
@@ -23,17 +23,17 @@ test("modifier la CI est refusé", () => {
 });
 
 test("réécrire sa propre mission est refusé", () => {
-  assert.deepEqual(fichiersInterdits([".claude/loop/MISSION.md"]), [".claude/loop/MISSION.md"]);
+  assert.deepEqual(fichiersInterdits(["boucle/MISSION.md"]), ["boucle/MISSION.md"]);
 });
 
 test("réécrire ses propres mandats est refusé", () => {
-  assert.deepEqual(fichiersInterdits([".claude/loop/roles/batisseur.md"]), [".claude/loop/roles/batisseur.md"]);
+  assert.deepEqual(fichiersInterdits(["boucle/roles/batisseur.md"]), ["boucle/roles/batisseur.md"]);
 });
 
 // Sans cette règle, la boucle pourrait affaiblir le garde-fou, et la version
 // affaiblie validerait le diff qui l'a affaiblie.
 test("désarmer son propre garde-fou est refusé", () => {
-  const chemins = [".claude/loop/bin/verifier-perimetre.mjs", ".claude/loop/bin/choisir-role.mjs"];
+  const chemins = ["boucle/bin/verifier-perimetre.mjs", "boucle/bin/choisir-role.mjs"];
   assert.deepEqual(fichiersInterdits(chemins), chemins);
 });
 
@@ -43,11 +43,11 @@ test("toucher à un fichier d'environnement est refusé", () => {
 });
 
 test("les fautifs sont signalés au milieu de changements légitimes", () => {
-  const chemins = ["web/src/app/page.tsx", ".claude/loop/MISSION.md", "README.md"];
-  assert.deepEqual(fichiersInterdits(chemins), [".claude/loop/MISSION.md"]);
+  const chemins = ["web/src/app/page.tsx", "boucle/MISSION.md", "README.md"];
+  assert.deepEqual(fichiersInterdits(chemins), ["boucle/MISSION.md"]);
 });
 
 // Les chemins arrivent de `git diff` : sur Windows le séparateur peut différer.
 test("les séparateurs Windows sont reconnus", () => {
-  assert.deepEqual(fichiersInterdits([".claude\\loop\\MISSION.md"]), [".claude\\loop\\MISSION.md"]);
+  assert.deepEqual(fichiersInterdits(["boucle\\MISSION.md"]), ["boucle\\MISSION.md"]);
 });

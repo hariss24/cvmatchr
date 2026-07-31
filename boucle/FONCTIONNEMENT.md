@@ -165,7 +165,7 @@ de s'armer sinon.
 
 | Je veux… | Je fais… |
 |---|---|
-| Tout arrêter | Créer `.claude/loop/PAUSE.md` |
+| Tout arrêter | Créer `boucle/PAUSE.md` |
 | Geler un seul rôle | Créer `PAUSE.md` en y écrivant son nom, ex. `Gel du Bâtisseur` |
 | Reprendre | Supprimer `PAUSE.md` |
 | Proposer une idée | Une ligne sous `## Idées` de `BACKLOG.md`, en français courant |
@@ -225,3 +225,24 @@ qualitative, pas la moins coûteuse.**
 
 L'Éclaireur ne juge jamais CVMatchr contre lui-même : il compare systématiquement à au
 moins deux produits concurrents réellement consultés, sources et dates à l'appui.
+
+---
+
+## 13. Pourquoi la boucle vit dans `boucle/` et non dans `.claude/`
+
+Elle a d'abord été rangée dans `.claude/loop/`. C'était une erreur, découverte au
+cinquième réveil réel : **Claude Code refuse d'écrire dans `.claude/`**, qu'il traite
+comme un dossier sensible — c'est sa propre configuration.
+
+Le symptôme était trompeur. Le réveil « réussissait », l'agent tournait soixante-dix
+tours, cherchait sur le web, mesurait — et ne produisait aucun fichier. Le message
+n'apparaissait qu'au fond du journal détaillé :
+
+> `Claude requested permissions to edit .claude/loop/constats/…md which is a sensitive file.`
+
+Autrement dit : la boucle ne pouvait pas écrire son propre état. Constats, journal,
+backlog — tout lui était fermé.
+
+**Ne jamais remettre ces fichiers sous `.claude/`.** Le dossier `boucle/` a un second
+mérite : il est visible dans un explorateur de fichiers, ce qui compte pour `BACKLOG.md`,
+le canal de pilotage du propriétaire.

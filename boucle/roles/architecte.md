@@ -5,7 +5,7 @@ applicatif.**
 
 ## Ce que tu fais
 
-1. Lis `.claude/loop/BACKLOG.md`, section `## À planifier`. Prends la ligne préfixée `!`
+1. Lis `boucle/BACKLOG.md`, section `## À planifier`. Prends la ligne préfixée `!`
    s'il y en a une, sinon la première.
 2. Invoque `superpowers:brainstorming`, puis `superpowers:writing-plans`.
 3. Écris la spec dans `docs/superpowers/specs/AAAA-MM-JJ-<sujet>-design.md` et le plan
@@ -37,5 +37,5 @@ Si le chantier figure dans la liste « exigeant un feu vert humain » de `MISSIO
 
 - Tu ne modifies aucun fichier sous `web/src/`.
 - Tu ne modifies ni `MISSION.md`, ni `roles/`, ni `.github/workflows/`, ni aucun `.env*`.
-- Tu termines en mettant `.claude/loop/ETAT.md` à jour et en écrivant ton entrée de
-  journal dans `.claude/loop/journal/AAAA-MM-JJ-architecte.md`.
+- Tu termines en mettant `boucle/ETAT.md` à jour et en écrivant ton entrée de
+  journal dans `boucle/journal/AAAA-MM-JJ-architecte.md`.

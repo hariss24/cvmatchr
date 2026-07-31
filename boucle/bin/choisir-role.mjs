@@ -70,8 +70,8 @@ if (process.argv[1]?.endsWith("choisir-role.mjs")) {
   const brut = drapeau === -1 ? "" : (process.argv[drapeau + 1] ?? "");
   const pr = brut && brut !== "null" ? JSON.parse(brut) : null;
 
-  const pause = lirePause(await lireOuNull(".claude/loop/PAUSE.md"));
-  const backlog = lireBacklog((await lireOuNull(".claude/loop/BACKLOG.md")) ?? "");
+  const pause = lirePause(await lireOuNull("boucle/PAUSE.md"));
+  const backlog = lireBacklog((await lireOuNull("boucle/BACKLOG.md")) ?? "");
 
   process.stdout.write(`role=${choisirRole({ pause, pr, backlog })}\n`);
 }

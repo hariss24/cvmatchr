@@ -385,9 +385,9 @@ Modales de référence : `TailorModal.tsx`, `PackModal.tsx` (Pack candidature : 
 Un agent Claude se réveille toutes les 6 heures (`.github/workflows/boucle.yml`) et joue
 **un** rôle : Gardien (répare), Bâtisseur (code), Architecte (planifie) ou Éclaireur
 (audite). Le choix est fait par un script pur et testé
-(`.claude/loop/bin/choisir-role.mjs`), jamais par le jugement de l'agent.
+(`boucle/bin/choisir-role.mjs`), jamais par le jugement de l'agent.
 
-Piloter la boucle : `.claude/loop/README.md`.
+Piloter la boucle : `boucle/README.md`.
 Conception : `docs/superpowers/specs/2026-07-31-boucle-autonome-design.md`.
 
 Pièges :

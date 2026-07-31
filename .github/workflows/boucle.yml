@@ -38,7 +38,7 @@ jobs:
           cache-dependency-path: web/package-lock.json
 
       - name: Tests des scripts de la boucle
-        run: node --test ".claude/loop/bin/*.test.mjs"
+        run: node --test "boucle/bin/*.test.mjs"
 
       # État de la PR courante de la boucle. Une seule PR ouverte à la fois :
       # on prend la plus récente sur une branche `claude/…`.
@@ -71,7 +71,7 @@ jobs:
           if [ -n "${{ github.event.inputs.role }}" ]; then
             echo "role=${{ github.event.inputs.role }}" >> "$GITHUB_OUTPUT"
           else
-            node .claude/loop/bin/choisir-role.mjs --pr '${{ steps.pr.outputs.pr }}' >> "$GITHUB_OUTPUT"
+            node boucle/bin/choisir-role.mjs --pr '${{ steps.pr.outputs.pr }}' >> "$GITHUB_OUTPUT"
           fi
 
       - name: Mandat du rôle
@@ -79,10 +79,10 @@ jobs:
         if: steps.role.outputs.role != 'Pause'
         run: |
           case "${{ steps.role.outputs.role }}" in
-            "Éclaireur")  echo "fichier=.claude/loop/roles/eclaireur.md" >> "$GITHUB_OUTPUT" ;;
-            "Architecte") echo "fichier=.claude/loop/roles/architecte.md" >> "$GITHUB_OUTPUT" ;;
-            "Bâtisseur")  echo "fichier=.claude/loop/roles/batisseur.md" >> "$GITHUB_OUTPUT" ;;
-            "Gardien")    echo "fichier=.claude/loop/roles/gardien.md" >> "$GITHUB_OUTPUT" ;;
+            "Éclaireur")  echo "fichier=boucle/roles/eclaireur.md" >> "$GITHUB_OUTPUT" ;;
+            "Architecte") echo "fichier=boucle/roles/architecte.md" >> "$GITHUB_OUTPUT" ;;
+            "Bâtisseur")  echo "fichier=boucle/roles/batisseur.md" >> "$GITHUB_OUTPUT" ;;
+            "Gardien")    echo "fichier=boucle/roles/gardien.md" >> "$GITHUB_OUTPUT" ;;
             *) echo "Rôle inconnu : ${{ steps.role.outputs.role }}" && exit 1 ;;
           esac
 
@@ -140,9 +140,9 @@ jobs:
             boucle autonome de CVMatchr.
 
             Lis dans cet ordre, en entier :
-            1. .claude/loop/MISSION.md
-            2. .claude/loop/ETAT.md
-            3. .claude/loop/BACKLOG.md
+            1. boucle/MISSION.md
+            2. boucle/ETAT.md
+            3. boucle/BACKLOG.md
             4. ${{ steps.mandat.outputs.fichier }}
 
             Applique ton mandat à la lettre. Ne lis jamais tout le dépôt : uniquement
@@ -182,7 +182,7 @@ jobs:
       # jamais le runner.
       - name: Vérification du périmètre
         if: steps.role.outputs.role != 'Pause'
-        run: git diff --name-only origin/main...HEAD | node .claude/loop/bin/verifier-perimetre.mjs
+        run: git diff --name-only origin/main...HEAD | node boucle/bin/verifier-perimetre.mjs
 
       - name: Y a-t-il quelque chose à pousser ?
         id: travail
@@ -210,7 +210,7 @@ jobs:
               --title "Boucle — ${{ steps.role.outputs.role }} du $(date -u +%d/%m/%Y)" \
               --body "Réveil automatique. Rôle joué : ${{ steps.role.outputs.role }}.
 
-          Voir \`.claude/loop/journal/\` pour le compte rendu et \`.claude/loop/ETAT.md\`
+          Voir \`boucle/journal/\` pour le compte rendu et \`boucle/ETAT.md\`
           pour l'état de la boucle.
 
           🤖 Generated with [Claude Code](https://claude.com/claude-code)"

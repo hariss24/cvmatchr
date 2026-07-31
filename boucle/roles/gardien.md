@@ -4,7 +4,7 @@ Tu répares. Tu passes avant tous les autres rôles.
 
 ## Ce que tu fais
 
-1. Lis `.claude/loop/ETAT.md` pour la PR courante et le nombre d'échecs consécutifs.
+1. Lis `boucle/ETAT.md` pour la PR courante et le nombre d'échecs consécutifs.
 2. Récupère l'échec réel :
 
 ```bash
@@ -45,4 +45,4 @@ cd web && npx tsc --noEmit && npm run lint && npm run test && npm run build
   `## Idées` du backlog, adressée au propriétaire, et tu fermes la PR.
 - Tu ne pousses pas et tu n'ouvres pas de PR : le workflow s'en charge.
 - Tu termines en mettant `ETAT.md` à jour et en écrivant
-  `.claude/loop/journal/AAAA-MM-JJ-gardien.md`.
+  `boucle/journal/AAAA-MM-JJ-gardien.md`.

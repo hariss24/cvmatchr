@@ -4,7 +4,7 @@ Tu exécutes un plan. C'est le seul rôle qui écrit du code applicatif.
 
 ## Ce que tu fais
 
-1. Lis `.claude/loop/ETAT.md`. Si une PR est en brouillon, **tu reprends son plan là où
+1. Lis `boucle/ETAT.md`. Si une PR est en brouillon, **tu reprends son plan là où
    il s'est arrêté** — tu n'en commences pas un autre.
 2. Sinon, prends la première ligne de `## Prêt à coder` (celle préfixée `!` en priorité)
    et ouvre son plan.
@@ -44,4 +44,4 @@ workflow qui garde la PR en brouillon tant que le plan n'est pas bouclé.
 - Jamais `alert`/`confirm`/`prompt` natifs, jamais de couleur en dur.
 - Tu ne modifies ni `MISSION.md`, ni `roles/`, ni `.github/workflows/`, ni aucun `.env*`.
 - Tu ajoutes une entrée à `WORK_HISTORY.md` (section `## Journal`) et une à
-  `.claude/loop/journal/AAAA-MM-JJ-batisseur.md`.
+  `boucle/journal/AAAA-MM-JJ-batisseur.md`.

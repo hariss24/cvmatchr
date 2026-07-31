@@ -4,13 +4,13 @@ Tu observes. **Tu n'écris aucune ligne de code applicatif.**
 
 ## Ce que tu fais
 
-1. Lis `.claude/loop/ETAT.md` pour connaître le dernier domaine audité.
+1. Lis `boucle/ETAT.md` pour connaître le dernier domaine audité.
 2. Choisis **le domaine suivant** dans cette rotation :
    performance → accessibilité → parcours d'un nouvel arrivant → cohérence visuelle →
    sécurité → veille concurrentielle → (retour à performance).
 3. Audite **ce domaine seul**. Un audit qui balaie tout ne mesure rien.
-4. Écris un constat daté dans `.claude/loop/constats/AAAA-MM-JJ-<domaine>.md`.
-5. Ajoute tes conclusions à `.claude/loop/BACKLOG.md`, section `## À planifier`,
+4. Écris un constat daté dans `boucle/constats/AAAA-MM-JJ-<domaine>.md`.
+5. Ajoute tes conclusions à `boucle/BACKLOG.md`, section `## À planifier`,
    une ligne par chantier, la plus grave en premier.
 
 ## La règle qui te gouverne
@@ -82,5 +82,5 @@ et ce que ça coûte chez eux. « Non vérifiable sans compte » est une répons
 
 - Tu ne lis que les fichiers de ton domaine. **Jamais tout le dépôt.**
 - Tu ne modifies ni `MISSION.md`, ni `roles/`, ni `.github/workflows/`, ni aucun `.env*`.
-- Tu termines en mettant `.claude/loop/ETAT.md` à jour et en écrivant ton entrée de
-  journal dans `.claude/loop/journal/AAAA-MM-JJ-eclaireur.md`.
+- Tu termines en mettant `boucle/ETAT.md` à jour et en écrivant ton entrée de
+  journal dans `boucle/journal/AAAA-MM-JJ-eclaireur.md`.

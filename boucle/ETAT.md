@@ -1,7 +1,7 @@
 # ÉTAT
 
 *(fichier court, écrasé à chaque réveil — ce n'est pas un historique,
-le journal est dans `.claude/loop/journal/`)*
+le journal est dans `boucle/journal/`)*
 
 - **Dernier réveil :** aucun
 - **Rôle joué :** aucun
