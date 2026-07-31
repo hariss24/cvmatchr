@@ -2,8 +2,10 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Profil - Mes informations", () => {
   test("sauvegarde les informations et pré-remplit les nouveaux CV", async ({ page }) => {
-    // 1. Aller sur l'accueil puis la page profil
+    // 1. Aller sur l'accueil puis la page profil (le lien /profil vit désormais
+    // dans le menu utilisateur de la TopBar, ouvert au clic sur l'avatar — commit b9a84e3).
     await page.goto("/");
+    await page.click(".btn-avatar");
     await page.click("a[href='/profil']");
     
     // 2. Remplir quelques champs
