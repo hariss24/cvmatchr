@@ -234,16 +234,26 @@ jobs:
           numero="${{ steps.pr.outputs.numero }}"
           [ -z "$numero" ] && numero=$(gh pr view --json number --jq .number)
 
-          # `--auto` ne diffère la fusion que s'il existe une vérification EXIGÉE par la
-          # protection de branche. Sans elle, GitHub fusionne immédiatement, avant même
-          # que la CI ait répondu — la boucle enverrait du code non testé en production.
-          # On refuse donc d'armer la fusion tant que la protection n'est pas en place.
-          exigees=$(gh api "repos/${{ github.repository }}/branches/main/protection/required_status_checks" \
-                      --jq '.contexts // [] | join(",")' 2>/dev/null || echo "")
-          if ! echo "$exigees" | grep -q "test-web"; then
-            echo "::warning::Fusion automatique NON armée : la protection de la branche main"
-            echo "::warning::n'exige pas le contrôle « test-web ». Voir la Task 6 du plan."
-            echo "La PR #$numero reste ouverte et attend une fusion manuelle."
+          # `--auto` ne diffère la fusion que si GitHub refuse déjà de fusionner. Sans
+          # protection, il fusionne immédiatement, avant même que la CI ait répondu — la
+          # boucle enverrait du code non testé en production.
+          #
+          # On ne demande pas à GitHub « une règle existe-t-elle ? » : lire la
+          # configuration d'administration exige une permission que la boucle n'a pas, et
+          # un refus silencieux se lisait comme une absence de règle. On lui demande la
+          # seule chose qui compte et qui est visible d'ici : « refuses-tu de fusionner
+          # CETTE proposition, maintenant ? ». BLOCKED = la porte est fermée.
+          etat="UNKNOWN"
+          for _ in 1 2 3 4 5 6; do
+            etat=$(gh pr view "$numero" --json mergeStateStatus --jq .mergeStateStatus)
+            [ "$etat" != "UNKNOWN" ] && break
+            sleep 10
+          done
+
+          if [ "$etat" != "BLOCKED" ]; then
+            echo "::warning::Fusion automatique NON armée : GitHub ne bloque pas la PR #$numero"
+            echo "::warning::(état « $etat »). La protection de main est absente ou inopérante."
+            echo "La PR reste ouverte et attend une fusion manuelle."
             exit 0
           fi
 
