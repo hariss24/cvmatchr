@@ -380,6 +380,34 @@ Modales de référence : `TailorModal.tsx`, `PackModal.tsx` (Pack candidature : 
 
 ---
 
+## 13. Boucle autonome
+
+Un agent Claude se réveille toutes les 6 heures (`.github/workflows/boucle.yml`) et joue
+**un** rôle : Gardien (répare), Bâtisseur (code), Architecte (planifie) ou Éclaireur
+(audite). Le choix est fait par un script pur et testé
+(`.claude/loop/bin/choisir-role.mjs`), jamais par le jugement de l'agent.
+
+Piloter la boucle : `.claude/loop/README.md`.
+Conception : `docs/superpowers/specs/2026-07-31-boucle-autonome-design.md`.
+
+Pièges :
+- **La boucle ne pousse jamais sur `main`.** Elle committe en local ; le workflow pousse
+  sur `claude/…`, ouvre la PR et arme `--auto`. La fusion n'a lieu que si la protection
+  de branche `main` exige le check `test-web` — **sans cette protection, `--auto`
+  fusionne immédiatement, y compris avant que la CI ait répondu** (le moteur refuse
+  désormais de s'armer sans cette protection mise en place).
+- Une PR ouverte avec le jeton par défaut de GitHub Actions **ne déclenche aucune CI**.
+  D'où le secret `LOOP_GITHUB_TOKEN` (jeton personnel). Si les PR de la boucle n'ont
+  aucun check, c'est ce secret qu'il faut regarder.
+- **Une seule PR de la boucle ouverte à la fois** : tant qu'elle vit, les réveils la
+  font avancer au lieu d'en ouvrir une autre.
+- La boucle ne peut modifier ni `MISSION.md`, ni `roles/`, ni `.github/workflows/`, ni
+  aucun `.env*` — `bin/verifier-perimetre.mjs` refuse le diff avant le push.
+- Elle n'a **aucune clé applicative** (France Travail, Adzuna, Gemini, Maps, Brandfetch) :
+  les tests tournent sur des bouchons.
+
+---
+
 ## 12. Commandes essentielles (depuis `web/`)
 
 ```bash
