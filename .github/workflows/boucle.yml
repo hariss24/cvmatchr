@@ -145,8 +145,35 @@ jobs:
             Applique ton mandat à la lettre. Ne lis jamais tout le dépôt : uniquement
             les fichiers dont ton mandat a besoin.
 
-            Tu committes en local. Tu ne pousses pas, tu n'ouvres pas de PR, tu ne
-            fusionnes rien : le workflow s'en charge après avoir vérifié ton périmètre.
+            IMPÉRATIF — enregistre ton travail avant de terminer :
+
+                git add -A
+                git commit -m "<ce que tu as fait, en français>"
+
+            Un fichier écrit et non commité est PERDU : cette machine est détruite à la
+            fin du réveil. Ne termine jamais sans avoir vérifié `git status`.
+
+            En revanche tu ne pousses pas, tu n'ouvres pas de PR, tu ne fusionnes rien :
+            le workflow s'en charge après avoir vérifié ton périmètre.
+
+      # Filet de sécurité : le moteur ne voit que les commits, or rien ne garantit que
+      # l'agent commite ce qu'il écrit. Deux réveils réels ont produit 39 puis 63 tours
+      # de travail perdus faute de commit. On ne compte donc pas sur sa discipline : ce
+      # qui traîne dans l'arbre de travail est enregistré ici, et passera comme le reste
+      # sous le garde-fou de l'étape suivante.
+      - name: Enregistrer ce que l'agent a laissé en plan
+        if: steps.role.outputs.role != 'Pause'
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::warning::L'agent n'a pas commité son travail — le moteur s'en charge."
+            git status --short
+            git add -A
+            git commit -m "${{ steps.role.outputs.role }} : travail enregistré par le moteur
+
+          L'agent a écrit ces fichiers sans les commiter."
+          else
+            echo "Rien à rattraper : l'agent a commité son travail lui-même."
+          fi
 
       # Le garde-fou passe APRÈS Claude et AVANT le push : une violation ne quitte
       # jamais le runner.
