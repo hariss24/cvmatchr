@@ -85,6 +85,7 @@ export function FilterBar({
         <button
           type="button"
           className="flt-go"
+          data-testid="jobs-scan"
           disabled={!canScan || scanning}
           onClick={onScan}
         >

@@ -19,29 +19,29 @@ test.describe("Page d'aide et FAQ", () => {
 
   test("Les accordéons de la FAQ s'ouvrent et se ferment", async ({ page }) => {
     await page.goto("/help");
-    
-    // Vérifier la présence d'une question
-    const firstQuestion = page.locator("summary").filter({ hasText: "Comment démarrer rapidement en 4 étapes ?" });
+
+    // Vérifier la présence d'une question (accordéon `<button className="faq-summary">`
+    // piloté par state React depuis le commit 5dc0a01, plus un <details>/<summary>).
+    const firstQuestion = page.locator(".faq-summary").filter({ hasText: "Comment démarrer rapidement en 4 étapes ?" });
     await expect(firstQuestion).toBeVisible();
-    
-    // Le contenu (ol.help-steps) est caché par défaut par le navigateur sur un <details> non-ouvert.
-    const detailsNode = firstQuestion.locator(".."); // Le parent <details>
-    await expect(detailsNode).not.toHaveAttribute("open", "");
-    
+
+    // Le contenu est caché par défaut : l'état ouvert/fermé est porté par `aria-expanded`.
+    await expect(firstQuestion).toHaveAttribute("aria-expanded", "false");
+
     // Cliquer pour ouvrir
     await firstQuestion.click();
-    await expect(detailsNode).toHaveAttribute("open", "");
-    
+    await expect(firstQuestion).toHaveAttribute("aria-expanded", "true");
+
     // Cliquer pour fermer
     await firstQuestion.click();
-    await expect(detailsNode).not.toHaveAttribute("open", "");
+    await expect(firstQuestion).toHaveAttribute("aria-expanded", "false");
   });
 
   test("« Régler ma clé API » ouvre l'invite de clé depuis la FAQ", async ({ page }) => {
     await page.goto("/help");
-    
+
     // Ouvrir l'accordéon correspondant
-    const apiKeyQuestion = page.locator("summary").filter({ hasText: "clé API" });
+    const apiKeyQuestion = page.locator(".faq-summary").filter({ hasText: "clé API" });
     await apiKeyQuestion.click();
     
     // Cliquer sur le bouton
