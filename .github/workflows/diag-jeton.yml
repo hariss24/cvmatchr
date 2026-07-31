@@ -1,0 +1,20 @@
+name: Diagnostic du jeton de la boucle
+
+# Jetable. Demande à GitHub quels droits porte LOOP_GITHUB_TOKEN, sans jamais
+# l'afficher. À supprimer une fois la boucle en état de pousser.
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Droits vus par le jeton
+        env:
+          GH_TOKEN: ${{ secrets.LOOP_GITHUB_TOKEN }}
+        run: |
+          echo "— Identité portée par le jeton —"
+          gh api /user --jq .login || echo "(jeton fin : /user peut être interdit, c'est normal)"
+
+          echo "— Droits sur le dépôt —"
+          gh api "/repos/${{ github.repository }}" --jq '.permissions'
