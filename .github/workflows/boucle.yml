@@ -17,6 +17,9 @@ concurrency:
 permissions:
   contents: write
   pull-requests: write
+  # Exigée par `claude-code-action` pour l'échange OIDC qui authentifie le jeton
+  # d'abonnement. Sans elle : « Could not fetch an OIDC token », après trois tentatives.
+  id-token: write
 
 jobs:
   reveil:
