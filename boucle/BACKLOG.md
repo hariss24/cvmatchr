@@ -18,6 +18,8 @@ apprendre. Conventions minimales :
 
 *(un constat existe, l'Architecte doit en faire une spec + un plan)*
 
+- Performance `/jobs` : ~3,9 s pour charger la seule coquille de page sous throttling « Slow 4G » (profil mobile standard Lighthouse), contre un seuil MISSION.md de 2 s pour le premier résultat visible — dépassement d'un facteur ~2, imputable au réseau (~1 Mo de JS+CSS décompressé chargés, pas le CPU). Voir `boucle/constats/2026-07-31-performance.md`.
+- Performance `/pack` (éditeur) : ~2,38 s pour la coquille de page sous throttling combiné réseau+CPU, sous le seuil de 2,5 s mais avec seulement 120 ms de marge, et cette mesure ne couvre probablement pas le vrai temps d'interactivité (Monaco/react-pdf chargés en dynamique, non capturés). À remesurer avec un signal d'interactivité plus fiable avant de considérer ce seuil acquis. Voir `boucle/constats/2026-07-31-performance.md`.
 - Robustesse du scan : une seule offre malformée fait échouer tout le scan en silence (`rankOffer` lève sur `contractLabel` absent, l'exception remonte et rien n'est persisté — un toast, c'est tout). Non reproduit en production, le type `JobOffer` rend le champ obligatoire ; une source tierce malformée suffirait.
 
 ## En attente de feu vert
