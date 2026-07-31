@@ -141,6 +141,105 @@ git commit -m "docs(boucle): constat de l'état réel de la CI avant armement"
 
 ---
 
+## Task 0 bis : remettre la suite end-to-end en phase avec l'app
+
+Ajoutée après la mesure de la Task 0. Les 14 tests rouges ne signalent **aucun bug
+produit** : ils décrivent une application qui n'existe plus, parce qu'elle a
+délibérément évolué. Une suite périmée est un filet décoratif — et c'est le seul filet
+qui vérifie qu'un utilisateur peut réellement se servir de l'app. Vitest teste des
+fonctions ; Playwright teste des parcours.
+
+**Autorisation explicite** : cette tâche lève la règle 9 de `web/CADRAGE_EXECUTION.md`
+(« tu ne modifies pas un test existant pour le faire passer ») **pour ces quatre
+fichiers uniquement**. La justification est que le comportement attendu a changé par
+décision produit, documentée par un commit — pas que le code soit faux.
+
+**Écart assumé au format du plan** : cette tâche ne contient pas le code à écrire, parce
+que sa rédaction exigeait de lire les quatre fichiers de test et les composants qu'ils
+visent. Le diagnostic ci-dessous est en revanche complet : chaque échec a sa cause
+racine et son commit d'origine.
+
+**Fichiers :**
+- Modifier : `web/tests/e2e/jobs.spec.ts`, `help.spec.ts`, `mobile.spec.ts`,
+  `profile.spec.ts` (chemins exacts à confirmer à l'ouverture)
+- Modifier : `.github/workflows/web.yml` — retirer le `continue-on-error: true`
+
+**Diagnostic établi par la Task 0** (voir `.claude/loop/constats/2026-07-31-etat-ci.md`) :
+
+| Fichier | Tests rouges | Cause racine |
+|---|---|---|
+| `jobs.spec.ts` | 9 | Le bouton de scan est désactivé tant qu'aucun mot-clé métier n'est saisi (`canScan`, décision produit du 22/07). Les tests n'en saisissent jamais. |
+| `help.spec.ts` | 2 | L'accordéon FAQ est passé de `<details>` à des boutons React pilotés par état (commit `5dc0a01`, pour l'animation CSS Grid). |
+| `mobile.spec.ts` | 2 | La page « Historique » a été absorbée par « Candidatures » (commit `d0d9082`). |
+| `profile.spec.ts` | 1 | Le lien `/profil` vit maintenant dans le menu utilisateur (`UserMenu`, commit `b9a84e3`) ; le test clique sans ouvrir le menu. |
+
+- [ ] **Étape 1 : constater les 14 échecs**
+
+```bash
+cd web && npm run test:e2e -- --workers=1 --reporter=line
+```
+
+Attendu : `24 passed`, `14 failed`. Relever le nom exact de chaque test rouge.
+
+- [ ] **Étape 2 : réparer chaque fichier, en visant le comportement d'aujourd'hui**
+
+Règle qui gouverne cette étape : **le test doit décrire ce que l'app fait maintenant, et
+échouer si elle cesse de le faire.** Un test qu'on rend vert en supprimant son assertion
+est pire que pas de test — il donne l'illusion d'une protection.
+
+Concrètement, pour chacun :
+- `jobs.spec.ts` — saisir un mot-clé métier dans le champ prévu avant d'attendre que le
+  bouton de scan soit actif. Le test doit continuer d'échouer si le bouton reste
+  désactivé alors qu'un mot-clé est saisi.
+- `help.spec.ts` — cibler les boutons de l'accordéon et vérifier l'ouverture par l'état
+  visible du panneau, pas par l'attribut `open` d'un `<details>` disparu.
+- `mobile.spec.ts` — viser « Candidatures » là où le test visait « Historique ». Ne pas
+  supprimer les assertions : l'écran existe toujours, il a changé de nom et d'adresse.
+- `profile.spec.ts` — ouvrir le menu utilisateur avant de cliquer sur le lien.
+
+Ne modifier aucun fichier de `web/src/` : la Task 0 a déjà restauré le seul point
+d'accroche réellement manquant (`data-testid="jobs-scan"`). Si un autre point d'accroche
+manque vraiment, l'ajouter est permis — mais uniquement un attribut de test, jamais un
+changement de comportement.
+
+- [ ] **Étape 3 : vérifier que la suite est verte**
+
+```bash
+cd web && npm run test:e2e -- --workers=1 --reporter=line
+```
+
+Attendu : `38 passed`, `0 failed`. Si un test résiste, ne pas le neutraliser : le
+diagnostiquer avec `superpowers:systematic-debugging` et rapporter.
+
+- [ ] **Étape 4 : rendre Playwright bloquant à nouveau**
+
+Dans `.github/workflows/web.yml`, supprimer la ligne `continue-on-error: true` sous
+`- name: E2E Tests (Playwright)`. L'étape doit redevenir :
+
+```yaml
+      - name: E2E Tests (Playwright)
+        run: npm run test:e2e
+```
+
+C'est cette ligne, et elle seule, qui redonne à la fusion automatique un filet réel.
+
+- [ ] **Étape 5 : vérifier la CI complète**
+
+```bash
+cd web && npx tsc --noEmit && npm run lint && npm run test && npm run build
+```
+
+Attendu : les quatre en succès.
+
+- [ ] **Étape 6 : commit**
+
+```bash
+git add web/tests .github/workflows/web.yml
+git commit -m "test(e2e): la suite décrit à nouveau l'app réelle, Playwright redevient bloquant"
+```
+
+---
+
 ## Task 1 : le socle de fichiers
 
 **Fichiers :**
