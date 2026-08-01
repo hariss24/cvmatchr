@@ -10,7 +10,8 @@
  * repli quand l'extraction échoue, jamais une mémoire silencieuse du dossier précédent.
  */
 
-import { DEFAULT_LETTER, type Letter, type Resume } from "@/lib/resume/schema";
+import { DEFAULT_LETTER } from "@/lib/resume/defaults";
+import type { Letter, Resume } from "@/lib/resume/schema";
 import { renderTemplate } from "@/lib/templates/render";
 
 export interface JobMeta {

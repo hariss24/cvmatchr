@@ -1,4 +1,5 @@
-import { DEFAULT_RESUME, type Resume } from "@/lib/resume/schema";
+import { DEFAULT_RESUME } from "@/lib/resume/defaults";
+import type { Resume } from "@/lib/resume/schema";
 
 /**
  * Profil « Mes informations » : identité de l'utilisateur, saisie une fois et

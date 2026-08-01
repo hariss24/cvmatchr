@@ -2,10 +2,10 @@ import {
   resumeSchema,
   letterSchema,
   RESUME_TOP_KEYS,
-  DEFAULT_LETTER,
   type Resume,
   type Letter,
 } from "./schema";
+import { DEFAULT_LETTER } from "./defaults";
 
 /**
  * Coercition + garde-fous du domaine CV.
