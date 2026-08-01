@@ -1,6 +1,21 @@
 # Journal — Bâtisseur du 01/08/2026
 
-## Plan exécuté
+## Réveil suivant (même jour) : rien à construire
+
+Au réveil, `ETAT.md` indiquait la PR du plan ci-dessous comme « prête pour
+revue/fusion ». Vérification : elle était déjà fusionnée dans `main`
+(commit `e824235`, PR #10) — confirmé par lecture directe de `rome.ts`,
+`rank/index.ts` et `JobsView.tsx` (aucun import statique résiduel de
+`rome-competences.json` ni de `profileSchema`). `## Prêt à coder` ne
+contenait que cette même ligne, désormais obsolète.
+
+Housekeeping effectué (pas de code applicatif touché, rien à vérifier
+tsc/lint/test/build) : ligne déplacée de `## Prêt à coder` vers
+`## Terminé` dans `BACKLOG.md`, `ETAT.md` réécrit pour refléter l'état réel
+(aucune PR en cours, rien de prêt à coder). Aucun commit de code ; seuls
+`boucle/BACKLOG.md`, `boucle/ETAT.md` et ce journal changent.
+
+## Plan exécuté (réveil précédent, même jour)
 
 `docs/superpowers/plans/2026-08-01-jobs-allegement-bundle.md` (4 tâches),
 seule ligne de `## Prêt à coder`. Spec associée :

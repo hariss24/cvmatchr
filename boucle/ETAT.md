@@ -5,12 +5,12 @@ le journal est dans `boucle/journal/`)*
 
 - **Dernier réveil :** 2026-08-01 (Bâtisseur)
 - **Rôle joué :** Bâtisseur
-- **PR en cours :** plan `docs/superpowers/plans/2026-08-01-jobs-allegement-bundle.md`
-  bouclé en entier (4/4 tâches, 4 commits sur `claude/reveil-20260801-0807`) — vérifs
-  vertes (tsc/lint/vitest/build/e2e). Prêt pour revue/fusion par le workflow. Mesure
-  finale : poids initial de `/jobs` -56 % (2 488 883 o → 1 088 377 o), mais la cible
-  de 700 Ko n'est pas atteinte (zod ~283 Ko chargé app-wide via `docStore.ts`, hors
-  périmètre de ce plan — détail dans `WORK_HISTORY.md` et
-  `boucle/journal/2026-08-01-batisseur.md`).
+- **PR en cours :** aucune. La seule ligne de `## Prêt à coder` (allègement
+  bundle `/jobs`) était déjà fusionnée dans `main` avant ce réveil (PR #10,
+  commit `e824235`) — vérifié par lecture directe du code (`rome.ts`,
+  `rank/index.ts`, `JobsView.tsx`, tous conformes au plan). Ligne déplacée
+  vers `## Terminé` dans `BACKLOG.md`. `## Prêt à coder` est maintenant vide :
+  rien à construire pour le Bâtisseur tant que l'Architecte n'aura pas
+  transformé une entrée de `## À planifier` en plan.
 - **Domaine audité en dernier :** performance
 - **Échecs consécutifs du Gardien sur la PR courante :** 0

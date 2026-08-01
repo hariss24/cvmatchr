@@ -14,8 +14,6 @@ apprendre. Conventions minimales :
 
 *(un plan existe, le Bâtisseur peut s'y mettre — vide au démarrage)*
 
-- Performance `/jobs` : ~3,9 s pour charger la seule coquille de page sous throttling « Slow 4G » (profil mobile standard Lighthouse), contre un seuil MISSION.md de 2 s pour le premier résultat visible — dépassement d'un facteur ~2, imputable au réseau. Cause racine trouvée le 01/08/2026 (mesure refaite, poids réel 2,4 Mo et non 1 Mo comme mesuré le 31/07, voir la spec pour le désaccord non tranché) : `rome-competences.json` (1,43 Mo, 60 % du poids) et `zod` (288 Ko) importés statiquement dans le bundle client de `/jobs` alors qu'ils ne sont utiles qu'au moment d'un scan. Spec : `docs/superpowers/specs/2026-08-01-jobs-allegement-bundle-design.md`. Plan : `docs/superpowers/plans/2026-08-01-jobs-allegement-bundle.md`.
-
 ## À planifier
 
 *(un constat existe, l'Architecte doit en faire une spec + un plan)*
@@ -32,5 +30,7 @@ apprendre. Conventions minimales :
 *(dépôt libre du propriétaire et de l'Éclaireur, à trier)*
 
 ## Terminé
+
+- Performance `/jobs` (chargement paresseux de `rome-competences.json` et de `zod`/`profileSchema`) : plan `docs/superpowers/plans/2026-08-01-jobs-allegement-bundle.md` bouclé (4/4 tâches) et fusionné dans `main` le 01/08/2026 (PR #10, commit `e824235`). Poids initial de `/jobs` -56 % (2 488 883 o → 1 088 377 o). Cible de 700 Ko non atteinte (zod ~283 Ko chargé app-wide via `docStore.ts` → `lib/resume/schema.ts`, hors périmètre de ce plan) — reste une piste ouverte, voir « État actuel » de `WORK_HISTORY.md`.
 
 ## Échoué
