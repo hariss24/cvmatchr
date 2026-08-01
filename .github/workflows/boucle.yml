@@ -40,6 +40,15 @@ jobs:
       - name: Tests des scripts de la boucle
         run: node --test "boucle/bin/*.test.mjs"
 
+      # AVANT « Branche de travail », qui rebase : sans identité, `git rebase` meurt sur
+      # « empty ident name ». Configurée plus bas, elle a fait passer tout rebase pour un
+      # conflit avec le propriétaire — la boucle a fermé sa propre PR et jeté son travail
+      # (PR #13, réveil du 01/08 21:15).
+      - name: Identité des commits de la boucle
+        run: |
+          git config user.name "Boucle CVMatchr"
+          git config user.email "boucle@cvmatchr.local"
+
       # État de la PR courante de la boucle. Une seule PR ouverte à la fois :
       # on prend la plus récente sur une branche `claude/…`.
       - name: État de la PR courante
@@ -96,10 +105,24 @@ jobs:
             # Le propriétaire gagne toujours : on se rebase sur son travail. En cas de
             # conflit on abandonne la branche au lieu de forcer quoi que ce soit — le
             # chantier repartira du backlog, aucun travail humain n'est écrasé.
+            #
+            # Mais on n'abandonne QUE pour un vrai conflit. Un `git rebase` peut aussi
+            # échouer pour des raisons qui n'ont rien à voir avec le travail en cours
+            # (identité absente, dépôt en mauvais état) : traiter ces pannes comme un
+            # conflit revenait à détruire un chantier entier à cause d'un outil mal
+            # configuré. C'est arrivé pour de vrai le 01/08 (PR #13).
             if ! git rebase origin/main; then
-              git rebase --abort
+              conflits=$(git diff --name-only --diff-filter=U)
+              git rebase --abort || true
+              if [ -z "$conflits" ]; then
+                echo "::error::Le rebase a échoué SANS conflit de fichier — panne d'outil,"
+                echo "::error::pas désaccord avec le propriétaire. La branche est conservée."
+                exit 1
+              fi
               gh pr close "${{ steps.pr.outputs.numero }}" \
-                --comment "Conflit avec main après un changement du propriétaire. Branche abandonnée, le chantier retourne au backlog."
+                --comment "Conflit avec main après un changement du propriétaire, sur : $conflits
+
+            Branche abandonnée, le chantier retourne au backlog."
               nom="claude/reveil-$(date -u +%Y%m%d-%H%M)"
               git checkout origin/main -B "$nom"
             fi
@@ -115,12 +138,6 @@ jobs:
         if: steps.role.outputs.role != 'Pause'
         working-directory: web
         run: npm ci
-
-      - name: Identité des commits de la boucle
-        if: steps.role.outputs.role != 'Pause'
-        run: |
-          git config user.name "Boucle CVMatchr"
-          git config user.email "boucle@cvmatchr.local"
 
       - name: Réveil de Claude
         if: steps.role.outputs.role != 'Pause'
