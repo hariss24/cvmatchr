@@ -22,5 +22,9 @@ le journal est dans `boucle/journal/`)*
   `BACKLOG.md` : ligne déplacée de `## Prêt à coder` (désormais vide) vers
   `## Terminé`. Détail complet : `WORK_HISTORY.md` et
   `boucle/journal/2026-08-01-batisseur.md`.
-- **Domaine audité en dernier :** performance (poids de bundle JS)
+- **Domaine audité en dernier :** aucun. La rotation de l'Éclaireur a été réécrite par le
+  propriétaire le 01/08 (neuf domaines au lieu de six, ajout du coût des appels externes,
+  de l'hygiène du dépôt et des briques externes). Le compteur repart donc au début :
+  **prochain domaine = manques fonctionnels**. Les audits antérieurs restent valables et
+  sont dans `boucle/constats/`.
 - **Échecs consécutifs du Gardien sur la PR courante :** 0
