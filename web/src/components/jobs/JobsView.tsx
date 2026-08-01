@@ -8,7 +8,6 @@ import { useDocStore } from "@/state/docStore";
 import { toast } from "@/state/uiStore";
 import type { JobOffer } from "@/lib/jobs/francetravail";
 import { EMPTY_PROFILE, type JobSearchProfile } from "@/lib/jobs/profile";
-import { parseProfile } from "@/lib/jobs/profileSchema";
 import { getJobProfile, saveJobProfile, getCachedCommute, setCachedCommute } from "@/lib/storage/db";
 import { rankOffer, buildRankContext, shouldPersist } from "@/lib/jobs/rank";
 import { geocodeHome, commuteCacheKey } from "@/lib/jobs/homeCoords";
@@ -56,12 +55,17 @@ export default function JobsView() {
   useEffect(() => {
     void reload();
     getApiUsage().then(setUsage);
-    getJobProfile().then((p) => {
+    getJobProfile().then(async (p) => {
       // Le profil persisté peut dater d'avant l'ajout d'un champ (ex. `sources`,
       // arrivé avec les sources multiples) : on le repasse par le schéma
       // tolérant, qui complète les manques avec les défauts neutres. Sans ça,
       // un profil existant fait planter le formulaire sur un champ absent.
-      if (p) setProfile(parseProfile(p));
+      // parseProfile (zod, ~288 Ko) est chargé à la demande ici plutôt qu'en
+      // import statique, pour ne pas alourdir le bundle initial de /jobs.
+      if (p) {
+        const { parseProfile } = await import("@/lib/jobs/profileSchema");
+        setProfile(parseProfile(p));
+      }
       setProfileLoaded(true);
     });
     // Au montage seulement. `reload` est redéfinie à chaque rendu ; la mettre en
@@ -170,7 +174,7 @@ export default function JobsView() {
   async function scanGroupe(
     p: JobSearchProfile,
     sources: JobSearchProfile["sources"],
-    ctx: ReturnType<typeof buildRankContext>,
+    ctx: Awaited<ReturnType<typeof buildRankContext>>,
     vues: Set<string>,
   ): Promise<number> {
     const res = await fetch("/api/jobs/search", {
@@ -263,7 +267,7 @@ export default function JobsView() {
       // Une seule requête de géocodage pour tout le scan, et seulement si une
       // adresse est renseignée. Sans domicile, le critère de distance reste neutre.
       const home = await geocodeHome(p.homeAddress);
-      const ctx = buildRankContext(p, home);
+      const ctx = await buildRankContext(p, home);
       const vues = await jobKeys();
 
       let retenues = 0;
