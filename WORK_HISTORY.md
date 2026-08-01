@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Phase 2 du classement : embeddings pour les sources hors France Travail (spec à écrire après usage réel de la phase 1).
+**Prochaine étape suggérée :** Allègement `/jobs` partiellement abouti (rome + profileSchema en `import()` dynamique, -56 % de poids initial) mais la cible de 700 Ko n'est pas atteinte : ~283 Ko de zod restent chargés au premier atterrissage via `docStore.ts` → schéma de CV (`lib/resume/schema.ts`), indépendamment de `profileSchema.ts` — chunk déjà présent sur `/`, `/login`, `/help`, `/pack` avant ce chantier (voir Journal 2026-08-01 et `boucle/constats/2026-07-31-performance.md` point 3). À investiguer par l'Architecte : peut-on retarder ce chargement de zod, partagé par toute l'app ?
 
 ---
 
@@ -40,6 +40,60 @@
 ---
 
 ## Journal
+
+### 2026-08-01 : Allègement du bundle JS initial de `/jobs` (plan `docs/superpowers/plans/2026-08-01-jobs-allegement-bundle.md`)
+
+- **Quoi :** `buildRomeTargets` (`lib/jobs/rome.ts`) et `buildRankContext`
+  (`lib/jobs/rank/index.ts`) passent d'un chargement statique du référentiel
+  ROME (1,43 Mo) à un `import()` dynamique caché en mémoire (module-level
+  promise), déclenché seulement au premier scan. `JobsView.tsx` attend
+  désormais `buildRankContext` et charge `profileSchema.ts` (zod) par
+  `import()` dynamique au montage plutôt qu'en import statique.
+- **Pourquoi :** `boucle/constats/2026-07-31-performance.md` mesurait `/jobs`
+  à ~3,9 s sous Slow 4G, contre un seuil MISSION.md de 2 s — imputable au
+  poids réseau (1 Mo+ mesuré alors, 2,43 Mo re-mesuré le 01/08/2026 avant ce
+  chantier, voir la spec pour le désaccord non tranché entre les deux
+  mesures). Le référentiel ROME entier n'était utile qu'au moment d'un scan,
+  jamais à l'atterrissage.
+- **Fichiers touchés :** `lib/jobs/rome.ts`, `lib/jobs/rome.test.ts`,
+  `lib/jobs/rank/index.ts`, `lib/jobs/rank/index.test.ts`,
+  `lib/jobs/rank/criteria.test.ts`, `components/jobs/JobsView.tsx`,
+  `components/jobs/JobsView.scan.test.ts`.
+- **Résultat vérifs :** `tsc --noEmit`, `lint`, `vitest run` (584 tests),
+  `build` et `playwright test tests/e2e/jobs.spec.ts` (9 tests) tous verts
+  après chaque tâche. Un commit par tâche (3 commits).
+- **Mesure finale (Task 4, build de prod propre, `.next` supprimé avant
+  rebuild) :** poids JS total référencé par le HTML de `/jobs` avant tout
+  clic : **1 088 377 o** (13 fichiers), contre **2 488 883 o** mesurés le
+  01/08/2026 avant ce chantier — **-56 %**. Le chunk contenant
+  `rome-competences.json` (1,43 Mo, confirmé par grep `M1855`) est bien
+  absent du chargement initial, se charge une seule fois au premier clic sur
+  « Rechercher » (vérifié par un script Playwright ad hoc, jeté après usage)
+  et ne se recharge pas à un second scan dans la même session — critères
+  §7.2a et §7.4 de la spec remplis.
+  **Cible de 700 Ko NON atteinte (critère §7.3)** : un chunk de 283 405 o
+  contenant zod (1112 occurrences du mot, donc la bibliothèque elle-même, pas
+  seulement des schémas) reste chargé au premier atterrissage de `/jobs`.
+  Investigation : ce chunk est **partagé par toute l'app** (retrouvé
+  identique sur `/pack` et `/history`), chargé via `docStore.ts` (importé par
+  `JobsView.tsx` pour `setPendingJobDesc`/`setCompany`/`setRole`) qui dépend
+  transitivement du schéma zod du CV (`lib/resume/schema.ts`) — une
+  dépendance **totalement indépendante** de `profileSchema.ts` (celui-ci a
+  bien été retiré du bundle initial, sa signature dynamique fonctionne). La
+  spec 2026-08-01 §2.3 avait attribué ce poids à `profileSchema.ts` seul ;
+  cette mesure montre que c'était une attribution incomplète — le même chunk
+  zod était déjà référencé sur `/`, `/login`, `/help`, `/pack` avant ce
+  chantier (déjà noté comme point non résolu par l'audit du 31/07, chantier
+  proposé n°3). Hors périmètre de ce plan (qui ne touchait que
+  `profileSchema.ts`) : ne pas retoucher `docStore.ts` ou
+  `lib/resume/schema.ts` sans nouvelle spec — impact potentiel sur toutes les
+  pages qui consomment `docStore`.
+- **Non fait faute de temps/environnement :** chronométrage Slow 4G + CPU x4
+  (méthodologie de l'audit du 31/07) — Chromium a dû être installé dans cette
+  session (`npx playwright install chromium`), le temps n'a pas permis de
+  relancer une mesure de timing complète après l'avoir fait ; seule la mesure
+  de poids (Task 4 §7.3) et la vérification fonctionnelle (e2e + réseau) ont
+  été faites.
 
 ### 2026-07-28 : Finalisation du chantier Notation en Lettres (Task 15)
 
