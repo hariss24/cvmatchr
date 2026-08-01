@@ -59,3 +59,60 @@ chronométrage Slow 4G + CPU x4 comme dans l'audit du 31/07 — impossible à
 exécuter dans cette session (Chromium non installé, `npx playwright install`
 échoue faute d'accès réseau sortant complet). À refaire si l'environnement
 d'exécution du Bâtisseur le permet.
+
+---
+
+## Réveil suivant (même jour) : ligne zod de `## À planifier`
+
+Ligne préfixée `!` (traitée en priorité) : « Poids de `zod` (~283 Ko) chargé sur
+**toutes** les pages via `docStore.ts` → `lib/resume/schema.ts` ». Constat
+source : `boucle/journal/2026-08-01-batisseur.md` — le Bâtisseur avait démonté,
+après son plan `/jobs`, que la spec ci-dessus (première entrée de ce journal)
+avait attribué ce poids à `profileSchema.ts` à tort ; la vraie deuxième source
+est ce chunk zod partagé par l'app entière.
+
+### Ce qui a été fait
+
+Plutôt que de proposer un correctif à l'aveugle (le risque exact qui avait
+produit l'attribution erronée de la spec `/jobs`), j'ai **codé le correctif,
+mesuré avec un vrai build, puis annulé** avant d'écrire la spec — deux fois :
+
+1. **Correctif partiel** (ne migrer que `docStore.ts`, le nœud le plus visible
+   dans la chaîne `RootLayout → UiHost → useGlobalUndoRedo → useDocStore`) :
+   build de prod, chunk zod inchangé (même hash, même poids) sur toutes les
+   routes. Réfuté par la mesure, pas supposé.
+2. **Correctif complet** (migrer les 14 fichiers qui importent
+   `DEFAULT_RESUME`/`DEFAULT_LETTER` depuis `schema.ts` — le fichier qui définit
+   aussi tous les schémas zod réels — vers un nouveau fichier zod-libre
+   `defaults.ts`) : chunk zod disparu de 8 routes sur 9 (-286 Ko chacune,
+   mesuré), resté seulement sur `/` (l'éditeur, où il est réellement utilisé par
+   les modales d'import/adaptation). `tsc`/`lint`/`vitest` (584 tests) verts.
+
+Les deux mesures, la chaîne d'import exacte et le raisonnement sont dans
+`docs/superpowers/specs/2026-08-01-zod-global-allegement-bundle-design.md`
+(§2). Une fois la mesure confirmée, j'ai annulé tout le code (`git checkout` +
+suppression du fichier créé) : l'Architecte ne modifie rien sous `web/src/`,
+même du code déjà vérifié.
+
+Plan écrit avec les diffs exacts déjà connus pour fonctionner (pas de
+« devrait marcher ») :
+`docs/superpowers/plans/2026-08-01-zod-global-allegement-bundle.md`, 4 tâches.
+
+Aucun chantier sous feu vert (pas de dépendance npm, pas de compte, pas
+d'IndexedDB) : ligne déplacée directement vers `## Prêt à coder`.
+
+### Idée notée pour plus tard
+
+`/` (l'éditeur) reste à ~1,34 Mo, zod compris — légitime, mais jamais mesuré
+contre le seuil de 2,5 s de `MISSION.md`. Notée dans `BACKLOG.md` § Idées
+(lazy-load des modales d'import), pas dans `## À planifier` : ce n'est qu'une
+piste, pas encore un constat mesuré.
+
+### Bornes respectées
+
+Le code expérimental (14 fichiers modifiés + 1 créé) a été intégralement
+annulé avant la fin du réveil — `git status` confirmé propre sous `web/src/`
+avant ce commit. Seuls `boucle/BACKLOG.md`, `boucle/ETAT.md`,
+`docs/superpowers/specs/2026-08-01-zod-global-allegement-bundle-design.md`,
+`docs/superpowers/plans/2026-08-01-zod-global-allegement-bundle.md` et ce
+journal changent.
