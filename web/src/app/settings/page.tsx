@@ -53,6 +53,7 @@ export default function SettingsPage() {
   };
 
   const isAnthropicRequired = settings.activeModel.startsWith("claude-");
+  const isDeepseekRequired = settings.activeModel.startsWith("deepseek-");
 
   return (
     <div className="wrap">
@@ -88,11 +89,14 @@ export default function SettingsPage() {
                   onChange={(v) => settings.setActiveModel(v)}
                   style={{ width: "100%" }}
                   options={[
-                    { value: "gemini-3.1-flash", label: "Gemini 3.1 Flash (Par défaut — recommandé)", group: "Modèles Google (Gemini)" },
+                    { value: "gemini-3.5-flash", label: "Gemini 3.5 Flash (Par défaut — recommandé)", group: "Modèles Google (Gemini)" },
                     { value: "gemini-3.1-flash-lite", label: "Gemini 3.1 Flash Lite (Le moins cher)", group: "Modèles Google (Gemini)" },
                     { value: "gemini-1.5-pro", label: "Gemini 1.5 Pro (Génération précédente)", group: "Modèles Google (Gemini)" },
                     { value: "claude-3-5-sonnet", label: "Claude 3.5 Sonnet (Très intelligent)", group: "Modèles Anthropic (Claude)" },
                     { value: "claude-haiku-4-5-20251001", label: "Claude 3.5 Haiku (Ultra rapide)", group: "Modèles Anthropic (Claude)" },
+                    { value: "deepseek-v4-flash", label: "DeepSeek V4 Flash (Rapide, contexte 1M)", group: "Modèles DeepSeek" },
+                    { value: "deepseek-chat", label: "DeepSeek V3 Chat (Bon marché)", group: "Modèles DeepSeek" },
+                    { value: "deepseek-reasoner", label: "DeepSeek R1 Reasoner (Raisonnement, pas cher)", group: "Modèles DeepSeek" },
                   ]}
                 />
               </div>
@@ -122,6 +126,19 @@ export default function SettingsPage() {
                     value={settings.anthropicKey}
                     onChange={(e) => settings.setAnthropicKey(e.target.value)}
                     placeholder="sk-ant-..."
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-field">
+                  <label className="form-label" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    Clé API DeepSeek
+                    {isDeepseekRequired && <span style={{ fontSize: "10px", background: "var(--success)", color: "#fff", padding: "2px 6px", borderRadius: "4px", fontWeight: "bold" }}>REQUISE</span>}
+                  </label>
+                  <input
+                    type="password"
+                    value={settings.deepseekKey}
+                    onChange={(e) => settings.setDeepseekKey(e.target.value)}
+                    placeholder="sk-..."
                     className="form-input"
                   />
                 </div>

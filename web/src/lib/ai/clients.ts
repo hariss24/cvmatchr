@@ -7,7 +7,7 @@ import { useSettingsStore, type AiModel } from "@/state/settingsStore";
  */
 
 // Legacy exports for backward compatibility (some components might use GEMINI_MODEL)
-export const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.1-flash";
+export const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
 const ANTHROPIC_MAX_TOKENS = 8192;
 
 export type ChatRole = "user" | "assistant";
@@ -26,24 +26,33 @@ export function serverKeyPreview(): string | null {
   return key ? `${key.slice(0, 4)}…` : null;
 }
 
-export function requireActiveKey(overrideKey?: string | null): { key: string; provider: "gemini" | "anthropic"; model: AiModel } {
-  const { activeModel, geminiKey, anthropicKey } = useSettingsStore.getState();
-  
+export function requireActiveKey(overrideKey?: string | null): { key: string; provider: "gemini" | "anthropic" | "deepseek"; model: AiModel } {
+  const { activeModel, geminiKey, anthropicKey, deepseekKey } = useSettingsStore.getState();
+
   if (overrideKey) {
     const provider = isAnthropicKey(overrideKey) ? "anthropic" : "gemini";
     let model = activeModel;
     if (provider === "anthropic" && !model.startsWith("claude-")) model = "claude-haiku-4-5-20251001";
-    if (provider === "gemini" && !model.startsWith("gemini-")) model = "gemini-3.1-flash";
+    if (provider === "gemini" && !model.startsWith("gemini-")) model = "gemini-3.5-flash";
     return { key: overrideKey, provider, model: model as AiModel };
   }
 
-  const provider = activeModel.startsWith("claude-") ? "anthropic" : "gemini";
+  const provider = activeModel.startsWith("claude-")
+    ? "anthropic"
+    : activeModel.startsWith("deepseek-")
+      ? "deepseek"
+      : "gemini";
 
   if (provider === "anthropic") {
     if (!anthropicKey) {
       throw new Error("Clé Anthropic requise pour utiliser ce modèle. Ajoutez-la dans ⚙️ Paramètres.");
     }
     return { key: anthropicKey, provider, model: activeModel };
+  } else if (provider === "deepseek") {
+    if (!deepseekKey) {
+      throw new Error("Clé DeepSeek requise pour utiliser ce modèle. Ajoutez-la dans ⚙️ Paramètres.");
+    }
+    return { key: deepseekKey, provider, model: activeModel };
   } else {
     const key = geminiKey || process.env.GEMINI_API_KEY || "";
     if (!key) {
@@ -118,6 +127,13 @@ export async function* streamCompletion(
       );
     }
     yield* streamAnthropic(prompt, finalSystem, key, model, creativity);
+  } else if (provider === "deepseek") {
+    if (images.length > 0) {
+      throw new Error(
+        "Le modèle DeepSeek ne supporte pas la conversion PDF. Sélectionnez un modèle Gemini dans les Paramètres.",
+      );
+    }
+    yield* streamDeepseek(prompt, finalSystem, key, model, creativity);
   } else {
     yield* streamGemini(prompt, finalSystem, images, key, model, creativity);
   }
@@ -176,6 +192,50 @@ async function* streamAnthropic(
   }
 }
 
+async function* streamDeepseek(
+  prompt: string,
+  system: string,
+  key: string,
+  model: string,
+  temperature: number,
+): AsyncGenerator<string> {
+  const resp = await fetch("https://api.deepseek.com/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    body: JSON.stringify({
+      model,
+      temperature,
+      stream: true,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: prompt },
+      ],
+    }),
+  });
+  if (!resp.ok || !resp.body) {
+    throw new Error(`Erreur DeepSeek (${resp.status}) : ${await resp.text()}`);
+  }
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    const lines = buf.split("\n");
+    buf = lines.pop() ?? "";
+    for (const line of lines) {
+      if (!line.startsWith("data: ")) continue;
+      const data = line.slice(6);
+      if (data === "[DONE]") return;
+      const chunk = JSON.parse(data) as { choices: Array<{ delta?: { content?: string } }> };
+      const text = chunk.choices[0]?.delta?.content;
+      if (text) yield text;
+    }
+  }
+}
+
 // ---- non-streaming (port de _complete_gemini / _complete_anthropic) ----------
 
 /** Complétion non-streaming à partir d'un historique de messages. Renvoie le texte complet. */
@@ -189,9 +249,9 @@ export async function complete(
   const finalSystem = buildSystemPrompt(system);
   const { creativity } = useSettingsStore.getState();
 
-  return provider === "anthropic"
-    ? completeAnthropic(messages, finalSystem, key, model, creativity)
-    : completeGemini(messages, finalSystem, key, model, creativity);
+  if (provider === "anthropic") return completeAnthropic(messages, finalSystem, key, model, creativity);
+  if (provider === "deepseek") return completeDeepseek(messages, finalSystem, key, model, creativity);
+  return completeGemini(messages, finalSystem, key, model, creativity);
 }
 
 async function completeGemini(
@@ -230,7 +290,7 @@ export async function completeJson(
 ): Promise<string> {
   const { key, provider, model } = requireActiveKey(apiKey);
 
-  if (provider === "anthropic") {
+  if (provider !== "gemini") {
     throw new Error("La fonctionnalité nécessite un modèle Gemini. Modifiez le modèle actif dans ⚙️ Paramètres.");
   }
   const ai = new GoogleGenAI({ apiKey: key });
@@ -271,4 +331,30 @@ async function completeAnthropic(
   });
   const block = response.content[0];
   return block && block.type === "text" ? block.text : "";
+}
+
+async function completeDeepseek(
+  messages: ChatMessage[],
+  system: string,
+  key: string,
+  model: string,
+  temperature: number,
+): Promise<string> {
+  const resp = await fetch("https://api.deepseek.com/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    body: JSON.stringify({
+      model,
+      temperature,
+      messages: [
+        { role: "system", content: system },
+        ...messages.map((m) => ({ role: m.role, content: m.content })),
+      ],
+    }),
+  });
+  if (!resp.ok) {
+    throw new Error(`Erreur DeepSeek (${resp.status}) : ${await resp.text()}`);
+  }
+  const data = (await resp.json()) as { choices: Array<{ message?: { content?: string } }> };
+  return data.choices[0]?.message?.content ?? "";
 }
