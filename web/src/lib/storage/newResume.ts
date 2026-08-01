@@ -1,7 +1,7 @@
 import { useDocStore } from "@/state/docStore";
 import { saveDraft, loadProfile } from "@/lib/storage/db";
 import { applyProfileToResume } from "@/lib/profile/profile";
-import { DEFAULT_RESUME } from "@/lib/resume/schema";
+import { DEFAULT_RESUME } from "@/lib/resume/defaults";
 
 /**
  * Repart d'un CV vierge, en basculant sur le type CV si besoin.
