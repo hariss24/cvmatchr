@@ -1,23 +1,27 @@
 /**
- * Couche d'appel client vers les routes IA serveur. Port de `getApiHeaders`/`getUserApiKey`
- * (app.js l.1961-1967) + un helper `postJson` factorisant le pattern fetch+erreur des appels IA.
+ * Couche d'appel client vers les routes IA serveur. Un helper `postJson`/`streamSse` factorise
+ * le pattern fetch+erreur des appels IA.
  *
- * La clé API personnelle de l'utilisateur est stockée dans `localStorage` (`userApiKey`) et
- * envoyée via l'en-tête `X-Api-Key`. Sans clé, le serveur retombe sur `GEMINI_API_KEY`.
+ * Le modèle actif et la clé API correspondante (Paramètres, store Zustand) voyagent vers le
+ * serveur via les en-têtes `X-Ai-Model` / `X-Api-Key` — sans ça, les routes API (exécutées
+ * côté serveur, où le store n'est jamais hydraté) ignorent le choix de l'utilisateur et
+ * retombent toujours sur Gemini + la clé serveur. Sans clé personnelle, le serveur retombe
+ * sur `GEMINI_API_KEY`.
  */
 
-const STORAGE_KEY_APIKEY = "userApiKey";
+import { useSettingsStore } from "@/state/settingsStore";
 
-/** Clé API personnelle de l'utilisateur (vide côté serveur / SSR). */
-export function getUserApiKey(): string {
-  if (typeof localStorage === "undefined") return "";
-  return localStorage.getItem(STORAGE_KEY_APIKEY) || "";
-}
-
-/** En-têtes IA : ajoute `X-Api-Key` si une clé personnelle est enregistrée. */
+/** En-têtes IA : modèle actif + clé API correspondante (Gemini/Anthropic/DeepSeek). */
 export function getApiHeaders(): Record<string, string> {
-  const key = getUserApiKey();
-  return key ? { "X-Api-Key": key } : {};
+  const { activeModel, geminiKey, anthropicKey, deepseekKey } = useSettingsStore.getState();
+  const key = activeModel.startsWith("claude-")
+    ? anthropicKey
+    : activeModel.startsWith("deepseek-")
+      ? deepseekKey
+      : geminiKey;
+  const headers: Record<string, string> = { "X-Ai-Model": activeModel };
+  if (key) headers["X-Api-Key"] = key;
+  return headers;
 }
 
 /**

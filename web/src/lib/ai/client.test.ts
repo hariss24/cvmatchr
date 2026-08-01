@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { getUserApiKey, getApiHeaders, postJson, streamSse } from "./client";
+import { getApiHeaders, postJson, streamSse } from "./client";
+import { useSettingsStore } from "@/state/settingsStore";
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  useSettingsStore.setState({ activeModel: "gemini-3.5-flash", geminiKey: "", anthropicKey: "", deepseekKey: "" });
+});
 
 /** Construit un corps de réponse SSE lisible (ReadableStream) à partir de lignes brutes. */
 function sseBody(raw: string): ReadableStream<Uint8Array> {
@@ -22,27 +26,34 @@ function sseBody(raw: string): ReadableStream<Uint8Array> {
   });
 }
 
-describe("getUserApiKey / getApiHeaders", () => {
-  it("renvoie vide sans localStorage (SSR)", () => {
-    expect(getUserApiKey()).toBe("");
-    expect(getApiHeaders()).toEqual({});
+describe("getApiHeaders", () => {
+  it("envoie toujours le modèle actif", () => {
+    expect(getApiHeaders()).toEqual({ "X-Ai-Model": "gemini-3.5-flash" });
   });
 
-  it("lit la clé et construit l'en-tête X-Api-Key", () => {
-    vi.stubGlobal("localStorage", { getItem: () => "sk-perso" });
-    expect(getUserApiKey()).toBe("sk-perso");
-    expect(getApiHeaders()).toEqual({ "X-Api-Key": "sk-perso" });
+  it("ajoute X-Api-Key avec la clé Gemini si le modèle actif est Gemini", () => {
+    useSettingsStore.setState({ activeModel: "gemini-3.1-flash-lite", geminiKey: "sk-perso" });
+    expect(getApiHeaders()).toEqual({ "X-Ai-Model": "gemini-3.1-flash-lite", "X-Api-Key": "sk-perso" });
   });
 
-  it("pas d'en-tête si clé vide", () => {
-    vi.stubGlobal("localStorage", { getItem: () => "" });
-    expect(getApiHeaders()).toEqual({});
+  it("bascule sur la clé Anthropic pour un modèle Claude", () => {
+    useSettingsStore.setState({ activeModel: "claude-3-5-sonnet", anthropicKey: "sk-ant-perso" });
+    expect(getApiHeaders()).toEqual({ "X-Ai-Model": "claude-3-5-sonnet", "X-Api-Key": "sk-ant-perso" });
+  });
+
+  it("bascule sur la clé DeepSeek pour un modèle DeepSeek", () => {
+    useSettingsStore.setState({ activeModel: "deepseek-v4-flash", deepseekKey: "sk-ds-perso" });
+    expect(getApiHeaders()).toEqual({ "X-Ai-Model": "deepseek-v4-flash", "X-Api-Key": "sk-ds-perso" });
+  });
+
+  it("pas de X-Api-Key si la clé correspondante est vide", () => {
+    expect(getApiHeaders()).toEqual({ "X-Ai-Model": "gemini-3.5-flash" });
   });
 });
 
 describe("postJson", () => {
   it("envoie le corps + en-têtes et renvoie le JSON parsé", async () => {
-    vi.stubGlobal("localStorage", { getItem: () => "sk-perso" });
+    useSettingsStore.setState({ activeModel: "gemini-3.5-flash", geminiKey: "sk-perso" });
     const fetchMock = vi.fn(async () => ({
       ok: true,
       json: async () => ({ resume: { name: "Zoé" } }),

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { complete, type ChatMessage } from "@/lib/ai/clients";
 import { SYSTEM_EDITOR_CHAT } from "@/lib/ai/prompts";
 import { parseAiJson } from "@/lib/ai/json";
-import { aiErrorResponse } from "@/lib/ai/http";
+import { aiErrorResponse, readAiHeaders } from "@/lib/ai/http";
 import { normalizeResume, normalizeLetter, isEmptyResume, isEmptyLetter } from "@/lib/resume/normalize";
 import type { DocData } from "@/state/docStore";
 
@@ -47,10 +47,10 @@ export async function POST(req: Request): Promise<Response> {
     ...messages,
   ];
 
-  const userKey = req.headers.get("x-api-key")?.trim() || null;
+  const { key: userKey, model: userModel } = readAiHeaders(req);
 
   try {
-    const raw = await complete(augmented, SYSTEM_EDITOR_CHAT, userKey);
+    const raw = await complete(augmented, SYSTEM_EDITOR_CHAT, userKey, userModel);
 
     // Le modèle lâche l'enveloppe JSON dès qu'une demande n'appelle aucune retouche du
     // document (« qu'est-ce que j'écris dans ce champ ? ») : il répond en prose. Sa

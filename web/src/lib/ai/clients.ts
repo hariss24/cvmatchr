@@ -26,39 +26,46 @@ export function serverKeyPreview(): string | null {
   return key ? `${key.slice(0, 4)}…` : null;
 }
 
-export function requireActiveKey(overrideKey?: string | null): { key: string; provider: "gemini" | "anthropic" | "deepseek"; model: AiModel } {
+/**
+ * Résout la clé/le modèle actifs. `overrideModel`/`overrideKey` viennent des en-têtes
+ * `X-Ai-Model`/`X-Api-Key` envoyés par le client (cf. lib/ai/client.ts `getApiHeaders`) : les
+ * routes API tournent côté serveur, où le store Zustand des Paramètres n'est jamais hydraté
+ * (toujours son état par défaut), donc sans ces en-têtes le modèle/la clé choisis par
+ * l'utilisateur n'atteignent jamais l'appel réel.
+ */
+export function requireActiveKey(
+  overrideKey?: string | null,
+  overrideModel?: string | null,
+): { key: string; provider: "gemini" | "anthropic" | "deepseek"; model: AiModel } {
   const { activeModel, geminiKey, anthropicKey, deepseekKey } = useSettingsStore.getState();
+  const model = (overrideModel || activeModel) as AiModel;
 
-  if (overrideKey) {
-    const provider = isAnthropicKey(overrideKey) ? "anthropic" : "gemini";
-    let model = activeModel;
-    if (provider === "anthropic" && !model.startsWith("claude-")) model = "claude-haiku-4-5-20251001";
-    if (provider === "gemini" && !model.startsWith("gemini-")) model = "gemini-3.5-flash";
-    return { key: overrideKey, provider, model: model as AiModel };
-  }
-
-  const provider = activeModel.startsWith("claude-")
+  const provider = model.startsWith("claude-")
     ? "anthropic"
-    : activeModel.startsWith("deepseek-")
+    : model.startsWith("deepseek-")
       ? "deepseek"
       : "gemini";
+
+  if (overrideKey) {
+    return { key: overrideKey, provider, model };
+  }
 
   if (provider === "anthropic") {
     if (!anthropicKey) {
       throw new Error("Clé Anthropic requise pour utiliser ce modèle. Ajoutez-la dans ⚙️ Paramètres.");
     }
-    return { key: anthropicKey, provider, model: activeModel };
+    return { key: anthropicKey, provider, model };
   } else if (provider === "deepseek") {
     if (!deepseekKey) {
       throw new Error("Clé DeepSeek requise pour utiliser ce modèle. Ajoutez-la dans ⚙️ Paramètres.");
     }
-    return { key: deepseekKey, provider, model: activeModel };
+    return { key: deepseekKey, provider, model };
   } else {
     const key = geminiKey || process.env.GEMINI_API_KEY || "";
     if (!key) {
       throw new Error("Clé Gemini requise pour utiliser ce modèle. Ajoutez-la dans ⚙️ Paramètres.");
     }
-    return { key, provider, model: activeModel };
+    return { key, provider, model };
   }
 }
 
@@ -112,9 +119,9 @@ function rethrowGeminiError(err: unknown): never {
 export async function* streamCompletion(
   prompt: string,
   system: string,
-  opts: { images?: Uint8Array[]; apiKey?: string | null } = {},
+  opts: { images?: Uint8Array[]; apiKey?: string | null; model?: string | null } = {},
 ): AsyncGenerator<string> {
-  const { key, provider, model } = requireActiveKey(opts.apiKey);
+  const { key, provider, model } = requireActiveKey(opts.apiKey, opts.model);
 
   const images = opts.images ?? [];
   const finalSystem = buildSystemPrompt(system);
@@ -243,8 +250,9 @@ export async function complete(
   messages: ChatMessage[],
   system: string,
   apiKey?: string | null,
+  aiModel?: string | null,
 ): Promise<string> {
-  const { key, provider, model } = requireActiveKey(apiKey);
+  const { key, provider, model } = requireActiveKey(apiKey, aiModel);
 
   const finalSystem = buildSystemPrompt(system);
   const { creativity } = useSettingsStore.getState();
@@ -287,8 +295,9 @@ export async function completeJson(
   system: string,
   schema: Schema,
   apiKey?: string | null,
+  aiModel?: string | null,
 ): Promise<string> {
-  const { key, provider, model } = requireActiveKey(apiKey);
+  const { key, provider, model } = requireActiveKey(apiKey, aiModel);
 
   if (provider !== "gemini") {
     throw new Error("La fonctionnalité nécessite un modèle Gemini. Modifiez le modèle actif dans ⚙️ Paramètres.");
@@ -357,4 +366,46 @@ async function completeDeepseek(
   }
   const data = (await resp.json()) as { choices: Array<{ message?: { content?: string } }> };
   return data.choices[0]?.message?.content ?? "";
+}
+
+// ---- test de connexion (bouton "Tester la connexion" des Paramètres) --------
+
+/**
+ * Vérifie qu'une clé/modèle donnés répondent réellement à l'API — port minimal des fonctions
+ * `complete*` ci-dessus, mais sans passer par `requireActiveKey`/le store : la clé testée est
+ * celle tapée à l'instant dans le formulaire, pas nécessairement celle déjà enregistrée.
+ */
+export async function testConnection(
+  provider: "gemini" | "anthropic" | "deepseek",
+  model: string,
+  key: string,
+): Promise<void> {
+  if (provider === "gemini") {
+    const ai = new GoogleGenAI({ apiKey: key });
+    try {
+      await ai.models.generateContent({ model, contents: "Dis « ok » et rien d'autre." });
+    } catch (err) {
+      rethrowGeminiError(err);
+    }
+  } else if (provider === "anthropic") {
+    const client = new Anthropic({ apiKey: key });
+    await client.messages.create({
+      model,
+      max_tokens: 5,
+      messages: [{ role: "user", content: "Dis « ok » et rien d'autre." }],
+    });
+  } else {
+    const resp = await fetch("https://api.deepseek.com/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      body: JSON.stringify({
+        model,
+        max_tokens: 5,
+        messages: [{ role: "user", content: "Dis « ok » et rien d'autre." }],
+      }),
+    });
+    if (!resp.ok) {
+      throw new Error(`Erreur DeepSeek (${resp.status}) : ${await resp.text()}`);
+    }
+  }
 }

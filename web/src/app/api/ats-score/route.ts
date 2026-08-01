@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { complete } from "@/lib/ai/clients";
 import { SYSTEM_ATS_SCORE } from "@/lib/ai/prompts";
 import { parseAiJson } from "@/lib/ai/json";
-import { aiErrorResponse } from "@/lib/ai/http";
+import { aiErrorResponse, readAiHeaders } from "@/lib/ai/http";
 import type { Requirement, Priority } from "@/lib/ats/engine";
 
 export const runtime = "nodejs";
@@ -69,14 +69,14 @@ export async function POST(req: Request): Promise<Response> {
     return NextResponse.json({ error: "CV et offre d'emploi requis." }, { status: 400 });
   }
 
-  const userKey = req.headers.get("x-api-key")?.trim() || null;
+  const { key: userKey, model: userModel } = readAiHeaders(req);
   const role = (body.role ?? "").trim();
   const content =
     (role ? `Intitulé du poste visé : ${role}\n\n` : "") +
     `CV (texte) :\n${resumeText}\n\nOffre d'emploi :\n${jobDesc}`;
 
   try {
-    const raw = await complete([{ role: "user", content }], SYSTEM_ATS_SCORE, userKey);
+    const raw = await complete([{ role: "user", content }], SYSTEM_ATS_SCORE, userKey, userModel);
     const result = parseAiJson(raw);
     if (typeof result !== "object" || result === null) {
       throw new Error("Réponse IA invalide : objet JSON attendu.");

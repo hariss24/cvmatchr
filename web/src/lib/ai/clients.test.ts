@@ -46,6 +46,16 @@ describe("requireActiveKey", () => {
     useSettingsStore.setState({ activeModel: "gemini-3.1-flash-lite", geminiKey: "" });
     expect(() => requireActiveKey()).toThrow(/Clé Gemini requise/);
   });
+
+  it("le modèle/la clé en override (en-têtes client) priment sur le store serveur", () => {
+    // Le store reflète l'état par défaut côté serveur (jamais hydraté par le client réel) ;
+    // le modèle + la clé envoyés via X-Ai-Model/X-Api-Key doivent quand même être utilisés.
+    useSettingsStore.setState({ activeModel: "gemini-3.5-flash", geminiKey: "" });
+    const res = requireActiveKey("sk-ds-user", "deepseek-v4-flash");
+    expect(res.key).toBe("sk-ds-user");
+    expect(res.provider).toBe("deepseek");
+    expect(res.model).toBe("deepseek-v4-flash");
+  });
 });
 
 describe("statut clé serveur", () => {
@@ -65,6 +75,7 @@ describe("streamCompletion (garde Anthropic + images)", () => {
   it("refuse les images avec une clé Anthropic", async () => {
     const gen = streamCompletion("prompt", "system", {
       apiKey: "sk-ant-test",
+      model: "claude-3-5-sonnet",
       images: [new Uint8Array([1, 2, 3])],
     });
     await expect(gen.next()).rejects.toThrow(/Anthropic ne supporte pas/);

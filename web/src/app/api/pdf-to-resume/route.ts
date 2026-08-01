@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { streamCompletion } from "@/lib/ai/clients";
 import { SYSTEM_PDF_TO_RESUME } from "@/lib/ai/prompts";
 import { parseAiJson } from "@/lib/ai/json";
-import { aiErrorResponse } from "@/lib/ai/http";
+import { aiErrorResponse, readAiHeaders } from "@/lib/ai/http";
 import { normalizeResume } from "@/lib/resume/normalize";
 
 export const runtime = "nodejs";
@@ -51,7 +51,7 @@ export async function POST(req: Request): Promise<Response> {
     return NextResponse.json({ error: "Images illisibles." }, { status: 400 });
   }
 
-  const userKey = req.headers.get("x-api-key")?.trim() || null;
+  const { key: userKey, model: userModel } = readAiHeaders(req);
   const n = decoded.length;
   const prompt =
     `Voici le CV en ${n} page${n > 1 ? "s" : ""}. ` +
@@ -62,6 +62,7 @@ export async function POST(req: Request): Promise<Response> {
     for await (const chunk of streamCompletion(prompt, SYSTEM_PDF_TO_RESUME, {
       images: decoded,
       apiKey: userKey,
+      model: userModel,
     })) {
       raw += chunk;
     }

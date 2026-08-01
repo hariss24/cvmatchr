@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { complete } from "@/lib/ai/clients";
 import { tailorResumeSystem, type TailorLevel } from "@/lib/ai/prompts";
 import { parseAiJson } from "@/lib/ai/json";
-import { aiErrorResponse } from "@/lib/ai/http";
+import { aiErrorResponse, readAiHeaders } from "@/lib/ai/http";
 import { normalizeResume, mergeTailored, preservePhoto } from "@/lib/resume/normalize";
 
 export const runtime = "nodejs";
@@ -53,10 +53,10 @@ export async function POST(req: Request): Promise<Response> {
   const content =
     "CV (JSON) :\n" + JSON.stringify(clean) + "\n\nOffre d'emploi :\n" + jobDesc;
 
-  const userKey = req.headers.get("x-api-key")?.trim() || null;
+  const { key: userKey, model: userModel } = readAiHeaders(req);
 
   try {
-    const raw = await complete([{ role: "user", content }], system, userKey);
+    const raw = await complete([{ role: "user", content }], system, userKey, userModel);
     const tailored = normalizeResume(parseAiJson(raw));
     const merged = mergeTailored(base, tailored);
     const result = preservePhoto(merged, base);

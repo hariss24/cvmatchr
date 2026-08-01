@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { streamCompletion } from "@/lib/ai/clients";
 import { SYSTEM_TEXT_TO_LETTER } from "@/lib/ai/prompts";
 import { parseAiJson } from "@/lib/ai/json";
-import { aiErrorResponse } from "@/lib/ai/http";
+import { aiErrorResponse, readAiHeaders } from "@/lib/ai/http";
 import { normalizeLetter } from "@/lib/resume/normalize";
 
 export const runtime = "nodejs";
@@ -27,13 +27,14 @@ export async function POST(req: Request): Promise<Response> {
     return NextResponse.json({ error: "Aucun texte reçu." }, { status: 400 });
   }
 
-  const userKey = req.headers.get("x-api-key")?.trim() || null;
+  const { key: userKey, model: userModel } = readAiHeaders(req);
   const prompt = "Voici le contenu texte de la lettre à structurer :\n\n" + text;
 
   try {
     let raw = "";
     for await (const chunk of streamCompletion(prompt, SYSTEM_TEXT_TO_LETTER, {
       apiKey: userKey,
+      model: userModel,
     })) {
       raw += chunk;
     }

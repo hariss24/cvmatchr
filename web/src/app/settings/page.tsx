@@ -7,8 +7,11 @@ import SegmentedNav from "@/components/layout/SegmentedNav";
 import { useSettingsStore, type AiModel, type AccentColor } from "@/state/settingsStore";
 import CustomSelect from "@/components/ui/CustomSelect";
 
+type TestState = { status: "idle" | "loading" | "ok" | "error"; message?: string };
+
 export default function SettingsPage() {
   const [theme, setTheme] = useState("light");
+  const [testState, setTestState] = useState<TestState>({ status: "idle" });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const settings = useSettingsStore();
@@ -25,6 +28,12 @@ export default function SettingsPage() {
 
     return () => clearTimeout(id);
   }, [settings]);
+
+  // Un résultat de test ne vaut que pour le modèle/la clé testés : le réinitialiser dès que
+  // l'un des deux change évite d'afficher un ✅/❌ obsolète après une modification.
+  useEffect(() => {
+    setTestState({ status: "idle" });
+  }, [settings.activeModel, settings.geminiKey, settings.anthropicKey, settings.deepseekKey]);
 
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
@@ -54,6 +63,34 @@ export default function SettingsPage() {
 
   const isAnthropicRequired = settings.activeModel.startsWith("claude-");
   const isDeepseekRequired = settings.activeModel.startsWith("deepseek-");
+
+  const activeKey = isAnthropicRequired
+    ? settings.anthropicKey
+    : isDeepseekRequired
+      ? settings.deepseekKey
+      : settings.geminiKey;
+  // Sans clé perso, Gemini retombe sur la clé serveur : le test reste possible. Claude et
+  // DeepSeek n'ont pas de clé serveur de secours, donc une clé perso est obligatoire pour eux.
+  const canTest = Boolean(activeKey) || (!isAnthropicRequired && !isDeepseekRequired);
+
+  const handleTestConnection = async () => {
+    setTestState({ status: "loading" });
+    try {
+      const resp = await fetch("/api/test-model", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: settings.activeModel, key: activeKey }),
+      });
+      const data = await resp.json();
+      if (resp.ok && data.ok) {
+        setTestState({ status: "ok" });
+      } else {
+        setTestState({ status: "error", message: data.error || "Échec du test." });
+      }
+    } catch {
+      setTestState({ status: "error", message: "Impossible de joindre le serveur." });
+    }
+  };
 
   return (
     <div className="wrap">
@@ -99,6 +136,25 @@ export default function SettingsPage() {
                     { value: "deepseek-reasoner", label: "DeepSeek R1 Reasoner (Raisonnement, pas cher)", group: "Modèles DeepSeek" },
                   ]}
                 />
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "10px" }}>
+                  <button
+                    type="button"
+                    className="btn-nav"
+                    onClick={handleTestConnection}
+                    disabled={testState.status === "loading" || !canTest}
+                  >
+                    {testState.status === "loading" ? "Test en cours…" : "Tester la connexion"}
+                  </button>
+                  {!canTest && (
+                    <span style={{ fontSize: "13px", color: "var(--muted)" }}>Ajoutez une clé API pour tester.</span>
+                  )}
+                  {testState.status === "ok" && (
+                    <span style={{ fontSize: "13px", color: "var(--success)", fontWeight: "bold" }}>✅ Modèle chargé, clé valide.</span>
+                  )}
+                  {testState.status === "error" && (
+                    <span style={{ fontSize: "13px", color: "var(--error)" }}>❌ {testState.message}</span>
+                  )}
+                </div>
               </div>
 
               {/* Clés API */}
