@@ -35,9 +35,9 @@ export interface RankResult {
   breakdown: Ligne[];
 }
 
-/** Prépare le contexte une seule fois par scan (le référentiel ROME est lourd). */
-export function buildRankContext(profile: JobSearchProfile, home: LatLng | null): RankContext {
-  return { rome: buildRomeTargets(profile.romeCodes), home };
+/** Prépare le contexte une seule fois par scan (le référentiel ROME est lourd, chargé à la demande). */
+export async function buildRankContext(profile: JobSearchProfile, home: LatLng | null): Promise<RankContext> {
+  return { rome: await buildRomeTargets(profile.romeCodes), home };
 }
 
 /**
