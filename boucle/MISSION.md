@@ -20,6 +20,8 @@ lettre adaptés à une offre précise — et ne jamais avoir envie de retourner 
 | Mobile | tout parcours principal utilisable sur 375 px de large |
 | Nouvel arrivant | de l'arrivée au premier PDF sans consulter l'aide |
 | **Couverture fonctionnelle** | **aucune capacité présente chez ≥ 2 des produits de référence et absente ici** |
+| **Coût des appels externes** | aucun appel facturé répété pour une même donnée dans un même parcours |
+| **Hygiène du dépôt** | aucun fichier ni export de `web/src/` sans appelant démontré |
 
 Produits de référence : Jobscan, Teal, Rezi, Huntr, Kickresume, Enhancv, Careerflow,
 Simplify. Une capacité qu'au moins deux d'entre eux offrent et que CVMatchr n'offre pas
