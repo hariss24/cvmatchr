@@ -19,6 +19,8 @@ apprendre. Conventions minimales :
 *(un constat existe, l'Architecte doit en faire une spec + un plan)*
 
 - Performance `/pack` (éditeur) : ~2,38 s pour la coquille de page sous throttling combiné réseau+CPU, sous le seuil de 2,5 s mais avec seulement 120 ms de marge, et cette mesure ne couvre probablement pas le vrai temps d'interactivité (Monaco/react-pdf chargés en dynamique, non capturés). À remesurer avec un signal d'interactivité plus fiable avant de considérer ce seuil acquis. Voir `boucle/constats/2026-07-31-performance.md`.
+- ! Poids de `zod` (~283 Ko) chargé sur **toutes** les pages via `docStore.ts` → `lib/resume/schema.ts`. C'est la cause restante identifiée par le Bâtisseur du 01/08 après l'allègement de `/jobs` : la spec du 01/08 avait attribué ce poids à `profileSchema.ts`, à tort. Tant qu'il est là, `/jobs` ne descendra pas sous 700 Ko, et `/`, `/login`, `/help`, `/pack` le paient aussi. Voir `boucle/journal/2026-08-01-batisseur.md`.
+- Gain en secondes du chantier `/jobs` non mesuré : seul le poids a été revérifié (2 488 883 o → 1 088 377 o). Le chronométrage Slow 4G + CPU x4 qui avait servi à établir le constat initial (~3,9 s) n'a pas été refait, donc on ignore si le seuil de 2 s est désormais tenu. À remesurer avant de clore le sujet performance de `/jobs`.
 - Robustesse du scan : une seule offre malformée fait échouer tout le scan en silence (`rankOffer` lève sur `contractLabel` absent, l'exception remonte et rien n'est persisté — un toast, c'est tout). Non reproduit en production, le type `JobOffer` rend le champ obligatoire ; une source tierce malformée suffirait.
 
 ## En attente de feu vert
