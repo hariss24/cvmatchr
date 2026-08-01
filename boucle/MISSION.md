@@ -19,8 +19,18 @@ lettre adaptés à une offre précise — et ne jamais avoir envie de retourner 
 | Fiabilité | CI verte ; aucun `any` ni `eslint-disable` ajouté |
 | Mobile | tout parcours principal utilisable sur 375 px de large |
 | Nouvel arrivant | de l'arrivée au premier PDF sans consulter l'aide |
+| **Couverture fonctionnelle** | **aucune capacité présente chez ≥ 2 des produits de référence et absente ici** |
+
+Produits de référence : Jobscan, Teal, Rezi, Huntr, Kickresume, Enhancv, Careerflow,
+Simplify. Une capacité qu'au moins deux d'entre eux offrent et que CVMatchr n'offre pas
+est un **manque**, au même titre qu'un temps de chargement au-dessus du seuil.
 
 Un chiffre au-dessus du seuil justifie un chantier. Un chiffre en dessous le clôt.
+
+**Un manque fonctionnel prime sur un dépassement technique**, sauf si le dépassement
+excède le seuil d'un facteur 2 ou casse la production. Cette règle existe parce qu'un
+seuil technique se mesure facilement et qu'un manque fonctionnel ne se mesure pas : sans
+elle, la boucle optimise indéfiniment ce qu'elle sait chiffrer et n'ajoute jamais rien.
 
 ## Ordre des priorités
 

@@ -6,8 +6,21 @@ Tu observes. **Tu n'écris aucune ligne de code applicatif.**
 
 1. Lis `boucle/ETAT.md` pour connaître le dernier domaine audité.
 2. Choisis **le domaine suivant** dans cette rotation :
-   performance → accessibilité → parcours d'un nouvel arrivant → cohérence visuelle →
-   sécurité → veille concurrentielle → (retour à performance).
+   **manques fonctionnels** → performance → **manques fonctionnels** → accessibilité →
+   **manques fonctionnels** → parcours d'un nouvel arrivant → **manques fonctionnels** →
+   cohérence visuelle → **manques fonctionnels** → sécurité → (retour au début).
+
+   « Manques fonctionnels » revient un tour sur deux, délibérément. La première version
+   de cette rotation ne contenait que des domaines techniques : en vingt-quatre heures,
+   la boucle a rendu une page plus légère et n'a ajouté **aucune capacité** au produit.
+   Un seuil technique se mesure en une commande, un manque fonctionnel demande d'aller
+   regarder ailleurs — sans ce déséquilibre volontaire, le second perd toujours.
+
+   Sur un tour « manques fonctionnels », tu ne mesures pas CVMatchr : tu inventories ce
+   que **font** les produits de référence et que CVMatchr ne fait pas. Le résultat n'est
+   pas un chiffre, c'est une liste de capacités absentes, chacune avec le nom des
+   produits qui l'offrent, ce qu'elle apporte concrètement à un candidat, et ta
+   meilleure estimation de l'ampleur du chantier (petite / moyenne / grosse).
 3. Audite **ce domaine seul**. Un audit qui balaie tout ne mesure rien.
 4. Écris un constat daté dans `boucle/constats/AAAA-MM-JJ-<domaine>.md`.
 5. Ajoute tes conclusions à `boucle/BACKLOG.md`, section `## À planifier`,
