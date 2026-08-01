@@ -11,7 +11,15 @@ type TestState = { status: "idle" | "loading" | "ok" | "error"; message?: string
 
 export default function SettingsPage() {
   const [theme, setTheme] = useState("light");
-  const [testState, setTestState] = useState<TestState>({ status: "idle" });
+  // Un résultat de test ne vaut que pour le modèle et la clé testés. On mémorise donc
+  // la combinaison qui l'a produit : dès qu'elle change, le résultat est simplement
+  // ignoré à l'affichage. Réinitialiser via un `useEffect` ferait la même chose, mais
+  // React 19 l'interdit (`react-hooks/set-state-in-effect`) car cela déclenche un
+  // second rendu en cascade.
+  const [essai, setEssai] = useState<{ etat: TestState; signature: string }>({
+    etat: { status: "idle" },
+    signature: "",
+  });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const settings = useSettingsStore();
@@ -29,11 +37,15 @@ export default function SettingsPage() {
     return () => clearTimeout(id);
   }, [settings]);
 
-  // Un résultat de test ne vaut que pour le modèle/la clé testés : le réinitialiser dès que
-  // l'un des deux change évite d'afficher un ✅/❌ obsolète après une modification.
-  useEffect(() => {
-    setTestState({ status: "idle" });
-  }, [settings.activeModel, settings.geminiKey, settings.anthropicKey, settings.deepseekKey]);
+  const signature = [
+    settings.activeModel,
+    settings.geminiKey,
+    settings.anthropicKey,
+    settings.deepseekKey,
+  ].join("|");
+  const testState: TestState =
+    essai.signature === signature ? essai.etat : { status: "idle" };
+  const setTestState = (etat: TestState) => setEssai({ etat, signature });
 
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
