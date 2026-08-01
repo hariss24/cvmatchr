@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { resolveMeta, buildAdaptedLetter } from "./adapt";
-import { DEFAULT_LETTER, DEFAULT_RESUME, type Letter, type Resume } from "@/lib/resume/schema";
+import { DEFAULT_LETTER, DEFAULT_RESUME } from "@/lib/resume/defaults";
+import type { Letter, Resume } from "@/lib/resume/schema";
 
 const master: Resume = {
   ...DEFAULT_RESUME,

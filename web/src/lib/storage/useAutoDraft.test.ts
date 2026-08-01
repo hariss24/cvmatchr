@@ -11,7 +11,7 @@ vi.mock("@/lib/storage/db", () => ({
 }));
 import { loadDraft } from "@/lib/storage/db";
 import { useDocStore } from "@/state/docStore";
-import { DEFAULT_RESUME, DEFAULT_LETTER } from "@/lib/resume/schema";
+import { DEFAULT_RESUME, DEFAULT_LETTER } from "@/lib/resume/defaults";
 import { useAutoDraft } from "./useAutoDraft";
 
 const mockLoad = vi.mocked(loadDraft);
