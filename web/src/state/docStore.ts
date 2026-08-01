@@ -1,11 +1,6 @@
 import { create } from "zustand";
-import {
-  DEFAULT_RESUME,
-  DEFAULT_LETTER,
-  type Resume,
-  type Letter,
-  type DocType,
-} from "@/lib/resume/schema";
+import { DEFAULT_RESUME, DEFAULT_LETTER } from "@/lib/resume/defaults";
+import type { Resume, Letter, DocType } from "@/lib/resume/schema";
 
 import { type TemplateId } from "@/lib/resume/templates";
 
