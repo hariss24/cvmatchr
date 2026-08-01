@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { applyProfileToResume, resolveLetterIdentity, EMPTY_PROFILE } from "./profile";
-import { DEFAULT_RESUME, type Resume } from "@/lib/resume/schema";
+import { DEFAULT_RESUME } from "@/lib/resume/defaults";
+import type { Resume } from "@/lib/resume/schema";
 
 const profile = {
   ...EMPTY_PROFILE,

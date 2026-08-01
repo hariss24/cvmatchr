@@ -14,8 +14,6 @@ apprendre. Conventions minimales :
 
 *(un plan existe, le Bâtisseur peut s'y mettre — vide au démarrage)*
 
-- Poids de `zod` (~283 Ko) chargé sur **toutes** les pages via `docStore.ts` → `lib/resume/schema.ts`. Plan : `docs/superpowers/plans/2026-08-01-zod-global-allegement-bundle.md` (spec associée : `docs/superpowers/specs/2026-08-01-zod-global-allegement-bundle-design.md`). Correctif conçu, testé en vrai (build + mesure) puis annulé par l'Architecte pour respecter sa borne de non-modification de `web/src/` — la spec documente un premier correctif partiel réfuté (§2.3) et le correctif complet validé (§2.4, -286 Ko sur 8 routes sur 9, `/` garde zod légitimement).
-
 ## À planifier
 
 *(un constat existe, l'Architecte doit en faire une spec + un plan)*
@@ -37,5 +35,6 @@ apprendre. Conventions minimales :
 ## Terminé
 
 - Performance `/jobs` (chargement paresseux de `rome-competences.json` et de `zod`/`profileSchema`) : plan `docs/superpowers/plans/2026-08-01-jobs-allegement-bundle.md` bouclé (4/4 tâches) et fusionné dans `main` le 01/08/2026 (PR #10, commit `e824235`). Poids initial de `/jobs` -56 % (2 488 883 o → 1 088 377 o). Cible de 700 Ko non atteinte (zod ~283 Ko chargé app-wide via `docStore.ts` → `lib/resume/schema.ts`, hors périmètre de ce plan) — reste une piste ouverte, voir « État actuel » de `WORK_HISTORY.md`.
+- Poids de `zod` (~283 Ko) chargé sur **toutes** les pages via `docStore.ts` → `lib/resume/schema.ts` : plan `docs/superpowers/plans/2026-08-01-zod-global-allegement-bundle.md` bouclé (4/4 tâches), 01/08/2026, non encore fusionné. `DEFAULT_RESUME`/`DEFAULT_LETTER` extraits dans `lib/resume/defaults.ts` (zod-libre), 14 fichiers migrés. Mesuré sur build de prod propre : `/login`, `/help`, `/pack`, `/jobs`, `/history`, `/profil`, `/settings`, `/candidatures` perdent le chunk zod (entre -284 880 o et -286 082 o chacune) ; `/` (éditeur) le garde légitimement, poids inchangé. `/` reste à ~1,34 Mo, jamais mesuré contre le seuil de 2,5 s — piste distincte en § Idées.
 
 ## Échoué

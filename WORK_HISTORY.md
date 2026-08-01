@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Allègement `/jobs` partiellement abouti (rome + profileSchema en `import()` dynamique, -56 % de poids initial) mais la cible de 700 Ko n'est pas atteinte : ~283 Ko de zod restent chargés au premier atterrissage via `docStore.ts` → schéma de CV (`lib/resume/schema.ts`), indépendamment de `profileSchema.ts` — chunk déjà présent sur `/`, `/login`, `/help`, `/pack` avant ce chantier (voir Journal 2026-08-01 et `boucle/constats/2026-07-31-performance.md` point 3). À investiguer par l'Architecte : peut-on retarder ce chargement de zod, partagé par toute l'app ?
+**Prochaine étape suggérée :** zod (283 Ko) retiré du bundle initial des 8 routes hors édition (voir Journal 2026-08-01, plan `2026-08-01-zod-global-allegement-bundle`) ; `/` (l'éditeur) le garde légitimement et reste à ~1,34 Mo, jamais mesuré contre le seuil de 2,5 s de `MISSION.md` — piste ouverte en `BACKLOG.md` § Idées (lazy-load des modales d'import). Restent aussi en attente : le chronométrage réel (Slow 4G + CPU x4) de `/jobs` et `/pack` non refait depuis leurs chantiers de poids respectifs, et la robustesse du scan face à une offre malformée.
 
 ---
 
@@ -40,6 +40,69 @@
 ---
 
 ## Journal
+
+### 2026-08-01 : Retrait de zod du bundle JS de toutes les pages sauf l'éditeur (plan `docs/superpowers/plans/2026-08-01-zod-global-allegement-bundle.md`)
+
+- **Quoi :** `DEFAULT_RESUME`/`DEFAULT_LETTER` (deux littéraux objets, aucun
+  appel zod) extraits de `lib/resume/schema.ts` — le fichier qui définit tous
+  les schémas zod de l'app — vers un nouveau fichier zod-libre,
+  `lib/resume/defaults.ts` (`import type` uniquement vers `schema.ts`). Les 14
+  fichiers (production + tests) qui les consommaient sont repointés vers ce
+  nouveau fichier, en 3 commits (`docStore.ts`/`docStore.test.ts` d'abord, puis
+  `normalize.ts`/`newResume.ts`/`profile.ts`/`letter/adapt.ts`, puis les 7
+  fichiers de test restants). Plus aucun fichier n'importe ces deux constantes
+  depuis `schema.ts` (vérifié par grep, seule une mention en commentaire
+  subsiste, inoffensive).
+- **Pourquoi :** `docStore.ts`, chargé sur **toutes** les routes via
+  `RootLayout → UiHost → useGlobalUndoRedo`, importait `DEFAULT_RESUME`/
+  `DEFAULT_LETTER` **par valeur** depuis `schema.ts` — un module JS s'exécute
+  en entier à son évaluation, donc importer n'importe quel export de valeur de
+  ce fichier embarquait tout zod (283 Ko) dans le bundle de l'importeur, même
+  sur des routes (`/login`, `/help`…) sans aucun besoin de validation de CV.
+  Constat initial : Journal 2026-08-01 précédent (`/jobs`, chunk zod partagé
+  retrouvé identique sur `/`, `/login`, `/help`, `/pack`). Spec :
+  `docs/superpowers/specs/2026-08-01-zod-global-allegement-bundle-design.md`
+  — documente aussi un premier correctif partiel (ne migrer que `docStore.ts`
+  avec un ré-export dans `schema.ts`) testé et **réfuté** par la mesure (le
+  chunk zod restait identique sur toutes les routes tant qu'un seul autre
+  fichier multi-routes touchait encore `schema.ts` par valeur).
+- **Fichiers touchés :** création de `lib/resume/defaults.ts` ; modifiés :
+  `lib/resume/schema.ts`, `state/docStore.ts`, `state/docStore.test.ts`,
+  `lib/resume/normalize.ts`, `lib/resume/normalize.test.ts`,
+  `lib/storage/newResume.ts`, `lib/storage/useAutoDraft.test.ts`,
+  `lib/profile/profile.ts`, `lib/profile/profile.test.ts`,
+  `lib/letter/adapt.ts`, `lib/letter/adapt.test.ts`,
+  `lib/pdfgen/ResumeDocument.test.tsx`, `lib/pdfgen/LetterDocument.test.tsx`,
+  `lib/templates/defaults.test.ts`.
+- **Résultat vérifs :** `tsc --noEmit`, `lint` (une seule erreur pré-existante
+  et sans rapport, `app/settings/page.tsx:35`, confirmée présente avant ce
+  chantier via `git stash`), `vitest run` (587 tests, 74 fichiers, aucune
+  assertion changée) tous verts après la migration complète (Task 3). 3
+  commits (un par task du plan).
+- **Mesure finale (Task 4, build de prod propre, `.next` supprimé avant
+  rebuild, serveur redémarré) :** le chunk zod de ce build
+  (`2jtker1b16bz3.js`, 283 405 o, 485 occurrences du mot « zod », identifié
+  sans ambiguïté malgré un second fichier de 1,44 Mo contenant fortuitement le
+  mot — en fait une table de métriques de police contenant `zodieresis`, 1
+  seule occurrence, sans rapport) :
+
+  | Route | Avant (o) | Après (o) | Δ | zod présent |
+  |---|---|---|---|---|
+  | `/` (éditeur) | 1 336 939 | 1 336 975 | +36 (bruit) | **oui** (légitime) |
+  | `/login` | 1 041 693 | 755 611 | -286 082 | non |
+  | `/help` | 1 053 919 | 767 837 | -286 082 | non |
+  | `/pack` | 1 055 011 | 769 067 | -285 944 | non |
+  | `/jobs` | 1 088 472 | 802 423 | -286 049 | non |
+  | `/history` | 1 040 110 | 754 028 | -286 082 | non |
+  | `/profil` | 1 043 719 | 757 637 | -286 082 | non |
+  | `/settings` | 1 066 563 | 781 683 | -284 880 | non |
+  | `/candidatures` | 1 066 749 | 780 667 | -286 082 | non |
+
+  Confirmé : `/` garde le chunk zod (légitime, les modales d'import/tailor
+  l'utilisent réellement via `normalize.ts`), les 8 autres routes ne le
+  chargent plus, et chacune perd bien plus que le seuil de 250 000 o exigé par
+  le plan (critère §7.4 de la spec). `/` reste à ~1,34 Mo, hors périmètre de ce
+  chantier — piste distincte notée en `BACKLOG.md` § Idées.
 
 ### 2026-08-01 : Allègement du bundle JS initial de `/jobs` (plan `docs/superpowers/plans/2026-08-01-jobs-allegement-bundle.md`)
 

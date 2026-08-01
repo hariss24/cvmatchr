@@ -3,23 +3,24 @@
 *(fichier court, écrasé à chaque réveil — ce n'est pas un historique,
 le journal est dans `boucle/journal/`)*
 
-- **Dernier réveil :** 2026-08-01 (Architecte)
-- **Rôle joué :** Architecte
-- **PR en cours :** aucune. Aucun code applicatif touché — seuls `boucle/` et
-  `docs/superpowers/` changent.
-- **Ce qui a été fait :** ligne préfixée `!` de `## À planifier` (poids de zod
-  chargé sur toutes les pages via `docStore.ts` → `lib/resume/schema.ts`)
-  transformée en spec (`docs/superpowers/specs/2026-08-01-zod-global-allegement-
-  bundle-design.md`) et plan (`docs/superpowers/plans/2026-08-01-zod-global-
-  allegement-bundle.md`), ligne déplacée vers `## Prêt à coder`. Le correctif a
-  été réellement codé, mesuré (build de prod + inspection des chunks), testé
-  (`tsc`/`lint`/`vitest`, 584 tests verts) une première fois par l'Architecte
-  pour valider l'hypothèse avant d'écrire la spec, puis **annulé** (`git
-  checkout`) pour respecter la borne qui interdit à l'Architecte de modifier
-  `web/src/`. Un premier correctif partiel (ne toucher que `docStore.ts`) a été
-  testé et réfuté par la mesure (le chunk zod restait identique sur toutes les
-  routes) avant de trouver le correctif complet qui fonctionne — les deux sont
-  documentés dans la spec §2.3/§2.4 pour que le Bâtisseur n'ait pas à refaire ce
-  travail de découverte.
+- **Dernier réveil :** 2026-08-01 (Bâtisseur)
+- **Rôle joué :** Bâtisseur
+- **PR en cours :** aucune ouverte encore — branche `claude/reveil-20260801-1857`
+  prête pour le workflow (push + PR), plan bouclé à 100 %.
+- **Ce qui a été fait :** plan `docs/superpowers/plans/2026-08-01-zod-global-
+  allegement-bundle.md` exécuté en entier (4/4 tâches, un commit par tâche) :
+  `DEFAULT_RESUME`/`DEFAULT_LETTER` extraits de `lib/resume/schema.ts` (zod)
+  vers un nouveau fichier zod-libre `lib/resume/defaults.ts`, 14 fichiers
+  (production + tests) migrés. Vérifié sur build de prod propre : `/login`,
+  `/help`, `/pack`, `/jobs`, `/history`, `/profil`, `/settings`,
+  `/candidatures` perdent le chunk zod (283 Ko, entre -284 880 o et
+  -286 082 o chacune, au-dessus du seuil de -250 000 o exigé) ; `/` (éditeur)
+  le garde légitimement (modales d'import/tailor), poids inchangé (+36 o,
+  bruit). `tsc --noEmit`/`lint`/`vitest run` (587 tests) verts après la
+  migration complète — une seule erreur lint préexistante et sans rapport
+  (`app/settings/page.tsx:35`, confirmée présente avant ce chantier).
+  `BACKLOG.md` : ligne déplacée de `## Prêt à coder` (désormais vide) vers
+  `## Terminé`. Détail complet : `WORK_HISTORY.md` et
+  `boucle/journal/2026-08-01-batisseur.md`.
 - **Domaine audité en dernier :** performance (poids de bundle JS)
 - **Échecs consécutifs du Gardien sur la PR courante :** 0

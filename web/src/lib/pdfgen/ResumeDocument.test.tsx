@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { renderToBuffer } from "@react-pdf/renderer";
-import { resumeSchema, DEFAULT_RESUME } from "@/lib/resume/schema";
+import { resumeSchema } from "@/lib/resume/schema";
+import { DEFAULT_RESUME } from "@/lib/resume/defaults";
 import { ResumeDocument, type PdfTemplateId } from "./ResumeDocument";
 import { extractPdfText } from "./extractText";
 

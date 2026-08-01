@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { DEFAULT_RESUME, type Resume } from "./schema";
+import { DEFAULT_RESUME } from "./defaults";
+import type { Resume } from "./schema";
 import {
   unwrap,
   normalizeResume,

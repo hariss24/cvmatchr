@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { useDocStore } from "./docStore";
-import { DEFAULT_RESUME } from "@/lib/resume/schema";
+import { DEFAULT_RESUME } from "@/lib/resume/defaults";
 import * as pdfGen from "@/lib/pdfgen/generatePdf";
 
 // Réinitialise le store avant chaque test (CV / sobre / défaut).

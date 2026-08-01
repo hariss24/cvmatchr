@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { renderToBuffer } from "@react-pdf/renderer";
-import { letterSchema, DEFAULT_LETTER } from "@/lib/resume/schema";
+import { letterSchema } from "@/lib/resume/schema";
+import { DEFAULT_LETTER } from "@/lib/resume/defaults";
 import { LetterDocument } from "./LetterDocument";
 import { extractPdfText } from "./extractText";
 

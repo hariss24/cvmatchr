@@ -1,5 +1,56 @@
 # Journal — Bâtisseur du 01/08/2026
 
+## Réveil suivant (même jour, 2e) : plan zod exécuté en entier
+
+`ETAT.md` indiquait le rôle Architecte au réveil précédent (spec + plan écrits
+pour le poids de zod, aucune PR en cours). `## Prêt à coder` de `BACKLOG.md` ne
+contenait qu'une ligne : le plan
+`docs/superpowers/plans/2026-08-01-zod-global-allegement-bundle.md`. Exécuté
+en entier, les 4 tâches dans l'ordre, un commit par tâche (le plan précisait
+que les diffs avaient déjà été testés une fois par l'Architecte avant d'être
+annulés — appliqués tels quels, sans réinvention) :
+
+1. `lib/resume/defaults.ts` créé (littéraux `DEFAULT_RESUME`/`DEFAULT_LETTER`,
+   `import type` seul vers `schema.ts`) ; `schema.ts` perd ces deux blocs ;
+   `docStore.ts`/`docStore.test.ts` migrés.
+2. `normalize.ts`, `storage/newResume.ts`, `profile/profile.ts`,
+   `letter/adapt.ts` migrés (les vrais consommateurs de production restants).
+3. Les 7 fichiers de test restants migrés. Vérifié par grep qu'aucun import de
+   `DEFAULT_RESUME`/`DEFAULT_LETTER` ne vise plus `schema.ts` (seule une
+   mention en commentaire subsiste, inoffensive).
+4. Vérification finale : build de prod propre (`.next` supprimé), serveur
+   démarré, poids mesuré par route. Chunk zod identifié sans ambiguïté
+   (`2jtker1b16bz3.js`, 283 405 o, 485 occurrences de « zod » — un second
+   fichier de 1,44 Mo contenait fortuitement le mot une fois, `zodieresis`
+   dans une table de métriques de police, sans rapport, écarté après
+   vérification).
+
+**Résultat :** `/` (éditeur) garde zod, poids quasi inchangé (+36 o, bruit).
+Les 8 autres routes perdent le chunk zod entièrement, entre -284 880 o et
+-286 082 o chacune — toutes au-dessus du seuil de -250 000 o exigé par le
+plan. Chiffres détaillés dans `WORK_HISTORY.md` (entrée du 01/08/2026, ce
+réveil).
+
+Vérifications après chaque tâche : `tsc --noEmit` (vert, erreurs attendues
+sur les fichiers non encore migrés aux tâches 1-2 comme documenté par le
+plan, toutes résorbées à la tâche 3), `lint` (une seule erreur, préexistante
+et sans rapport avec ce chantier — `app/settings/page.tsx:35`, confirmée
+présente avant toute modification via `git stash`), `vitest run` (587 tests,
+74 fichiers, aucune assertion changée — seuls des chemins d'import). `build`
+lancé à la tâche 4 comme prévu par le plan (pas à chaque tâche intermédiaire).
+
+**Bornes respectées :** aucune dépendance npm touchée, aucun `any`/
+`@ts-ignore`/`eslint-disable` ajouté, aucune assertion de test modifiée,
+aucun fichier hors périmètre du plan touché. Push non fait — reste au
+workflow. `BACKLOG.md` : ligne déplacée de `## Prêt à coder` vers
+`## Terminé`.
+
+**Pour la suite :** `## Prêt à coder` est maintenant vide. `## À planifier`
+contient 3 lignes (performance `/pack`, chronométrage `/jobs` non refait,
+robustesse du scan) pour l'Architecte. `## Idées` contient l'allègement de `/`
+lui-même (lazy-load des modales d'import), noté explicitement hors périmètre
+par la spec de ce chantier.
+
 ## Réveil suivant (même jour) : rien à construire
 
 Au réveil, `ETAT.md` indiquait la PR du plan ci-dessous comme « prête pour
