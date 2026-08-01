@@ -43,16 +43,16 @@ describe("gradeOf", () => {
 });
 
 describe("rankOffer", () => {
-  const ctx = () => buildRankContext(profilWeb, { lat: 48.85, lng: 2.35 });
+  const ctx = async () => buildRankContext(profilWeb, { lat: 48.85, lng: 2.35 });
 
-  it("borne le score entre 0 et 100", () => {
-    const bas = rankOffer(offre({ title: "Comptable", jobText: "Bilans.", romeCode: "M1203" }), profilWeb, ctx(), T0);
+  it("borne le score entre 0 et 100", async () => {
+    const bas = rankOffer(offre({ title: "Comptable", jobText: "Bilans.", romeCode: "M1203" }), profilWeb, await ctx(), T0);
     expect(bas.score).toBeGreaterThanOrEqual(0);
     expect(bas.score).toBeLessThanOrEqual(100);
   });
 
-  it("renvoie une ligne de détail par critère", () => {
-    const r = rankOffer(offre({ title: "Webmaster" }), profilWeb, ctx(), T0);
+  it("renvoie une ligne de détail par critère", async () => {
+    const r = rankOffer(offre({ title: "Webmaster" }), profilWeb, await ctx(), T0);
     const cles = r.breakdown.map((l) => l.key);
     expect(cles).toContain("competences");
     expect(cles).toContain("metier");
@@ -61,7 +61,7 @@ describe("rankOffer", () => {
     expect(cles).toContain("experience");
   });
 
-  it("classe haut une offre en plein dans la cible", () => {
+  it("classe haut une offre en plein dans la cible", async () => {
     const r = rankOffer(offre({
       title: "Webmaster",
       jobText: "Profil recherché : SEO, WordPress, Matomo.",
@@ -69,14 +69,14 @@ describe("rankOffer", () => {
       contractLabel: "CDI",
       salaryLabel: "34 k€ / an",
       lat: 48.86, lng: 2.35,
-    }), profilWeb, ctx(), T0);
+    }), profilWeb, await ctx(), T0);
     expect(r.score).toBeGreaterThanOrEqual(55);
     expect(["S", "A", "B"]).toContain(r.grade);
   });
 
   // Critère de succès n°4 de la spec : le bruit de la recherche plein-texte
   // (K2101 « Conseiller en formation ») ne doit jamais remonter.
-  it("écrase une offre hors-sujet malgré un titre trompeur", () => {
+  it("écrase une offre hors-sujet malgré un titre trompeur", async () => {
     const r = rankOffer(offre({
       title: "Conseiller en formation webmaster",
       jobText: "Accompagnement de stagiaires.",
@@ -84,7 +84,7 @@ describe("rankOffer", () => {
       contractLabel: "CDI",
       salaryLabel: "30 k€",
       lat: 48.86, lng: 2.35,
-    }), profilWeb, ctx(), T0);
+    }), profilWeb, await ctx(), T0);
     expect(r.grade === "C" || r.grade === "D").toBe(true);
   });
 
@@ -101,8 +101,8 @@ describe("rankOffer", () => {
     lat: 48.86, lng: 2.35,
   });
 
-  it("ne punit pas une offre pertinente pour une description tronquée par la source", () => {
-    const r = rankOffer(adzunaWebmaster(), profilWeb, ctx(), T0);
+  it("ne punit pas une offre pertinente pour une description tronquée par la source", async () => {
+    const r = rankOffer(adzunaWebmaster(), profilWeb, await ctx(), T0);
     expect(["S", "A", "B"]).toContain(r.grade);
     // Le critère illisible sort de l'enveloppe au lieu d'y peser un zéro.
     const comp = r.breakdown.find((l) => l.key === "competences");
@@ -111,28 +111,28 @@ describe("rankOffer", () => {
 
   // Garde-fou du bénéfice du doute : sans signe de pertinence, pas de cadeau.
   // Sinon n'importe quelle offre en CDI près de chez soi remonterait.
-  it("ne l'accorde pas à une offre sans le moindre signe de pertinence", () => {
+  it("ne l'accorde pas à une offre sans le moindre signe de pertinence", async () => {
     const r = rankOffer(offre({
       source: "adzuna",
       title: "Comptable général",
       jobText: "Écritures, rapprochements bancaires et bilans annuels…",
       contractLabel: "CDI",
       lat: 48.86, lng: 2.35,
-    }), profilWeb, ctx(), T0);
+    }), profilWeb, await ctx(), T0);
     expect(r.grade === "C" || r.grade === "D").toBe(true);
     expect(r.breakdown.find((l) => l.key === "competences")?.max).toBe(MAX.competences);
   });
 
-  it("classe une offre franchement étrangère tout en bas", () => {
+  it("classe une offre franchement étrangère tout en bas", async () => {
     const r = rankOffer(offre({
       title: "Comptable",
       jobText: "Écritures et bilans annuels.",
       romeCode: "M1203",
-    }), profilWeb, ctx(), T0);
+    }), profilWeb, await ctx(), T0);
     expect(r.grade).toBe("D");
   });
 
-  it("note une offre sans code ROME sur la seule voie textuelle", () => {
+  it("note une offre sans code ROME sur la seule voie textuelle", async () => {
     const r = rankOffer(offre({
       source: "adzuna",
       title: "Webmaster",
@@ -140,14 +140,16 @@ describe("rankOffer", () => {
       contractLabel: "CDI",
       salaryLabel: "35 k€",
       lat: 48.86, lng: 2.35,
-    }), profilWeb, ctx(), T0);
+    }), profilWeb, await ctx(), T0);
     expect(r.score).toBeGreaterThan(0);
     expect(r.breakdown.find((l) => l.key === "hors_sujet")?.points ?? 0).toBe(0);
   });
 
-  it("reste stable : deux appels donnent le même résultat", () => {
+  it("reste stable : deux appels donnent le même résultat", async () => {
     const o = offre({ title: "Webmaster", romeCode: "M1855" });
-    expect(rankOffer(o, profilWeb, ctx(), T0).score).toBe(rankOffer(o, profilWeb, ctx(), T0).score);
+    const r1 = rankOffer(o, profilWeb, await ctx(), T0).score;
+    const r2 = rankOffer(o, profilWeb, await ctx(), T0).score;
+    expect(r1).toBe(r2);
   });
 });
 

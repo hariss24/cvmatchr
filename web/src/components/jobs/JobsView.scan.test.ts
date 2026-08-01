@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import { rankOffer, buildRankContext, shouldPersist } from "@/lib/jobs/rank";
 import { EMPTY_PROFILE, type JobSearchProfile } from "@/lib/jobs/profile";
 import type { JobOffer } from "@/lib/jobs/offer";
@@ -25,7 +25,10 @@ const profil: JobSearchProfile = {
 };
 
 describe("logique de scan", () => {
-  const ctx = buildRankContext(profil, { lat: 48.85, lng: 2.35 });
+  let ctx: Awaited<ReturnType<typeof buildRankContext>>;
+  beforeAll(async () => {
+    ctx = await buildRankContext(profil, { lat: 48.85, lng: 2.35 });
+  });
 
   const lot = [
     offre({ id: "bon", title: "Webmaster", jobText: "Profil recherché : SEO, WordPress.",

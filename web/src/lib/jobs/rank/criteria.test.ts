@@ -13,33 +13,33 @@ const offre = (p: Partial<JobOffer> = {}): JobOffer => ({
   boardDomain: "", boardName: "", contractLabel: "", salaryLabel: "", ...p,
 });
 
-const ctx = (romeCodes: string[] = [], home: { lat: number; lng: number } | null = null) => ({
-  rome: buildRomeTargets(romeCodes),
+const ctx = async (romeCodes: string[] = [], home: { lat: number; lng: number } | null = null) => ({
+  rome: await buildRomeTargets(romeCodes),
   home,
 });
 
 describe("competencesPoints", () => {
-  it("note la description même sans donnée structurée", () => {
+  it("note la description même sans donnée structurée", async () => {
     const l = competencesPoints(
       offre({ title: "Webmaster", jobText: "Profil recherché : SEO et Matomo." }),
       { ...EMPTY_PROFILE, prefilterKeywords: ["seo", "matomo"] },
-      ctx(),
+      await ctx(),
     );
     expect(l.points).toBeGreaterThan(0);
     expect(l.max).toBe(MAX.competences);
     expect(l.reason).toMatch(/seo/i);
   });
 
-  it("retombe sur les intitulés de poste si aucune compétence n'est saisie", () => {
+  it("retombe sur les intitulés de poste si aucune compétence n'est saisie", async () => {
     const l = competencesPoints(
       offre({ title: "Webmaster", jobText: "Poste de webmaster." }),
       { ...EMPTY_PROFILE, keywords: ["webmaster"], prefilterKeywords: [] },
-      ctx(),
+      await ctx(),
     );
     expect(l.points).toBeGreaterThan(0);
   });
 
-  it("ne dépasse jamais son maximum, même avec les deux voies", () => {
+  it("ne dépasse jamais son maximum, même avec les deux voies", async () => {
     const l = competencesPoints(
       offre({
         title: "Webmaster SEO", jobText: "Profil recherché : seo. ".repeat(20),
@@ -47,74 +47,74 @@ describe("competencesPoints", () => {
         competences: [{ code: "100341", exigence: "E" }, { code: "300374", exigence: "E" }],
       }),
       { ...EMPTY_PROFILE, prefilterKeywords: ["seo"] },
-      ctx(["M1855"]),
+      await ctx(["M1855"]),
     );
     expect(l.points).toBeLessThanOrEqual(MAX.competences);
   });
 
-  it("rend zéro sur une offre hors-sujet", () => {
+  it("rend zéro sur une offre hors-sujet", async () => {
     const l = competencesPoints(
       offre({ title: "Comptable", jobText: "Bilans et écritures." }),
       { ...EMPTY_PROFILE, prefilterKeywords: ["seo"] },
-      ctx(),
+      await ctx(),
     );
     expect(l.points).toBe(0);
   });
 });
 
 describe("metierPoints", () => {
-  it("donne le maximum sur un code ROME visé", () => {
-    const l = metierPoints(offre({ romeCode: "M1855" }), EMPTY_PROFILE, ctx(["M1855"]));
+  it("donne le maximum sur un code ROME visé", async () => {
+    const l = metierPoints(offre({ romeCode: "M1855" }), EMPTY_PROFILE, await ctx(["M1855"]));
     expect(l.points).toBe(MAX.metier);
     expect(l.reason).toMatch(/cible/i);
   });
 
-  it("donne une note partielle sur un métier voisin", () => {
-    const t = buildRomeTargets(["M1855"]);
+  it("donne une note partielle sur un métier voisin", async () => {
+    const t = await buildRomeTargets(["M1855"]);
     const voisin = [...t.voisins][0];
-    const l = metierPoints(offre({ romeCode: voisin }), EMPTY_PROFILE, ctx(["M1855"]));
+    const l = metierPoints(offre({ romeCode: voisin }), EMPTY_PROFILE, await ctx(["M1855"]));
     expect(l.points).toBeGreaterThan(0);
     expect(l.points).toBeLessThan(MAX.metier);
     expect(l.reason).toMatch(/voisin/i);
   });
 
-  it("rend zéro sur un code hors-sujet", () => {
+  it("rend zéro sur un code hors-sujet", async () => {
     // K2101 « Conseiller en formation » : 20 offres sur 60 pour « webmaster ».
-    const l = metierPoints(offre({ romeCode: "K2101" }), EMPTY_PROFILE, ctx(["M1855"]));
+    const l = metierPoints(offre({ romeCode: "K2101" }), EMPTY_PROFILE, await ctx(["M1855"]));
     expect(l.points).toBe(0);
   });
 
-  it("retombe sur le titre quand l'offre n'a pas de code ROME", () => {
+  it("retombe sur le titre quand l'offre n'a pas de code ROME", async () => {
     const l = metierPoints(
       offre({ title: "Webmaster senior" }),
       { ...EMPTY_PROFILE, keywords: ["webmaster"] },
-      ctx(["M1855"]),
+      await ctx(["M1855"]),
     );
     expect(l.points).toBeGreaterThan(0);
   });
 });
 
 describe("distanceLigne", () => {
-  it("donne le maximum dans le rayon", () => {
+  it("donne le maximum dans le rayon", async () => {
     const l = distanceLigne(
       offre({ lat: 48.86, lng: 2.35 }),
       { ...EMPTY_PROFILE, location: { ...EMPTY_PROFILE.location, radiusKm: 20 } },
-      ctx([], { lat: 48.85, lng: 2.35 }),
+      await ctx([], { lat: 48.85, lng: 2.35 }),
     );
     expect(l.points).toBe(MAX.distance);
     expect(l.reason).toMatch(/km/);
   });
 
-  it("reste neutre sans domicile connu", () => {
-    const l = distanceLigne(offre({ lat: 48.86, lng: 2.35 }), EMPTY_PROFILE, ctx());
+  it("reste neutre sans domicile connu", async () => {
+    const l = distanceLigne(offre({ lat: 48.86, lng: 2.35 }), EMPTY_PROFILE, await ctx());
     expect(l.points).toBe(Math.round(MAX.distance / 2));
   });
 
-  it("lit les coordonnées depuis commuteDestination en repli", () => {
+  it("lit les coordonnées depuis commuteDestination en repli", async () => {
     const l = distanceLigne(
       offre({ commuteDestination: "48.86,2.35" }),
       { ...EMPTY_PROFILE, location: { ...EMPTY_PROFILE.location, radiusKm: 20 } },
-      ctx([], { lat: 48.85, lng: 2.35 }),
+      await ctx([], { lat: 48.85, lng: 2.35 }),
     );
     expect(l.points).toBe(MAX.distance);
   });
@@ -173,22 +173,22 @@ describe("experiencePoints", () => {
 });
 
 describe("malusHorsSujet", () => {
-  it("frappe un code ROME ni cible ni voisin", () => {
-    const l = malusHorsSujet(offre({ romeCode: "K2101" }), ctx(["M1855"]));
+  it("frappe un code ROME ni cible ni voisin", async () => {
+    const l = malusHorsSujet(offre({ romeCode: "K2101" }), await ctx(["M1855"]));
     expect(l.points).toBe(-20);
   });
 
-  it("épargne une cible et un voisin", () => {
-    expect(malusHorsSujet(offre({ romeCode: "M1855" }), ctx(["M1855"])).points).toBe(0);
+  it("épargne une cible et un voisin", async () => {
+    expect(malusHorsSujet(offre({ romeCode: "M1855" }), await ctx(["M1855"])).points).toBe(0);
   });
 
   // Adzuna et JSearch n'ont pas de code ROME : ni punis, ni protégés (spec §4).
-  it("n'affecte jamais une offre sans code ROME", () => {
-    expect(malusHorsSujet(offre({ source: "adzuna" }), ctx(["M1855"])).points).toBe(0);
+  it("n'affecte jamais une offre sans code ROME", async () => {
+    expect(malusHorsSujet(offre({ source: "adzuna" }), await ctx(["M1855"])).points).toBe(0);
   });
 
-  it("ne s'applique pas si le candidat n'a déclaré aucun métier", () => {
-    expect(malusHorsSujet(offre({ romeCode: "K2101" }), ctx([])).points).toBe(0);
+  it("ne s'applique pas si le candidat n'a déclaré aucun métier", async () => {
+    expect(malusHorsSujet(offre({ romeCode: "K2101" }), await ctx([])).points).toBe(0);
   });
 });
 
