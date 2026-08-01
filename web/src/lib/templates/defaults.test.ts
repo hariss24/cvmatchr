@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { DEFAULT_TEMPLATES } from "./defaults";
 import { buildLetterFromTemplate } from "./build";
-import { DEFAULT_RESUME } from "@/lib/resume/schema";
+import { DEFAULT_RESUME } from "@/lib/resume/defaults";
 
 describe("modèle de départ", () => {
   it("fournit 1 modèle avec un id stable", () => {
