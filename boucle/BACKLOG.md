@@ -14,11 +14,12 @@ apprendre. Conventions minimales :
 
 *(un plan existe, le Bâtisseur peut s'y mettre — vide au démarrage)*
 
+- Manque fonctionnel — optimisation de profil LinkedIn (analyse + suggestions) : spec `docs/superpowers/specs/2026-08-02-linkedin-optimisation-design.md` + plan `docs/superpowers/plans/2026-08-02-linkedin-optimisation.md` (02/08/2026). Réutilise le moteur ATS existant (`lib/ats/engine.ts`) plutôt qu'un moteur neuf ; ne couvre que l'analyse d'un profil collé en texte, jamais un import automatique (voir spec §2, §8).
+
 ## À planifier
 
 *(un constat existe, l'Architecte doit en faire une spec + un plan)*
 
-- Manque fonctionnel — optimisation de profil LinkedIn (analyse + suggestions) : présente chez 2 produits avec outil dédié (Jobscan, Careerflow). Ampleur : moyenne, flux proche de `ats-score` si le profil est collé en texte. Voir `boucle/constats/2026-08-01-manques-fonctionnels.md` §4.
 - Manque fonctionnel — import direct du profil LinkedIn pour préremplir le CV : présent chez 2 produits (Rezi, Kickresume). Ampleur : moyenne, mais faisabilité technique à vérifier en premier (LinkedIn bloque activement le scraping non officiel) — risque d'être bloquant avant même d'écrire une spec. Voir `boucle/constats/2026-08-01-manques-fonctionnels.md` §5.
 - Manque fonctionnel — identification des compétences manquantes vs une offre (« skill gap ») : présent chez 2 produits (Careerflow, Enhancv). Chevauchement possible avec le moteur ATS existant (`src/lib/ats/engine.ts`) à vérifier avant de chiffrer — peut-être un nouvel affichage plutôt qu'un nouveau calcul. Voir `boucle/constats/2026-08-01-manques-fonctionnels.md` §6.
 - Manque fonctionnel — journal de candidature (réalisations, culture d'entreprise, questions à poser) : présent chez 2 produits (Teal, Simplify). Ampleur : petite, valeur incertaine pour un candidat isolé, saisie manuelle récurrente à contre-courant du principe « zéro coût pour l'utilisateur ». Voir `boucle/constats/2026-08-01-manques-fonctionnels.md` §7.

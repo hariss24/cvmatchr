@@ -3,52 +3,47 @@
 *(fichier court, écrasé à chaque réveil — ce n'est pas un historique,
 le journal est dans `boucle/journal/`)*
 
-- **Dernier réveil :** 2026-08-02 (Bâtisseur)
-- **Rôle joué :** Bâtisseur
-- **PR en cours :** aucune ouverte, branche `claude/reveil-20260802-0809`,
-  4 commits, prête pour le workflow (push + PR). Plan
-  `docs/superpowers/plans/2026-08-02-extension-autofill.md` bouclé (4/4
-  tâches) — voir `boucle/journal/2026-08-02-batisseur.md` pour le détail
-  complet (fichiers, écarts corrigés, vérifications).
-- **Ce qui a été fait :** exécution intégrale du plan « extension navigateur
-  — autofill de candidature Greenhouse/Lever » (seule ligne de
-  `## Prêt à coder`) : scaffold `extension/` (Manifest V3, zéro dépendance
-  npm), construction/envoi du paquet côté `web/src/` (TDD, tests verts),
-  reconnaissance générique de champ + remplissage. Vérification manuelle
-  du plan (Task 3, spec §7) automatisée via Playwright + Chromium
-  `--headless=new --load-extension` (aucun affichage graphique disponible
-  ici, mais le flux observé est un chargement réel de l'extension, pas une
-  simulation) sur deux offres publiques réelles : Greenhouse
-  (`job-boards.greenhouse.io/thehonestcompanysandbox/jobs/140167`, 7/7
-  champs + CV joint) et Lever
-  (`jobs.lever.co/Aprio/cb5984b4-b2de-4662-8691-3b7ea2a21a44/apply`, 6/8,
-  nom complet + email + CV joints). Deux écarts entre la spec et le DOM réel
-  trouvés et corrigés par cette vérification (pas supposés) : Greenhouse
-  expose ses identifiants documentés via l'attribut `id` (pas `name`) sur le
-  DOM rendu ; Lever n'a qu'un champ « Full name » unique, pas de prénom/nom
-  séparés (reconnaissance générique étendue avec une entrée `fullName`,
-  toujours un attribut/autocomplete standard, jamais un sélecteur propre à
-  Lever). Un troisième écart, purement mécanique, trouvé et corrigé en Task 1 :
-  `manifest.json` référence `content-autofill.js` dès le chargement, mais ce
-  fichier n'existait qu'à partir de la Task 3 — l'extension refusait de
-  charger entre-temps ; stub vide ajouté, même traitement que
-  `lib/fieldMatch.js` déjà anticipé par le plan pour cette raison. Détail
-  exhaustif (champs remplis un par un, par offre) dans `WORK_HISTORY.md`,
-  Journal 2026-08-02, et `boucle/journal/2026-08-02-batisseur.md`.
-  `BACKLOG.md` : ligne déplacée de `## Prêt à coder` (désormais vide) vers
-  `## Terminé`.
-- **Vérifications (`web/`) :** `tsc --noEmit`, `lint` (5 warnings
-  préexistants sans rapport), `vitest run` (589 tests, 75 fichiers) et
-  `build` verts après chaque tâche touchant `web/src/` ; `npx playwright test`
-  (38/38, Chromium installé via `npx playwright install chromium`, absent de
-  l'environnement) vert en fin de plan. Aucune dépendance npm ajoutée. Aucun
-  `any`/`@ts-ignore`/`eslint-disable` ajouté.
+- **Dernier réveil :** 2026-08-02 (Architecte)
+- **Rôle joué :** Architecte
+- **PR en cours :** aucune ouverte — celle du Bâtisseur précédent
+  (`claude/reveil-20260802-0809`, extension autofill, 4 commits) n'a pas encore été
+  poussée/fusionnée par le workflow. Ce réveil ne la touche pas (rôle Architecte,
+  branche/commits séparés).
+- **Ce qui a été fait :** transformé la première ligne de `BACKLOG.md` § À planifier
+  (« Manque fonctionnel — optimisation de profil LinkedIn (analyse + suggestions) »,
+  constat `boucle/constats/2026-08-01-manques-fonctionnels.md` §4) en spec + plan :
+  - `docs/superpowers/specs/2026-08-02-linkedin-optimisation-design.md`
+  - `docs/superpowers/plans/2026-08-02-linkedin-optimisation.md`
+  Décision de conception centrale : réutiliser `src/lib/ats/engine.ts` (extraction de
+  mots-clés pondérés, présence dans un texte, forme du rapport `AtsReport`) plutôt
+  qu'un moteur neuf — le profil LinkedIn n'est qu'un second texte à analyser, pas un
+  second problème. Le plan prévoit en Task 1 une extraction préparatoire sans
+  changement de comportement (exporter `contains`/`normalize`, déplacer la coercition
+  JSON de `/api/ats-score` dans `src/lib/ai/coerceAi.ts`, extraire l'affichage du
+  rapport `AtsPanel.tsx` dans `src/components/shared/ScoreReportParts.tsx`), avant le
+  nouveau domaine `src/lib/linkedin/` (Task 2), la route `/api/linkedin-score`
+  (Task 3), la page `/linkedin` (Task 4) et la documentation (Task 5). Ne couvre que
+  l'analyse d'un profil collé en texte — l'import automatique du profil (scraping ou
+  connexion LinkedIn) reste une ligne distincte du backlog (§5 du constat),
+  explicitement écartée en spec §4.1 (faisabilité technique non validée).
+  `BACKLOG.md` : ligne déplacée de `## À planifier` vers `## Prêt à coder`.
+- **Vérifications :** aucune commande de vérification à faire tourner pour ce rôle
+  (l'Architecte n'écrit aucun code applicatif, `boucle/roles/architecte.md`). La spec
+  et le plan ont été relus contre le code source existant (`src/lib/ats/engine.ts`,
+  `src/lib/ai/prompts.ts`, `src/app/api/ats-score/route.ts`,
+  `src/components/modals/AtsPanel.tsx`, `src/components/profile/ProfileView.tsx`,
+  `src/components/layout/UserMenu.tsx`) pour vérifier que les fonctions/types cités
+  existent réellement et que les classes CSS réutilisées (`.ats-*`, `.form-textarea`,
+  `.pane`, `.pack-page`, etc.) sont déjà définies — aucune nouvelle dépendance ni CSS
+  neuf nécessaire. Les valeurs numériques des tests du moteur local (Task 2 du plan)
+  ont été calculées à la main et vérifiées deux fois (65, 48, 57, 66).
 - **Domaine audité en dernier :** manques fonctionnels (Éclaireur, 01/08/2026).
-  Rotation inchangée par ce réveil (le Bâtisseur exécute un plan, il ne
+  Rotation inchangée par ce réveil (l'Architecte planifie un constat existant, il ne
   choisit pas de domaine) : manques fonctionnels → coût des appels externes
-  (prochain domaine pour l'Éclaireur) → hygiène du dépôt → manques fonctionnels
-  → performance → briques externes → manques fonctionnels → accessibilité →
+  (prochain domaine pour l'Éclaireur) → hygiène du dépôt → manques fonctionnels →
+  performance → briques externes → manques fonctionnels → accessibilité →
   parcours d'un nouvel arrivant → manques fonctionnels → cohérence visuelle →
   sécurité → (retour au début).
-- **Échecs consécutifs du Gardien sur la PR courante :** 0 (nouvelle PR, pas
-  encore examinée par le Gardien).
+- **Échecs consécutifs du Gardien sur la PR courante :** 0 (aucune PR issue de ce
+  réveil — l'Architecte ne produit pas de code, la PR viendra du Bâtisseur qui
+  exécutera ce plan à un prochain réveil).
