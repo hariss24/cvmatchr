@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "CVMatchr — Autofill de candidature",
+  "version": "0.1.0",
+  "description": "Prépare un CV et une identité depuis CVMatchr, puis remplit les formulaires de candidature Greenhouse et Lever.",
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://cvmatchr.fr/*", "http://localhost:3000/*"],
+      "js": ["content-bridge.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.greenhouse.io/*",
+        "https://job-boards.greenhouse.io/*",
+        "https://jobs.lever.co/*"
+      ],
+      "js": ["lib/fieldMatch.js", "content-autofill.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
