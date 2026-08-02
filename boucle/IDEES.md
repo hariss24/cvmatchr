@@ -148,6 +148,63 @@ vérifié résolu par lecture directe du fichier — plus une idée à classer n
 | Cohérence | 1 | Hors du parcours candidature qui est le cœur de la promesse du produit. |
 | **Total** | **8** | Mention pour mémoire seulement dans le constat source lui-même — à ne prioriser que si un chantier lettre s'ouvre pour une autre raison, jamais en tête de liste. |
 
+### 12. `/pack` : dédupliquer `/api/extract-meta` et sauter l'appel quand l'entreprise/le
+poste sont déjà connus
+
+Constat détaillé : `boucle/constats/2026-08-02-cout-appels-externes.md` §1-2. Deux
+défauts distincts autour du même appel IA (`fetchJobMeta` → `POST /api/extract-meta`) :
+
+- **Appel dupliqué dans le même clic** : `PackView.tsx` appelle `fetchJobMeta` à trois
+  endroits (`onExtracted` d'un `JobExtractor`, `onBlur` du textarea, et dans
+  `adaptWithAi`), sans aucun cache entre eux. Cliquer directement sur « Adapter » après
+  avoir collé une offre déclenche 2 appels identiques dans le même geste (le `blur` du
+  navigateur avant le `click`). Reproductible à la lecture du code, pas une hypothèse.
+- **Appel évitable** : le parcours « Candidater » depuis `/jobs` connaît déjà
+  l'entreprise et le poste (champs structurés de l'offre, `JobsView.tsx:304-306`), et
+  `resolveMeta` (`lib/letter/adapt.ts:26-31`) fait pourtant primer la réponse IA sur cette
+  donnée déjà exacte et gratuite quand l'utilisateur clique « Adapter » sans rien changer.
+
+Violation directe du seuil `MISSION.md` : « aucun appel facturé répété pour une même
+donnée dans un même parcours ». Correction ciblée : mémoriser `(jobDesc, résultat)` comme
+le fait déjà `AtsPanel.tsx:39`, et sauter l'appel entièrement quand `company`/`role` sont
+déjà renseignés.
+
+### 13. Compter/plafonner les appels IA comme les job-boards — *touche potentiellement à
+un vrai plafond produit, pas seulement un compteur*
+
+Constat détaillé : `boucle/constats/2026-08-02-cout-appels-externes.md` §4. Aucune des
+huit routes IA (`/api/tailor-resume`, `/api/adapt-letter`, `/api/ats-score`,
+`/api/editor-chat`, `/api/pdf-to-resume`, `/api/text-to-resume`, `/api/text-to-letter`,
+`/api/extract-meta`) n'est comptée ni limitée — `web/src/middleware.ts` ne vérifie qu'un
+mot de passe partagé. Seuls les appels `francetravail`/`adzuna`/`jsearch` ont un compteur
+(`db.ts:614-659`), et il est explicitement « local et indicatif […] pas à faire
+autorité » selon son propre commentaire — rien ne bloque un dépassement. Sans clé
+personnelle, tous les appels IA retombent sur la clé serveur partagée
+(`GEMINI_API_KEY`).
+
+Comparaison concurrence (constat §« Ce que fait la concurrence ») : Jobscan plafonne à 5
+scans/mois gratuits, Teal à 10 crédits IA — les deux comptent et plafonnent chaque geste
+IA dès leur offre gratuite. CVMatchr n'en plafonne aucun.
+
+Signalé explicitement comme sensible : décider d'un plafond (avertissement, puis blocage)
+sur la clé serveur partagée est un choix de modèle économique, pas une simple correction
+technique — à trancher par le propriétaire, pas à noter comme les autres idées de ce
+classement.
+
+### 14. `/api/editor-chat` : élaguer l'historique et ne pas répéter un `doc_json`
+inchangé
+
+Constat détaillé : `boucle/constats/2026-08-02-cout-appels-externes.md` §3. Chaque
+message du chat éditeur (`ChatPanel.tsx`) repart avec tout l'historique de la conversation
+(`historyRef.current`, sans limite) **et** le CV/lettre entier en JSON
+(`doc_json`), même si le document n'a pas changé depuis le tour précédent — le serveur
+(`editor-chat/route.ts:40-48`) ne compare jamais le JSON reçu à celui d'avant. Mesuré sur
+le fixture `base_resume.json` (sans photo) : 4 742 caractères de JSON répétés à
+l'identique à chaque tour d'une conversation sans modification appliquée, en plus d'un
+historique qui grossit de façon quadratique. Gain non chiffré précisément (dépend de la
+longueur réelle des conversations), mais la croissance est aujourd'hui totalement non
+bornée.
+
 ## Écartées
 
 - **Préparation d'entretien par IA (mock interview)** — écartée le 02/08/2026. Présente
