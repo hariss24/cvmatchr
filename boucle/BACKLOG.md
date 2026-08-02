@@ -18,9 +18,7 @@ apprendre. Conventions minimales :
 
 *(un constat existe, l'Architecte doit en faire une spec + un plan)*
 
-- Manque fonctionnel — préparation d'entretien par IA (mock interview) : présente chez 4 produits (Rezi, Kickresume, Enhancv, Careerflow). Ampleur : grosse, mais techniquement le plus proche de l'existant (réutilise `editor-chat` et l'offre déjà extraite en texte). Voir `boucle/constats/2026-08-01-manques-fonctionnels.md` §2.
 - Manque fonctionnel — optimisation de profil LinkedIn (analyse + suggestions) : présente chez 2 produits avec outil dédié (Jobscan, Careerflow). Ampleur : moyenne, flux proche de `ats-score` si le profil est collé en texte. Voir `boucle/constats/2026-08-01-manques-fonctionnels.md` §4.
-- Manque fonctionnel — CRM de networking / suivi de contacts : présent chez 4 produits (Teal, Huntr, Careerflow, Simplify), mais en tension directe avec le principe directeur du tracker actuel (statut dérivé, zéro saisie — `PROJECT_INDEX.md` §8 bis). Nécessite un arbitrage du propriétaire avant toute spec, pas une simple priorisation technique. Voir `boucle/constats/2026-08-01-manques-fonctionnels.md` §3.
 - Manque fonctionnel — import direct du profil LinkedIn pour préremplir le CV : présent chez 2 produits (Rezi, Kickresume). Ampleur : moyenne, mais faisabilité technique à vérifier en premier (LinkedIn bloque activement le scraping non officiel) — risque d'être bloquant avant même d'écrire une spec. Voir `boucle/constats/2026-08-01-manques-fonctionnels.md` §5.
 - Manque fonctionnel — identification des compétences manquantes vs une offre (« skill gap ») : présent chez 2 produits (Careerflow, Enhancv). Chevauchement possible avec le moteur ATS existant (`src/lib/ats/engine.ts`) à vérifier avant de chiffrer — peut-être un nouvel affichage plutôt qu'un nouveau calcul. Voir `boucle/constats/2026-08-01-manques-fonctionnels.md` §6.
 - Manque fonctionnel — journal de candidature (réalisations, culture d'entreprise, questions à poser) : présent chez 2 produits (Teal, Simplify). Ampleur : petite, valeur incertaine pour un candidat isolé, saisie manuelle récurrente à contre-courant du principe « zéro coût pour l'utilisateur ». Voir `boucle/constats/2026-08-01-manques-fonctionnels.md` §7.
@@ -36,6 +34,14 @@ apprendre. Conventions minimales :
 ## Idées
 
 *(dépôt libre du propriétaire et de l'Éclaireur, à trier)*
+
+**Écartés par le propriétaire le 02/08/2026 — secondaires, à ne pas implémenter.** Ils
+restent ici pour mémoire : le constat qui les documente est valide, c'est la priorité qui
+ne l'est pas. Ne pas les remonter en `## À planifier` sans instruction écrite du
+propriétaire, même si un futur audit les redécouvre chez la concurrence.
+
+- Manque fonctionnel — préparation d'entretien par IA (mock interview) : présente chez 4 produits (Rezi, Kickresume, Enhancv, Careerflow). Ampleur : grosse, mais techniquement le plus proche de l'existant (réutilise `editor-chat` et l'offre déjà extraite en texte). Voir `boucle/constats/2026-08-01-manques-fonctionnels.md` §2.
+- Manque fonctionnel — CRM de networking / suivi de contacts : présent chez 4 produits (Teal, Huntr, Careerflow, Simplify), mais en tension directe avec le principe directeur du tracker actuel (statut dérivé, zéro saisie — `PROJECT_INDEX.md` §8 bis). Voir `boucle/constats/2026-08-01-manques-fonctionnels.md` §3.
 
 - Alléger `/` (l'éditeur) lui-même : après le retrait de zod des 8 autres routes (plan `2026-08-01-zod-global-allegement-bundle`), `/` reste à ~1,34 Mo, zod compris — légitime (les modales d'import/tailor l'utilisent réellement), mais jamais mesuré contre le seuil de 2,5 s de `MISSION.md`. Piste : lazy-load des modales d'import (`ImportTextModal`/`TailorModal`/`ImportPdfModal`) par `import()` dynamique, sur le modèle du plan `/jobs`. Nécessiterait sa propre spec + mesure.
 - Capture d'offre par l'extension navigateur (`extension/`) : écartée explicitement du chantier autofill (`docs/superpowers/specs/2026-08-02-extension-autofill-design.md` §2) parce que l'extracteur magique d'offre existant (`/api/extract-job`, coller une URL) couvre déjà l'essentiel du gain — resterait à chiffrer l'écart marginal (éviter le copier-coller d'URL) une fois l'autofill Greenhouse/Lever validé en usage réel.
