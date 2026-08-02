@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** extension navigateur autofill (Greenhouse/Lever) — Tasks 1-3 du plan `2026-08-02-extension-autofill` terminées et vérifiées en usage réel (voir Journal 2026-08-02) ; reste la Task 4 (documentation `PROJECT_INDEX.md`) pour clore le plan. Restent aussi en attente : zod (283 Ko) toujours chargé sur `/` (l'éditeur), jamais mesuré contre le seuil de 2,5 s de `MISSION.md` — piste ouverte en `BACKLOG.md` § Idées (lazy-load des modales d'import) — et le chronométrage réel (Slow 4G + CPU x4) de `/jobs` et `/pack`, et la robustesse du scan face à une offre malformée.
+**Prochaine étape suggérée :** extension navigateur autofill (Greenhouse/Lever) — plan `2026-08-02-extension-autofill` bouclé (4/4 tasks) et vérifié en usage réel sur une offre Greenhouse et une offre Lever (voir Journal 2026-08-02), pas encore fusionné. Restent en attente : zod (283 Ko) toujours chargé sur `/` (l'éditeur), jamais mesuré contre le seuil de 2,5 s de `MISSION.md` — piste ouverte en `BACKLOG.md` § Idées (lazy-load des modales d'import) — et le chronométrage réel (Slow 4G + CPU x4) de `/jobs` et `/pack`, et la robustesse du scan face à une offre malformée.
 
 ---
 
@@ -112,9 +112,9 @@
   nouveaux tests verts), `build` (28 routes générées) tous verts. Aucune
   dépendance npm ajoutée. `extension/manifest.json` : JSON valide, chargement
   Chrome sans erreur (vérifié après correction de l'écart n°1).
-- **Reste à faire (Task 4, prochain réveil Bâtisseur) :** documenter
-  `extension/` dans `PROJECT_INDEX.md` (§2 structure + nouvelle section 8
-  ter) — voir le plan.
+- **Task 4 (même réveil) :** `extension/` documenté dans `PROJECT_INDEX.md`
+  (§2 structure + nouvelle section 8 ter, résumant les deux écarts mesurés
+  ci-dessus). Plan bouclé (4/4 tasks), 3 commits.
 
 ### 2026-08-01 : Retrait de zod du bundle JS de toutes les pages sauf l'éditeur (plan `docs/superpowers/plans/2026-08-01-zod-global-allegement-bundle.md`)
 

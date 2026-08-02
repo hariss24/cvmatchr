@@ -26,6 +26,8 @@ Les documents de conception de cette migration sont archivés dans `docs/archive
 ```
 cv-tailor/
 ├── web/                  # L'application (Next.js). Tout le code vit ici.
+├── extension/            # Extension navigateur (Manifest V3) : autofill de candidature
+│                         # Greenhouse/Lever depuis un paquet préparé dans /pack
 ├── docs/archive/         # Documents de conception des chantiers passés (lecture seule, historique)
 ├── .agents/rules/        # Contrats d'exécution génériques pour agents (cadrage.md)
 ├── README.md             # Présentation courte + renvoi vers web/README.md
@@ -300,6 +302,30 @@ une déduction invisible produisant des chiffres faux dès qu'un CV est retouch�
 
 Spec : `docs/superpowers/specs/2026-07-25-tracker-candidatures-design.md`.
 Maquettes validées : `docs/design/candidatures/` (dont un prototype cliquable).
+
+---
+
+## 8 ter. Extension navigateur (autofill de candidature)
+
+`extension/` (Manifest V3, JavaScript vanilla, zéro dépendance npm, chargée en
+mode développeur — pas de publication Chrome Web Store à ce stade). Depuis
+`/pack`, « Préparer pour l'extension » envoie {identité, texte de lettre, CV en
+base64} par `postMessage` ; l'extension l'écrit dans `chrome.storage.local` et
+propose un bouton flottant sur les pages Greenhouse/Lever pour remplir le
+formulaire — jamais de soumission automatique.
+
+Reconnaissance de champ générique (identifiant documenté → `autocomplete` →
+texte de label), pas de sélecteurs figés par ATS : voir
+`docs/superpowers/specs/2026-08-02-extension-autofill-design.md` §5.2 pour le
+raisonnement (aucune preuve publique sur le DOM réel de Lever). Vérifié en
+usage réel sur une offre Greenhouse et une offre Lever (détail des champs
+remplis dans `WORK_HISTORY.md`, Journal 2026-08-02) : les identifiants
+documentés par l'API Greenhouse sont exposés en attribut `id` (pas `name`) sur
+le DOM rendu, et Lever n'a qu'un champ « Full name » (pas de prénom/nom
+séparés) — les deux constats ont fait évoluer `fieldMatch.js`.
+
+Hors périmètre à ce stade : capture d'offre par extension (l'extracteur URL
+existant, §7, couvre l'essentiel), tout ATS autre que Greenhouse/Lever.
 
 ---
 
