@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** zod (283 Ko) retiré du bundle initial des 8 routes hors édition (voir Journal 2026-08-01, plan `2026-08-01-zod-global-allegement-bundle`) ; `/` (l'éditeur) le garde légitimement et reste à ~1,34 Mo, jamais mesuré contre le seuil de 2,5 s de `MISSION.md` — piste ouverte en `BACKLOG.md` § Idées (lazy-load des modales d'import). Restent aussi en attente : le chronométrage réel (Slow 4G + CPU x4) de `/jobs` et `/pack` non refait depuis leurs chantiers de poids respectifs, et la robustesse du scan face à une offre malformée.
+**Prochaine étape suggérée :** extension navigateur autofill (Greenhouse/Lever) — Tasks 1-3 du plan `2026-08-02-extension-autofill` terminées et vérifiées en usage réel (voir Journal 2026-08-02) ; reste la Task 4 (documentation `PROJECT_INDEX.md`) pour clore le plan. Restent aussi en attente : zod (283 Ko) toujours chargé sur `/` (l'éditeur), jamais mesuré contre le seuil de 2,5 s de `MISSION.md` — piste ouverte en `BACKLOG.md` § Idées (lazy-load des modales d'import) — et le chronométrage réel (Slow 4G + CPU x4) de `/jobs` et `/pack`, et la robustesse du scan face à une offre malformée.
 
 ---
 
@@ -40,6 +40,81 @@
 ---
 
 ## Journal
+
+### 2026-08-02 : Extension navigateur — autofill de candidature Greenhouse/Lever (Tasks 1-3, plan `docs/superpowers/plans/2026-08-02-extension-autofill.md`)
+
+- **Quoi :** nouveau répertoire `extension/` (Manifest V3, JavaScript vanilla,
+  zéro dépendance npm) qui remplit les formulaires de candidature Greenhouse
+  et Lever depuis un paquet {identité, lettre, CV en base64} préparé sur
+  `/pack` — `manifest.json`, `content-bridge.js` (pont `postMessage` →
+  `chrome.storage.local`), `popup.html`/`popup.js`, `lib/fieldMatch.js`
+  (reconnaissance générique de champ) et `content-autofill.js` (bouton
+  flottant + remplissage, jamais de soumission). Côté `web/src/` :
+  `lib/extension/autofillPackage.ts` (construction pure du paquet, testée
+  TDD — rouge confirmé en déplaçant temporairement le fichier avant de
+  l'écrire, puis vert), `lib/extension/bridge.ts` (`postAutofillPackage`,
+  `postMessage` + accusé de réception avec délai de 800 ms) et le bouton
+  `ExtensionExportButton.tsx` monté dans `PackView.tsx`.
+- **Pourquoi :** manque fonctionnel le plus large mesuré par l'Éclaireur le
+  01/08 (autofill présent chez 7 des 8 produits de référence, absent de
+  CVMatchr). Spec : `docs/superpowers/specs/2026-08-02-extension-autofill-design.md`.
+  Plan : `docs/superpowers/plans/2026-08-02-extension-autofill.md`.
+- **Écarts constatés au plan, corrigés par vérification réelle (pas supposée) :**
+  1. Le plan ne stubait que `lib/fieldMatch.js` en Task 1, mais `manifest.json`
+     référence aussi `content-autofill.js` (créé en Task 3) — un chargement
+     réel dans Chrome (`chromium --headless=new --load-extension=...`)
+     échouait avec « Could not load javascript 'content-autofill.js' for
+     script » tant que ce fichier n'existait pas. Stub vide ajouté, même
+     modèle que `fieldMatch.js`.
+  2. `fieldMatch.js` (Task 3) cherchait les identifiants documentés par
+     l'API Greenhouse (`first_name`, `last_name`, `email`, `phone`, `resume`,
+     `cover_letter`) via l'attribut `name`. Mesuré sur une offre Greenhouse
+     réelle (`job-boards.greenhouse.io/thehonestcompanysandbox/jobs/140167`,
+     02/08/2026) : ces identifiants sont exposés en attribut `id`, pas
+     `name`, sur le DOM rendu — l'attribut `name` HTML est vide sur ces
+     champs. `findField`/`findFileField` vérifient maintenant les deux.
+  3. La spec §9.5 exige « au moins Nom complet et Email » sur Lever, mais
+     Lever n'a pas de champ prénom/nom séparé : un seul champ « Full name »
+     (`name="name"`, `label` = « Full name✱ », mesuré sur une offre Lever
+     réelle, `jobs.lever.co/Aprio/cb5984b4-b2de-4662-8691-3b7ea2a21a44/apply`,
+     02/08/2026). Ajout d'une entrée `fullName` (attribut `name="name"`,
+     `autocomplete="name"`, libellés « full name »/« nom complet ») dans
+     `FIELD_HINTS`, remplie avec `firstName + " " + lastName` — toujours un
+     attribut/autocomplete standard, jamais un sélecteur propre à Lever.
+- **Vérification manuelle réelle (protocole spec §7/plan Task 3 Step 4),
+  automatisée via Playwright + Chromium headless=new + `--load-extension`
+  faute d'affichage graphique dans cet environnement — flux bout en bout
+  identique à un usage réel : `/pack` → clic « Préparer pour l'extension »
+  → ouverture de l'offre → clic sur le bouton flottant :**
+  - **Greenhouse** (`job-boards.greenhouse.io/thehonestcompanysandbox/jobs/140167`) :
+    7/7 champs remplis (prénom, nom, email, téléphone, ville, LinkedIn — ce
+    dernier via un champ `question_876060` reconnu par libellé — et le CV en
+    pièce jointe, confirmé par le nom de fichier `CV_Testeur_Autofill.pdf`
+    apparu dans le DOM après remplacement du widget d'upload par l'état
+    « fichier attaché »). Aucune soumission (URL inchangée après clic).
+  - **Lever** (`jobs.lever.co/Aprio/cb5984b4-b2de-4662-8691-3b7ea2a21a44/apply`) :
+    6/8 champs remplis (nom complet, email, téléphone, ville, LinkedIn via
+    `urls[LinkedIn]` reconnu par libellé, CV en pièce jointe confirmé par
+    `C:\fakepath\CV_Testeur_Autofill_Lever.pdf`) — prénom/nom séparés non
+    remplis (dégradé attendu, absorbés par `fullName`), les deux champs
+    obligatoires du critère §9.5 (nom complet, email) le sont. Aucune
+    soumission (URL inchangée après clic).
+- **Fichiers touchés :** créés `extension/manifest.json`,
+  `extension/content-bridge.js`, `extension/content-autofill.js`,
+  `extension/lib/fieldMatch.js`, `extension/popup.html`, `extension/popup.js`,
+  `extension/README.md`, `web/src/lib/extension/autofillPackage.ts`,
+  `web/src/lib/extension/autofillPackage.test.ts`,
+  `web/src/lib/extension/bridge.ts`,
+  `web/src/components/pack/ExtensionExportButton.tsx` ; modifié
+  `web/src/components/pack/PackView.tsx`.
+- **Résultat vérifs (`web/`) :** `tsc --noEmit`, `lint` (5 warnings
+  préexistants sans rapport), `vitest run` (589 tests, 75 fichiers — 2
+  nouveaux tests verts), `build` (28 routes générées) tous verts. Aucune
+  dépendance npm ajoutée. `extension/manifest.json` : JSON valide, chargement
+  Chrome sans erreur (vérifié après correction de l'écart n°1).
+- **Reste à faire (Task 4, prochain réveil Bâtisseur) :** documenter
+  `extension/` dans `PROJECT_INDEX.md` (§2 structure + nouvelle section 8
+  ter) — voir le plan.
 
 ### 2026-08-01 : Retrait de zod du bundle JS de toutes les pages sauf l'éditeur (plan `docs/superpowers/plans/2026-08-01-zod-global-allegement-bundle.md`)
 
