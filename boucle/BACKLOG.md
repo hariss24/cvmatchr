@@ -14,11 +14,12 @@ apprendre. Conventions minimales :
 
 *(un plan existe, le Bâtisseur peut s'y mettre — vide au démarrage)*
 
+- Manque fonctionnel — extension navigateur (autofill de candidature Greenhouse/Lever, sans capture d'offre — voir écarté explicitement §2 de la spec) : présente chez 7 des 8 produits de référence, le manque le plus large mesuré à ce jour. Aucune dépendance npm, aucun feu vert requis. Spec : `docs/superpowers/specs/2026-08-02-extension-autofill-design.md`. Plan : `docs/superpowers/plans/2026-08-02-extension-autofill.md`.
+
 ## À planifier
 
 *(un constat existe, l'Architecte doit en faire une spec + un plan)*
 
-- Manque fonctionnel — extension navigateur (capture d'offre + autofill de candidature) : présente chez 7 des 8 produits de référence consultés (Jobscan, Teal, Rezi, Huntr, Enhancv, Careerflow, Simplify), absente à 100 % de CVMatchr. Le manque le plus large mesuré à ce jour sur ce domaine. Ampleur : grosse (spec dédiée nécessaire — manifeste V3, permissions, choix des ATS ciblés en premier). Voir `boucle/constats/2026-08-01-manques-fonctionnels.md` §1.
 - Manque fonctionnel — préparation d'entretien par IA (mock interview) : présente chez 4 produits (Rezi, Kickresume, Enhancv, Careerflow). Ampleur : grosse, mais techniquement le plus proche de l'existant (réutilise `editor-chat` et l'offre déjà extraite en texte). Voir `boucle/constats/2026-08-01-manques-fonctionnels.md` §2.
 - Manque fonctionnel — optimisation de profil LinkedIn (analyse + suggestions) : présente chez 2 produits avec outil dédié (Jobscan, Careerflow). Ampleur : moyenne, flux proche de `ats-score` si le profil est collé en texte. Voir `boucle/constats/2026-08-01-manques-fonctionnels.md` §4.
 - Manque fonctionnel — CRM de networking / suivi de contacts : présent chez 4 produits (Teal, Huntr, Careerflow, Simplify), mais en tension directe avec le principe directeur du tracker actuel (statut dérivé, zéro saisie — `PROJECT_INDEX.md` §8 bis). Nécessite un arbitrage du propriétaire avant toute spec, pas une simple priorisation technique. Voir `boucle/constats/2026-08-01-manques-fonctionnels.md` §3.
@@ -39,6 +40,8 @@ apprendre. Conventions minimales :
 *(dépôt libre du propriétaire et de l'Éclaireur, à trier)*
 
 - Alléger `/` (l'éditeur) lui-même : après le retrait de zod des 8 autres routes (plan `2026-08-01-zod-global-allegement-bundle`), `/` reste à ~1,34 Mo, zod compris — légitime (les modales d'import/tailor l'utilisent réellement), mais jamais mesuré contre le seuil de 2,5 s de `MISSION.md`. Piste : lazy-load des modales d'import (`ImportTextModal`/`TailorModal`/`ImportPdfModal`) par `import()` dynamique, sur le modèle du plan `/jobs`. Nécessiterait sa propre spec + mesure.
+- Capture d'offre par l'extension navigateur (`extension/`) : écartée explicitement du chantier autofill (`docs/superpowers/specs/2026-08-02-extension-autofill-design.md` §2) parce que l'extracteur magique d'offre existant (`/api/extract-job`, coller une URL) couvre déjà l'essentiel du gain — resterait à chiffrer l'écart marginal (éviter le copier-coller d'URL) une fois l'autofill Greenhouse/Lever validé en usage réel.
+- Autofill sur d'autres ATS que Greenhouse/Lever (Workday, iCIMS, SmartRecruiters, Taleo, LinkedIn Easy Apply) : hors périmètre du premier chantier autofill faute de structure DOM publiquement documentée (spec `2026-08-02-extension-autofill-design.md` §5.1/§8) — à rouvrir un ATS à la fois, une fois Greenhouse/Lever mesurés en usage réel.
 
 ## Terminé
 
