@@ -14,8 +14,6 @@ apprendre. Conventions minimales :
 
 *(un plan existe, le Bâtisseur peut s'y mettre — vide au démarrage)*
 
-- Manque fonctionnel — extension navigateur (autofill de candidature Greenhouse/Lever, sans capture d'offre — voir écarté explicitement §2 de la spec) : présente chez 7 des 8 produits de référence, le manque le plus large mesuré à ce jour. Aucune dépendance npm, aucun feu vert requis. Spec : `docs/superpowers/specs/2026-08-02-extension-autofill-design.md`. Plan : `docs/superpowers/plans/2026-08-02-extension-autofill.md`.
-
 ## À planifier
 
 *(un constat existe, l'Architecte doit en faire une spec + un plan)*
@@ -45,6 +43,7 @@ apprendre. Conventions minimales :
 
 ## Terminé
 
+- Manque fonctionnel — extension navigateur (autofill de candidature Greenhouse/Lever) : plan `docs/superpowers/plans/2026-08-02-extension-autofill.md` bouclé (4/4 tâches), 02/08/2026, non encore fusionné. Vérifié en usage réel (Playwright + Chromium headless, faute d'affichage graphique disponible) sur une offre Greenhouse publique (7/7 champs + CV joint) et une offre Lever publique (6/8, nom complet + email + CV joints — les deux champs obligatoires du critère de succès). Deux écarts de la spec corrigés par cette mesure : Greenhouse expose ses identifiants documentés via l'attribut `id` (pas `name`) sur le DOM rendu ; Lever n'a qu'un champ « Full name », pas de prénom/nom séparés (entrée `fullName` ajoutée à la reconnaissance générique, toujours un attribut/autocomplete standard). Détail dans `WORK_HISTORY.md`, Journal 02/08/2026, et `boucle/journal/2026-08-02-batisseur.md`.
 - Performance `/jobs` (chargement paresseux de `rome-competences.json` et de `zod`/`profileSchema`) : plan `docs/superpowers/plans/2026-08-01-jobs-allegement-bundle.md` bouclé (4/4 tâches) et fusionné dans `main` le 01/08/2026 (PR #10, commit `e824235`). Poids initial de `/jobs` -56 % (2 488 883 o → 1 088 377 o). Cible de 700 Ko non atteinte (zod ~283 Ko chargé app-wide via `docStore.ts` → `lib/resume/schema.ts`, hors périmètre de ce plan) — reste une piste ouverte, voir « État actuel » de `WORK_HISTORY.md`.
 - Poids de `zod` (~283 Ko) chargé sur **toutes** les pages via `docStore.ts` → `lib/resume/schema.ts` : plan `docs/superpowers/plans/2026-08-01-zod-global-allegement-bundle.md` bouclé (4/4 tâches), 01/08/2026, non encore fusionné. `DEFAULT_RESUME`/`DEFAULT_LETTER` extraits dans `lib/resume/defaults.ts` (zod-libre), 14 fichiers migrés. Mesuré sur build de prod propre : `/login`, `/help`, `/pack`, `/jobs`, `/history`, `/profil`, `/settings`, `/candidatures` perdent le chunk zod (entre -284 880 o et -286 082 o chacune) ; `/` (éditeur) le garde légitimement, poids inchangé. `/` reste à ~1,34 Mo, jamais mesuré contre le seuil de 2,5 s — piste distincte en § Idées.
 
