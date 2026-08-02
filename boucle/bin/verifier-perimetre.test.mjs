@@ -2,9 +2,25 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { fichiersInterdits } from "./verifier-perimetre.mjs";
 
-test("le code applicatif passe", () => {
-  const chemins = ["web/src/components/jobs/JobCard.tsx", "web/src/lib/jobs/rank/index.ts"];
+// La boucle propose, le propriétaire implémente (décision du 02/08/2026). Toucher au
+// code applicatif n'est plus « hors périmètre » : c'est le périmètre qui a changé de
+// nature. Sans cette barrière, « rien implémenter » ne serait qu'une consigne de prompt.
+test("le code applicatif est refusé", () => {
+  const chemins = ["web/src/components/jobs/JobCard.tsx", "extension/content-autofill.js"];
+  assert.deepEqual(fichiersInterdits(chemins), chemins);
+});
+
+test("un dossier inventé de toutes pièces est refusé", () => {
+  assert.deepEqual(fichiersInterdits(["scripts/migration.ts"]), ["scripts/migration.ts"]);
+});
+
+test("les specs et les plans passent", () => {
+  const chemins = ["docs/superpowers/specs/2026-08-02-x-design.md", "docs/archive/vieux.md"];
   assert.deepEqual(fichiersInterdits(chemins), []);
+});
+
+test("le classement des idées passe", () => {
+  assert.deepEqual(fichiersInterdits(["boucle/IDEES.md"]), []);
 });
 
 test("les fichiers de suivi de la boucle passent", () => {
@@ -43,7 +59,7 @@ test("toucher à un fichier d'environnement est refusé", () => {
 });
 
 test("les fautifs sont signalés au milieu de changements légitimes", () => {
-  const chemins = ["web/src/app/page.tsx", "boucle/MISSION.md", "README.md"];
+  const chemins = ["boucle/IDEES.md", "boucle/MISSION.md", "boucle/journal/x.md"];
   assert.deepEqual(fichiersInterdits(chemins), ["boucle/MISSION.md"]);
 });
 

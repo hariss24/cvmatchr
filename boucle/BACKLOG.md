@@ -1,4 +1,14 @@
-# BACKLOG
+# BACKLOG *(archive — remplacé par `IDEES.md`)*
+
+> **Ce fichier ne pilote plus rien depuis le 02/08/2026.** La boucle n'implémente plus :
+> elle explore et classe dans `boucle/IDEES.md`, le propriétaire décide et construit.
+>
+> Il est conservé comme **source** : le premier Arbitre y puisera les constats de la
+> section « À planifier » pour amorcer le classement. Une fois qu'une ligne est passée
+> dans `IDEES.md`, elle n'a plus à être relue ici.
+>
+> Le volant du propriétaire est désormais `IDEES.md`.
+
 
 Canal de pilotage. Le propriétaire écrit ici en langage courant, sans syntaxe à
 apprendre. Conventions minimales :

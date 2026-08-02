@@ -1,8 +1,22 @@
 # MISSION — le référentiel de la boucle
 
-Ce fichier est la boussole. Tous les rôles le lisent à chaque réveil.
+Ce fichier est la boussole. Les deux rôles le lisent à chaque réveil.
 **La boucle ne le modifie jamais.** Elle peut proposer de le changer : une ligne dans
-`BACKLOG.md`, section « Idées », adressée au propriétaire.
+`IDEES.md`, adressée au propriétaire.
+
+## Ce que fait la boucle, et ce qu'elle ne fait plus
+
+Depuis le 02/08/2026, sur décision du propriétaire : **la boucle explore et classe, elle
+n'implémente rien.** Elle observe le produit, le marché et le dépôt, elle en tire des
+idées, elle les note et les ordonne dans `IDEES.md`. Le propriétaire lit ce classement et
+décide seul de ce qui se construit — et le construit.
+
+Cette limite n'est pas une consigne de politesse : `bin/verifier-perimetre.mjs` refuse
+tout diff qui sort de `boucle/` et `docs/`. Un réveil qui touche à `web/` ou
+`extension/` est perdu en entier, quelle que soit la qualité de ce qu'il a écrit.
+
+Ce qui a été construit avant cette date reste en place. On arrête de bâtir, on ne défait
+rien.
 
 ## Objectif
 
@@ -47,33 +61,36 @@ Cet ordre est fixé par le propriétaire. Il ne se redébat pas à chaque révei
 À chaque arbitrage, retenir l'option **la plus complète et la plus qualitative**, pas la
 moins coûteuse. Puis écrire ce qui a été écarté et pourquoi.
 
-## Chantiers exigeant un feu vert humain
+## Sujets sensibles
 
 - comptes et authentification ;
 - migration des données hors d'IndexedDB ;
 - ajout d'une dépendance npm importante ;
 - tout ce qui touche à un paiement ou au modèle économique.
 
-L'Architecte **peut** écrire la spec de ces chantiers. Le Bâtisseur ne les implémente
-qu'après que le propriétaire ait écrit `!ok` sur la ligne du backlog. Toute ligne de
-backlog portant `[feu vert requis]` sans `!ok` est invisible pour le Bâtisseur.
+Ils peuvent être proposés et classés comme n'importe quelle idée. Le mécanisme du feu
+vert a disparu avec les rôles qui construisaient : plus rien ne s'implémente sans le
+propriétaire, donc plus rien n'a besoin d'être bloqué. Signale simplement dans le
+classement qu'une idée touche à l'un de ces sujets — il décidera en connaissance de
+cause.
 
 ## Interdits absolus
 
-La boucle ne modifie jamais : `.github/workflows/`, `boucle/MISSION.md`,
-`boucle/roles/`, `boucle/bin/`, tout fichier `.env*`. Elle ne pousse jamais
-sur `main`. Elle décide librement **comment** atteindre le but, jamais **quel** but.
+La boucle n'écrit que dans `boucle/` et `docs/` — et jamais, à l'intérieur même de
+`boucle/`, dans `MISSION.md`, `roles/` ni `bin/`. Ces trois-là sont sa mission, ses
+mandats et son moteur : un agent qui peut les réécrire n'a plus de limites, seulement
+des limites qu'il consent à garder. Elle ne pousse jamais sur `main`.
 
-Si tu penses qu'un de ces fichiers doit changer, écris une ligne dans `BACKLOG.md`,
-section « Idées », adressée au propriétaire. Ne le modifie pas toi-même : un script
-(`bin/verifier-perimetre.mjs`) refusera ton diff et le réveil sera perdu.
+Si tu penses qu'un de ces fichiers doit changer, écris-le dans `IDEES.md`, à l'adresse
+du propriétaire. Ne le modifie pas toi-même : un script (`bin/verifier-perimetre.mjs`)
+refusera ton diff et le réveil sera perdu.
 
 ## Règles héritées du dépôt
 
 - `CLAUDE.md` (racine) et `web/AGENTS.md` s'appliquent intégralement.
-- `web/CADRAGE_EXECUTION.md` est le contrat d'exécution, avec un seul amendement :
-  sa règle 10 (« push strictement interdit ») devient « push sur une branche `claude/…`
-  uniquement, jamais sur `main` ».
-- Jamais `alert`/`confirm`/`prompt` natifs → `uiAlert`/`uiConfirm`/`uiPrompt`.
-- Jamais de couleur en dur → variables de thème dans `src/app/globals.css`.
 - La photo de profil (base64) n'est jamais envoyée à une IA.
+
+Les règles de style et de code (`uiAlert` plutôt qu'`alert`, variables de thème plutôt
+que couleurs en dur, `web/CADRAGE_EXECUTION.md`) ne concernent plus la boucle : elle
+n'écrit plus de code. Elles restent valables pour le propriétaire et pour quiconque
+implémente une idée sortie d'ici — cite-les dans une idée quand elles la contraignent.

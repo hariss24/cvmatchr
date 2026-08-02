@@ -2,13 +2,17 @@
  * Choix du rôle joué par un réveil de la boucle.
  *
  * Volontairement pur et testé : le rôle ne doit jamais dépendre du jugement de
- * l'agent. L'ordre de priorité est réparer > livrer > planifier > explorer —
- * explorer arrive en dernier parce que c'est la tâche la plus agréable, donc celle
- * qui monopoliserait tout si on la laissait libre.
+ * l'agent.
+ *
+ * Depuis le 02/08/2026, la boucle n'implémente plus rien (décision du
+ * propriétaire) : elle explore et elle classe, il décide. Deux rôles seulement,
+ * qui alternent — découvrir une idée et comparer dix idées entre elles sont deux
+ * actes différents, et les mélanger produit un classement écrit par celui qui
+ * vient de s'enthousiasmer pour sa trouvaille.
  */
 import { readFile } from "node:fs/promises";
 
-export const ROLES = ["Gardien", "Bâtisseur", "Architecte", "Éclaireur"];
+export const ROLES = ["Éclaireur", "Arbitre"];
 
 /** `null` = pas de pause. Un fichier sans nom de rôle gèle tout. */
 export function lirePause(texte) {
@@ -16,43 +20,30 @@ export function lirePause(texte) {
   return { rolesGeles: ROLES.filter((r) => texte.includes(r)) };
 }
 
-function lignesDeSection(texte, titre) {
-  const lignes = texte.split("\n");
-  const debut = lignes.findIndex((l) => l.trim() === `## ${titre}`);
-  if (debut === -1) return [];
-  const reste = lignes.slice(debut + 1);
-  const fin = reste.findIndex((l) => l.startsWith("## "));
-  return (fin === -1 ? reste : reste.slice(0, fin))
-    .map((l) => l.trim())
-    .filter((l) => l.startsWith("- "))
-    .map((l) => l.slice(2).trim());
+/**
+ * Rôle du réveil précédent, lu dans `ETAT.md` (ligne « **Rôle joué :** … »).
+ * Absent ou illisible → `null`, et l'alternance repart sur l'Éclaireur.
+ */
+export function lireDernierRole(texte) {
+  if (!texte) return null;
+  const ligne = texte.split("\n").find((l) => l.includes("Rôle joué"));
+  if (!ligne) return null;
+  return ROLES.find((r) => ligne.includes(r)) ?? null;
 }
 
-/** Une ligne compte si elle n'est ni barrée ni bloquée par un feu vert non donné. */
-function ouvrable(ligne) {
-  if (ligne.startsWith("~~")) return false;
-  if (ligne.includes("[feu vert requis]") && !ligne.includes("!ok")) return false;
-  return true;
-}
-
-export function lireBacklog(texte) {
-  return {
-    pretACoder: lignesDeSection(texte, "Prêt à coder").some(ouvrable),
-    constatSansPlan: lignesDeSection(texte, "À planifier").some(ouvrable),
-  };
-}
-
-export function choisirRole({ pause = null, pr = null, backlog }) {
+export function choisirRole({ pause = null, dernierRole = null }) {
   const geles = pause ? (pause.rolesGeles.length > 0 ? pause.rolesGeles : ROLES) : [];
   const libre = (role) => !geles.includes(role);
 
-  if (pr && (pr.rouge || pr.heures > 24) && libre("Gardien")) return "Gardien";
-  if (pr && pr.brouillon && libre("Bâtisseur")) return "Bâtisseur";
-  // Une seule PR ouverte à la fois : tant qu'elle vit, on n'en ouvre pas d'autre.
-  if (!pr && backlog.pretACoder && libre("Bâtisseur")) return "Bâtisseur";
-  // L'Architecte n'écrit que des documents : il peut travailler en parallèle d'une PR.
-  if (backlog.constatSansPlan && libre("Architecte")) return "Architecte";
-  if (libre("Éclaireur")) return "Éclaireur";
+  // Alternance stricte. Après un Éclaireur, on classe ce qu'il a rapporté ; sinon
+  // les idées s'empilent sans jamais être comparées, et le fichier de classement
+  // devient une liste de courses.
+  const voulu = dernierRole === "Éclaireur" ? "Arbitre" : "Éclaireur";
+  if (libre(voulu)) return voulu;
+
+  const autre = voulu === "Éclaireur" ? "Arbitre" : "Éclaireur";
+  if (libre(autre)) return autre;
+
   return "Pause";
 }
 
@@ -66,12 +57,8 @@ async function lireOuNull(chemin) {
 
 // Interface ligne de commande, appelée par le workflow.
 if (process.argv[1]?.endsWith("choisir-role.mjs")) {
-  const drapeau = process.argv.indexOf("--pr");
-  const brut = drapeau === -1 ? "" : (process.argv[drapeau + 1] ?? "");
-  const pr = brut && brut !== "null" ? JSON.parse(brut) : null;
-
   const pause = lirePause(await lireOuNull("boucle/PAUSE.md"));
-  const backlog = lireBacklog((await lireOuNull("boucle/BACKLOG.md")) ?? "");
+  const dernierRole = lireDernierRole(await lireOuNull("boucle/ETAT.md"));
 
-  process.stdout.write(`role=${choisirRole({ pause, pr, backlog })}\n`);
+  process.stdout.write(`role=${choisirRole({ pause, dernierRole })}\n`);
 }

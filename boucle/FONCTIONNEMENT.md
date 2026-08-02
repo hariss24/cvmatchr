@@ -9,9 +9,13 @@ Pour les raisons de chaque choix de conception,
 
 ## 1. En une phrase
 
-Toutes les 6 heures, un agent Claude se réveille chez GitHub, fait **une seule chose**
-pour améliorer CVMatchr, la propose, et ne peut la mettre en ligne que si toutes les
-vérifications automatiques sont vertes.
+Toutes les 6 heures, un agent Claude se réveille chez GitHub, observe CVMatchr et son
+marché, et enrichit un **classement d'idées** que le propriétaire lit pour décider quoi
+construire.
+
+**Elle ne construit rien elle-même.** Ce n'est pas une consigne qu'on lui donne, c'est
+une barrière : un programme inspecte son travail avant qu'il ne sorte de la machine et
+refuse tout ce qui touche au code de l'application.
 
 ---
 
@@ -37,45 +41,37 @@ vrai navigateur, et la construction complète de l'app.
 
 ---
 
-## 3. Pourquoi quatre rôles et non un seul agent
+## 3. Deux rôles, et pourquoi pas un seul
 
-Un agent qui ferait tout en une fois — auditer, concevoir, coder — arriverait au moment
-de coder avec une mémoire déjà saturée par son propre audit. C'est le pire moment pour
-saturer.
-
-La boucle joue donc **un seul rôle par réveil** :
+> **Changement du 02/08/2026.** La boucle comptait quatre rôles et construisait
+> elle-même. Elle n'implémente plus rien : elle explore et elle classe, le propriétaire
+> décide et construit. Le Gardien, le Bâtisseur et l'Architecte ont disparu.
 
 | Rôle | Ce qu'il fait | Ce qu'il ne fait pas |
 |---|---|---|
-| 🛡️ **Gardien** | Répare ce qui est cassé | Rien d'autre |
-| 🔨 **Bâtisseur** | Écrit le code d'un plan existant | Ne conçoit pas |
-| 📐 **Architecte** | Transforme un constat en plan détaillé | N'écrit aucun code |
-| 🔭 **Éclaireur** | Audite, mesure, compare à la concurrence | N'écrit aucun code |
+| 🔭 **Éclaireur** | Observe le produit, le marché, le dépôt ; rapporte ce qu'il trouve | Ne note pas, ne classe pas |
+| ⚖️ **Arbitre** | Relit tout, note chaque idée, ordonne le classement | Ne cherche rien de nouveau |
 
-La séparation entre l'Architecte et le Bâtisseur n'est pas de la bureaucratie : un agent
-qui conçoit et code dans le même souffle taille sa conception à la mesure de ce qu'il a
-envie de coder.
+Ni l'un ni l'autre n'écrit une ligne de code.
+
+Les séparer n'est pas de la bureaucratie. Celui qui vient de découvrir quelque chose le
+surestime — c'est mécanique, pas un défaut de caractère. Un agent qui explore **et**
+classe dans le même souffle met sa trouvaille du jour en tête, tous les jours.
 
 ---
 
 ## 4. Comment le rôle est choisi
 
-Pas au feeling. Une règle fixe, appliquée par un petit programme testé
-(`bin/choisir-role.mjs`, 17 vérifications automatiques) :
+Pas au feeling. Une alternance stricte, appliquée par un petit programme testé
+(`bin/choisir-role.mjs`, 12 vérifications automatiques) :
 
 ```
-1. Une proposition est cassée, ou traîne depuis plus de 24 h ?   → Gardien
-2. Une proposition est inachevée ?                                → Bâtisseur (il la reprend)
-3. Aucune proposition en cours et un plan est prêt ?              → Bâtisseur (il en démarre un)
-4. Un constat attend d'être transformé en plan ?                  → Architecte
-5. Sinon                                                          → Éclaireur
+Le réveil précédent a exploré ?  → on classe   (Arbitre)
+Sinon                            → on explore  (Éclaireur)
 ```
 
-L'ordre est **réparer > livrer > planifier > explorer**.
-
-Explorer arrive en dernier volontairement : c'est la tâche la plus agréable, donc celle
-qui monopoliserait tout si on la laissait libre. Une boucle « créative » accumule les
-audits brillants et ne livre jamais.
+L'alternance est le point important. Sans elle, les idées s'empilent sans jamais être
+comparées entre elles, et le classement redevient une liste de courses.
 
 ---
 
@@ -166,12 +162,12 @@ de s'armer sinon.
 | Je veux… | Je fais… |
 |---|---|
 | Tout arrêter | Créer `boucle/PAUSE.md` |
-| Geler un seul rôle | Créer `PAUSE.md` en y écrivant son nom, ex. `Gel du Bâtisseur` |
+| Geler un seul rôle | Créer `PAUSE.md` en y écrivant son nom, ex. `Gel de l'Arbitre` |
 | Reprendre | Supprimer `PAUSE.md` |
-| Proposer une idée | Une ligne sous `## Idées` de `BACKLOG.md`, en français courant |
-| Faire passer une idée devant | La préfixer de `!` |
-| Refuser une proposition | Barrer la ligne : `- ~~non merci~~` |
-| Débloquer un chantier sensible | Écrire `!ok` sur sa ligne |
+| Proposer une idée | Une ligne dans `IDEES.md`, en français courant |
+| Dire « je veux celle-là » | La préfixer de `!` |
+| Refuser une idée définitivement | Barrer la ligne : `- ~~non merci~~` |
+| Corriger une note que tu trouves fausse | L'écrire à la main : l'Arbitre la recopie sans discuter |
 | Changer le comportement d'un rôle | Éditer `roles/<rôle>.md` |
 | Changer les objectifs ou les seuils | Éditer `MISSION.md` |
 | Réveiller la boucle tout de suite | Onglet Actions → « Boucle autonome » → Run workflow |
@@ -181,19 +177,19 @@ Aucun de ces gestes ne demande de toucher à du code.
 
 ---
 
-## 10. Les quatre chantiers qui exigent ton feu vert
-
-L'Architecte a le droit de les **concevoir** — c'est du terrain préparé, c'est utile.
-Le Bâtisseur ne peut pas les **implémenter** tant que tu n'as pas écrit `!ok` sur la
-ligne correspondante du backlog :
+## 10. Les sujets sensibles
 
 - comptes et authentification ;
 - sortie des données hors du navigateur ;
 - ajout d'une dépendance importante ;
 - tout ce qui touche à un paiement.
 
-Ce sont les changements qu'on ne peut pas annuler d'un bouton. C'est la seule limite
-posée à l'autonomie de la boucle, et elle tient en un mot à taper.
+Ce sont les changements qu'on ne peut pas annuler d'un bouton. Il existait autrefois un
+mécanisme de feu vert pour les bloquer — il a disparu avec les rôles qui construisaient.
+**Plus rien ne s'implémente sans toi, donc plus rien n'a besoin d'être bloqué.**
+
+La boucle peut proposer et classer ces idées comme les autres. Elle doit seulement
+signaler, dans le classement, qu'une idée touche à l'un de ces sujets.
 
 ---
 
@@ -204,7 +200,8 @@ posée à l'autonomie de la boucle, et elle tient en un mot à taper.
 | `ETAT.md` | Où elle en est, en cinq lignes |
 | `journal/` | Une entrée par réveil |
 | `constats/` | Les audits, chiffrés, avec la comparaison à la concurrence |
-| `BACKLOG.md` | Ce qui est prévu, dans quel ordre |
+| **`IDEES.md`** | **Le classement — c'est le livrable, c'est ce qu'on lit en premier** |
+| `BACKLOG.md` | Archive de l'époque où la boucle construisait |
 | Onglet **Pull requests** de GitHub | Ce qu'elle propose en ce moment |
 | `git log --author="Boucle CVMatchr"` | Tout ce qu'elle a écrit, depuis le début |
 

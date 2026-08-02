@@ -14,9 +14,21 @@ export const CHEMINS_INTERDITS = [
   /(^|\/)\.env($|\.)/,
 ];
 
+/**
+ * Depuis le 02/08/2026, la boucle propose mais n'implémente plus (décision du
+ * propriétaire). Elle n'écrit donc QUE dans ces deux dossiers.
+ *
+ * Interdire le code par une liste noire serait sans fin — il suffirait d'un dossier
+ * nouveau pour passer à travers. On inverse : tout est interdit sauf ce qui est
+ * nommé ici. Un agent qui décide de « juste corriger vite fait » un fichier de
+ * `web/` voit son réveil refusé avant que quoi que ce soit ne quitte la machine.
+ */
+export const RACINES_AUTORISEES = [/^boucle\//, /^docs\//];
+
 export function fichiersInterdits(chemins) {
   return chemins.filter((brut) => {
     const chemin = brut.replace(/\\/g, "/");
+    if (!RACINES_AUTORISEES.some((motif) => motif.test(chemin))) return true;
     return CHEMINS_INTERDITS.some((motif) => motif.test(chemin));
   });
 }

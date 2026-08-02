@@ -49,30 +49,18 @@ jobs:
           git config user.name "Boucle CVMatchr"
           git config user.email "boucle@cvmatchr.local"
 
-      # État de la PR courante de la boucle. Une seule PR ouverte à la fois :
-      # on prend la plus récente sur une branche `claude/…`.
-      - name: État de la PR courante
+      # PR ouverte de la boucle, s'il y en a une : le réveil poursuit dessus plutôt que
+      # d'en ouvrir une seconde. Le rôle, lui, ne dépend plus de son état — la boucle
+      # n'écrit que des documents, une CI rouge ne peut plus venir d'elle.
+      - name: PR ouverte de la boucle
         id: pr
         env:
           GH_TOKEN: ${{ secrets.LOOP_GITHUB_TOKEN }}
         run: |
-          brut=$(gh pr list --state open --limit 1 --json number,isDraft,createdAt,statusCheckRollup,headRefName \
-                   --jq '[.[] | select(.headRefName | startswith("claude/"))] | .[0] // empty')
-          if [ -z "$brut" ]; then
-            echo "pr=null" >> "$GITHUB_OUTPUT"
-            echo "numero=" >> "$GITHUB_OUTPUT"
-            echo "Aucune PR de la boucle ouverte."
-          else
-            echo "$brut" > /tmp/pr.json
-            node -e '
-              const pr = require("/tmp/pr.json");
-              const etats = (pr.statusCheckRollup ?? []).map((c) => c.conclusion ?? c.state);
-              const rouge = etats.some((e) => e === "FAILURE" || e === "TIMED_OUT" || e === "CANCELLED");
-              const heures = (Date.now() - Date.parse(pr.createdAt)) / 3600000;
-              const out = { rouge, heures, brouillon: pr.isDraft };
-              process.stdout.write(`pr=${JSON.stringify(out)}\nnumero=${pr.number}\n`);
-            ' >> "$GITHUB_OUTPUT"
-          fi
+          numero=$(gh pr list --state open --limit 1 --json number,headRefName \
+                     --jq '[.[] | select(.headRefName | startswith("claude/"))] | .[0].number // empty')
+          echo "numero=$numero" >> "$GITHUB_OUTPUT"
+          [ -z "$numero" ] && echo "Aucune PR de la boucle ouverte." || echo "PR courante : #$numero"
 
       - name: Choix du rôle
         id: role
@@ -80,7 +68,7 @@ jobs:
           if [ -n "${{ github.event.inputs.role }}" ]; then
             echo "role=${{ github.event.inputs.role }}" >> "$GITHUB_OUTPUT"
           else
-            node boucle/bin/choisir-role.mjs --pr '${{ steps.pr.outputs.pr }}' >> "$GITHUB_OUTPUT"
+            node boucle/bin/choisir-role.mjs >> "$GITHUB_OUTPUT"
           fi
 
       - name: Mandat du rôle
@@ -88,10 +76,8 @@ jobs:
         if: steps.role.outputs.role != 'Pause'
         run: |
           case "${{ steps.role.outputs.role }}" in
-            "Éclaireur")  echo "fichier=boucle/roles/eclaireur.md" >> "$GITHUB_OUTPUT" ;;
-            "Architecte") echo "fichier=boucle/roles/architecte.md" >> "$GITHUB_OUTPUT" ;;
-            "Bâtisseur")  echo "fichier=boucle/roles/batisseur.md" >> "$GITHUB_OUTPUT" ;;
-            "Gardien")    echo "fichier=boucle/roles/gardien.md" >> "$GITHUB_OUTPUT" ;;
+            "Éclaireur") echo "fichier=boucle/roles/eclaireur.md" >> "$GITHUB_OUTPUT" ;;
+            "Arbitre")   echo "fichier=boucle/roles/arbitre.md" >> "$GITHUB_OUTPUT" ;;
             *) echo "Rôle inconnu : ${{ steps.role.outputs.role }}" && exit 1 ;;
           esac
 
@@ -134,10 +120,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.LOOP_GITHUB_TOKEN }}
 
-      - name: Dépendances
-        if: steps.role.outputs.role != 'Pause'
-        working-directory: web
-        run: npm ci
+      # `npm ci` a disparu : la boucle n'exécute plus l'application, elle l'observe et
+      # écrit des documents. Un Éclaireur qui a besoin de mesurer quelque chose sur le
+      # produit installe ce qu'il lui faut lui-même, dans son réveil.
 
       - name: Réveil de Claude
         if: steps.role.outputs.role != 'Pause'
@@ -159,11 +144,17 @@ jobs:
             Lis dans cet ordre, en entier :
             1. boucle/MISSION.md
             2. boucle/ETAT.md
-            3. boucle/BACKLOG.md
+            3. boucle/IDEES.md
             4. ${{ steps.mandat.outputs.fichier }}
 
             Applique ton mandat à la lettre. Ne lis jamais tout le dépôt : uniquement
             les fichiers dont ton mandat a besoin.
+
+            TU N'IMPLÉMENTES RIEN. La boucle propose, le propriétaire décide et
+            construit. Tu n'écris que dans `boucle/` et `docs/`. Toucher à `web/` ou
+            `extension/`, même pour une correction évidente, fait refuser ton diff par
+            `boucle/bin/verifier-perimetre.mjs` et perd tout ton réveil. Si tu vois
+            quelque chose à corriger, écris-le, ne le corrige pas.
 
             IMPÉRATIF — enregistre ton travail avant de terminer :
 
@@ -234,8 +225,9 @@ jobs:
               --title "Boucle — ${{ steps.role.outputs.role }} du $(date -u +%d/%m/%Y)" \
               --body "Réveil automatique. Rôle joué : ${{ steps.role.outputs.role }}.
 
-          Voir \`boucle/journal/\` pour le compte rendu et \`boucle/ETAT.md\`
-          pour l'état de la boucle.
+          **Aucun code applicatif** : la boucle propose, le propriétaire décide.
+          Le classement des idées est dans \`boucle/IDEES.md\`, le compte rendu dans
+          \`boucle/journal/\`.
 
           🤖 Generated with [Claude Code](https://claude.com/claude-code)"
           fi
@@ -275,7 +267,7 @@ jobs:
           fi
 
           if [ "$(gh pr view "$numero" --json isDraft --jq .isDraft)" = "true" ]; then
-            echo "PR en brouillon : plan inachevé, pas de fusion automatique."
+            echo "PR en brouillon : pas de fusion automatique."
           else
             gh pr merge "$numero" --auto --squash
           fi
