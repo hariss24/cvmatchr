@@ -16,6 +16,7 @@ import { ensureDefaultTemplates, listTemplates, saveTemplate, saveDraft, loadPro
 import { resolveLetterIdentity, type UserProfile } from "@/lib/profile/profile";
 import { toast } from "@/state/uiStore";
 import JobExtractor from "../modals/JobExtractor";
+import ExtensionExportButton from "./ExtensionExportButton";
 
 /**
  * Page « Lettre de motivation » (/pack) : un éditeur à étiquettes plein écran
@@ -254,6 +255,14 @@ export default function PackView() {
           <button type="button" className="go" onClick={loadLetter} disabled={busy || !letter}>
             Créer ma lettre (ouvrir dans l&apos;éditeur)
           </button>
+          {isCv && identity ? (
+            <ExtensionExportButton
+              identity={identity}
+              company={company}
+              role={role}
+              coverLetterText={letter?.body ?? ""}
+            />
+          ) : null}
           {!isCv ? (
             <p className="pack-hint">Charge d&apos;abord un CV dans l&apos;éditeur pour générer la lettre.</p>
           ) : null}
