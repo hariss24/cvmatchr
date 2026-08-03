@@ -38,6 +38,11 @@ déjà construite (`## Terminé` de `BACKLOG.md`, en attente de fusion, ce n'est
 idée) ; le constat CI du 31/07 (`tsc --noEmit` cassé sur `useAutoDraft.test.ts`) est
 vérifié résolu par lecture directe du fichier — plus une idée à classer non plus.*
 
+*Mise à jour du 03/08/2026 (Arbitre) : les trois idées du constat
+`2026-08-02-cout-appels-externes.md`, ajoutées non notées par l'Éclaireur le 02/08, sont
+maintenant notées et intégrées au classement. Le reste des notes n'a pas bougé — voir
+`boucle/journal/2026-08-03-arbitre.md` pour le détail des égalités tranchées.*
+
 ### 1. Optimisation de profil LinkedIn (analyse + suggestions) — 14/20
 
 | Critère | Note | Justification |
@@ -58,7 +63,19 @@ vérifié résolu par lecture directe du fichier — plus une idée à classer n
 | Cohérence | 4 | Prolonge directement un chantier déjà construit et validé en usage réel, cœur de « postuler plus vite ». |
 | **Total** | **13** | À rouvrir un ATS à la fois (Workday en premier, le plus répandu) une fois Greenhouse/Lever mesurés sur davantage d'offres réelles — pas seulement une chacune. |
 
-### 3. Identification des compétences manquantes vs une offre (« skill gap ») — 12/20 — *estimation Facilité peu fiable*
+### 3. `/pack` : dédupliquer `/api/extract-meta` et sauter l'appel quand l'entreprise/le poste sont déjà connus — 13/20
+
+Constat détaillé : `boucle/constats/2026-08-02-cout-appels-externes.md` §1-2.
+
+| Critère | Note | Justification |
+|---|---|---|
+| Apport | 3 | Corrige aussi un vrai bug de fond, pas seulement un coût : `resolveMeta` (`lib/letter/adapt.ts:26-31`) fait aujourd'hui primer une extraction IA imparfaite sur une entreprise/poste déjà exacts (venus de `/jobs` via « Candidater ») — le candidat peut se retrouver avec une lettre adressée à une raison sociale reformulée ou tronquée par l'IA. Reste à 3 : le gain principal (latence, appel évité) est peu perceptible en soi. |
+| Facilité | 5 | Correction ciblée et déjà entièrement spécifiée par le constat (§1-2) : mémoriser `(jobDesc, résultat)` sur le modèle exact d'`AtsPanel.tsx:39`, et inverser la priorité dans `resolveMeta`. Pas de nouvelle dépendance, terrain connu. |
+| Écart | 1 | Pas une capacité comparée à la concurrence — un défaut interne au code de CVMatchr, le constat le dit explicitement (§ Écart à la concurrence). |
+| Cohérence | 4 | Viole directement un seuil vérifiable et explicite de `MISSION.md` (« aucun appel facturé répété pour une même donnée dans un même parcours »), sur le parcours « Candidater », l'un des plus centraux du produit. |
+| **Total** | **13** | Égalité avec l'idée n°2 tranchée en sa faveur par Écart (4 contre 1) : l'autofill sert davantage la promesse par une capacité comparée à la concurrence, celle-ci corrige un défaut interne. |
+
+### 4. Identification des compétences manquantes vs une offre (« skill gap ») — 12/20 — *estimation Facilité peu fiable*
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -68,7 +85,7 @@ vérifié résolu par lecture directe du fichier — plus une idée à classer n
 | Cohérence | 4 | Directement lié à l'adéquation candidat/offre — au cœur de « postuler mieux ». |
 | **Total** | **12** | Monterait à Facilité 5 si la vérification confirme un simple nouvel affichage du calcul ATS existant ; descendrait si un moteur distinct s'avère nécessaire. |
 
-### 4. Performance `/jobs` — remesurer le chronométrage réel sous throttling — 12/20
+### 5. Performance `/jobs` — remesurer le chronométrage réel sous throttling — 12/20
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -78,7 +95,7 @@ vérifié résolu par lecture directe du fichier — plus une idée à classer n
 | Cohérence | 3 | Seuil explicite de `MISSION.md` pour la recherche d'offres, un des parcours principaux du produit. |
 | **Total** | **12** | Un manque fonctionnel prime sur un dépassement technique sauf facteur 2 (`MISSION.md`) — cette remesure ne construit rien, elle informe seulement si le chantier est clos ou pas. |
 
-### 5. Alléger `/` (l'éditeur) — lazy-load des modales d'import/adaptation — 11/20
+### 6. Alléger `/` (l'éditeur) — lazy-load des modales d'import/adaptation — 11/20
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -88,7 +105,7 @@ vérifié résolu par lecture directe du fichier — plus une idée à classer n
 | Cohérence | 4 | Le seuil de chargement de l'éditeur est un des seuils vérifiables les plus centraux de `MISSION.md` — premier écran du produit. |
 | **Total** | **11** | À mesurer d'abord (temps réel sous Slow 4G + CPU x4) avant de décider si le lazy-load est nécessaire — le poids seul ne dit pas si le seuil est dépassé. |
 
-### 6. Robustesse du scan face à une offre malformée — 11/20
+### 7. Robustesse du scan face à une offre malformée — 11/20
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -98,7 +115,7 @@ vérifié résolu par lecture directe du fichier — plus une idée à classer n
 | Cohérence | 3 | La fiabilité perçue du chasseur d'offres (une des fonctions cœur) dépend de ne pas perdre un scan entier pour une cause externe. |
 | **Total** | **11** | Non reproduit en production à ce jour (le type `JobOffer` rend le champ obligatoire) — une source tierce malformée suffirait à déclencher le cas. |
 
-### 7. Performance `/pack` — mesurer le vrai temps d'interactivité (Monaco/react-pdf) — 11/20
+### 8. Performance `/pack` — mesurer le vrai temps d'interactivité (Monaco/react-pdf) — 11/20
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -108,7 +125,26 @@ vérifié résolu par lecture directe du fichier — plus une idée à classer n
 | Cohérence | 3 | Seuil explicite de `MISSION.md` pour l'éditeur, le cœur du produit. |
 | **Total** | **11** | La marge de 120 ms mesurée est trop faible pour trancher sans cette remesure — à traiter comme un quasi-échec plutôt qu'une marge confortable tant que non refait. |
 
-### 8. Journal de candidature (réalisations, culture d'entreprise, questions à poser) — 10/20
+### 9. `/api/editor-chat` : élaguer l'historique et ne pas répéter un `doc_json` inchangé — 10/20
+
+Constat détaillé : `boucle/constats/2026-08-02-cout-appels-externes.md` §3. Chaque message
+du chat éditeur (`ChatPanel.tsx`) repart avec tout l'historique de la conversation
+(`historyRef.current`, sans limite) **et** le CV/lettre entier en JSON (`doc_json`), même
+si le document n'a pas changé depuis le tour précédent — le serveur
+(`editor-chat/route.ts:40-48`) ne compare jamais le JSON reçu à celui d'avant. Mesuré sur
+le fixture `base_resume.json` (sans photo) : 4 742 caractères de JSON répétés à
+l'identique à chaque tour d'une conversation sans modification appliquée, en plus d'un
+historique qui grossit de façon quadratique.
+
+| Critère | Note | Justification |
+|---|---|---|
+| Apport | 2 | Le chat répondrait en théorie plus vite une fois l'historique et le JSON répétés élagués (moins de tokens envoyés/traités), mais aucun constat n'a mesuré de lenteur perçue aujourd'hui — gain réel non chiffré. |
+| Facilité | 4 | Correction ciblée décrite précisément par le constat : comparer le `doc_json` reçu à celui du tour précédent côté serveur, limiter l'historique envoyé aux N derniers échanges côté client. Pas de nouvelle dépendance ; reste à 4 et pas 5 car la taille de fenêtre d'historique à retenir est un choix à trancher, pas une valeur déjà donnée. |
+| Écart | 1 | Coût interne, pas une capacité comparée à la concurrence. |
+| Cohérence | 3 | Correspond au seuil « coût des appels externes » de `MISSION.md`, mais sur une fonctionnalité secondaire (le chat de l'éditeur) plutôt que sur le parcours principal comme l'idée n°3. |
+| **Total** | **10** | Égalité avec l'idée « Journal de candidature » tranchée en sa faveur par Cohérence (3 contre 2) : celle-ci sert un seuil explicite de `MISSION.md`, l'autre est en tension avec un principe déjà établi du produit (voir sa justification). |
+
+### 10. Journal de candidature (réalisations, culture d'entreprise, questions à poser) — 10/20
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -118,7 +154,7 @@ vérifié résolu par lecture directe du fichier — plus une idée à classer n
 | Cohérence | 2 | Va à contre-courant du principe directeur du tracker actuel (statut dérivé, zéro saisie, `PROJECT_INDEX.md` §8 bis) — même tension que le CRM déjà écarté par le propriétaire. |
 | **Total** | **10** | Même tension structurelle que la ligne « CRM de networking » déjà écartée (voir Écartées ci-dessous) — signalé explicitement pour que le propriétaire tranche en connaissance de cause plutôt que par surprise. |
 
-### 9. Import direct du profil LinkedIn pour préremplir le CV — 8/20
+### 11. Import direct du profil LinkedIn pour préremplir le CV — 8/20
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -128,7 +164,7 @@ vérifié résolu par lecture directe du fichier — plus une idée à classer n
 | Cohérence | 3 | Touche à l'import CV, terrain connu de la promesse « postuler mieux, plus vite », côté onboarding. |
 | **Total** | **8** | À vérifier en premier, avant toute spec : la faisabilité technique (API officielle LinkedIn payante ? scraping toléré ?), sans quoi le chantier s'arrête avant de commencer. |
 
-### 10. Capture d'offre native dans l'extension navigateur (éviter le copier-coller d'URL) — 8/20 — *estimation Facilité peu fiable*
+### 12. Capture d'offre native dans l'extension navigateur (éviter le copier-coller d'URL) — 8/20 — *estimation Facilité peu fiable*
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -138,7 +174,7 @@ vérifié résolu par lecture directe du fichier — plus une idée à classer n
 | Cohérence | 2 | Terrain voisin de l'extension déjà construite, mais gain marginal plutôt que central. |
 | **Total** | **8** | Explicitement écartée du premier chantier autofill (spec `2026-08-02-extension-autofill-design.md` §2) faute de gain net démontré face à l'extracteur d'URL existant — à chiffrer une fois Greenhouse/Lever mesurés en usage réel plus large. |
 
-### 11. Générateur de lettre de démission — 8/20
+### 13. Générateur de lettre de démission — 8/20
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -148,29 +184,8 @@ vérifié résolu par lecture directe du fichier — plus une idée à classer n
 | Cohérence | 1 | Hors du parcours candidature qui est le cœur de la promesse du produit. |
 | **Total** | **8** | Mention pour mémoire seulement dans le constat source lui-même — à ne prioriser que si un chantier lettre s'ouvre pour une autre raison, jamais en tête de liste. |
 
-### 12. `/pack` : dédupliquer `/api/extract-meta` et sauter l'appel quand l'entreprise/le
-poste sont déjà connus
-
-Constat détaillé : `boucle/constats/2026-08-02-cout-appels-externes.md` §1-2. Deux
-défauts distincts autour du même appel IA (`fetchJobMeta` → `POST /api/extract-meta`) :
-
-- **Appel dupliqué dans le même clic** : `PackView.tsx` appelle `fetchJobMeta` à trois
-  endroits (`onExtracted` d'un `JobExtractor`, `onBlur` du textarea, et dans
-  `adaptWithAi`), sans aucun cache entre eux. Cliquer directement sur « Adapter » après
-  avoir collé une offre déclenche 2 appels identiques dans le même geste (le `blur` du
-  navigateur avant le `click`). Reproductible à la lecture du code, pas une hypothèse.
-- **Appel évitable** : le parcours « Candidater » depuis `/jobs` connaît déjà
-  l'entreprise et le poste (champs structurés de l'offre, `JobsView.tsx:304-306`), et
-  `resolveMeta` (`lib/letter/adapt.ts:26-31`) fait pourtant primer la réponse IA sur cette
-  donnée déjà exacte et gratuite quand l'utilisateur clique « Adapter » sans rien changer.
-
-Violation directe du seuil `MISSION.md` : « aucun appel facturé répété pour une même
-donnée dans un même parcours ». Correction ciblée : mémoriser `(jobDesc, résultat)` comme
-le fait déjà `AtsPanel.tsx:39`, et sauter l'appel entièrement quand `company`/`role` sont
-déjà renseignés.
-
-### 13. Compter/plafonner les appels IA comme les job-boards — *touche potentiellement à
-un vrai plafond produit, pas seulement un compteur*
+### 14. Compter/plafonner les appels IA comme les job-boards — 8/20 — *sensible : touche
+potentiellement à un vrai plafond produit, pas seulement un compteur*
 
 Constat détaillé : `boucle/constats/2026-08-02-cout-appels-externes.md` §4. Aucune des
 huit routes IA (`/api/tailor-resume`, `/api/adapt-letter`, `/api/ats-score`,
@@ -182,28 +197,13 @@ autorité » selon son propre commentaire — rien ne bloque un dépassement. Sa
 personnelle, tous les appels IA retombent sur la clé serveur partagée
 (`GEMINI_API_KEY`).
 
-Comparaison concurrence (constat §« Ce que fait la concurrence ») : Jobscan plafonne à 5
-scans/mois gratuits, Teal à 10 crédits IA — les deux comptent et plafonnent chaque geste
-IA dès leur offre gratuite. CVMatchr n'en plafonne aucun.
-
-Signalé explicitement comme sensible : décider d'un plafond (avertissement, puis blocage)
-sur la clé serveur partagée est un choix de modèle économique, pas une simple correction
-technique — à trancher par le propriétaire, pas à noter comme les autres idées de ce
-classement.
-
-### 14. `/api/editor-chat` : élaguer l'historique et ne pas répéter un `doc_json`
-inchangé
-
-Constat détaillé : `boucle/constats/2026-08-02-cout-appels-externes.md` §3. Chaque
-message du chat éditeur (`ChatPanel.tsx`) repart avec tout l'historique de la conversation
-(`historyRef.current`, sans limite) **et** le CV/lettre entier en JSON
-(`doc_json`), même si le document n'a pas changé depuis le tour précédent — le serveur
-(`editor-chat/route.ts:40-48`) ne compare jamais le JSON reçu à celui d'avant. Mesuré sur
-le fixture `base_resume.json` (sans photo) : 4 742 caractères de JSON répétés à
-l'identique à chaque tour d'une conversation sans modification appliquée, en plus d'un
-historique qui grossit de façon quadratique. Gain non chiffré précisément (dépend de la
-longueur réelle des conversations), mais la croissance est aujourd'hui totalement non
-bornée.
+| Critère | Note | Justification |
+|---|---|---|
+| Apport | 1 | Un plafond ne fait gagner ni temps ni entretien à un candidat — c'est une mesure de protection du coût serveur, pas une capacité qui sert directement l'utilisateur ; un blocage mal calibré ajoute même de la friction sur le parcours. |
+| Facilité | 2 | Pattern de comptage déjà existant à étendre (`bumpApiUsage`/`getApiUsage`, `db.ts:614-659`), mais son propre commentaire le dit « local et indicatif […] pas à faire autorité » — le rendre vraiment autoritaire (avertissement puis blocage) suppose de trancher un seuil produit et une UX de blocage, pas seulement du code. **Estimation peu fiable** tant que ce seuil et ce comportement ne sont pas décidés. |
+| Écart | 3 | Jobscan (5 scans/mois gratuits) et Teal (10 crédits IA) plafonnent tous deux chaque geste IA dès leur offre gratuite, vérifié en direct sur leurs pages de tarifs (constat §« Ce que fait la concurrence ») — mais c'est une pratique de maîtrise de coût côté fournisseur, pas une capacité candidate-facing au sens strict du critère. |
+| Cohérence | 2 | Un plafond introduit de la friction sur des parcours IA centraux (adapter la lettre, scorer l'ATS) — en tension avec « postuler mieux, plus vite » plutôt qu'à son service, même si nécessaire à la soutenabilité du produit. |
+| **Total** | **8** | Dernière du classement à égalité de total (8) : contrairement aux trois autres, elle ne fait rien gagner directement au candidat et ajoute de la friction sur un parcours central — placée après elles. Signalée explicitement comme sensible : décider d'un plafond sur la clé serveur partagée est un choix de modèle économique, à trancher par le propriétaire en connaissance de cause. |
 
 ## Écartées
 
