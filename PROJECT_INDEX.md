@@ -93,6 +93,7 @@ Il est retiré avant l'appel et restauré à la réception (`src/lib/ai/base64.t
   - `templates` — modèles avec variables dynamiques (Lettre + Email)
   - `applications` (v8) — candidatures suivies. **Le statut n'est jamais stocké** : il
     est dérivé du journal `events` et de l'ancienneté (voir section « Mes candidatures »).
+  - `atsDirectory` (v11) — cache de détection des ATS (Greenhouse/Lever) par entreprise.
 
 ---
 
@@ -136,6 +137,7 @@ l'import PDF). Modèle Gemini par défaut : `gemini-3.1-flash-lite` (réglable v
 | `text-to-resume` | Importe un CV depuis du texte brut collé |
 | `text-to-letter` | Importe une lettre depuis du texte brut collé |
 | `extract-job` | « Extracteur magique d'offre » : scrape et nettoie une URL d'offre (LinkedIn, WTTJ…) via `src/lib/scraper/`. Cascade : fetch+cheerio → microservice Camoufox (`scraper-service/`, si `SCRAPER_URL` définie) → Jina AI |
+| `jobs/ats` | Résolution par lot du board public (Greenhouse, Lever) d'une liste d'entreprises |
 | `status` | Statut de configuration IA (clé serveur présente ou non) |
 
 **Système ATS** (`src/lib/ats/`, panneau `components/modals/AtsPanel.tsx`) :

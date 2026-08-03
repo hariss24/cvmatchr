@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Détecteur d'ATS (Greenhouse / Lever) — Task 6 : résolution en tâche de fond et affichage sur la carte.
+**Prochaine étape suggérée :** Phase 2 du détecteur d'ATS — récupérer les offres depuis les boards détectés.
 
 ---
 
@@ -40,6 +40,13 @@
 ---
 
 ## Journal
+
+### 2026-08-03 : Détecteur d'ATS — Phase 1 (Task 6 et 7, plan `docs/superpowers/plans/2026-08-03-detecteur-ats.md`)
+
+- **Quoi :** résolution en tâche de fond des ATS et affichage d'un lien direct sur la carte de l'offre.
+- **Pourquoi :** trouver les offres à la source permet de réduire la concurrence par rapport aux jobboards classiques.
+- **Fichiers touchés :** modifiés `web/src/components/jobs/JobsView.tsx`, `web/src/components/jobs/JobCard.tsx`, `web/src/app/globals.css`, `PROJECT_INDEX.md`, `WORK_HISTORY.md`.
+- **Résultat vérifs (`web/`) :** `npm test`, `npm run lint`, `npm run build` tous verts.
 
 ### 2026-08-03 : Détecteur d'ATS — Phase 1 (Task 5, plan `docs/superpowers/plans/2026-08-03-detecteur-ats.md`)
 
