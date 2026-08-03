@@ -205,6 +205,40 @@ personnelle, tous les appels IA retombent sur la clé serveur partagée
 | Cohérence | 2 | Un plafond introduit de la friction sur des parcours IA centraux (adapter la lettre, scorer l'ATS) — en tension avec « postuler mieux, plus vite » plutôt qu'à son service, même si nécessaire à la soutenabilité du produit. |
 | **Total** | **8** | Dernière du classement à égalité de total (8) : contrairement aux trois autres, elle ne fait rien gagner directement au candidat et ajoute de la friction sur un parcours central — placée après elles. Signalée explicitement comme sensible : décider d'un plafond sur la clé serveur partagée est un choix de modèle économique, à trancher par le propriétaire en connaissance de cause. |
 
+## Nouvelles idées non notées (Éclaireur, 03/08/2026)
+
+*Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md`. Non notées : c'est
+à l'Arbitre de le faire au prochain réveil.*
+
+### Supprimer les six fonctions mortes de `db.ts` et `completeJson` de `clients.ts`
+
+`deleteDraft`, `listHistoryEntries`, `getHistoryEntry`, `saveExplored`,
+`listJobsByGrade`, `deleteTemplate` (`src/lib/storage/db.ts`) et `completeJson`
+(`src/lib/ai/clients.ts`) sont exportées mais n'ont **aucun appelant** dans tout `src`
+(preuve par `grep`, détail §1-2 du constat) ni aucun test. `saveExplored` a un commentaire
+qui décrit un mécanisme d'évitement de re-notation du chasseur d'offres jamais branché
+dans le pipeline de scan — à supprimer, ou à réellement câbler si le mécanisme est encore
+voulu. Correction ciblée, aucune nouvelle dépendance, terrain connu (constat §1-2,
+§« Chantiers proposés » n°1).
+
+### Faire de `DEFAULT_STALE_DAYS` la seule source de vérité du délai de 30 jours
+
+`DEFAULT_STALE_DAYS = 30` (`src/lib/applications/types.ts:31`) n'a aucun appelant — la
+valeur réellement utilisée par le calcul de statut « sans suite » est un `30` réécrit en
+dur dans `src/state/settingsStore.ts:64`. Les deux nombres peuvent diverger sans qu'aucun
+signal ne le montre. Correction d'une ligne (import au lieu du littéral), constat §3.
+
+### Câbler ou retirer le filtre « Cadre / Non-cadre » (`QUALIFICATION_OPTIONS`)
+
+`QUALIFICATION_OPTIONS` (`src/lib/jobs/filters.ts:42`) et le champ `qualification` du
+profil de recherche sont câblés jusqu'à l'appel réel à l'API France Travail
+(`src/lib/jobs/francetravail.ts:97`) et comptés dans le nombre de filtres actifs
+(`filters.ts:90`) — mais **aucun composant** ne les rend à l'écran (contrairement à
+`EXPERIENCE_OPTIONS`/`WORK_TIME_OPTIONS`, ses deux voisines dans le même fichier, bien
+présentes dans `FilterBar.tsx`). Soit ajouter le `<select>` manquant (la plomberie
+existe déjà jusqu'au réseau), soit retirer le champ partout s'il est jugé sans intérêt.
+Constat §4.
+
 ## Écartées
 
 - **Préparation d'entretien par IA (mock interview)** — écartée le 02/08/2026. Présente
