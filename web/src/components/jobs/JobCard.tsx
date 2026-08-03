@@ -35,7 +35,7 @@ const TRAIN = '<rect x="4" y="3" width="16" height="13" rx="2"/><path d="M4 11h1
  * rendaient la grille illisible (cf. spec §5.3).
  */
 export default function JobCard({
-  job, onAdapt, onApply, onTrack, onDismiss, onSeen, onCommute,
+  job, onAdapt, onApply, onTrack, onDismiss, onSeen, onCommute, atsLink,
 }: {
   job: JobEntry;
   onAdapt: (job: JobEntry) => void;
@@ -45,6 +45,8 @@ export default function JobCard({
   onSeen: (job: JobEntry) => void;
   /** Calcule le trajet à la demande (premier dépliage de l'offre). */
   onCommute?: (job: JobEntry) => Promise<string>;
+  /** Board public de l'entreprise, si détecté. Absent = rien à afficher. */
+  atsLink?: { ats: "greenhouse" | "lever"; slug: string };
 }) {
   const [open, setOpen] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -64,6 +66,14 @@ export default function JobCard({
   // tri, et un éventuel filtre, s'appuient dessus.
   const lignes = (job.breakdown ?? []).filter((l) => l.reason !== "");
   const date = relativeDate(job.publishedAt);
+
+  // Les offres du board de l'entreprise échappent souvent aux jobboards saturés :
+  // c'est le seul intérêt de ce lien, donc il n'apparaît que s'il mène quelque part.
+  const boardUrl = !atsLink
+    ? ""
+    : atsLink.ats === "greenhouse"
+      ? `https://job-boards.greenhouse.io/${atsLink.slug}`
+      : `https://jobs.lever.co/${atsLink.slug}`;
 
   return (
     <article className={`job-card${open ? " is-open" : ""}`} data-testid="job-card">
@@ -104,6 +114,12 @@ export default function JobCard({
         ) : null}
         {commute ? (
           <span className="job-fact job-fact--commute"><Icon path={TRAIN} />{commute}</span>
+        ) : null}
+        {boardUrl ? (
+          <a className="job-fact job-fact--board" href={boardUrl} target="_blank"
+            rel="noopener noreferrer" data-testid="job-ats-link">
+            Offres directes chez {job.company}
+          </a>
         ) : null}
       </div>
 

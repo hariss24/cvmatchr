@@ -2804,7 +2804,16 @@ button.go:disabled {
 .job-fact svg { color: var(--faint); flex-shrink: 0; }
 .job-fact--none { color: var(--faint); }
 .job-fact--commute { color: var(--apply-text); }
-
+/* Lien vers le board public de l'entreprise : c'est une puce cliquable, pas un
+   fait — la couleur d'accent la distingue sans ajouter de bouton à la carte. */
+.job-fact--board {
+  color: var(--orange);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.job-fact--board:hover {
+  border-bottom-color: var(--orange);
+}
 .job-desc {
   font-size: 12.5px; line-height: 1.6; color: var(--muted); margin: 12px 0 0;
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;

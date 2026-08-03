@@ -8,7 +8,7 @@ import { useDocStore } from "@/state/docStore";
 import { toast } from "@/state/uiStore";
 import type { JobOffer } from "@/lib/jobs/francetravail";
 import { EMPTY_PROFILE, type JobSearchProfile } from "@/lib/jobs/profile";
-import { getJobProfile, saveJobProfile, getCachedCommute, setCachedCommute } from "@/lib/storage/db";
+import { getJobProfile, saveJobProfile, getCachedCommute, setCachedCommute, atsKey, getAtsEntry, saveAtsEntry } from "@/lib/storage/db";
 import { rankOffer, buildRankContext, shouldPersist } from "@/lib/jobs/rank";
 import { geocodeHome, commuteCacheKey } from "@/lib/jobs/homeCoords";
 import { upsertApplicationForDocument } from "@/lib/applications/store";
@@ -44,6 +44,7 @@ export default function JobsView() {
   const [progress, setProgress] = useState<ScanState>(ZERO);
   const [configMsg, setConfigMsg] = useState<string | null>(null);
   const [usage, setUsage] = useState<Record<SourceId, number>>({ francetravail: 0, adzuna: 0, jsearch: 0 });
+  const [atsParEntreprise, setAtsParEntreprise] = useState<Record<string, { ats: "greenhouse" | "lever"; slug: string }>>({});
   const setPendingJobDesc = useDocStore((s) => s.setPendingJobDesc);
   const setCompany = useDocStore((s) => s.setCompany);
   const setRole = useDocStore((s) => s.setRole);
@@ -88,6 +89,7 @@ export default function JobsView() {
     const liste = await listJobs("new");
     setJobs(liste);
     void completerLogos(liste);
+    void completerAts(liste);
   }
 
   /**
@@ -133,6 +135,54 @@ export default function JobsView() {
 
     await Promise.all(aPatcher.map((j) => saveJob({ ...j, logoUrl: url(j) })));
     setJobs((actuels) => actuels.map((j) => (url(j) ? { ...j, logoUrl: url(j) } : j)));
+  }
+
+  /**
+   * Détecte le board public des entreprises affichées, une seule fois chacune.
+   *
+   * Même déroulé que `completerLogos` : ce qui est déjà en base n'est jamais
+   * redemandé, échecs compris — sans ça une entreprise sans ATS serait
+   * réinterrogée à chaque affichage de la liste.
+   */
+  async function completerAts(liste: JobEntry[]) {
+    const entreprises = [...new Set(liste.map((j) => j.company).filter((c) => c.trim()))];
+
+    const connues: Record<string, { ats: "greenhouse" | "lever"; slug: string }> = {};
+    const inconnues: string[] = [];
+    for (const nom of entreprises) {
+      const entree = await getAtsEntry(atsKey(nom));
+      if (!entree) inconnues.push(nom);
+      else if (entree.ats !== "none") connues[nom] = { ats: entree.ats, slug: entree.slug };
+    }
+
+    if (inconnues.length > 0) {
+      try {
+        const res = await fetch("/api/jobs/ats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ companies: inconnues }),
+        });
+        if (res.ok) {
+          const { ats } = (await res.json()) as {
+            ats?: Record<string, { ats: "greenhouse" | "lever"; slug: string }>;
+          };
+          for (const nom of inconnues) {
+            const trouve = ats?.[nom];
+            await saveAtsEntry({
+              companyKey: atsKey(nom),
+              ats: trouve?.ats ?? "none",
+              slug: trouve?.slug ?? "",
+              resolvedAt: Date.now(),
+            });
+            if (trouve) connues[nom] = trouve;
+          }
+        }
+      } catch {
+        // Un board non détecté ne doit jamais remonter comme une panne.
+      }
+    }
+
+    setAtsParEntreprise((actuels) => ({ ...actuels, ...connues }));
   }
 
   /**
@@ -393,7 +443,7 @@ export default function JobsView() {
       ) : (
         <div className="jobs-list" data-testid="jobs-list">
           {jobs.map((job) => (
-            <JobCard key={job.id} job={job} onAdapt={adapt} onApply={apply} onTrack={track} onDismiss={dismiss} onSeen={seen} onCommute={loadCommute} />
+            <JobCard key={job.id} job={job} onAdapt={adapt} onApply={apply} onTrack={track} onDismiss={dismiss} onSeen={seen} onCommute={loadCommute} atsLink={atsParEntreprise[job.company]} />
           ))}
         </div>
       )}
