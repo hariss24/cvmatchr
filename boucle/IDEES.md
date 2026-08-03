@@ -247,6 +247,34 @@ personnelle, tous les appels IA retombent sur la clé serveur partagée
 | Cohérence | 2 | Un plafond introduit de la friction sur des parcours IA centraux (adapter la lettre, scorer l'ATS) — en tension avec « postuler mieux, plus vite » plutôt qu'à son service, même si nécessaire à la soutenabilité du produit. |
 | **Total** | **8** | Dernière du classement à égalité de total (8) parmi quatre autres idées (n°13, 14, 15, 16) : la seule des cinq où la Cohérence traduit une tension active avec la promesse (une friction ajoutée sur un parcours IA central) plutôt qu'un simple terrain voisin ou un défaut d'hygiène neutre et invisible pour l'utilisateur, comme chez les autres. Placée après elles. Signalée explicitement comme sensible : décider d'un plafond sur la clé serveur partagée est un choix de modèle économique, à trancher par le propriétaire en connaissance de cause. |
 
+## Nouvelles idées non notées (Éclaireur, 03/08/2026, 2e réveil)
+
+Constat détaillé : `boucle/constats/2026-08-03-manques-fonctionnels-2.md`. Trois
+manques fonctionnels nouveaux, absents du constat du 02/08 déjà classé. Non
+notés : c'est à l'Arbitre de les noter et de les intégrer au classement
+ci-dessus au prochain réveil.
+
+- **Assistant de négociation salariale** — présent chez Careerflow (IA, arguments
+  de négociation à partir de l'offre), Teal (analyse d'offre + comparaison au
+  marché) et Simplify (service payant humain, 3/8 produits consultés). Absent à
+  100 % de CVMatchr : rien entre l'obtention d'une offre et son acceptation.
+  Ampleur estimée moyenne, réutiliserait l'infra IA existante.
+- **Alertes sur de nouvelles offres correspondant au profil** — présent chez Teal
+  (instantané ou résumé quotidien par e-mail) et Careerflow (e-mail temps réel),
+  2/8 produits. CVMatchr est intégralement à la demande : sans notification,
+  rien ne prévient le candidat entre deux visites de `/jobs`. **Sensible** :
+  contrairement aux deux autres idées de ce constat, ce n'est pas un module de
+  calcul pur — ça suppose un envoi programmé serveur (donc potentiellement un
+  contact hors navigateur, l'app étant 100 % locale aujourd'hui) ou une
+  notification push navigateur avec ses limites. Ampleur estimée grosse.
+- **Correction orthographique/grammaticale dédiée avec rapport** — présent chez
+  Enhancv (outil dédié, gratuit, liste de fautes) et Kickresume (correcteur IA +
+  option de relecture humaine payante), 2/8 produits. Chez CVMatchr, la seule
+  voie existante est de le demander au chat libre de l'éditeur (`prompts.ts:337`),
+  sans rapport ni liste de fautes. Chevauchement probable avec le panneau ATS
+  existant (`AtsPanel.tsx`, axe « Structure ») à vérifier avant de spécifier.
+  Ampleur estimée petite.
+
 ## Écartées
 
 - **Préparation d'entretien par IA (mock interview)** — écartée le 02/08/2026. Présente
