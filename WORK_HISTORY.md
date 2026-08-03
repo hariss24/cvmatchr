@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** extension navigateur autofill (Greenhouse/Lever) — plan `2026-08-02-extension-autofill` bouclé (4/4 tasks) et vérifié en usage réel sur une offre Greenhouse et une offre Lever (voir Journal 2026-08-02), pas encore fusionné. Restent en attente : zod (283 Ko) toujours chargé sur `/` (l'éditeur), jamais mesuré contre le seuil de 2,5 s de `MISSION.md` — piste ouverte en `BACKLOG.md` § Idées (lazy-load des modales d'import) — et le chronométrage réel (Slow 4G + CPU x4) de `/jobs` et `/pack`, et la robustesse du scan face à une offre malformée.
+**Prochaine étape suggérée :** Détecteur d'ATS (Greenhouse / Lever) — Task 2 : résolution contre les endpoints Greenhouse et Lever.
 
 ---
 
@@ -40,6 +40,14 @@
 ---
 
 ## Journal
+
+### 2026-08-03 : Détecteur d'ATS — Phase 1 (Task 1, plan `docs/superpowers/plans/2026-08-03-detecteur-ats.md`)
+
+- **Quoi :** création de `lib/jobs/ats.ts` (types `AtsProvider`, `AtsMatch`, constante `NO_ATS` et fonctions pures `normalizeCompany` et `atsSlugs`) et de ses tests `ats.test.ts`. Les slugs sont dérivés en minuscules, sans accent, en variante tiretée et collée.
+- **Pourquoi :** première brique pour le détecteur d'ATS, permettant de deviner les slugs possibles pour une entreprise donnée.
+- **Fichiers touchés :** créés `web/src/lib/jobs/ats.ts` et `web/src/lib/jobs/ats.test.ts`.
+- **Résultat vérifs (`web/`) :** `tsc --noEmit`, `lint`, `vitest run src/lib/jobs/ats.test.ts` (5 tests verts), `build` tous verts. Aucune dépendance npm ajoutée.
+
 
 ### 2026-08-02 : Extension navigateur — autofill de candidature Greenhouse/Lever (Tasks 1-3, plan `docs/superpowers/plans/2026-08-02-extension-autofill.md`)
 
