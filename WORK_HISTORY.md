@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Détecteur d'ATS (Greenhouse / Lever) — Task 4 : table Dexie et helpers de cache.
+**Prochaine étape suggérée :** Détecteur d'ATS (Greenhouse / Lever) — Task 5 : export de l'annuaire.
 
 ---
 
@@ -40,6 +40,13 @@
 ---
 
 ## Journal
+
+### 2026-08-03 : Détecteur d'ATS — Phase 1 (Task 4, plan `docs/superpowers/plans/2026-08-03-detecteur-ats.md`)
+
+- **Quoi :** ajout de la table `atsDirectory` dans Dexie (`db.ts`, v11) et des helpers associés (`getAtsEntry`, `saveAtsEntry`, `allAtsEntries`).
+- **Pourquoi :** stocker localement le résultat de la résolution des ATS (y compris les "none") pour éviter de bombarder les APIs Greenhouse/Lever au fil de la navigation.
+- **Fichiers touchés :** modifié `web/src/lib/storage/db.ts`.
+- **Résultat vérifs (`web/`) :** `tsc --noEmit`, `lint`, `npm test` tous verts.
 
 ### 2026-08-03 : Détecteur d'ATS — Phase 1 (Task 3, plan `docs/superpowers/plans/2026-08-03-detecteur-ats.md`)
 

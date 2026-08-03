@@ -10,6 +10,7 @@ import type { SourceId } from "@/lib/jobs/offer";
 import { GRADE_ORDER, type Grade } from "@/lib/jobs/grade";
 import { normKey } from "@/lib/applications/normKey";
 import type { Ligne } from "@/lib/jobs/rank/criteria";
+import { normalizeCompany, type AtsProvider } from "@/lib/jobs/ats";
 
 // ---------------------------------------------------------------------------
 // TYPES
@@ -89,6 +90,21 @@ export interface JobEntry {
   breakdown?: Ligne[];
 }
 
+/**
+ * Board public détecté pour une entreprise (feature « offres à la source »).
+ *
+ * Les entrées `"none"` sont conservées volontairement : savoir qu'une entreprise
+ * a déjà été essayée sans succès évite de la retester à chaque affichage.
+ */
+export interface AtsDirectoryEntry {
+  /** Nom d'entreprise normalisé — voir `atsKey`. Clé primaire. */
+  companyKey: string;
+  ats: AtsProvider | "none";
+  /** Identifiant du board chez l'ATS ; "" quand `ats === "none"`. */
+  slug: string;
+  resolvedAt: number;
+}
+
 // ---------------------------------------------------------------------------
 // DB DEFINITION
 // ---------------------------------------------------------------------------
@@ -104,6 +120,7 @@ export class AppDatabase extends Dexie {
   applications!: Table<Application, string>; // Primary key: id
   apiUsage!: Table<{ key: string; count: number }, string>; // Primary key: key
   commuteCache!: Table<{ key: string; text: string; at: number }, string>;
+  atsDirectory!: Table<AtsDirectoryEntry, string>; // Primary key: companyKey
 
   constructor() {
     // Nouveau nom pour éviter les collisions si on lance sur le même port que Flask
@@ -179,6 +196,12 @@ export class AppDatabase extends Dexie {
     // par mois.
     this.version(10).stores({
       commuteCache: "key",
+    });
+
+    // v11 : annuaire entreprise → ATS. Pas d'upgrade : table neuve, et une
+    // absence d'entrée signifie simplement « pas encore résolue ».
+    this.version(11).stores({
+      atsDirectory: "companyKey",
     });
   }
 }
@@ -656,4 +679,46 @@ export async function getApiUsage(): Promise<Record<SourceId, number>> {
     console.warn("getApiUsage error:", e);
   }
   return out;
+}
+
+// ---------------------------------------------------------------------------
+// ANNUAIRE ATS (offres à la source)
+// ---------------------------------------------------------------------------
+
+/**
+ * Clé de cache d'une entreprise. « Doctolib », « DOCTOLIB » et « doctolib » ne
+ * doivent pas occuper trois lignes.
+ *
+ * Délègue à `normalizeCompany` : si la clé et le slug divergeaient, une
+ * entreprise serait résolue en boucle sans jamais se retrouver en cache.
+ */
+export function atsKey(companyName: string): string {
+  return normalizeCompany(companyName);
+}
+
+export async function getAtsEntry(companyKey: string): Promise<AtsDirectoryEntry | undefined> {
+  try {
+    return await db.atsDirectory.get(companyKey);
+  } catch (e) {
+    console.warn("getAtsEntry error:", e);
+    return undefined;
+  }
+}
+
+export async function saveAtsEntry(entry: AtsDirectoryEntry): Promise<void> {
+  try {
+    await db.atsDirectory.put(entry);
+  } catch (e) {
+    console.warn("saveAtsEntry error:", e);
+  }
+}
+
+/** Tout l'annuaire, pour l'export. Entrées « none » comprises. */
+export async function allAtsEntries(): Promise<AtsDirectoryEntry[]> {
+  try {
+    return await db.atsDirectory.toArray();
+  } catch (e) {
+    console.warn("allAtsEntries error:", e);
+    return [];
+  }
 }
