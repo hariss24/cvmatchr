@@ -410,11 +410,11 @@ export default function SettingsPage() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px", paddingBottom: "12px" }}>
                 <div className="form-field">
                   <div className="form-label">Exporter l&apos;annuaire ATS</div>
-                  <div style={{ fontSize: "13px", color: "var(--muted)", maxWidth: "400px" }}>Télécharger le cache de résolution des entreprises sous forme de dictionnaire JSON.</div>
+                  <div style={{ fontSize: "13px", color: "var(--muted)", maxWidth: "400px" }}>Les entreprises dont le site carrières a été identifié, dans un fichier JSON réutilisable.</div>
                 </div>
                 <button type="button" className="btn-nav" onClick={exportAtsDirectory}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                  JSON ATS
+                  Exporter
                 </button>
               </div>
               

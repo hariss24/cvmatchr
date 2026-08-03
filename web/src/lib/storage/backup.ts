@@ -1,4 +1,4 @@
-import { db } from "./db";
+import { db, allAtsEntries } from "./db";
 import { toast, uiConfirm } from "@/state/uiStore";
 
 export async function exportDatabase(): Promise<void> {
@@ -94,28 +94,36 @@ export async function resetDatabase(): Promise<void> {
   }
 }
 
+/**
+ * Annuaire entreprise → ATS, seul, au format plat.
+ *
+ * Distinct d'`exportDatabase` : celui-ci est une sauvegarde personnelle, celui-là
+ * un extrait destiné à être agrégé ailleurs.
+ *
+ * Tableau et non dictionnaire, `resolvedAt` conservé : c'est ce qui permettra de
+ * fusionner plusieurs exports en gardant l'entrée la plus fraîche, et de périmer
+ * un jour les « none ». Un dictionnaire sans date rendrait les deux impossibles.
+ */
 export async function exportAtsDirectory(): Promise<void> {
   try {
-    const all = await db.atsDirectory.toArray();
-    // Transforme le tableau en dictionnaire
-    const dico: Record<string, { ats: string; slug: string }> = {};
-    for (const e of all) {
-      dico[e.companyKey] = { ats: e.ats, slug: e.slug };
+    const entries = await allAtsEntries();
+    if (entries.length === 0) {
+      toast("Aucune entreprise résolue pour l'instant.", "error");
+      return;
     }
 
-    const jsonString = JSON.stringify(dico, null, 2);
-    const blob = new Blob([jsonString], { type: "application/json" });
+    const blob = new Blob([JSON.stringify(entries, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = `cvmatchr-ats-directory.json`;
+    a.download = `cvmatchr-annuaire-ats-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
 
     URL.revokeObjectURL(url);
-    toast("Annuaire ATS exporté.", "success");
+    toast(`${entries.length} entreprises exportées.`, "success");
   } catch (error) {
     console.error("Export ATS failed:", error);
-    toast("Erreur lors de l'export de l'annuaire ATS.", "error");
+    toast("Erreur lors de l'exportation de l'annuaire.", "error");
   }
 }
