@@ -46,3 +46,53 @@ export function atsSlugs(companyName: string): string[] {
   const colle = base.replace(/-/g, "");
   return colle === base ? [base] : [base, colle];
 }
+
+/** Coupe un endpoint qui ne répond pas : un ATS lent ne doit pas retenir le lot. */
+const TIMEOUT_MS = 5_000;
+
+/** True si la réponse décrit un board existant AVEC au moins une offre ouverte. */
+async function aDesOffres(res: Response, ats: AtsProvider): Promise<boolean> {
+  if (!res.ok) return false;
+  try {
+    const corps: unknown = await res.json();
+    if (ats === "greenhouse") {
+      const jobs = (corps as { jobs?: unknown })?.jobs;
+      return Array.isArray(jobs) && jobs.length > 0;
+    }
+    return Array.isArray(corps) && corps.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+function url(ats: AtsProvider, slug: string): string {
+  return ats === "greenhouse"
+    ? `https://boards-api.greenhouse.io/v1/boards/${slug}/jobs`
+    : `https://api.lever.co/v0/postings/${slug}?mode=json`;
+}
+
+/**
+ * Board public de l'entreprise, ou `NO_ATS`.
+ *
+ * `fetchImpl` est injectable pour que les tests tournent hors-ligne.
+ * Cette fonction s'exécute **côté serveur** (route API) : appeler ces endpoints
+ * depuis le navigateur dépendrait du bon vouloir CORS de deux services tiers.
+ */
+export async function resolveAts(
+  companyName: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<AtsMatch> {
+  for (const slug of atsSlugs(companyName)) {
+    for (const ats of ["greenhouse", "lever"] as const) {
+      try {
+        const res = await fetchImpl(url(ats, slug), {
+          signal: AbortSignal.timeout(TIMEOUT_MS),
+        });
+        if (await aDesOffres(res, ats)) return { ats, slug };
+      } catch {
+        // Timeout, DNS, coupure : ce candidat ne matche pas, on passe au suivant.
+      }
+    }
+  }
+  return NO_ATS;
+}

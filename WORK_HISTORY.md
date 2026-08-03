@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Détecteur d'ATS (Greenhouse / Lever) — Task 2 : résolution contre les endpoints Greenhouse et Lever.
+**Prochaine étape suggérée :** Détecteur d'ATS (Greenhouse / Lever) — Task 3 : route API de résolution par lot.
 
 ---
 
@@ -40,6 +40,13 @@
 ---
 
 ## Journal
+
+### 2026-08-03 : Détecteur d'ATS — Phase 1 (Task 2, plan `docs/superpowers/plans/2026-08-03-detecteur-ats.md`)
+
+- **Quoi :** implémentation de la fonction `resolveAts` pour interroger les endpoints publics de Greenhouse et Lever et vérifier la présence d'offres.
+- **Pourquoi :** permet de vérifier si un slug d'entreprise est valide et actif sur un des ATS supportés.
+- **Fichiers touchés :** modifiés `web/src/lib/jobs/ats.ts` et `web/src/lib/jobs/ats.test.ts`.
+- **Résultat vérifs (`web/`) :** `tsc --noEmit`, `lint`, `vitest run src/lib/jobs/ats.test.ts` (12 tests verts), `build` tous verts.
 
 ### 2026-08-03 : Détecteur d'ATS — Phase 1 (Task 1, plan `docs/superpowers/plans/2026-08-03-detecteur-ats.md`)
 
