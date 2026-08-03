@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Détecteur d'ATS (Greenhouse / Lever) — Task 3 : route API de résolution par lot.
+**Prochaine étape suggérée :** Détecteur d'ATS (Greenhouse / Lever) — Task 4 : table Dexie et helpers de cache.
 
 ---
 
@@ -40,6 +40,13 @@
 ---
 
 ## Journal
+
+### 2026-08-03 : Détecteur d'ATS — Phase 1 (Task 3, plan `docs/superpowers/plans/2026-08-03-detecteur-ats.md`)
+
+- **Quoi :** création de la route API `POST /api/jobs/ats` pour résoudre par lot les ATS d'une liste d'entreprises (limite 60).
+- **Pourquoi :** le proxy côté serveur est obligatoire pour contourner le CORS des APIs de Greenhouse et Lever (interdites depuis le navigateur).
+- **Fichiers touchés :** créé `web/src/app/api/jobs/ats/route.ts`.
+- **Résultat vérifs (`web/`) :** `tsc --noEmit`, `lint` tous verts.
 
 ### 2026-08-03 : Détecteur d'ATS — Phase 1 (Task 2, plan `docs/superpowers/plans/2026-08-03-detecteur-ats.md`)
 
