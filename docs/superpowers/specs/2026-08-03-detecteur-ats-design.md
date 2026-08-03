@@ -4,10 +4,16 @@
 board Greenhouse ou Lever public, et le signaler sur la carte d'offre — première
 brique d'un futur annuaire entreprise → ATS.
 
-**Architecture:** une fonction pure de résolution (essaie des slugs candidats
-contre les endpoints publics des deux ATS), un cache Dexie par navigateur pour ne
-jamais résoudre deux fois la même entreprise, et une fonction d'export JSON pour
-ne pas perdre ces données tant qu'aucun annuaire partagé n'existe.
+**Architecture:** une fonction de résolution côté serveur (essaie des slugs
+candidats contre les endpoints publics des deux ATS), exposée par une route API
+sur le modèle de `/api/jobs/logos`, un cache Dexie par navigateur pour ne jamais
+résoudre deux fois la même entreprise, et un export JSON pour ne pas perdre ces
+données tant qu'aucun annuaire partagé n'existe.
+
+**Pourquoi côté serveur :** appeler `boards-api.greenhouse.io` depuis le
+navigateur dépend du bon vouloir CORS de deux services tiers, qui peuvent le
+retirer sans préavis. La route API supprime cette dépendance et suit le chemin
+déjà tracé par la résolution des logos.
 
 **Tech Stack:** TypeScript, Dexie (existant), `fetch` natif — aucune dépendance
 nouvelle.
@@ -48,10 +54,15 @@ nouvelle.
 5. Toute erreur réseau (timeout, DNS) est traitée comme "pas ce candidat", pas
    comme une exception qui remonte à l'appelant.
 
-**Fichier :** `web/src/lib/jobs/ats/resolve.ts`, fonction
-`resolveAts(companyName: string, fetchImpl = fetch): Promise<AtsMatch>` — le
-paramètre `fetchImpl` permet aux tests d'injecter un faux `fetch` sans requête
-réseau réelle.
+**Fichiers :**
+- `web/src/lib/jobs/ats.ts` — `atsSlugs(companyName: string): string[]` (pure) et
+  `resolveAts(companyName: string, fetchImpl?: typeof fetch): Promise<AtsMatch>`.
+  Le paramètre `fetchImpl` permet aux tests d'injecter un faux `fetch` sans
+  requête réseau réelle.
+- `web/src/app/api/jobs/ats/route.ts` — `POST { companies: string[] }` →
+  `{ ats: { "<raison sociale>": { ats, slug } } }`, calquée sur
+  `/api/jobs/logos/route.ts` (runtime Node.js, plafond d'entreprises par appel,
+  entreprises non résolues simplement absentes de la réponse).
 
 ## 2. Cache local (table Dexie)
 
@@ -76,10 +87,10 @@ interface AtsDirectoryEntry {
 
 ## 3. Déclenchement et affichage
 
-Quand `JobsView` affiche des résultats de recherche, pour chaque entreprise
-**pas encore en cache**, on appelle `resolveAts` en tâche de fond (une par
-entreprise, sans bloquer l'affichage des résultats déjà connus), puis on
-enregistre le résultat.
+Quand `JobsView` affiche des résultats de recherche, les entreprises **pas
+encore en cache** sont envoyées en un seul appel à `/api/jobs/ats`, en tâche de
+fond, sans bloquer l'affichage — exactement le déroulé de `completerLogos`. Les
+réponses sont écrites dans la table Dexie.
 
 Sur `JobCard`, si l'entrée en cache pour cette entreprise a `ats !== "none"`,
 afficher un lien discret : "Offres directes chez {entreprise}" pointant vers :
@@ -95,9 +106,17 @@ Le cache est local à chaque navigateur : sans export, les entreprises
 résolues restent enfermées dans le poste de l'utilisateur qui les a
 découvertes, et rien ne profite au reste de la base d'utilisateurs.
 
-**Ce que Phase 1 fournit :** une fonction d'export qui produit un fichier JSON
-téléchargeable, format stable et directement réimportable dans une future base
-partagée :
+**Deux mécanismes, deux besoins distincts :**
+
+**(a) Survivre à un vidage de cache.** `exportDatabase()` /`importDatabase()`
+(`web/src/lib/storage/backup.ts`) existent déjà et sont branchés sur la page
+`/settings` — c'est le filet anti-perte de l'app, et la page prévient déjà que
+tout vider fait tout perdre. La table `atsDirectory` y est ajoutée comme les six
+autres. Sans ça, l'annuaire serait la seule donnée non sauvegardée.
+
+**(b) Extraire l'annuaire seul, pour l'agréger ailleurs.** Un export dédié
+produit un fichier JSON au format plat, directement réimportable dans une future
+base partagée :
 
 ```json
 [
@@ -106,28 +125,31 @@ partagée :
 ]
 ```
 
-- Fonction : `exportAtsDirectory(): Promise<AtsDirectoryEntry[]>` dans
-  `web/src/lib/storage/db.ts`, qui lit toute la table et retourne le tableau
-  (ne filtre pas les `"none"` : savoir qu'une entreprise a déjà été essayée sans
-  succès évite de la retester plus tard).
-- Déclenchement : un bouton "Exporter l'annuaire ATS" dans les réglages/débug
-  de l'app (même emplacement que les autres exports de données existants s'il y
-  en a, sinon une nouvelle petite section dans `/settings`), qui déclenche le
-  téléchargement du JSON via un blob — pas d'upload automatique, pas de serveur
-  destinataire : l'utilisateur (le propriétaire, dans un premier temps) récupère
-  le fichier et l'agrège manuellement.
+- Fonction : `exportAtsDirectory(): Promise<void>` dans
+  `web/src/lib/storage/backup.ts`, qui lit toute la table et déclenche le
+  téléchargement du blob, sur le patron exact d'`exportDatabase`. Elle ne filtre
+  pas les `"none"` : savoir qu'une entreprise a déjà été essayée sans succès
+  évite de la retester plus tard.
+- Déclenchement : un bouton « Exporter l'annuaire ATS » dans la section
+  « Gestion des données » de `/settings`, à côté du bouton « Exporter »
+  existant. Pas d'upload automatique, pas de serveur destinataire : le
+  propriétaire récupère le fichier et l'agrège lui-même.
 - Ce mécanisme est délibérément manuel. Automatiser l'envoi vers un serveur
   partagé suppose ce serveur — hors de portée de cette phase, et une décision
   d'infra à prendre séparément le jour où l'annuaire doit devenir commun.
 
 ## Testing
 
-- `resolve.ts` : tests unitaires avec un `fetch` factice injecté — cas
-  "premier candidat matche", "aucun candidat ne matche", "erreur réseau traitée
-  comme non-match", "dérivation de slug" (accents, espaces, apostrophes).
-- `db.ts` (ajouts) : tests Dexie existants déjà en place pour `commuteCache` /
-  `apiUsage` servent de modèle — tester `getAtsEntry`/`saveAtsEntry` et
-  `exportAtsDirectory` avec `fake-indexeddb` (déjà utilisé dans le projet).
+Le projet **ne teste pas ses fonctions Dexie** : `apiUsage.test.ts` ne couvre que
+le helper pur `usageKey`, et `fake-indexeddb` n'est pas installé. On suit cette
+convention — aucune dépendance nouvelle ne sera ajoutée pour tester la base.
+
+- `ats.test.ts` : `atsSlugs` (accents, espaces, apostrophes, casse) et
+  `resolveAts` avec un `fetch` factice injecté — « premier candidat matche »,
+  « Greenhouse répond 200 mais liste vide → on continue », « aucun candidat ne
+  matche → none », « erreur réseau traitée comme non-match ».
+- Les helpers Dexie (`getAtsEntry`, `saveAtsEntry`, `allAtsEntries`) ne sont pas
+  testés unitairement, comme les autres helpers de `db.ts`.
 - Pas de test réseau réel : toute la suite doit passer hors-ligne.
 
 ## Hors scope (explicitement reporté)
