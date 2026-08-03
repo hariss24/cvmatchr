@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Phase 2 du détecteur d'ATS — récupérer les offres depuis les boards détectés.
+**Prochaine étape suggérée :** Phase 2 du détecteur d'ATS — récupérer les offres depuis les boards détectés et les mêler aux résultats de recherche. La Phase 1 est vérifiée à l'écran (lien Nexton → SmartRecruiters).
 
 ---
 
@@ -40,6 +40,24 @@
 ---
 
 ## Journal
+
+### 2026-08-03 : Détecteur d'ATS — quatre ATS au lieu de deux, choisis par la mesure
+
+- **Quoi :** ajout d'Ashby et SmartRecruiters ; interrogation en parallèle ;
+  `boardUrl()` centralise les adresses de pages carrières ; Dexie v12 purge les
+  `none` de la v11.
+- **Pourquoi :** sur un scan réel, **9 entreprises sur 9 rendaient `none`**. Un
+  sondage de 8 ATS sur 49 entreprises françaises a montré que Greenhouse et Lever
+  seuls ne couvrent quasiment que la tech américaine. Résultat du sondage :
+  ashby 8, lever 6, smartrecruiters 4, greenhouse 2 ; workable, recruitee,
+  teamtailor et personio **0**. Nexton — présente dans le scan de l'utilisateur —
+  a 137 offres sur SmartRecruiters.
+- **Fichiers touchés :** `web/src/lib/jobs/ats.ts`, `ats.test.ts` (réécrit :
+  accents corrompus), `web/src/components/jobs/JobCard.tsx`, `JobsView.tsx`,
+  `web/src/lib/storage/db.ts`, `PROJECT_INDEX.md`, spec du 03/08.
+- **Vérif :** 607 tests verts, `tsc --noEmit` propre, `lint` 0 erreur, `build` OK.
+  **Vérifié à l'écran** : le lien « Offres directes chez Nexton » s'affiche sur la
+  carte et mène à careers.smartrecruiters.com/nexton (Lille 6 postes, Lyon 11).
 
 ### 2026-08-03 : Détecteur d'ATS — Phase 1 (Task 6 et 7, plan `docs/superpowers/plans/2026-08-03-detecteur-ats.md`)
 

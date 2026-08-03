@@ -93,7 +93,9 @@ Il est retiré avant l'appel et restauré à la réception (`src/lib/ai/base64.t
   - `templates` — modèles avec variables dynamiques (Lettre + Email)
   - `applications` (v8) — candidatures suivies. **Le statut n'est jamais stocké** : il
     est dérivé du journal `events` et de l'ancienneté (voir section « Mes candidatures »).
-  - `atsDirectory` (v11) — cache de détection des ATS (Greenhouse/Lever) par entreprise.
+  - `atsDirectory` (v12) — cache de détection des ATS par entreprise (Ashby, Lever,
+    SmartRecruiters, Greenhouse). La v12 purge les `none` de la v11, calculés quand
+    seuls Greenhouse et Lever étaient interrogés.
 
 ---
 

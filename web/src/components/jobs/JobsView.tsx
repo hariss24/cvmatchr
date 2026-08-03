@@ -10,6 +10,7 @@ import type { JobOffer } from "@/lib/jobs/francetravail";
 import { EMPTY_PROFILE, type JobSearchProfile } from "@/lib/jobs/profile";
 import { getJobProfile, saveJobProfile, getCachedCommute, setCachedCommute, atsKey, getAtsEntry, saveAtsEntry } from "@/lib/storage/db";
 import { rankOffer, buildRankContext, shouldPersist } from "@/lib/jobs/rank";
+import type { AtsProvider } from "@/lib/jobs/ats";
 import { geocodeHome, commuteCacheKey } from "@/lib/jobs/homeCoords";
 import { upsertApplicationForDocument } from "@/lib/applications/store";
 import { getApiUsage, bumpApiUsage } from "@/lib/storage/db";
@@ -44,7 +45,7 @@ export default function JobsView() {
   const [progress, setProgress] = useState<ScanState>(ZERO);
   const [configMsg, setConfigMsg] = useState<string | null>(null);
   const [usage, setUsage] = useState<Record<SourceId, number>>({ francetravail: 0, adzuna: 0, jsearch: 0 });
-  const [atsParEntreprise, setAtsParEntreprise] = useState<Record<string, { ats: "greenhouse" | "lever"; slug: string }>>({});
+  const [atsParEntreprise, setAtsParEntreprise] = useState<Record<string, { ats: AtsProvider; slug: string }>>({});
   const setPendingJobDesc = useDocStore((s) => s.setPendingJobDesc);
   const setCompany = useDocStore((s) => s.setCompany);
   const setRole = useDocStore((s) => s.setRole);
@@ -147,7 +148,7 @@ export default function JobsView() {
   async function completerAts(liste: JobEntry[]) {
     const entreprises = [...new Set(liste.map((j) => j.company).filter((c) => c.trim()))];
 
-    const connues: Record<string, { ats: "greenhouse" | "lever"; slug: string }> = {};
+    const connues: Record<string, { ats: AtsProvider; slug: string }> = {};
     const inconnues: string[] = [];
     for (const nom of entreprises) {
       const entree = await getAtsEntry(atsKey(nom));
@@ -164,7 +165,7 @@ export default function JobsView() {
         });
         if (res.ok) {
           const { ats } = (await res.json()) as {
-            ats?: Record<string, { ats: "greenhouse" | "lever"; slug: string }>;
+            ats?: Record<string, { ats: AtsProvider; slug: string }>;
           };
           for (const nom of inconnues) {
             const trouve = ats?.[nom];

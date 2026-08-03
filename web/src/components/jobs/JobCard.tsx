@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import type { JobEntry } from "@/lib/storage/db";
 import { BoardIcon } from "./BoardIcon";
 import { CompanyLogo } from "./CompanyLogo";
+import { boardUrl, type AtsProvider } from "@/lib/jobs/ats";
 
 /** Date de publication relative (« il y a 4 jours ») ou null si absente/invalide. */
 function relativeDate(iso?: string): string | null {
@@ -46,7 +47,7 @@ export default function JobCard({
   /** Calcule le trajet à la demande (premier dépliage de l'offre). */
   onCommute?: (job: JobEntry) => Promise<string>;
   /** Board public de l'entreprise, si détecté. Absent = rien à afficher. */
-  atsLink?: { ats: "greenhouse" | "lever"; slug: string };
+  atsLink?: { ats: AtsProvider; slug: string };
 }) {
   const [open, setOpen] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -69,11 +70,7 @@ export default function JobCard({
 
   // Les offres du board de l'entreprise échappent souvent aux jobboards saturés :
   // c'est le seul intérêt de ce lien, donc il n'apparaît que s'il mène quelque part.
-  const boardUrl = !atsLink
-    ? ""
-    : atsLink.ats === "greenhouse"
-      ? `https://job-boards.greenhouse.io/${atsLink.slug}`
-      : `https://jobs.lever.co/${atsLink.slug}`;
+  const lienBoard = atsLink ? boardUrl(atsLink) : "";
 
   return (
     <article className={`job-card${open ? " is-open" : ""}`} data-testid="job-card">
@@ -115,8 +112,8 @@ export default function JobCard({
         {commute ? (
           <span className="job-fact job-fact--commute"><Icon path={TRAIN} />{commute}</span>
         ) : null}
-        {boardUrl ? (
-          <a className="job-fact job-fact--board" href={boardUrl} target="_blank"
+        {lienBoard ? (
+          <a className="job-fact job-fact--board" href={lienBoard} target="_blank"
             rel="noopener noreferrer" data-testid="job-ats-link">
             Offres directes chez {job.company}
           </a>

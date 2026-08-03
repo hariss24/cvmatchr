@@ -203,6 +203,15 @@ export class AppDatabase extends Dexie {
     this.version(11).stores({
       atsDirectory: "companyKey",
     });
+
+    // v12 : Ashby et SmartRecruiters rejoignent Greenhouse et Lever. Les « none »
+    // enregistrés avec les deux ATS d'origine sont des non-réponses périmées, pas
+    // des faits : sans cette purge, une entreprise comme Nexton (137 offres sur
+    // SmartRecruiters) resterait marquée introuvable à jamais. Les détections
+    // positives sont conservées — elles restent vraies.
+    this.version(12).stores({}).upgrade(async (tx) => {
+      await tx.table("atsDirectory").filter((e) => e.ats === "none").delete();
+    });
   }
 }
 

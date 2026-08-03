@@ -42,13 +42,33 @@ nouvelle.
 1. Dériver 2 à 3 slugs candidats depuis le nom : minuscules, accents retirés,
    espaces/apostrophes remplacés par des tirets ou supprimés (ex. "Leboncoin" →
    `leboncoin`; "Groupe SEB" → `groupe-seb`, `groupeseb`).
-2. Pour chaque candidat, tenter dans l'ordre :
-   - `GET https://boards-api.greenhouse.io/v1/boards/{slug}/jobs`
+2. Pour chaque candidat, interroger les quatre ATS **en parallèle** :
+   - `GET https://api.ashbyhq.com/posting-api/job-board/{slug}`
    - `GET https://api.lever.co/v0/postings/{slug}?mode=json`
-3. Un match est confirmé si la requête répond 200 **et** le corps contient au
-   moins une offre (`jobs.length > 0` pour Greenhouse, tableau non vide pour
-   Lever). Un 404 ou une liste vide n'est pas une erreur — juste "pas ce
-   candidat".
+   - `GET https://api.smartrecruiters.com/v1/companies/{slug}/postings?limit=1`
+   - `GET https://boards-api.greenhouse.io/v1/boards/{slug}/jobs`
+
+   **Cet ordre vient d'une mesure, pas d'une réputation.** Sondage du 03/08/2026
+   sur 49 entreprises françaises (tech et non-tech) : ashby 8, lever 6,
+   smartrecruiters 4, greenhouse 2. Greenhouse, l'ATS le plus connu, arrive
+   dernier — c'est un outil de start-up américaine. SmartRecruiters est le seul
+   à couvrir les grands employeurs français (Accor 529 offres, Nexton 137,
+   Thales). L'ordre ne tranche que les égalités : Doctolib est à la fois sur
+   Greenhouse et sur Ashby.
+
+   Workable, Recruitee, Teamtailor et Personio ont été sondés le même jour :
+   **zéro entreprise trouvée sur les 49**, ils ne sont pas implémentés. Workable
+   répond même 200 avec un board vide pour presque n'importe quel nom.
+   Taleez et Welcome to the Jungle exigent une authentification (401/403), et
+   l'API d'embed publique de WTTJ demande une référence d'organisation opaque
+   (`Pg4eV6k`) impossible à dériver d'un nom d'entreprise.
+3. Un match est confirmé si la requête répond 200 **et** le board contient au
+   moins une offre : `jobs.length > 0` pour Greenhouse et Ashby, tableau racine
+   non vide pour Lever, `totalFound > 0` pour SmartRecruiters — seul ATS dont la
+   présence se lit sur un compteur et non sur une liste. Un 404 ou un board vide
+   n'est pas une erreur — juste « pas ce candidat ». Cette exigence est ce qui
+   protège des faux positifs : un lien vers une page carrières sans aucune offre
+   serait pire que pas de lien du tout.
 4. Premier candidat qui matche → résultat retenu, on arrête. Aucun candidat ne
    matche → `{ ats: "none" }`.
 5. Toute erreur réseau (timeout, DNS) est traitée comme "pas ce candidat", pas
@@ -157,6 +177,9 @@ convention — aucune dépendance nouvelle ne sera ajoutée pour tester la base.
 - Récupération effective des offres depuis les boards détectés (Phase 2).
 - Annuaire partagé / base serveur / synchronisation automatique entre
   utilisateurs.
-- Autres ATS (Workable, Ashby, SmartRecruiters…) — Greenhouse et Lever
-  couvrent la majorité des entreprises tech, on étend plus tard si utile.
+- Les ATS français à authentification (Taleez, Flatchr, Digitalrecruiters,
+  Welcome to the Jungle) — ils exigent une clé, donc un partenariat.
+- Les grands employeurs traditionnels (Carrefour, SNCF, Orange, Decathlon…),
+  qui utilisent Workday, SuccessFactors ou Cegid Talentsoft : ces ATS n'exposent
+  pas d'endpoint dérivable d'un nom d'entreprise, il faut l'URL du locataire.
 - Revérification périodique des entrées `"none"`.
