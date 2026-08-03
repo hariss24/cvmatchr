@@ -93,3 +93,29 @@ export async function resetDatabase(): Promise<void> {
     toast("Erreur lors de la réinitialisation.", "error");
   }
 }
+
+export async function exportAtsDirectory(): Promise<void> {
+  try {
+    const all = await db.atsDirectory.toArray();
+    // Transforme le tableau en dictionnaire
+    const dico: Record<string, { ats: string; slug: string }> = {};
+    for (const e of all) {
+      dico[e.companyKey] = { ats: e.ats, slug: e.slug };
+    }
+
+    const jsonString = JSON.stringify(dico, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `cvmatchr-ats-directory.json`;
+    a.click();
+
+    URL.revokeObjectURL(url);
+    toast("Annuaire ATS exporté.", "success");
+  } catch (error) {
+    console.error("Export ATS failed:", error);
+    toast("Erreur lors de l'export de l'annuaire ATS.", "error");
+  }
+}

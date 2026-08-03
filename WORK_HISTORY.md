@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Détecteur d'ATS (Greenhouse / Lever) — Task 5 : export de l'annuaire.
+**Prochaine étape suggérée :** Détecteur d'ATS (Greenhouse / Lever) — Task 6 : résolution en tâche de fond et affichage sur la carte.
 
 ---
 
@@ -40,6 +40,13 @@
 ---
 
 ## Journal
+
+### 2026-08-03 : Détecteur d'ATS — Phase 1 (Task 5, plan `docs/superpowers/plans/2026-08-03-detecteur-ats.md`)
+
+- **Quoi :** ajout d'un bouton "Exporter l'annuaire ATS" dans la page Paramètres et de son handler `exportAtsDirectory`.
+- **Pourquoi :** permettre de récupérer un dictionnaire clé-valeur JSON de l'annuaire mis en cache.
+- **Fichiers touchés :** modifiés `web/src/app/settings/page.tsx` et `web/src/lib/storage/backup.ts`.
+- **Résultat vérifs (`web/`) :** `tsc --noEmit`, `lint`, `build` tous verts.
 
 ### 2026-08-03 : Détecteur d'ATS — Phase 1 (Task 4, plan `docs/superpowers/plans/2026-08-03-detecteur-ats.md`)
 
