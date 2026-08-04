@@ -35,15 +35,18 @@ jobs:
       - name: Rafraîchir l'index
         run: node scripts/build-boards-fr.mjs --source=tout
 
+      - name: Moissonner les offres légères
+        run: node scripts/build-boards-offres.mjs
+
       - name: Commiter si l'index a changé
         run: |
-          if git diff --quiet -- web/src/lib/jobs/data/boards-fr.json web/src/lib/jobs/data/boards-fr-testes.json; then
+          if git diff --quiet -- web/src/lib/jobs/data/boards-fr.json web/src/lib/jobs/data/boards-fr-testes.json web/src/lib/jobs/data/boards-offres.json; then
             echo "Aucun changement."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add web/src/lib/jobs/data/boards-fr.json web/src/lib/jobs/data/boards-fr-testes.json
+          git add web/src/lib/jobs/data/boards-fr.json web/src/lib/jobs/data/boards-fr-testes.json web/src/lib/jobs/data/boards-offres.json
           git commit -m "chore(boards): rafraîchissement hebdomadaire de l'index"
           git pull --rebase
           git push

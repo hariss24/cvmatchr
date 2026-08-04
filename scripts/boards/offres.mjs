@@ -62,8 +62,8 @@ const ENDPOINTS = {
 };
 
 /** SmartRecruiters : pas de texte dans la liste, `limit` plafonné à 100 par l'API. */
-const smartRecruitersUrl = (s, page) =>
-  `https://api.smartrecruiters.com/v1/companies/${s}/postings?country=fr&limit=100&page=${page}`;
+const smartRecruitersUrl = (s, offset) =>
+  `https://api.smartrecruiters.com/v1/companies/${s}/postings?country=fr&limit=100&offset=${offset}`;
 
 /** ⚠️ Pas d'URL publique dans la liste : construite et vérifiée en direct (200). */
 function offresSmartRecruiters(corps, slug) {
@@ -83,18 +83,23 @@ function offresSmartRecruiters(corps, slug) {
   });
 }
 
+/**
+ * ⚠️ SmartRecruiters pagine par `offset`, pas par `page` — vérifié en direct le
+ * 04/08/2026 : page=0,1,2,3 renvoient les mêmes 100 offres, offset=100 renvoie
+ * les suivantes. Le premier passage (par page) dupliquait chaque board N fois.
+ */
 async function listerSmartRecruiters(slug, fetchImpl) {
   const out = [];
-  let page = 0;
-  let total = 1;
-  while (page < total) {
-    const res = await fetchImpl(smartRecruitersUrl(slug, page), { signal: AbortSignal.timeout(TIMEOUT_MS) });
-    if (page === 0 && res.status === 404) return [];
-    if (!res.ok) throw new Error(`smartrecruiters ${slug} page ${page} : ${res.status}`);
+  let offset = 0;
+  while (true) {
+    const res = await fetchImpl(smartRecruitersUrl(slug, offset), { signal: AbortSignal.timeout(TIMEOUT_MS) });
+    if (offset === 0 && res.status === 404) return [];
+    if (!res.ok) throw new Error(`smartrecruiters ${slug} offset ${offset} : ${res.status}`);
     const corps = await res.json();
-    total = Math.max(1, Math.ceil((corps?.totalFound ?? 0) / 100));
+    const content = corps?.content ?? [];
     out.push(...offresSmartRecruiters(corps, slug).filter((o) => estFrancais(o.lieu, o.pays)));
-    page += 1;
+    if (content.length === 0) break;
+    offset += content.length;
   }
   return out;
 }

@@ -60,9 +60,10 @@ test("Ashby : mappe id/title/location/jobUrl/publishedAt", async () => {
   assert.equal(r[0].url, "https://jobs.ashbyhq.com/alan/xyz");
 });
 
-test("SmartRecruiters : URL construite (jobs.smartrecruiters.com), lat/lng repris, pagination", async () => {
-  // totalFound=150 avec limit=100 exige deux pages (ceil(150/100)=2) — un
-  // totalFound de 2 tiendrait sur une seule page et ne testerait rien.
+test("SmartRecruiters : URL construite (jobs.smartrecruiters.com), lat/lng repris, pagination par offset", async () => {
+  // totalFound=150 avec limit=100 exige deux pages (100 + 50). ⚠️ L'API pagine
+  // par `offset`, pas par `page` (page=0,1,2 renvoient les mêmes 100 offres) —
+  // vérifié en direct le 04/08/2026.
   const page1 = {
     totalFound: 150,
     content: [{ id: "1", name: "Guest Relation", location: { fullLocation: "Bagnolet, IDF, France", country: "fr", latitude: "48.87", longitude: "2.42" }, releasedDate: "2026-08-04T12:48:52.037Z" }],
@@ -71,8 +72,12 @@ test("SmartRecruiters : URL construite (jobs.smartrecruiters.com), lat/lng repri
     totalFound: 150,
     content: [{ id: "2", name: "Réceptionniste", location: { fullLocation: "Lyon, France", country: "fr" }, releasedDate: "2026-08-04T12:48:52.037Z" }],
   };
+  const vide = { totalFound: 150, content: [] };
   const f = fauxFetch({
-    "api.smartrecruiters.com": (u) => new Response(JSON.stringify(u.includes("page=1") ? page2 : page1), { status: 200 }),
+    "api.smartrecruiters.com": (u) => new Response(
+      JSON.stringify(u.endsWith("offset=1") ? page2 : u.endsWith("offset=2") ? vide : page1),
+      { status: 200 },
+    ),
   });
   const r = await listerOffresFR("smartrecruiters", "accor", f);
   assert.equal(r.length, 2);
