@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Marché caché — Brique 2 : moissonner les offres depuis les boards indexés (`boards-fr.json`, 448 boards / 9 714 offres FR) et les afficher dans « Offres ».
+**Prochaine étape suggérée :** Marché caché — **scan quotidien et « Nouveau depuis hier »**. Priorité réévaluée sur mesure le 04/08/2026 : l'âge médian des 9 719 offres moissonnées est de **46 jours** (44 % ont plus de 60 jours, seules 617 ont moins de 48 h). La concurrence sur une offre dépend surtout de son ancienneté, pas du canal de publication — surfacer les offres neuves vaut plus que d'élargir l'index. Ensuite seulement : descendre le seuil SIRENE sous 200 salariés (les PME reçoivent moins de candidatures, et toutes les tranches sous 200 dépassent le plafond d'affichage de l'API, donc des dizaines de milliers d'entreprises sont hors périmètre), puis la Brique 3 (Common Crawl → Workday et ATS non énumérables).
 
 ---
 
@@ -40,6 +40,21 @@
 ---
 
 ## Journal
+
+### 2026-08-04 : Marché caché — Brique 2, Task 2 + réorientation mesurée de la suite
+
+- **Quoi :** orchestrateur `scripts/build-boards-offres.mjs` → `web/src/lib/jobs/data/boards-offres.json` (**9 719 offres légères** issues des 448 boards), test de cohérence `boards-offres.test.ts`, moisson branchée sur le workflow hebdomadaire. Spec et plan de la Brique 2 versionnés (ils étaient restés non suivis).
+- **Bug corrigé :** SmartRecruiters pagine par `offset`, **pas par `page`** — `page=0,1,2,3` renvoyait les mêmes 100 offres, dupliquant chaque board autant de fois qu'il avait de pages. Vérifié en direct : `offset=100` renvoie bien les suivantes.
+- **Vérifs :** `node --test` 55/55, Vitest 617/617, `tsc` propre, `lint` 0 erreur, `build` OK.
+- **Commit :** `d3d3d41` — feat(boards): moisson des offres françaises des boards indexés
+
+**Mesures qui réorientent la suite** (faites le 04/08/2026, à conserver — elles contredisent la direction initiale) :
+
+- **Âge des 9 719 offres : médiane 46 jours**, 75ᵉ centile 146 jours, 4 278 offres (44 %) de plus de 60 jours, 1 490 de moins de 7 jours, **617 de moins de 48 h**. Une offre de 46 jours a déjà été recopiée par les agrégateurs et a accumulé ses candidats. **La concurrence est fonction de l'ancienneté, pas du canal.** D'où la priorité au scan quotidien plutôt qu'à l'élargissement de l'index.
+- **Seuil SIRENE mal choisi :** le périmètre « ≥ 200 salariés » de la Brique 1 a été retenu pour une raison d'ingénierie (chaque tranche tenait sous le plafond de pagination), pas au service de l'objectif. Or les grands employeurs sont précisément ceux qui reçoivent le plus de candidatures. Les tranches 11, 12, 21 et 22 (10 à 199 salariés) dépassent **toutes** le plafond d'affichage de 10 000 : des dizaines de milliers de PME sont hors périmètre, et ce sont celles où la concurrence est la plus faible.
+- **ATS non énumérables — verrou levé :** l'index public de Common Crawl (126 collections, sans clé) permet d'énumérer les locataires Workday et Flatchr, que la Brique 1 avait écartés faute de pouvoir deviner leur URL. Vérifié : `POST {tenant}.wdN.myworkdayjobs.com/wday/cxs/{tenant}/{site}/jobs` répond en JSON sans authentification (3M : 651 offres). Deviner l'URL sans Common Crawl échoue — testé sur 10 entreprises françaises, 0 succès (trois inconnues : locataire, datacentre, nom du site).
+- **Sites carrières sans ATS :** pas besoin de crawler. Vérifié sur `emploi.sncf.com` — la page de liste expose un `ItemList` JSON-LD et la page de détail un `JobPosting` complet (titre, date, pays `FR`, ville, description de 6 948 caractères), **rendus côté serveur**. Un `fetch` suffit. Firecrawl, crawl4ai, Scrapy et consorts résolvent l'extraction, qui n'est pas le goulot ; le goulot était la découverte d'URL, que Common Crawl règle gratuitement.
+- **Réserve honnête :** ce balisage `JobPosting` existe pour Google for Jobs — ces offres sont donc déjà sur Google, et l'app a déjà cette source (`jsearch`, désactivée par défaut, plafonnée à 200 appels/mois). L'avantage de la moisson directe est l'exhaustivité, l'absence de quota et la fraîcheur — **pas** l'invisibilité.
 
 ### 2026-08-04 : Marché caché — Brique 2, Task 1 (plan `docs/superpowers/plans/2026-08-04-marche-cache-offres.md`)
 
