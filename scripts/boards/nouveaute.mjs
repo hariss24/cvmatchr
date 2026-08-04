@@ -32,3 +32,16 @@ export function dater(precedentes, courantes, jourCourant) {
   const connues = new Map(precedentes.map((o) => [cleOffre(o), o.decouverteLe]));
   return courantes.map((o) => ({ ...o, decouverteLe: connues.get(cleOffre(o)) ?? jourCourant }));
 }
+
+/**
+ * Offres du passage précédent appartenant à un board resté INDÉTERMINÉ.
+ *
+ * Même discipline qu'en Brique 1 : `null` veut dire « on ne sait pas », pas
+ * « il n'y a rien ». Sans cette reprise, les offres d'un board momentanément
+ * injoignable sortaient du fichier, puis y revenaient le lendemain avec la
+ * date du jour — annoncées comme neuves alors qu'elles ne l'étaient pas.
+ * Mesuré le 04/08/2026 : 3 boards indéterminés sur 448 en un seul passage.
+ */
+export function reprendreIndetermines(precedentes, clesIndeterminees) {
+  return precedentes.filter((o) => clesIndeterminees.has(`${o.ats}:${o.slug}`));
+}

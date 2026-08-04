@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { obtenirTextes, type FetchLike } from "./boardsText";
+import { obtenirTextes, texteBrut, type FetchLike } from "./boardsText";
 import type { OffreLegere } from "./boardsFr";
 
 function offre(partial: Partial<OffreLegere>): OffreLegere {
@@ -25,6 +25,42 @@ function fauxFetch(reponses: Record<string, unknown>): FetchLike {
     return new Response(JSON.stringify(reponses[cle]), { status: 200 });
   };
 }
+
+describe("texteBrut", () => {
+  it("décode le HTML encodé en entités de Greenhouse", () => {
+    // Forme réelle vérifiée en direct le 04/08/2026 sur capfigroupe.
+    const brut = "&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;CAPFI est une ESN&lt;/span&gt;&lt;/p&gt;";
+    expect(texteBrut(brut)).toBe("CAPFI est une ESN");
+  });
+
+  it("retire les balises du HTML direct de SmartRecruiters", () => {
+    expect(texteBrut('<p>ALTEN joue un rôle dans <a href="https://x">les secteurs</a>.</p>'))
+      .toBe("ALTEN joue un rôle dans les secteurs .");
+  });
+
+  it("garde les sauts de ligne des listes et des paragraphes", () => {
+    expect(texteBrut("<ul><li>Java</li><li>Angular</li></ul>")).toBe("Java\nAngular");
+  });
+
+  it("traite les entités révélées par le premier décodage", () => {
+    // Chez Greenhouse tout est encodé une fois : les balises comme les entités
+    // qu'elles contiennent. `&amp;nbsp;` ne redevient `&nbsp;` qu'au 1er passage,
+    // et n'est donc traitable qu'au second.
+    expect(texteBrut("&lt;p&gt;R&amp;D&amp;nbsp;&lt;/p&gt;")).toBe("R&D");
+  });
+
+  it("décode les entités numériques", () => {
+    expect(texteBrut("R&#38;D et l&#39;équipe")).toBe("R&D et l'équipe");
+  });
+
+  it("ne laisse pas passer le contenu d'un script", () => {
+    expect(texteBrut("<p>Poste</p><script>alert(1)</script>")).toBe("Poste");
+  });
+
+  it("un texte déjà propre traverse sans dommage", () => {
+    expect(texteBrut("Ingénieur logiciel — Paris")).toBe("Ingénieur logiciel — Paris");
+  });
+});
 
 describe("obtenirTextes", () => {
   it("Greenhouse : un appel par offre, endpoint par id avec content=true", async () => {

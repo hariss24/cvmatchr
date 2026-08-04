@@ -13,6 +13,8 @@ vi.mock("./data/boards-offres.json", () => ({
     // manque, elle sort en tête.
     { ats: "ashby", slug: "alan", entreprise: "Alan", id: "5", titre: "Data Analyst", lieu: "Paris", url: "https://jobs.ashbyhq.com/alan/5", publieLe: new Date(Date.now() - 10 * 86_400_000).toISOString(), decouverteLe: "2026-07-25" },
     { ats: "ashby", slug: "alan", entreprise: "Alan", id: "6", titre: "Data Engineer", lieu: "Paris", url: "https://jobs.ashbyhq.com/alan/6", publieLe: new Date().toISOString(), decouverteLe: "2026-08-04" },
+    // Publiée « aujourd'hui » selon l'ATS, connue de nous depuis six mois.
+    { ats: "greenhouse", slug: "onrunning", entreprise: "On Running", id: "7", titre: "Chargé de retouche", lieu: "Paris", url: "https://boards.greenhouse.io/onrunning/jobs/7", publieLe: new Date().toISOString(), decouverteLe: "2026-02-01" },
   ],
 }));
 
@@ -26,6 +28,14 @@ vi.mock("./boardsText", () => ({
     ["ashby:alan:6", "Construction de pipelines de données."],
   ])),
 }));
+
+// Aucun appel réseau en test : le géocodage échoue, `boardsLieu` retombe alors
+// sur le rapprochement de libellés — c'est le chemin des 47 % d'offres sans
+// coordonnées, donc celui qui mérite d'être couvert.
+vi.mock("./homeCoords", () => ({ geocodeHome: vi.fn(async () => null) }));
+
+const PARIS = { kind: "commune" as const, code: "75056", label: "Paris (75056)", radiusKm: 10 };
+const LYON = { kind: "commune" as const, code: "69123", label: "Lyon (69123)", radiusKm: 10 };
 
 describe("searchBoards", () => {
   it("aucun mot-clé → aucun appel, liste vide", async () => {
@@ -71,6 +81,29 @@ describe("searchBoards", () => {
     // premières de l'index, rangé par ats/slug/id — un biais alphabétique.
     const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["data"], excludedWords: [] });
     expect(r.offers.map((o) => o.title)).toEqual(["Data Engineer", "Data Analyst"]);
+  });
+
+  it("écarte les offres hors du lieu demandé", async () => {
+    // Toutes les offres de l'index de test sont à Paris.
+    const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["ingénieur"], excludedWords: [], location: LYON });
+    expect(r.offers).toHaveLength(0);
+  });
+
+  it("garde les offres du lieu demandé", async () => {
+    const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["ingénieur"], excludedWords: [], location: PARIS });
+    expect(r.offers).toHaveLength(1);
+  });
+
+  it("une recherche sans lieu reste nationale", async () => {
+    const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["ingénieur"], excludedWords: [] });
+    expect(r.offers).toHaveLength(1);
+  });
+
+  it("une retouche chez Greenhouse ne rajeunit pas une offre ancienne", async () => {
+    // id 7 : publiée « aujourd'hui » d'après Greenhouse (updated_at), mais notre
+    // scan la connaît depuis six mois. C'est la plus ancienne des deux qui vaut.
+    const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["retouche"], excludedWords: [], maxAgeDays: 30 });
+    expect(r.offers).toHaveLength(0);
   });
 
   it("un mot-clé accentué matche un titre sans accent, et l'inverse", async () => {

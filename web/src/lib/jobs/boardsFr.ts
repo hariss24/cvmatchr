@@ -12,6 +12,8 @@ import type { JobOffer } from "./offer";
 import { isExcludedText } from "./exclude";
 import { obtenirTextes } from "./boardsText";
 import { hostnameOf } from "./board";
+import { dansLeSecteur, villeDuLibelle } from "./boardsLieu";
+import { geocodeHome } from "./homeCoords";
 import boardsOffresData from "./data/boards-offres.json";
 
 export interface OffreLegere {
@@ -57,10 +59,23 @@ function matchTitre(titre: string, keywords: string[]): boolean {
   return keywords.some((k) => k.trim() !== "" && hay.includes(normalize(k)));
 }
 
-function dansLage(publieLe: string, maxAgeDays: number): boolean {
-  if (!publieLe) return true; // absence de date ≠ preuve d'ancienneté (spec §5)
-  const jours = (Date.now() - new Date(publieLe).getTime()) / 86_400_000;
-  return jours <= maxAgeDays;
+/**
+ * Ancienneté d'une offre, mesurée sur la PLUS ANCIENNE des deux dates connues.
+ *
+ * `publieLe` seul se laisse tromper : chez Greenhouse (1 578 offres de l'index)
+ * ce champ est `updated_at`, donc une correction de faute de frappe rajeunit
+ * une annonce de trois mois. `decouverteLe` — le jour où notre scan a vu
+ * l'offre pour la première fois — ne peut pas être rajeuni par l'entreprise.
+ * Retenir la plus ancienne des deux, c'est refuser qu'une retouche efface
+ * l'historique. Une offre réellement publiée avant la création de l'index
+ * garde de son côté son vrai âge, puisque `publieLe` est alors le plus ancien.
+ */
+function dansLage(o: OffreLegere, maxAgeDays: number): boolean {
+  const dates = [o.publieLe, o.decouverteLe]
+    .map((d) => (d ? new Date(d).getTime() : Number.NaN))
+    .filter((t) => !Number.isNaN(t));
+  if (dates.length === 0) return true; // absence de date ≠ preuve d'ancienneté (spec §5)
+  return (Date.now() - Math.min(...dates)) / 86_400_000 <= maxAgeDays;
 }
 
 function cleOffre(o: Pick<OffreLegere, "ats" | "slug" | "id">): string {
@@ -72,10 +87,19 @@ export async function searchBoards(
 ): Promise<{ offers: JobOffer[]; calls: number }> {
   if (profile.keywords.length === 0) return { offers: [], calls: 0 };
 
+  // Un seul géocodage par recherche, et seulement si une commune est demandée :
+  // c'est ce qui permet d'appliquer le rayon réel aux 53 % d'offres qui portent
+  // des coordonnées. En cas d'échec, `boardsLieu` retombe sur les libellés.
+  const cible =
+    profile.location.code && profile.location.kind === "commune"
+      ? await geocodeHome(villeDuLibelle(profile.location.label))
+      : null;
+
   const candidates = boardsOffres
     .filter((o) => matchTitre(o.titre, profile.keywords))
     .filter((o) => !isExcludedText(o.titre, profile.excludedWords))
-    .filter((o) => dansLage(o.publieLe, profile.maxAgeDays))
+    .filter((o) => dansLage(o, profile.maxAgeDays))
+    .filter((o) => dansLeSecteur(o, profile.location, cible))
     // ⚠️ Trier AVANT de plafonner. L'index est rangé par ats/slug/id : sans ce
     // tri, les 60 retenues étaient les premières dans l'ordre alphabétique —
     // mesuré le 04/08/2026, « développeur » ne remontait aucune offre
@@ -104,6 +128,7 @@ export async function searchBoards(
       url: o.url,
       jobText: texte.slice(0, profile.maxDescriptionChars),
       publishedAt: o.publieLe,
+      discoveredAt: o.decouverteLe,
       logoUrl: "",
       boardDomain: hostnameOf(o.url),
       boardName: NOMS_ATS[o.ats],

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { cleOffre, jour, dater } from "./nouveaute.mjs";
+import { cleOffre, jour, dater, reprendreIndetermines } from "./nouveaute.mjs";
 
 const offre = (id, extra = {}) => ({ ats: "lever", slug: "acme", id, ...extra });
 
@@ -29,6 +29,27 @@ test("une offre disparue ne réapparaît pas", () => {
   const precedentes = [offre("1", { decouverteLe: "2026-07-01" })];
   const resultat = dater(precedentes, [offre("2")], "2026-08-04");
   assert.deepEqual(resultat.map((o) => o.id), ["2"]);
+});
+
+test("un board indéterminé garde les offres du passage précédent", () => {
+  const precedentes = [
+    offre("1", { decouverteLe: "2026-07-01" }),
+    { ats: "ashby", slug: "alan", id: "9", decouverteLe: "2026-07-02" },
+  ];
+  const repris = reprendreIndetermines(precedentes, new Set(["lever:acme"]));
+  assert.deepEqual(repris.map((o) => o.id), ["1"]);
+  assert.equal(repris[0].decouverteLe, "2026-07-01");
+});
+
+test("aucun board indéterminé, rien n'est repris", () => {
+  assert.deepEqual(reprendreIndetermines([offre("1")], new Set()), []);
+});
+
+test("une offre reprise ne devient pas nouvelle en passant par dater", () => {
+  const precedentes = [offre("1", { decouverteLe: "2026-07-01" })];
+  const repris = reprendreIndetermines(precedentes, new Set(["lever:acme"]));
+  const resultat = dater(precedentes, repris, "2026-08-04");
+  assert.equal(resultat[0].decouverteLe, "2026-07-01");
 });
 
 test("les autres champs sont préservés", () => {

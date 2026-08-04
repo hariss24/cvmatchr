@@ -24,6 +24,51 @@ function cleOffre(o: Pick<OffreLegere, "ats" | "slug" | "id">): string {
   return `${o.ats}:${o.slug}:${o.id}`;
 }
 
+const ENTITES: Record<string, string> = {
+  amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ",
+  eacute: "é", egrave: "è", agrave: "à", ccedil: "ç", ugrave: "ù", ocirc: "ô",
+  rsquo: "’", laquo: "«", raquo: "»", hellip: "…", eur: "€",
+};
+
+function decoder(s: string): string {
+  return s.replace(/&(#\d+|#x[0-9a-f]+|[a-z]+);/gi, (tout, code: string) => {
+    try {
+      if (/^#x/i.test(code)) return String.fromCodePoint(parseInt(code.slice(2), 16));
+      if (code.startsWith("#")) return String.fromCodePoint(Number(code.slice(1)));
+    } catch {
+      return tout; // point de code hors plage : on préfère l'entité brute à un plantage
+    }
+    return ENTITES[code.toLowerCase()] ?? tout;
+  });
+}
+
+/**
+ * HTML d'annonce → texte lisible.
+ *
+ * Greenhouse rend son `content` **encodé en entités** (`&lt;p&gt;…`) et
+ * SmartRecruiters ses sections en HTML direct. Sans ce nettoyage, la carte
+ * affichait littéralement `<p>ALTEN joue un rôle…` — et surtout la notation
+ * ATS et « Adapter mon CV » recevaient les balises comme du texte d'offre.
+ * Lever et Ashby en sont dispensés : leur `descriptionPlain` est déjà du texte,
+ * et le faire passer ici abîmerait un « < » légitime.
+ *
+ * Deux décodages : le premier révèle les balises encodées, le second traite les
+ * entités qu'elles contenaient (`&amp;nbsp;` devenu `&nbsp;`).
+ */
+export function texteBrut(html: string): string {
+  const revele = decoder(html);
+  const sansBalises = revele
+    .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|li|ul|ol|h[1-6]|tr|table)>/gi, "\n")
+    .replace(/<[^>]*>/g, " ");
+  return decoder(sansBalises)
+    .replace(/[ \t ]+/g, " ")
+    .replace(/ *\n */g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 async function texteGreenhouse(o: OffreLegere, fetchImpl: FetchLike): Promise<string | null> {
   try {
     const res = await fetchImpl(
@@ -31,7 +76,7 @@ async function texteGreenhouse(o: OffreLegere, fetchImpl: FetchLike): Promise<st
     );
     if (!res.ok) return null;
     const corps = (await res.json()) as { content?: string };
-    return corps.content ?? "";
+    return texteBrut(corps.content ?? "");
   } catch {
     return null;
   }
@@ -45,10 +90,12 @@ async function texteSmartRecruiters(o: OffreLegere, fetchImpl: FetchLike): Promi
       jobAd?: { sections?: Record<string, { text?: string } | undefined> };
     };
     const sections = corps.jobAd?.sections ?? {};
-    return Object.values(sections)
-      .map((s) => s?.text ?? "")
-      .filter(Boolean)
-      .join("\n\n");
+    return texteBrut(
+      Object.values(sections)
+        .map((s) => s?.text ?? "")
+        .filter(Boolean)
+        .join("\n\n"),
+    );
   } catch {
     return null;
   }

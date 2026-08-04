@@ -280,6 +280,7 @@ export default function JobsView() {
         url: offer.url,
         jobText: offer.jobText,
         publishedAt: offer.publishedAt,
+        discoveredAt: offer.discoveredAt,
         status: "new",
         seen: false,
         source: offer.source,

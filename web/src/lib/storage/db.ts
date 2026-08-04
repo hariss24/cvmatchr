@@ -70,6 +70,13 @@ export interface JobEntry {
   status: "new" | "dismissed" | "hidden"; // hidden = explorée mais sous le seuil (mémorisée, non affichée)
   seen?: boolean;      // false = pas encore consultée (badge « Nouveau ») ; absent/true = déjà vue
   publishedAt?: string; // date de publication de l'offre (ISO France Travail)
+  /**
+   * Jour (`YYYY-MM-DD`) où le scan quotidien a vu l'offre pour la première fois.
+   * Marché caché seulement ; absent partout ailleurs. Sert la pastille de
+   * fraîcheur de la carte — à ne pas confondre avec `seen`, qui dit si TOI tu
+   * l'as ouverte, ni avec `createdAt`, qui date ton propre scan.
+   */
+  discoveredAt?: string;
   /** Candidature créée depuis cette offre (bouton « Suivre »). */
   applicationId?: string;
   /** Source qui a fait remonter l'offre. Absent = donnée d'avant la v9. */

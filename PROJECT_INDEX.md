@@ -211,7 +211,10 @@ rien d'autre ne le lit. Voir `docs/superpowers/specs/2026-08-04-marche-cache-ind
 défaut) : lit l'index léger `lib/jobs/data/boards-offres.json`
 (titre/entreprise/lieu/url/date, sans texte, rafraîchi **chaque jour** par
 `.github/workflows/boards-offres.yml`), ne garde que les offres dont le titre
-matche les mots-clés du profil, les classe **de la plus récente à la plus
+matche les mots-clés du profil, applique le **filtre de lieu** (distance réelle
+pour les 53 % d'offres qui portent des coordonnées — SmartRecruiters est le seul
+ATS à en donner ; rapprochement de libellés pour les autres, voir
+`lib/jobs/boardsLieu.ts`), les classe **de la plus récente à la plus
 ancienne**, puis récupère le texte complet **en direct** pour les 60 premières
 — jamais de texte committé, pour ne pas faire grossir le dépôt à chaque scan.
 Le tri avant plafonnement n'est pas cosmétique : sans lui, les 60 retenues

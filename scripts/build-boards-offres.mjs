@@ -16,7 +16,8 @@ import { fileURLToPath } from "node:url";
 
 import { listerOffresFR } from "./boards/offres.mjs";
 import { enLot } from "./boards/lot.mjs";
-import { dater, jour } from "./boards/nouveaute.mjs";
+import { cle } from "./boards/memo.mjs";
+import { dater, jour, reprendreIndetermines } from "./boards/nouveaute.mjs";
 
 const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "web", "src", "lib", "jobs", "data");
 const F_INDEX = join(DATA_DIR, "boards-fr.json");
@@ -32,22 +33,35 @@ const boards = JSON.parse(readFileSync(F_INDEX, "utf8"));
 
 console.log(`${boards.length} boards à moissonner.`);
 
-const brut = await enLot(boards, PLAFOND, async (b) => {
-  const offres = await listerOffresFR(b.ats, b.slug);
-  return offres === null ? null : { board: b, offres };
-});
+// `brut[i]` correspond à `boards[i]` : `null` = board indéterminé, que ce soit
+// par le `null` de `listerOffresFR` ou par une exception rattrapée par `enLot`.
+const brut = await enLot(boards, PLAFOND, (b) => listerOffresFR(b.ats, b.slug));
 
-const resultats = brut.filter(Boolean);
-console.log(`${resultats.length} boards exploitables, ${brut.length - resultats.length} indéterminés.`);
+const precedentes = existsSync(F_OFFRES) ? JSON.parse(readFileSync(F_OFFRES, "utf8")) : [];
 
 const index = [];
-for (const { board, offres } of resultats) {
+const indetermines = new Set();
+boards.forEach((board, i) => {
+  const offres = brut[i];
+  if (offres === null) {
+    indetermines.add(cle(board.ats, board.slug));
+    return;
+  }
   for (const o of offres) {
     // `pays` est interne au harvest (estFrancais) : pas dans OffreLegere (spec §2).
     const { pays, ...legere } = o;
     index.push({ ats: board.ats, slug: board.slug, entreprise: board.nom, ...legere });
   }
-}
+});
+
+// Un board injoignable n'est pas un board vide : on garde ce qu'on savait de lui.
+const repris = reprendreIndetermines(precedentes, indetermines);
+index.push(...repris);
+
+console.log(
+  `${boards.length - indetermines.size} boards exploitables, ${indetermines.size} indéterminés `
+  + `(${repris.length} offres reprises du passage précédent).`,
+);
 
 index.sort(
   (a, b) => a.ats.localeCompare(b.ats) || a.slug.localeCompare(b.slug) || a.id.localeCompare(b.id),
@@ -55,7 +69,6 @@ index.sort(
 
 // Tri AVANT datation : l'ordre du fichier reste celui de l'index, pas celui de
 // la nouveauté. Un diff quotidien ne doit montrer que ce qui a réellement bougé.
-const precedentes = existsSync(F_OFFRES) ? JSON.parse(readFileSync(F_OFFRES, "utf8")) : [];
 const aujourdhui = jour(new Date());
 const datees = dater(precedentes, index, aujourdhui);
 const nouvelles = datees.filter((o) => o.decouverteLe === aujourdhui).length;

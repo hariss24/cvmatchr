@@ -17,6 +17,22 @@ function relativeDate(iso?: string): string | null {
   return `il y a ${days} jours`;
 }
 
+/**
+ * L'offre est-elle apparue au dernier scan quotidien ?
+ *
+ * `discoveredAt` est un jour (`YYYY-MM-DD`), renseigné par le marché caché
+ * seul. La tolérance d'un jour n'est pas de la coquetterie : le scan tourne à
+ * 06:00 UTC, donc quelqu'un qui consulte à 2 h du matin n'a encore que le
+ * relevé de la veille — sans elle, la pastille disparaîtrait chaque nuit.
+ */
+export function estFraiche(discoveredAt: string | undefined, maintenant: Date): boolean {
+  if (!discoveredAt) return false;
+  const vu = Date.parse(`${discoveredAt}T00:00:00Z`);
+  if (Number.isNaN(vu)) return false;
+  const jours = (Date.UTC(maintenant.getUTCFullYear(), maintenant.getUTCMonth(), maintenant.getUTCDate()) - vu) / 86_400_000;
+  return jours >= 0 && jours <= 1;
+}
+
 function Icon({ path }: { path: string }) {
   return (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -67,6 +83,7 @@ export default function JobCard({
   // tri, et un éventuel filtre, s'appuient dessus.
   const lignes = (job.breakdown ?? []).filter((l) => l.reason !== "");
   const date = relativeDate(job.publishedAt);
+  const fraiche = estFraiche(job.discoveredAt, new Date());
 
   // Les offres du board de l'entreprise échappent souvent aux jobboards saturés :
   // c'est le seul intérêt de ce lien, donc il n'apparaît que s'il mène quelque part.
@@ -88,11 +105,26 @@ export default function JobCard({
           ) : null}
         </div>
 
+        {/* Trois faits distincts tenaient jusqu'ici dans un seul emplacement, et
+            le badge « Nouveau » évinçait la date — celle qui dit combien de
+            candidats sont déjà passés. Ils cohabitent maintenant sans un mot de
+            plus, ce qui compte sur mobile où toute étiquette pousse le titre à
+            la ligne : la fraîcheur est un point de 6 px, le fait de ne pas
+            l'avoir encore ouverte est porté par la couleur de la date, et la
+            date reste toujours lisible. */}
         <div className="job-card__aside">
-          {job.seen === false ? (
-            <span className="job-new" data-testid="job-new">Nouveau</span>
-          ) : date ? (
-            <span className="job-date">{date}</span>
+          {fraiche ? (
+            <span className="job-fresh" data-testid="job-fresh"
+              title="Repérée par le scan du jour" />
+          ) : null}
+          {date ? (
+            <span
+              className={job.seen === false ? "job-date job-date--neuve" : "job-date"}
+              data-testid={job.seen === false ? "job-new" : undefined}
+              title={job.seen === false ? "Pas encore ouverte" : undefined}
+            >
+              {date}
+            </span>
           ) : null}
         </div>
       </div>

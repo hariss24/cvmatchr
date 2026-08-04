@@ -18,6 +18,14 @@ export interface JobOffer {
   url: string;
   jobText: string;
   publishedAt: string;         // ISO ; "" si absente
+  /**
+   * Jour (`YYYY-MM-DD`) où notre scan a vu l'offre pour la première fois.
+   * Renseigné par la source « Marché caché » seule : elle est la seule à
+   * balayer le même gisement tous les jours, donc la seule à savoir ce qui est
+   * apparu depuis hier. Absent ailleurs — une API de recherche ne dit jamais
+   * si l'offre était déjà là la veille.
+   */
+  discoveredAt?: string;
   /** Logo de l'entreprise fourni par la source ; "" si aucune (≈ 1 offre sur 3). */
   logoUrl: string;
   /** Hôte complet du lien de l'offre, ex. "jobs.lilylifestyle.co.uk" ; "" si inconnu. */
