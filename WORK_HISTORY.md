@@ -41,6 +41,14 @@
 
 ## Journal
 
+### 2026-08-04 : Marché caché — Brique 1, Task 4 (plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md`)
+
+- **Quoi :** module `scripts/boards/memo.mjs` — `cle`, `mois`, `estFrais` (TTL mensuelle), `nomDepuisSlug`, `trierIndex`/`trierMemo`, `fusionner` (ajout/màj/retrait d'un board à zéro, siren conservé).
+- **Pourquoi :** deux fichiers aux rôles opposés — l'index (`boards-fr.json`) doit rester un diff lisible, le mémo (`boards-fr-testes.json`) retient tout, échecs compris, sans quoi l'incrémental n'existe pas.
+- **Fichiers touchés :** créés `scripts/boards/memo.mjs`, `scripts/boards/memo.test.mjs`.
+- **Résultat vérifs :** `node --test` 34/34 verts (Tasks 1-4) ; pas de fichier web touché.
+- **Commit :** `5b64cd7` — feat(boards): index, mémo des tests et TTL mensuelle
+
 ### 2026-08-04 : Marché caché — Brique 1, Task 3 (plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md`)
 
 - **Quoi :** module `scripts/boards/ats.mjs` — `compterFR(ats, slug, fetchImpl?)` par ATS (Greenhouse, Lever, Ashby, SmartRecruiters), avec distinction stricte `null` (panne réseau/5xx/JSON illisible = « on ne sait pas ») vs `0` (testé, rien trouvé).
