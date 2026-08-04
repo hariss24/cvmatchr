@@ -41,6 +41,14 @@
 
 ## Journal
 
+### 2026-08-04 : Marché caché — Brique 1, Task 5 (plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md`)
+
+- **Quoi :** module `scripts/boards/sources.mjs` — `slugsDesListes()` (listes publiques Greenhouse/Lever/Ashby de Feashliaa, CC BY-NC, isolées pour remplacement futur) et `entreprisesFrancaises()` (SIRENE, tranches 31→53, paginé à 25).
+- **Pourquoi :** deux sources de découverte complémentaires — la source A balaie les slugs publics (98 % américains), la source B part des entreprises françaises et est la seule voie vers SmartRecruiters.
+- **Fichiers touchés :** créés `scripts/boards/sources.mjs`, `scripts/boards/sources.test.mjs`.
+- **Résultat vérifs :** `node --test` 41/41 verts (Tasks 1-5) ; pas de fichier web touché.
+- **Commit :** `4cc6784` — feat(boards): énumération des listes publiques et des entreprises SIRENE
+
 ### 2026-08-04 : Marché caché — Brique 1, Task 4 (plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md`)
 
 - **Quoi :** module `scripts/boards/memo.mjs` — `cle`, `mois`, `estFrais` (TTL mensuelle), `nomDepuisSlug`, `trierIndex`/`trierMemo`, `fusionner` (ajout/màj/retrait d'un board à zéro, siren conservé).
