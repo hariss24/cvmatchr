@@ -6,12 +6,13 @@ d'où la brique 2 ira moissonner les offres.
 
 **Architecture:** un script Node hors ligne, sur le patron exact de
 `scripts/build-rome.mjs`, alimenté par deux sources de découverte (les listes de
-slugs publiques, puis la base SIRENE), écrivant un fichier JSON commité dans
-`web/src/lib/jobs/data/`. Un workflow GitHub Actions hebdomadaire le relance en
-incrémental.
+slugs publiques, puis la base SIRENE), écrivant deux fichiers JSON commités dans
+`web/src/lib/jobs/data/` — l'index et la mémoire de ce qui a déjà été testé (§1).
+Un workflow GitHub Actions hebdomadaire le relance en incrémental.
 
-**Tech Stack:** Node 22 (`.mjs`, aucune dépendance), `fetch` natif, le
-`resolveAts` déjà livré en Phase 1.
+**Tech Stack:** Node 22 (`.mjs`, aucune dépendance), `fetch` natif, et
+`atsSlugs` — la dérivation de slugs candidats déjà livrée en Phase 1. Le
+`resolveAts` de la Phase 1 n'est **pas** réutilisé, pour la raison exposée au §3.
 
 ## Pourquoi cette brique existe
 
@@ -24,18 +25,32 @@ brique construit cette carte, et rien d'autre.
 ## Global Constraints
 
 - Aucune dépendance npm nouvelle, ni dans le script ni dans l'app.
-- Le script ne touche jamais à `web/` hors du fichier de données qu'il produit.
+- Le script ne touche jamais à `web/` hors des deux fichiers de données qu'il
+  produit (§1).
 - Aucun secret : les quatre ATS et l'API entreprises sont publics et sans clé.
-- Le fichier produit est commité et versionné : un rafraîchissement doit donner
-  un diff lisible, entreprise par entreprise.
+- L'index produit est commité et versionné : un rafraîchissement doit donner un
+  diff lisible, entreprise par entreprise. C'est cette contrainte qui impose de
+  sortir la mémoire des négatifs dans un second fichier (§1).
 - La brique ne récupère aucune offre et ne modifie aucune page de l'app.
 
 ---
 
-## 1. Le fichier produit
+## 1. Les deux fichiers produits
 
-`web/src/lib/jobs/data/boards-fr.json` — un tableau plat, trié par `nom` pour
-que le diff d'un rafraîchissement reste lisible :
+Le script écrit **deux** fichiers, aux rôles opposés. Les séparer n'est pas un
+confort : l'index doit rester un diff lisible (contrainte globale), et la mémoire
+des négatifs pèse cent fois plus que lui tout en changeant à chaque passage.
+
+| Fichier | Contenu | Lu par |
+|---|---|---|
+| `web/src/lib/jobs/data/boards-fr.json` | les boards ayant ≥ 1 offre française | la brique 2 |
+| `web/src/lib/jobs/data/boards-fr-testes.json` | tout ce qui a été testé, succès comme échecs | le script seul |
+
+### 1.1 `boards-fr.json` — l'index
+
+Un tableau plat, trié par `nom` puis `ats` — le second critère départage deux
+entrées de même nom sur deux ATS, sans quoi l'ordre serait instable d'un
+passage à l'autre et le diff illisible :
 
 ```json
 [
@@ -60,14 +75,48 @@ que le diff d'un rafraîchissement reste lisible :
 
 - `ats` : l'une des quatre valeurs de `AtsProvider` (`greenhouse`, `lever`,
   `ashby`, `smartrecruiters`).
-- `offresFR` : le nombre d'offres françaises constaté au dernier passage. Sert à
-  prioriser la moisson en brique 2 et à repérer un board qui se vide.
+- `offresFR` : le nombre d'offres françaises constaté au dernier passage.
+  **Toujours ≥ 1 dans ce fichier** — un board tombé à zéro sort de l'index et ne
+  subsiste que dans le mémo (§5). Sert à prioriser la moisson en brique 2.
 - `siren` : renseigné par la source B seulement, `null` pour la source A. C'est
   ce qui permettra plus tard de rapprocher une entreprise de sa fiche publique.
 - `vuLe` : date ISO courte du dernier passage réussi. Pilote l'incrémental.
 
-Ordre de grandeur attendu : quelques milliers d'entrées, quelques centaines de
-Ko — comparable aux `rome-*.json` déjà commités (0,8 et 1,4 Mo).
+**D'où vient `nom` :** la source B le tient de SIRENE (`nom_complet`). La
+source A ne connaît **que le slug** — vérifié le 04/08/2026 : la racine Ashby ne
+porte que `{jobs, apiVersion}`, et aucune offre Lever ni Greenhouse ne contient
+de champ entreprise. Pour la source A, `nom` est donc le slug remis en forme
+(tirets en espaces, initiales capitalisées) : `contentsquare` → `Contentsquare`,
+`loft-orbital` → `Loft Orbital`. C'est une étiquette d'affichage, imparfaite et
+assumée ; la source B écrase cette valeur par la raison sociale réelle si elle
+retrouve la même entreprise.
+
+Ordre de grandeur attendu : quelques centaines d'entrées au sortir de la source A
+(~300 boards, extrapolés de l'échantillon de 450), quelques milliers une fois la
+source B passée. Soit quelques dizaines à quelques centaines de Ko — bien en
+deçà des `rome-*.json` déjà commités (0,8 et 1,4 Mo).
+
+### 1.2 `boards-fr-testes.json` — le mémo
+
+La liste de tout ce qui a été essayé, succès **et** échecs, sans quoi
+l'incrémental du §5 n'a rien sur quoi s'appuyer :
+
+```json
+[
+  { "cle": "lever:contentsquare", "offresFR": 5, "vuLe": "2026-08" },
+  { "cle": "greenhouse:boulangerie-durand", "offresFR": 0, "vuLe": "2026-08" }
+]
+```
+
+- `cle` : `"<ats>:<slug>"`, l'identité stable d'un board.
+- `offresFR: 0` signifie « testé, rien trouvé » — pas « jamais testé ».
+- `vuLe` est ici au **mois**, pas au jour. Avec une TTL de l'ordre du mois (§5)
+  et un passage
+  hebdomadaire, une date au jour ferait bouger un quart des ~30 000 lignes à
+  chaque exécution. Le mois suffit à piloter la TTL et réduit le bruit du diff.
+
+Ce fichier atteindra ~30 000 entrées (~1,5 Mo). Rien ne le lit hors du script :
+le supprimer ne coûte qu'un balayage complet de plus.
 
 ## 2. Source A — les listes de slugs publiques
 
@@ -132,9 +181,10 @@ supplémentaire n'est nécessaire. Les tranches 21 (50–99) et 22 (100–199) l
 dépassent toutes deux et sont hors périmètre initial ; les inclure exigera un
 découpage par département, ce qui est un travail distinct.
 
-Le nom testé est `nom_complet`. Une entreprise dont aucun slug ne résout n'est
-pas réessayée avant l'expiration de son `vuLe` (§5) — y compris les échecs, pour
-ne pas repayer 14 651 résolutions à chaque passage.
+Le nom testé est `nom_complet`. Chaque couple `<ats>:<slug>` essayé est inscrit
+dans le mémo (§1.2), qu'il ait abouti ou non, et n'est pas réessayé avant
+l'expiration de sa TTL (§5) — sans cette trace des échecs, les 14 651 résolutions
+seraient repayées à chaque passage.
 
 ## 4. Reconnaître une offre « en France »
 
@@ -142,40 +192,86 @@ Les quatre ATS écrivent le lieu différemment. Formats relevés sur de vraies
 réponses le 04/08/2026 :
 
 ```
-Greenhouse       "Berlin, Berlin, Germany"   "Frankfurt"   "Münster; Osnabrück"
-Ashby            "Paris, France"             "Anywhere in France"
-Lever            "Montpellier, France"       "Remote, Brasil"
+Greenhouse       "Berlin, Berlin, Germany"   "Frankfurt"   "Paris"
+Ashby            "Paris, France"             "Anywhere in France"   "Paris"
+Lever            "Paris Area, France"        "Toulouse, Occitanie"  "Remote, Brasil"
 SmartRecruiters  champ structuré : { city: "Lille", country: "fr" }
+Lever            champ structuré : country: "FR"   (présent, mais pas toujours)
 ```
 
 **Règle, dans cet ordre :**
 
-1. **SmartRecruiters** expose le pays en champ structuré. On lit `country`, on ne
-   devine jamais sur du texte.
-2. Pour les trois autres, un **marqueur de pays fait foi** : `France`,
-   `, fr` en fin de segment, `(FR)`. Insensible à la casse et aux accents.
-3. À défaut de marqueur, une **liste de villes françaises** sert de repli — mais
-   la correspondance est **rejetée** si la chaîne contient par ailleurs un autre
-   marqueur de pays ou un code d'état américain. Sans cette garde, « Paris, TX »
-   et « Paris, Texas » entrent dans l'index.
-4. Une chaîne sans marqueur de pays ni ville connue est écartée. C'est le bon
-   comportement : `"Frankfurt"` seul est allemand.
+1. **Champ pays structuré, s'il existe.** SmartRecruiters le donne toujours
+   (`location.country`), Lever souvent (`country`, code ISO : `FR`, `SA`, `PL`,
+   `US`…). Quand il est là, il fait foi et on ne regarde pas le texte.
+2. **Marqueur de pays dans le texte** : `France`, `, fr` en fin de segment,
+   `(FR)`. Insensible à la casse et aux accents.
+3. **Ville ou région française** dans le texte. La correspondance est **rejetée**
+   si la chaîne porte par ailleurs un autre marqueur de pays ou un code d'état
+   américain — sans cette garde, « Paris, TX » et « Paris, Texas » entrent dans
+   l'index.
+4. Rien de tout cela : écarté. C'est le bon comportement, `"Frankfurt"` seul est
+   allemand.
+
+**La règle 3 n'est pas un repli, elle est portante.** Mesuré le 04/08/2026 :
+
+| Board | offres FR avec marqueur de pays | ville ou région seule |
+|---|---|---|
+| On Running (Greenhouse) | **0** | **8** — `"Paris"` |
+| Loft Orbital (Lever) | 1 | **13** — `"Toulouse, Occitanie"` |
+| Alan (Ashby) | 69 | 2 — `"Paris"` |
+
+Sans la règle 3, On Running disparaît **entièrement** de l'index et Loft Orbital
+perd 13 de ses 14 offres. La liste doit donc couvrir les villes françaises
+usuelles **et les treize régions** : `"Toulouse, Occitanie"` n'a pas de marqueur
+de pays, et le nom de région est une preuve plus forte qu'un nom de ville — aucune
+région française n'a d'homonyme étranger, contrairement à Paris ou Nice.
+
+Le champ structuré de Lever ne dispense pas des règles 2 et 3 : il est absent de
+certains boards, Loft Orbital le premier — celui-là même dont 13 offres ne
+tiennent qu'à la règle 3.
 
 Cette logique est une fonction pure, isolée du réseau, et c'est la seule partie
 de la brique réellement testée unitairement.
 
 ## 5. Incrémental
 
-Le script relit `boards-fr.json` avant de commencer. Une entrée dont `vuLe`
-remonte à moins de 30 jours n'est pas re-testée. Sans ça, chaque exécution
-hebdomadaire repaierait le balayage complet — 1,6 Go pour la source A, 14 651
-résolutions pour la source B — sans rien apprendre.
+Le script relit **`boards-fr-testes.json`** — pas l'index — avant de commencer.
+Une clé `<ats>:<slug>` dont le `vuLe` est **le mois courant ou le précédent**
+n'est pas re-testée, qu'elle ait donné un résultat ou non.
 
-Un drapeau `--complet` force le re-test intégral, pour le jour où la logique de
-détection change et où l'index doit être reconstruit.
+La TTL s'exprime en mois parce que le mémo date au mois (§1.2) : une durée en
+jours n'y serait pas calculable. L'ancienneté réelle tolérée oscille donc entre
+30 et 60 jours selon le moment du mois — une imprécision sans conséquence, un
+ATS ne changeant pas en huit semaines.
 
-Une entrée dont le board ne répond plus, ou n'a plus d'offre française, est
-**retirée** du fichier. L'index décrit l'état courant, pas un historique.
+C'est le mémo, et lui seul, qui rend l'incrémental possible. L'index ne contient
+que les succès ; s'appuyer sur lui laisserait sans mémoire les dizaines de
+milliers de slugs testés en vain, et chaque exécution hebdomadaire repaierait
+l'intégralité du balayage — 1,6 Go et ~117 000 requêtes — pour ne rien
+apprendre de neuf.
+
+Un drapeau `--complet` ignore la TTL et force le re-test intégral, pour le jour
+où la logique de détection change et où l'index doit être reconstruit.
+
+### Ce qui se passe quand un board ne répond plus
+
+**Une erreur réseau n'écrit rien.** Timeout, DNS, 5xx, connexion coupée :
+l'entrée garde sa valeur et sa date précédentes, et sera réessayée au passage
+suivant.
+
+C'est la règle la plus importante de cette section. Le code de la Phase 1 traite
+une erreur réseau comme un non-match ; transposer ce comportement ici suffirait à
+vider l'index un jour de réseau dégradé sur le *runner*, ou pendant une panne
+d'Ashby — et comme le fichier est commité, la perte deviendrait un commit.
+
+Seule une réponse **HTTP 200 exploitable** fait autorité :
+
+- 200 avec au moins une offre française → l'entrée est mise à jour dans l'index.
+- 200 avec zéro offre française, ou 404 → `offresFR: 0` dans le mémo, et
+  l'entrée **sort de l'index** si elle y était.
+
+L'index décrit donc l'état courant constaté, jamais un état supposé.
 
 ## 6. Exécution
 
@@ -189,7 +285,8 @@ code, et l'échec de l'une ne doit pas emporter l'autre.
 - **`concurrency: group: boucle-autonome`** — le même groupe que la boucle. Les
   deux workflows commitent sur `main` ; sans ce verrou partagé, un `push`
   simultané échoue ou écrase. C'est la seule raison de partager le groupe.
-- Le job commite le fichier s'il a changé, et ne commite rien sinon.
+- Le job commite les **deux** fichiers s'ils ont changé, et ne commite rien
+  sinon. Un passage entièrement servi par la TTL ne produit aucun commit.
 
 ## Coûts mesurés
 
@@ -198,10 +295,18 @@ code, et l'échec de l'une ne doit pas emporter l'autre.
 | Source A, balayage complet | 15 862 | 1,6 Go mesurés | ~5 min mesurées |
 | Source B, 14 651 entreprises | ~117 000 | faible | ~20–40 min estimées |
 
-La source A est mesurée. La source B est estimée : 14 651 entreprises × 2 slugs
-× 4 ATS, dont l'écrasante majorité répond 404 en quelques dizaines de
-millisecondes sans corps. Seuls les rares boards existants sont rapatriés, d'où
-un volume faible malgré le nombre de requêtes.
+La source A est mesurée. La source B est estimée, et **117 000 est un majorant,
+pas une prévision** : `atsSlugs` ne rend qu'un seul slug quand la variante collée
+égale la variante tiretée (« Doctolib »), et la recherche s'arrête au premier
+slug qui résout. L'écrasante majorité des appels répond 404 en quelques dizaines
+de millisecondes sans corps ; seuls les rares boards existants sont rapatriés,
+d'où un volume faible malgré le nombre de requêtes.
+
+**Ashby n'a pas de mode léger.** Testé le 04/08/2026 sur le board d'Alan :
+`?includeCompensation=false` et `?includeContent=false` renvoient 1 666 Ko, soit
+exactement le poids de l'appel nu. Les descriptions complètes sont incompressibles.
+Ashby coûte donc ~1,7 Mo par board pour le rendement le plus faible des quatre
+(0,7 %) — c'est admis, pas à ré-optimiser.
 
 Les deux tiennent très au large sous la limite de 6 h d'un job GitHub Actions.
 
@@ -217,10 +322,17 @@ Le projet ne teste pas ses scripts de build ; il teste la **cohérence du fichie
 produit** — c'est ce que fait `rome-data.test.ts`. Même convention :
 
 - `boards-fr.test.ts` : chaque entrée a les six champs, `ats` appartient aux
-  quatre valeurs connues, `offresFR` est un entier ≥ 1, aucun doublon sur
-  `ats + slug`, le tableau est trié par `nom`.
-- La détection « France » est testée unitairement sur les huit formats réels
-  ci-dessus, plus les pièges : `Paris, TX`, `Paris, Texas`, chaîne vide.
+  quatre valeurs connues, `offresFR` est un entier **≥ 1** (un zéro dans l'index
+  est le symptôme d'une suppression manquée, §5), aucun doublon sur `ats + slug`,
+  le tableau est trié par `nom` puis `ats`.
+- Le mémo `boards-fr-testes.json` n'est **pas** testé : rien ne le lit hors du
+  script, et le perdre ne coûte qu'un balayage.
+- La détection « France » est testée unitairement sur tous les formats réels du
+  §4 — `"Paris, France"`, `"Anywhere in France"`, `"Paris Area, France"`,
+  `"Toulouse, Occitanie"`, `"Paris"` seul, `"Berlin, Berlin, Germany"`,
+  `"Remote, Brasil"`, `"Frankfurt"` — plus les pièges : `"Paris, TX"`,
+  `"Paris, Texas"`, chaîne vide, et un champ structuré `country: "FR"` qui doit
+  l'emporter sur un texte trompeur.
 - Aucun test réseau : la suite doit passer hors ligne.
 
 ## Réserves
