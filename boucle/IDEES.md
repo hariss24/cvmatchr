@@ -60,6 +60,12 @@ idées déjà notées gardent leurs notes et justifications à l'identique, seul
 numérotation a changé — voir `boucle/journal/2026-08-04-arbitre.md` pour le détail des
 égalités tranchées.*
 
+*Mise à jour du 04/08/2026 (Arbitre, deuxième réveil) : une idée notée et intégrée —
+celle du constat `2026-08-04-briques-externes.md` (remplacer les sélecteurs CSS de
+`scrapeJobText` par `@mozilla/readability`), laissée non notée par l'Éclaireur en fin de
+fichier. Les 21 idées déjà notées gardent leurs notes et justifications à l'identique —
+voir `boucle/journal/2026-08-04-arbitre-2.md` pour le détail.*
+
 ### 1. Optimisation de profil LinkedIn (analyse + suggestions) — 14/20
 
 | Critère | Note | Justification |
@@ -326,6 +332,18 @@ personnelle, tous les appels IA retombent sur la clé serveur partagée
 | Cohérence | 2 | Un plafond introduit de la friction sur des parcours IA centraux (adapter la lettre, scorer l'ATS) — en tension avec « postuler mieux, plus vite » plutôt qu'à son service, même si nécessaire à la soutenabilité du produit. |
 | **Total** | **8** | Dernière du classement à égalité de total (8) parmi quatre autres idées (n°13, 14, 15, 16) : la seule des cinq où la Cohérence traduit une tension active avec la promesse (une friction ajoutée sur un parcours IA central) plutôt qu'un simple terrain voisin ou un défaut d'hygiène neutre et invisible pour l'utilisateur, comme chez les autres. Placée après elles. Signalée explicitement comme sensible : décider d'un plafond sur la clé serveur partagée est un choix de modèle économique, à trancher par le propriétaire en connaissance de cause. |
 
+### 22. Remplacer les sélecteurs CSS faits main de `scrapeJobText` par `@mozilla/readability` — 7/20 — *sensible : ajout d'une dépendance npm importante, feu vert requis ; estimation Facilité peu fiable*
+
+Constat détaillé : `boucle/constats/2026-08-04-briques-externes.md` §1.
+
+| Critère | Note | Justification |
+|---|---|---|
+| Apport | 2 | Réduirait le repli vers Jina AI Reader (service tiers payant au-delà d'un quota gratuit) sur les sites à structure inhabituelle, où l'extraction par sélecteurs faits main échoue silencieusement aujourd'hui — mais le constat le dit lui-même : aucune télémétrie actuelle sur la fréquence de ce repli, le gain réel n'est pas chiffré. |
+| Facilité | 2 | Le remplacement de code proprement dit est ciblé (44 lignes de sélecteurs en moins), mais il fait passer `jsdom` de `devDependencies` à une dépendance de production (7 086 515 o non compressés, 21 dépendances directes) — sujet sensible nommé par `MISSION.md` (« ajout d'une dépendance npm importante »), feu vert du propriétaire requis avant tout code. L'impact sur le cold-start de la fonction serverless n'est pas mesuré. **Estimation peu fiable** tant que ce coût n'est pas chiffré. |
+| Écart | 1 | Le constat le dit explicitement : « sans objet pour ce domaine » — l'extraction de contenu est un détail d'implémentation serveur invisible depuis l'extérieur d'un produit concurrent, aucun des huit produits de référence ne publie sa pile technique d'extraction. |
+| Cohérence | 2 | Lien indirect avec le seuil « coût des appels externes » de `MISSION.md` (Jina AI Reader fonctionne sur le même principe de quota gratuit dépassable) sans le violer au sens strict — le constat précise que Jina n'est pas dans la liste des services facturés nommés. Reste un raffinement de fiabilité du scraper d'offres, pas un parcours central. |
+| **Total** | **7** | Dernière du classement : profil proche de l'idée n°21 (Apport modeste, Écart quasi nul faute de comparaison possible avec la concurrence) mais avec un Apport non chiffré en plus d'une Facilité non chiffrée — les deux à mesurer avant de trancher, comme le dit le constat lui-même. Signalée sensible : décision d'ajouter `jsdom` en production à faire trancher par le propriétaire, pas seulement une question de code. |
+
 ## Écartées
 
 - **Préparation d'entretien par IA (mock interview)** — écartée le 02/08/2026. Présente
@@ -338,31 +356,3 @@ personnelle, tous les appels IA retombent sur la clé serveur partagée
 
 **Une idée écartée ne remonte jamais d'elle-même**, même si un audit ultérieur la
 retrouve chez la concurrence. Seul le propriétaire peut la rouvrir.
-
-## À noter (Éclaireur, non notées)
-
-*Ajoutée le 04/08/2026 par l'Éclaireur (domaine « briques externes »). Non notée :
-c'est à l'Arbitre de le faire au réveil suivant.*
-
-### Remplacer les sélecteurs CSS faits main de `scrapeJobText` par `@mozilla/readability` — *sensible : ajout d'une dépendance npm importante, feu vert requis*
-
-Constat détaillé : `boucle/constats/2026-08-04-briques-externes.md` §1.
-`scrapeJobText` (`web/src/lib/scraper/scraper.ts:86-129`) élimine le bruit d'une
-page HTML et cherche le contenu de l'offre via deux listes de sélecteurs CSS
-écrites à la main (44 lignes), avec repli sur Jina AI Reader (service tiers
-payant au-delà d'un quota gratuit) si l'extraction échoue. `@mozilla/readability`
-(bibliothèque du mode lecture de Firefox, Apache-2.0, dernier commit le
-04/08/2026, 11 378 étoiles GitHub, dernière version 0.6.0 du 03/03/2025) score
-le texte par densité plutôt que par sélecteurs devinés — pas de liste à
-maintenir par site. Coût : exige `jsdom` en production (7 Mo non compressés,
-21 dépendances ; actuellement seulement en `devDependencies` pour les tests),
-côté serveur uniquement donc sans poids navigateur mais avec un cold-start
-serverless non mesuré. Gain réel (taux de repli vers Jina évité) non chiffré
-faute de télémétrie actuelle — à mesurer avant de trancher.
-
-Deux autres briques examinées le même jour et **non retenues**, par manque de
-gain net démontré : `p-limit` en remplacement de `parVagues` (10 lignes déjà
-testées, `reseau.ts:28-34`) ; toute alternative à la résolution de logo faite
-main (`logos.ts`, 354 lignes) — le code actuel corrige déjà deux échecs
-documentés d'approches plus simples (deviner le domaine, se fier à l'annuaire
-seul). Détail des trois dans le constat.
