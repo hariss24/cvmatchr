@@ -1,0 +1,3194 @@
+[
+  {
+    "nom": "10xteam",
+    "ats": "ashby",
+    "slug": "10xteam",
+    "offresFR": 16,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "360learning",
+    "ats": "lever",
+    "slug": "360learning",
+    "offresFR": 16,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Actian",
+    "ats": "lever",
+    "slug": "actian",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Additionwealth",
+    "ats": "lever",
+    "slug": "additionwealth",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Adyen",
+    "ats": "greenhouse",
+    "slug": "adyen",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Agency",
+    "ats": "greenhouse",
+    "slug": "agency",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Agicap",
+    "ats": "lever",
+    "slug": "agicap",
+    "offresFR": 12,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Airapps",
+    "ats": "ashby",
+    "slug": "airapps",
+    "offresFR": 47,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Airbnb",
+    "ats": "greenhouse",
+    "slug": "airbnb",
+    "offresFR": 7,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Aircall",
+    "ats": "lever",
+    "slug": "aircall",
+    "offresFR": 16,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Airtable",
+    "ats": "greenhouse",
+    "slug": "airtable",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Airwallex",
+    "ats": "ashby",
+    "slug": "airwallex",
+    "offresFR": 7,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Ajax",
+    "ats": "lever",
+    "slug": "ajax",
+    "offresFR": 7,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Akqa",
+    "ats": "greenhouse",
+    "slug": "akqa",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Akur8",
+    "ats": "ashby",
+    "slug": "akur8",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Alan",
+    "ats": "ashby",
+    "slug": "alan",
+    "offresFR": 71,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Algolia",
+    "ats": "greenhouse",
+    "slug": "algolia",
+    "offresFR": 7,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Alice Bob",
+    "ats": "lever",
+    "slug": "alice-bob",
+    "offresFR": 20,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Alma31",
+    "ats": "greenhouse",
+    "slug": "alma31",
+    "offresFR": 9,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Aloyoga",
+    "ats": "greenhouse",
+    "slug": "aloyoga",
+    "offresFR": 9,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Alphafmcroles",
+    "ats": "greenhouse",
+    "slug": "alphafmcroles",
+    "offresFR": 8,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Amo",
+    "ats": "ashby",
+    "slug": "amo",
+    "offresFR": 31,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Anaplan",
+    "ats": "greenhouse",
+    "slug": "anaplan",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Anchanto",
+    "ats": "greenhouse",
+    "slug": "anchanto",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Aninebing",
+    "ats": "greenhouse",
+    "slug": "aninebing",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Ankorstore",
+    "ats": "ashby",
+    "slug": "ankorstore",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Anthropic",
+    "ats": "greenhouse",
+    "slug": "anthropic",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Appen",
+    "ats": "lever",
+    "slug": "appen",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Appian",
+    "ats": "greenhouse",
+    "slug": "appian",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Arago",
+    "ats": "ashby",
+    "slug": "arago",
+    "offresFR": 15,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Artefact",
+    "ats": "greenhouse",
+    "slug": "artefact",
+    "offresFR": 24,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Artefactjobs",
+    "ats": "greenhouse",
+    "slug": "artefactjobs",
+    "offresFR": 21,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Artefactlinkedin",
+    "ats": "greenhouse",
+    "slug": "artefactlinkedin",
+    "offresFR": 26,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Asana",
+    "ats": "greenhouse",
+    "slug": "asana",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Ashby",
+    "ats": "ashby",
+    "slug": "ashby",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Asm",
+    "ats": "greenhouse",
+    "slug": "asm",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Atolls",
+    "ats": "greenhouse",
+    "slug": "atolls",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Avepoint",
+    "ats": "greenhouse",
+    "slug": "avepoint",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Awin",
+    "ats": "greenhouse",
+    "slug": "awin",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Axelera",
+    "ats": "ashby",
+    "slug": "axelera",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Axon",
+    "ats": "greenhouse",
+    "slug": "axon",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Backmarket",
+    "ats": "ashby",
+    "slug": "backmarket",
+    "offresFR": 9,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Banyansoftware",
+    "ats": "greenhouse",
+    "slug": "banyansoftware",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Bazaarvoice",
+    "ats": "lever",
+    "slug": "bazaarvoice",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Bdainc",
+    "ats": "greenhouse",
+    "slug": "bdainc",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Beaconbiosignals",
+    "ats": "greenhouse",
+    "slug": "beaconbiosignals",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Bigblue",
+    "ats": "lever",
+    "slug": "bigblue",
+    "offresFR": 31,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Biggie",
+    "ats": "lever",
+    "slug": "biggie",
+    "offresFR": 12,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Bioptimus8",
+    "ats": "greenhouse",
+    "slug": "bioptimus8",
+    "offresFR": 10,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Bitstack",
+    "ats": "ashby",
+    "slug": "bitstack",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Bjakcareer",
+    "ats": "ashby",
+    "slug": "bjakcareer",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Blablacar",
+    "ats": "lever",
+    "slug": "blablacar",
+    "offresFR": 16,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Block",
+    "ats": "greenhouse",
+    "slug": "block",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Blockchain",
+    "ats": "greenhouse",
+    "slug": "blockchain",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Bloomreach",
+    "ats": "greenhouse",
+    "slug": "bloomreach",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Boomilp",
+    "ats": "greenhouse",
+    "slug": "boomilp",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Bozzuto",
+    "ats": "greenhouse",
+    "slug": "bozzuto",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Brevo",
+    "ats": "lever",
+    "slug": "brevo",
+    "offresFR": 11,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Burga",
+    "ats": "lever",
+    "slug": "burga",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Bursonglobalcareers",
+    "ats": "greenhouse",
+    "slug": "bursonglobalcareers",
+    "offresFR": 7,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "C12qe",
+    "ats": "lever",
+    "slug": "c12qe",
+    "offresFR": 6,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "C3iot",
+    "ats": "greenhouse",
+    "slug": "c3iot",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Canarytechnologies",
+    "ats": "lever",
+    "slug": "canarytechnologies",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Capco",
+    "ats": "greenhouse",
+    "slug": "capco",
+    "offresFR": 8,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Capfigroupe",
+    "ats": "greenhouse",
+    "slug": "capfigroupe",
+    "offresFR": 28,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Capimoney",
+    "ats": "ashby",
+    "slug": "capimoney",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Cardiologs",
+    "ats": "lever",
+    "slug": "cardiologs",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Careersday",
+    "ats": "greenhouse",
+    "slug": "careersday",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Castaigroupinc",
+    "ats": "greenhouse",
+    "slug": "castaigroupinc",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Catawiki",
+    "ats": "greenhouse",
+    "slug": "catawiki",
+    "offresFR": 10,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Catonetworks",
+    "ats": "greenhouse",
+    "slug": "catonetworks",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Celonis",
+    "ats": "greenhouse",
+    "slug": "celonis",
+    "offresFR": 12,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Cfgi",
+    "ats": "lever",
+    "slug": "cfgi",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Cfoinsights",
+    "ats": "greenhouse",
+    "slug": "cfoinsights",
+    "offresFR": 6,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Chainguard",
+    "ats": "greenhouse",
+    "slug": "chainguard",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Chargepoint",
+    "ats": "greenhouse",
+    "slug": "chargepoint",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Charlesriverassociates",
+    "ats": "greenhouse",
+    "slug": "charlesriverassociates",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Cheerz",
+    "ats": "lever",
+    "slug": "cheerz",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Choco",
+    "ats": "ashby",
+    "slug": "choco",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Choose",
+    "ats": "lever",
+    "slug": "choose",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Clinchoice",
+    "ats": "greenhouse",
+    "slug": "clinchoice",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Coderabbit",
+    "ats": "ashby",
+    "slug": "coderabbit",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Cognism",
+    "ats": "greenhouse",
+    "slug": "cognism",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Cognite",
+    "ats": "greenhouse",
+    "slug": "cognite",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Cohere",
+    "ats": "ashby",
+    "slug": "cohere",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Commvault",
+    "ats": "greenhouse",
+    "slug": "commvault",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Conga",
+    "ats": "greenhouse",
+    "slug": "conga",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Contentsquare",
+    "ats": "lever",
+    "slug": "contentsquare",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Convelio",
+    "ats": "lever",
+    "slug": "convelio",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Convera",
+    "ats": "greenhouse",
+    "slug": "convera",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Coupa",
+    "ats": "lever",
+    "slug": "coupa",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Crossing Minds",
+    "ats": "lever",
+    "slug": "crossing-minds",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Dashlane",
+    "ats": "greenhouse",
+    "slug": "dashlane",
+    "offresFR": 8,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Databricks",
+    "ats": "greenhouse",
+    "slug": "databricks",
+    "offresFR": 17,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Datadog",
+    "ats": "greenhouse",
+    "slug": "datadog",
+    "offresFR": 48,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Dataiku",
+    "ats": "greenhouse",
+    "slug": "dataiku",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Dataikujobs",
+    "ats": "greenhouse",
+    "slug": "dataikujobs",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Ddome",
+    "ats": "greenhouse",
+    "slug": "ddome",
+    "offresFR": 12,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Decagon",
+    "ats": "ashby",
+    "slug": "decagon",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Decathlontechnology",
+    "ats": "greenhouse",
+    "slug": "decathlontechnology",
+    "offresFR": 76,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Delinea",
+    "ats": "ashby",
+    "slug": "delinea",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Deliverect",
+    "ats": "lever",
+    "slug": "deliverect",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Deliveroo",
+    "ats": "ashby",
+    "slug": "deliveroo",
+    "offresFR": 19,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Dept",
+    "ats": "greenhouse",
+    "slug": "dept",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Devrev",
+    "ats": "greenhouse",
+    "slug": "devrev",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Didomi",
+    "ats": "lever",
+    "slug": "didomi",
+    "offresFR": 6,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Doctolib",
+    "ats": "greenhouse",
+    "slug": "doctolib",
+    "offresFR": 60,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Docugami",
+    "ats": "greenhouse",
+    "slug": "docugami",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Doitintl",
+    "ats": "greenhouse",
+    "slug": "doitintl",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Dotfile",
+    "ats": "ashby",
+    "slug": "dotfile",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Doubleverify",
+    "ats": "greenhouse",
+    "slug": "doubleverify",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Duettoresearch",
+    "ats": "greenhouse",
+    "slug": "duettoresearch",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Dust",
+    "ats": "ashby",
+    "slug": "dust",
+    "offresFR": 13,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Easygenerator",
+    "ats": "ashby",
+    "slug": "easygenerator",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Ebury",
+    "ats": "greenhouse",
+    "slug": "ebury",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Ecosio",
+    "ats": "greenhouse",
+    "slug": "ecosio",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Ekimetrics",
+    "ats": "lever",
+    "slug": "ekimetrics",
+    "offresFR": 11,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Elastic",
+    "ats": "greenhouse",
+    "slug": "elastic",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Elementbiosciences",
+    "ats": "greenhouse",
+    "slug": "elementbiosciences",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Elevenlabs",
+    "ats": "ashby",
+    "slug": "elevenlabs",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Equativ",
+    "ats": "lever",
+    "slug": "equativ",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Espace",
+    "ats": "lever",
+    "slug": "espace",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Esri",
+    "ats": "greenhouse",
+    "slug": "esri",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Everai",
+    "ats": "ashby",
+    "slug": "everai",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Everfield",
+    "ats": "ashby",
+    "slug": "everfield",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Examplecorpsandbox",
+    "ats": "greenhouse",
+    "slug": "examplecorpsandbox",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Exegy",
+    "ats": "ashby",
+    "slug": "exegy",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Fanaticscollectibles",
+    "ats": "greenhouse",
+    "slug": "fanaticscollectibles",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Feedzai",
+    "ats": "greenhouse",
+    "slug": "feedzai",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Fender",
+    "ats": "greenhouse",
+    "slug": "fender",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Feverup",
+    "ats": "greenhouse",
+    "slug": "feverup",
+    "offresFR": 15,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Fieldwire",
+    "ats": "greenhouse",
+    "slug": "fieldwire",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Figma",
+    "ats": "greenhouse",
+    "slug": "figma",
+    "offresFR": 6,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Filigran",
+    "ats": "ashby",
+    "slug": "filigran",
+    "offresFR": 13,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Finary",
+    "ats": "ashby",
+    "slug": "finary",
+    "offresFR": 6,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Firstglobalmanagementservicesinc",
+    "ats": "greenhouse",
+    "slug": "firstglobalmanagementservicesinc",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Flexport",
+    "ats": "greenhouse",
+    "slug": "flexport",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Fresha",
+    "ats": "lever",
+    "slug": "fresha",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Frontcareers",
+    "ats": "ashby",
+    "slug": "frontcareers",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Getyourguide",
+    "ats": "greenhouse",
+    "slug": "getyourguide",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Gigs",
+    "ats": "greenhouse",
+    "slug": "gigs",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Gitlab",
+    "ats": "greenhouse",
+    "slug": "gitlab",
+    "offresFR": 10,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Gladia",
+    "ats": "ashby",
+    "slug": "gladia",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Globalfishingwatchrfp",
+    "ats": "greenhouse",
+    "slug": "globalfishingwatchrfp",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Gojob",
+    "ats": "lever",
+    "slug": "gojob",
+    "offresFR": 76,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Gorgias",
+    "ats": "ashby",
+    "slug": "gorgias",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Grafanalabs",
+    "ats": "greenhouse",
+    "slug": "grafanalabs",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Gruve",
+    "ats": "greenhouse",
+    "slug": "gruve",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Guidepostmontessori",
+    "ats": "greenhouse",
+    "slug": "guidepostmontessori",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Gympass",
+    "ats": "greenhouse",
+    "slug": "gympass",
+    "offresFR": 7,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Harmattan Ai",
+    "ats": "ashby",
+    "slug": "harmattan-ai",
+    "offresFR": 61,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Harvey",
+    "ats": "ashby",
+    "slug": "harvey",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Hcompany",
+    "ats": "ashby",
+    "slug": "hcompany",
+    "offresFR": 15,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Heetch",
+    "ats": "lever",
+    "slug": "heetch",
+    "offresFR": 8,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Hellofresh",
+    "ats": "greenhouse",
+    "slug": "hellofresh",
+    "offresFR": 9,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Helsing",
+    "ats": "greenhouse",
+    "slug": "helsing",
+    "offresFR": 12,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Heritageholdings",
+    "ats": "greenhouse",
+    "slug": "heritageholdings",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Hexa",
+    "ats": "ashby",
+    "slug": "hexa",
+    "offresFR": 23,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Higgsfieldai",
+    "ats": "ashby",
+    "slug": "higgsfieldai",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Hightouch",
+    "ats": "greenhouse",
+    "slug": "hightouch",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Hilberts",
+    "ats": "ashby",
+    "slug": "hilberts",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Hive",
+    "ats": "greenhouse",
+    "slug": "hive",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Hopae",
+    "ats": "ashby",
+    "slug": "hopae",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Hrtechx",
+    "ats": "greenhouse",
+    "slug": "hrtechx",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Hubspotjobs",
+    "ats": "greenhouse",
+    "slug": "hubspotjobs",
+    "offresFR": 11,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Humanrightswatch",
+    "ats": "greenhouse",
+    "slug": "humanrightswatch",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Ibanfirst",
+    "ats": "greenhouse",
+    "slug": "ibanfirst",
+    "offresFR": 6,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Ifm Us",
+    "ats": "lever",
+    "slug": "ifm-us",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Inato",
+    "ats": "ashby",
+    "slug": "inato",
+    "offresFR": 7,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Infinit",
+    "ats": "lever",
+    "slug": "infinit",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Interstellarlab",
+    "ats": "greenhouse",
+    "slug": "interstellarlab",
+    "offresFR": 8,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Intersystems",
+    "ats": "greenhouse",
+    "slug": "intersystems",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Interviewengineering",
+    "ats": "greenhouse",
+    "slug": "interviewengineering",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Ippon",
+    "ats": "lever",
+    "slug": "ippon",
+    "offresFR": 56,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Ircagroup",
+    "ats": "lever",
+    "slug": "ircagroup",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Ivalua",
+    "ats": "greenhouse",
+    "slug": "ivalua",
+    "offresFR": 14,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Janes",
+    "ats": "greenhouse",
+    "slug": "janes",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Jetsupport",
+    "ats": "lever",
+    "slug": "jetsupport",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Jitter Video",
+    "ats": "ashby",
+    "slug": "jitter-video",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Jobgether",
+    "ats": "lever",
+    "slug": "jobgether",
+    "offresFR": 133,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Joko",
+    "ats": "ashby",
+    "slug": "joko",
+    "offresFR": 44,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Joya",
+    "ats": "greenhouse",
+    "slug": "joya",
+    "offresFR": 65,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Jumptrading",
+    "ats": "greenhouse",
+    "slug": "jumptrading",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Kcasbio",
+    "ats": "lever",
+    "slug": "kcasbio",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Kestra",
+    "ats": "ashby",
+    "slug": "kestra",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Kickmaker",
+    "ats": "lever",
+    "slug": "kickmaker",
+    "offresFR": 16,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Klaviyo",
+    "ats": "greenhouse",
+    "slug": "klaviyo",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Klaxoon",
+    "ats": "greenhouse",
+    "slug": "klaxoon",
+    "offresFR": 6,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Kog",
+    "ats": "ashby",
+    "slug": "kog",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Kong",
+    "ats": "ashby",
+    "slug": "kong",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Konvu",
+    "ats": "ashby",
+    "slug": "konvu",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Kpler",
+    "ats": "lever",
+    "slug": "kpler",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Kraken123",
+    "ats": "lever",
+    "slug": "kraken123",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Landor",
+    "ats": "greenhouse",
+    "slug": "landor",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Ledger",
+    "ats": "ashby",
+    "slug": "ledger",
+    "offresFR": 7,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Legora",
+    "ats": "ashby",
+    "slug": "legora",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Lemlist",
+    "ats": "ashby",
+    "slug": "lemlist",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Lightspeedhq",
+    "ats": "ashby",
+    "slug": "lightspeedhq",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Lilt Production",
+    "ats": "ashby",
+    "slug": "lilt-production",
+    "offresFR": 13,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Linkup",
+    "ats": "ashby",
+    "slug": "linkup",
+    "offresFR": 8,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Loftorbital",
+    "ats": "lever",
+    "slug": "loftorbital",
+    "offresFR": 14,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Lucis",
+    "ats": "ashby",
+    "slug": "lucis",
+    "offresFR": 10,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Malt",
+    "ats": "lever",
+    "slug": "malt",
+    "offresFR": 19,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Margo Group",
+    "ats": "lever",
+    "slug": "margo-group",
+    "offresFR": 39,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Matchgroup",
+    "ats": "lever",
+    "slug": "matchgroup",
+    "offresFR": 6,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Meili",
+    "ats": "lever",
+    "slug": "meili",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Mewssystems",
+    "ats": "greenhouse",
+    "slug": "mewssystems",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Minitab",
+    "ats": "greenhouse",
+    "slug": "minitab",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Miqdigital",
+    "ats": "greenhouse",
+    "slug": "miqdigital",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Mirakl",
+    "ats": "greenhouse",
+    "slug": "mirakl",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Mirakllabs",
+    "ats": "greenhouse",
+    "slug": "mirakllabs",
+    "offresFR": 11,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Mobilefirst",
+    "ats": "ashby",
+    "slug": "mobilefirst",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Mollie",
+    "ats": "ashby",
+    "slug": "mollie",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Mongodb",
+    "ats": "greenhouse",
+    "slug": "mongodb",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Mozilla",
+    "ats": "greenhouse",
+    "slug": "mozilla",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Nabla",
+    "ats": "ashby",
+    "slug": "nabla",
+    "offresFR": 8,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Nanonets",
+    "ats": "greenhouse",
+    "slug": "nanonets",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Nebius",
+    "ats": "greenhouse",
+    "slug": "nebius",
+    "offresFR": 14,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Neo4j",
+    "ats": "greenhouse",
+    "slug": "neo4j",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Netcracker",
+    "ats": "greenhouse",
+    "slug": "netcracker",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Netgear",
+    "ats": "ashby",
+    "slug": "netgear",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Netskope",
+    "ats": "greenhouse",
+    "slug": "netskope",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Neuralconcept",
+    "ats": "ashby",
+    "slug": "neuralconcept",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Newform",
+    "ats": "ashby",
+    "slug": "newform",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Newlabcareers",
+    "ats": "greenhouse",
+    "slug": "newlabcareers",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Newrelic",
+    "ats": "greenhouse",
+    "slug": "newrelic",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Nlcventures",
+    "ats": "greenhouse",
+    "slug": "nlcventures",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Notion",
+    "ats": "ashby",
+    "slug": "notion",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Novaspace",
+    "ats": "lever",
+    "slug": "novaspace",
+    "offresFR": 15,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Nozominetworks",
+    "ats": "greenhouse",
+    "slug": "nozominetworks",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Odaseva",
+    "ats": "lever",
+    "slug": "odaseva",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Ogury",
+    "ats": "lever",
+    "slug": "ogury",
+    "offresFR": 6,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Okta",
+    "ats": "greenhouse",
+    "slug": "okta",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Oliver",
+    "ats": "greenhouse",
+    "slug": "oliver",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Onrunning",
+    "ats": "greenhouse",
+    "slug": "onrunning",
+    "offresFR": 8,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Opal Os",
+    "ats": "ashby",
+    "slug": "opal-os",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Openai",
+    "ats": "ashby",
+    "slug": "openai",
+    "offresFR": 8,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Opentable",
+    "ats": "greenhouse",
+    "slug": "opentable",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Openweb",
+    "ats": "greenhouse",
+    "slug": "openweb",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Opswat",
+    "ats": "greenhouse",
+    "slug": "opswat",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Ouihelp",
+    "ats": "greenhouse",
+    "slug": "ouihelp",
+    "offresFR": 233,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Outsight",
+    "ats": "lever",
+    "slug": "outsight",
+    "offresFR": 9,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Overstory",
+    "ats": "greenhouse",
+    "slug": "overstory",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Palantir",
+    "ats": "lever",
+    "slug": "palantir",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Paradox",
+    "ats": "ashby",
+    "slug": "paradox",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Parloa",
+    "ats": "greenhouse",
+    "slug": "parloa",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Payhawkio",
+    "ats": "greenhouse",
+    "slug": "payhawkio",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Pennylane",
+    "ats": "ashby",
+    "slug": "pennylane",
+    "offresFR": 102,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Perionnetworkltd",
+    "ats": "greenhouse",
+    "slug": "perionnetworkltd",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Pfm",
+    "ats": "greenhouse",
+    "slug": "pfm",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Photoroom",
+    "ats": "ashby",
+    "slug": "photoroom",
+    "offresFR": 10,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Pigment",
+    "ats": "lever",
+    "slug": "pigment",
+    "offresFR": 32,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Pingidentity",
+    "ats": "greenhouse",
+    "slug": "pingidentity",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Pinterest",
+    "ats": "greenhouse",
+    "slug": "pinterest",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Pivot",
+    "ats": "ashby",
+    "slug": "pivot",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Planetlabs",
+    "ats": "greenhouse",
+    "slug": "planetlabs",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Platformsh",
+    "ats": "greenhouse",
+    "slug": "platformsh",
+    "offresFR": 7,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Plaud",
+    "ats": "ashby",
+    "slug": "plaud",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Playplay",
+    "ats": "lever",
+    "slug": "playplay",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Point72",
+    "ats": "greenhouse",
+    "slug": "point72",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Polene Paris",
+    "ats": "ashby",
+    "slug": "polene-paris",
+    "offresFR": 40,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Postman",
+    "ats": "greenhouse",
+    "slug": "postman",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Powerdot",
+    "ats": "greenhouse",
+    "slug": "powerdot",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Pqshield",
+    "ats": "greenhouse",
+    "slug": "pqshield",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Precisionmedicinegroup",
+    "ats": "greenhouse",
+    "slug": "precisionmedicinegroup",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Prelude",
+    "ats": "ashby",
+    "slug": "prelude",
+    "offresFR": 15,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Prismic",
+    "ats": "lever",
+    "slug": "prismic",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Privateequityinsights",
+    "ats": "greenhouse",
+    "slug": "privateequityinsights",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Proton",
+    "ats": "greenhouse",
+    "slug": "proton",
+    "offresFR": 32,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Purestorage",
+    "ats": "greenhouse",
+    "slug": "purestorage",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Qonto",
+    "ats": "lever",
+    "slug": "qonto",
+    "offresFR": 20,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Qualtrics",
+    "ats": "greenhouse",
+    "slug": "qualtrics",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Quberesearchandtechnologies",
+    "ats": "greenhouse",
+    "slug": "quberesearchandtechnologies",
+    "offresFR": 27,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Referralsuseonly",
+    "ats": "greenhouse",
+    "slug": "referralsuseonly",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Reformation",
+    "ats": "greenhouse",
+    "slug": "reformation",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Relex",
+    "ats": "greenhouse",
+    "slug": "relex",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Remotecom",
+    "ats": "greenhouse",
+    "slug": "remotecom",
+    "offresFR": 6,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Remotereferralboardinternaluseonly",
+    "ats": "greenhouse",
+    "slug": "remotereferralboardinternaluseonly",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Remotewoman",
+    "ats": "greenhouse",
+    "slug": "remotewoman",
+    "offresFR": 7,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Resolvetosavelives",
+    "ats": "greenhouse",
+    "slug": "resolvetosavelives",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Retailinsights",
+    "ats": "greenhouse",
+    "slug": "retailinsights",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Revolutionmedicines",
+    "ats": "greenhouse",
+    "slug": "revolutionmedicines",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Rimestechnologies",
+    "ats": "greenhouse",
+    "slug": "rimestechnologies",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Rtbhouse",
+    "ats": "greenhouse",
+    "slug": "rtbhouse",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Rubrik",
+    "ats": "greenhouse",
+    "slug": "rubrik",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Rws",
+    "ats": "lever",
+    "slug": "rws",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Safran Ai",
+    "ats": "lever",
+    "slug": "safran-ai",
+    "offresFR": 27,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Salonkee",
+    "ats": "ashby",
+    "slug": "salonkee",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Sambatv",
+    "ats": "lever",
+    "slug": "sambatv",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Samsara",
+    "ats": "greenhouse",
+    "slug": "samsara",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Satispay",
+    "ats": "ashby",
+    "slug": "satispay",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Scaleway",
+    "ats": "lever",
+    "slug": "scaleway",
+    "offresFR": 31,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Scality",
+    "ats": "lever",
+    "slug": "scality",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Sentinellabs",
+    "ats": "greenhouse",
+    "slug": "sentinellabs",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Sesamm",
+    "ats": "greenhouse",
+    "slug": "sesamm",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Setsales",
+    "ats": "greenhouse",
+    "slug": "setsales",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Sfeir",
+    "ats": "lever",
+    "slug": "sfeir",
+    "offresFR": 45,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Sharkninjaoperatingllc",
+    "ats": "greenhouse",
+    "slug": "sharkninjaoperatingllc",
+    "offresFR": 12,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Shifttechnology",
+    "ats": "greenhouse",
+    "slug": "shifttechnology",
+    "offresFR": 11,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Sierra",
+    "ats": "ashby",
+    "slug": "sierra",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Skillsoft",
+    "ats": "greenhouse",
+    "slug": "skillsoft",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Snowflake",
+    "ats": "ashby",
+    "slug": "snowflake",
+    "offresFR": 6,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Sohohouseco",
+    "ats": "greenhouse",
+    "slug": "sohohouseco",
+    "offresFR": 11,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Soldejaneiro",
+    "ats": "greenhouse",
+    "slug": "soldejaneiro",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Solidgate",
+    "ats": "ashby",
+    "slug": "solidgate",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Sonatus",
+    "ats": "greenhouse",
+    "slug": "sonatus",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Sonio",
+    "ats": "ashby",
+    "slug": "sonio",
+    "offresFR": 6,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Sonobello",
+    "ats": "greenhouse",
+    "slug": "sonobello",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Sonyinteractiveentertainmentglobal",
+    "ats": "greenhouse",
+    "slug": "sonyinteractiveentertainmentglobal",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Sonymusiccareersfrance",
+    "ats": "greenhouse",
+    "slug": "sonymusiccareersfrance",
+    "offresFR": 17,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Sonymusicentertainment",
+    "ats": "greenhouse",
+    "slug": "sonymusicentertainment",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Sophos",
+    "ats": "lever",
+    "slug": "sophos",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Sorare",
+    "ats": "ashby",
+    "slug": "sorare",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Sothebys",
+    "ats": "greenhouse",
+    "slug": "sothebys",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Source",
+    "ats": "lever",
+    "slug": "source",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Spauldingridge",
+    "ats": "greenhouse",
+    "slug": "spauldingridge",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Speechify",
+    "ats": "greenhouse",
+    "slug": "speechify",
+    "offresFR": 19,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Spektrum",
+    "ats": "greenhouse",
+    "slug": "spektrum",
+    "offresFR": 30,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Spothopper",
+    "ats": "greenhouse",
+    "slug": "spothopper",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Squarepointcapital",
+    "ats": "greenhouse",
+    "slug": "squarepointcapital",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Staycation",
+    "ats": "ashby",
+    "slug": "staycation",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Stripe",
+    "ats": "greenhouse",
+    "slug": "stripe",
+    "offresFR": 6,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Studsinc",
+    "ats": "greenhouse",
+    "slug": "studsinc",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Suitsupply",
+    "ats": "greenhouse",
+    "slug": "suitsupply",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Sumup",
+    "ats": "greenhouse",
+    "slug": "sumup",
+    "offresFR": 68,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Swapcard",
+    "ats": "lever",
+    "slug": "swapcard",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Swile",
+    "ats": "lever",
+    "slug": "swile",
+    "offresFR": 12,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Synthesia",
+    "ats": "ashby",
+    "slug": "synthesia",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Taketwo",
+    "ats": "greenhouse",
+    "slug": "taketwo",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Tandem Health",
+    "ats": "ashby",
+    "slug": "tandem-health",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Tanium",
+    "ats": "greenhouse",
+    "slug": "tanium",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Taskrabbit",
+    "ats": "greenhouse",
+    "slug": "taskrabbit",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Teads1",
+    "ats": "greenhouse",
+    "slug": "teads1",
+    "offresFR": 24,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Teampicnic",
+    "ats": "greenhouse",
+    "slug": "teampicnic",
+    "offresFR": 29,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Tegnainc",
+    "ats": "greenhouse",
+    "slug": "tegnainc",
+    "offresFR": 9,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Temporaltechnologies",
+    "ats": "greenhouse",
+    "slug": "temporaltechnologies",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Testendouble",
+    "ats": "greenhouse",
+    "slug": "testendouble",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "The Exploration Company",
+    "ats": "ashby",
+    "slug": "the-exploration-company",
+    "offresFR": 43,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "The Flex",
+    "ats": "ashby",
+    "slug": "the-flex",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Thefork",
+    "ats": "greenhouse",
+    "slug": "thefork",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Theknotworldwide",
+    "ats": "greenhouse",
+    "slug": "theknotworldwide",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Theodo",
+    "ats": "lever",
+    "slug": "theodo",
+    "offresFR": 123,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Thequalitygroupgmbh2",
+    "ats": "greenhouse",
+    "slug": "thequalitygroupgmbh2",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Thetradedesk",
+    "ats": "greenhouse",
+    "slug": "thetradedesk",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Thiga",
+    "ats": "lever",
+    "slug": "thiga",
+    "offresFR": 8,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Thunes",
+    "ats": "greenhouse",
+    "slug": "thunes",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Tide",
+    "ats": "greenhouse",
+    "slug": "tide",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Toogoodtogo",
+    "ats": "greenhouse",
+    "slug": "toogoodtogo",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Tourlane",
+    "ats": "ashby",
+    "slug": "tourlane",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Towerresearchcapital",
+    "ats": "greenhouse",
+    "slug": "towerresearchcapital",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Traderepublicbank",
+    "ats": "greenhouse",
+    "slug": "traderepublicbank",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Trainline",
+    "ats": "ashby",
+    "slug": "trainline",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Tripactions",
+    "ats": "greenhouse",
+    "slug": "tripactions",
+    "offresFR": 6,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Tripadvisor",
+    "ats": "greenhouse",
+    "slug": "tripadvisor",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Truelogic",
+    "ats": "ashby",
+    "slug": "truelogic",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Tryriot",
+    "ats": "lever",
+    "slug": "tryriot",
+    "offresFR": 22,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Tsmg",
+    "ats": "lever",
+    "slug": "tsmg",
+    "offresFR": 337,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Ttcglobal",
+    "ats": "greenhouse",
+    "slug": "ttcglobal",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Uipath",
+    "ats": "ashby",
+    "slug": "uipath",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Unframe",
+    "ats": "greenhouse",
+    "slug": "unframe",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Unispace",
+    "ats": "greenhouse",
+    "slug": "unispace",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Unitedmedia",
+    "ats": "greenhouse",
+    "slug": "unitedmedia",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Valiantys",
+    "ats": "lever",
+    "slug": "valiantys",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Valtech",
+    "ats": "greenhouse",
+    "slug": "valtech",
+    "offresFR": 13,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Veeamsoftware",
+    "ats": "greenhouse",
+    "slug": "veeamsoftware",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Veepee",
+    "ats": "lever",
+    "slug": "veepee",
+    "offresFR": 58,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Veeva",
+    "ats": "lever",
+    "slug": "veeva",
+    "offresFR": 10,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Veracyte",
+    "ats": "greenhouse",
+    "slug": "veracyte",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Verifone",
+    "ats": "greenhouse",
+    "slug": "verifone",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Verkada",
+    "ats": "greenhouse",
+    "slug": "verkada",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Verkor",
+    "ats": "lever",
+    "slug": "verkor",
+    "offresFR": 37,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Vertice",
+    "ats": "ashby",
+    "slug": "vertice",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Vestiairecollective",
+    "ats": "lever",
+    "slug": "vestiairecollective",
+    "offresFR": 6,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Via",
+    "ats": "greenhouse",
+    "slug": "via",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Vibe",
+    "ats": "ashby",
+    "slug": "vibe",
+    "offresFR": 11,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Viralnation",
+    "ats": "greenhouse",
+    "slug": "viralnation",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Vistar",
+    "ats": "ashby",
+    "slug": "vistar",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Vizzia",
+    "ats": "ashby",
+    "slug": "vizzia",
+    "offresFR": 6,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Vmlenterprisesolutions",
+    "ats": "greenhouse",
+    "slug": "vmlenterprisesolutions",
+    "offresFR": 10,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Vo2 Group",
+    "ats": "lever",
+    "slug": "vo2-group",
+    "offresFR": 14,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Voize",
+    "ats": "ashby",
+    "slug": "voize",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Voodoo",
+    "ats": "ashby",
+    "slug": "voodoo",
+    "offresFR": 77,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Wakam",
+    "ats": "greenhouse",
+    "slug": "wakam",
+    "offresFR": 7,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Waterworks",
+    "ats": "lever",
+    "slug": "waterworks",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Wattpad",
+    "ats": "lever",
+    "slug": "wattpad",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Whitecircle",
+    "ats": "ashby",
+    "slug": "whitecircle",
+    "offresFR": 12,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Winamax",
+    "ats": "lever",
+    "slug": "winamax",
+    "offresFR": 17,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Wizinc",
+    "ats": "greenhouse",
+    "slug": "wizinc",
+    "offresFR": 2,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Worldquant",
+    "ats": "greenhouse",
+    "slug": "worldquant",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Wppmedia",
+    "ats": "greenhouse",
+    "slug": "wppmedia",
+    "offresFR": 47,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Wrike",
+    "ats": "greenhouse",
+    "slug": "wrike",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Wundermanthompson",
+    "ats": "greenhouse",
+    "slug": "wundermanthompson",
+    "offresFR": 21,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Xometryeurope",
+    "ats": "greenhouse",
+    "slug": "xometryeurope",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Yext",
+    "ats": "greenhouse",
+    "slug": "yext",
+    "offresFR": 1,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Younited",
+    "ats": "lever",
+    "slug": "younited",
+    "offresFR": 5,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Yubo",
+    "ats": "ashby",
+    "slug": "yubo",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Zefir",
+    "ats": "ashby",
+    "slug": "zefir",
+    "offresFR": 7,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Zetaglobal",
+    "ats": "greenhouse",
+    "slug": "zetaglobal",
+    "offresFR": 4,
+    "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "Zscaler",
+    "ats": "greenhouse",
+    "slug": "zscaler",
+    "offresFR": 3,
+    "siren": null,
+    "vuLe": "2026-08"
+  }
+]

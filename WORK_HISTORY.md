@@ -41,6 +41,15 @@
 
 ## Journal
 
+### 2026-08-04 : Marché caché — Brique 1, Task 6 (plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md`)
+
+- **Quoi :** `scripts/boards/lot.mjs` (concurrence plafonnée, une tâche qui jette ne tue pas le lot), orchestrateur `scripts/build-boards-fr.mjs` (CLI `--source`, `--complet`, `null` jamais écrit), et **premier index réel issu de la source A**.
+- **Pourquoi :** l'orchestrateur relie les cinq modules ; l'exécution réelle de la source A valide la chaîne de bout en bout.
+- **Chiffres réels (source A, 04/08/2026) :** 15 862 slugs dans les listes publiques, 15 850 réponses exploitables / 12 indéterminées, **399 boards français, 3 980 offres FR**, ~5 min. Conforme à l'estimation (200-400).
+- **Fichiers touchés :** créés `scripts/boards/lot.mjs`, `scripts/boards/lot.test.mjs`, `scripts/build-boards-fr.mjs`, `web/src/lib/jobs/data/boards-fr.json` (399 entrées), `web/src/lib/jobs/data/boards-fr-testes.json` (15 850 couples).
+- **Résultat vérifs :** `node --test` 44/44 verts ; `tsc` OK ; `lint` 0 erreur ; Vitest 607/607 ; `build` OK.
+- **Commit :** `71a4462` — feat(boards): orchestrateur et premier index issu des listes publiques
+
 ### 2026-08-04 : Marché caché — Brique 1, Task 5 (plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md`)
 
 - **Quoi :** module `scripts/boards/sources.mjs` — `slugsDesListes()` (listes publiques Greenhouse/Lever/Ashby de Feashliaa, CC BY-NC, isolées pour remplacement futur) et `entreprisesFrancaises()` (SIRENE, tranches 31→53, paginé à 25).
