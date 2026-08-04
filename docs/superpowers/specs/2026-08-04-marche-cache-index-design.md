@@ -10,9 +10,19 @@ slugs publiques, puis la base SIRENE), écrivant deux fichiers JSON commités da
 `web/src/lib/jobs/data/` — l'index et la mémoire de ce qui a déjà été testé (§1).
 Un workflow GitHub Actions hebdomadaire le relance en incrémental.
 
-**Tech Stack:** Node 22 (`.mjs`, aucune dépendance), `fetch` natif, et
-`atsSlugs` — la dérivation de slugs candidats déjà livrée en Phase 1. Le
-`resolveAts` de la Phase 1 n'est **pas** réutilisé, pour la raison exposée au §3.
+**Tech Stack:** Node 22 (`.mjs`, aucune dépendance), `fetch` natif.
+
+**Ce que la Phase 1 ne peut pas prêter.** Ni `resolveAts` ni `atsSlugs` ne sont
+importables ici, pour deux raisons distinctes :
+
+- `resolveAts` répond à une autre question — voir §3.
+- `atsSlugs` répond à la bonne question, mais vit dans `web/src/lib/jobs/ats.ts`,
+  en TypeScript, à l'intérieur de l'app. Un script `.mjs` ne peut pas importer un
+  `.ts`, et l'app ne peut pas importer depuis `scripts/`. La dérivation des slugs
+  est donc **dupliquée** dans `scripts/boards/slugs.mjs` — huit lignes, sans
+  logique cachée. Les deux copies sont épinglées par des **vecteurs de test
+  identiques**, cités de part et d'autre, pour qu'une divergence casse une suite
+  au lieu de produire un index silencieusement faux.
 
 ## Pourquoi cette brique existe
 
@@ -150,12 +160,13 @@ derrière une seule fonction pour que ce remplacement ne touche rien d'autre.
 Licence Ouverte. Pour chaque entreprise retenue, on dérive ses slugs candidats
 avec `atsSlugs` (Phase 1), puis on interroge les quatre ATS en parallèle.
 
-**On ne réutilise pas `resolveAts` tel quel.** Il répond « ce board existe et a
-au moins une offre » — pas « au moins une offre *en France* » — et il ne rend
-aucun compte. L'index a besoin des deux. La source B applique donc le même
-comptage que la source A (§4) : elle récupère le board et compte les offres
-françaises. `atsSlugs`, en revanche, est réutilisé sans modification : la
-dérivation des slugs candidats est identique.
+**On ne réutilise pas `resolveAts`.** Il répond « ce board existe et a au moins
+une offre » — pas « au moins une offre *en France* » — et il ne rend aucun
+compte. L'index a besoin des deux. La source B applique donc le même comptage
+que la source A (§4) : elle récupère le board et compte les offres françaises.
+
+La dérivation des slugs, elle, est identique à celle de la Phase 1, mais
+dupliquée pour la raison technique exposée en tête de document.
 
 Pour SmartRecruiters, le paramètre `country=fr` donne ce compte directement,
 côté serveur, sans rapatrier le board — mesuré sur Accor : 530 offres au total,
@@ -180,6 +191,10 @@ résultats**. Chacune de ces tranches passe sous le plafond, donc aucun découpa
 supplémentaire n'est nécessaire. Les tranches 21 (50–99) et 22 (100–199) le
 dépassent toutes deux et sont hors périmètre initial ; les inclure exigera un
 découpage par département, ce qui est un travail distinct.
+
+**`per_page` est plafonné à 25** — l'API refuse toute valeur supérieure. Énumérer
+les 14 651 entreprises coûte donc 587 pages, soit quelques minutes. Vérifié le
+04/08/2026 qu'une page profonde répond bien (tranche 32, page 240 sur 240).
 
 Le nom testé est `nom_complet`. Chaque couple `<ats>:<slug>` essayé est inscrit
 dans le mémo (§1.2), qu'il ait abouti ou non, et n'est pas réessayé avant
