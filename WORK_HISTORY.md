@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Marché caché — **scan quotidien et « Nouveau depuis hier »**. Priorité réévaluée sur mesure le 04/08/2026 : l'âge médian des 9 719 offres moissonnées est de **46 jours** (44 % ont plus de 60 jours, seules 617 ont moins de 48 h). La concurrence sur une offre dépend surtout de son ancienneté, pas du canal de publication — surfacer les offres neuves vaut plus que d'élargir l'index. Ensuite seulement : descendre le seuil SIRENE sous 200 salariés (les PME reçoivent moins de candidatures, et toutes les tranches sous 200 dépassent le plafond d'affichage de l'API, donc des dizaines de milliers d'entreprises sont hors périmètre), puis la Brique 3 (Common Crawl → Workday et ATS non énumérables).
+**Prochaine étape suggérée :** Marché caché — **brancher les offres sur la recherche** (Brique 2, Tasks 3 à 5 : texte complet par ATS, source `searchBoards`, intégration dans `SourceId`/`dedupe.ts`/la route de recherche), puis afficher « Nouveau depuis hier » à partir du champ `decouverteLe`. Le scan quotidien qui alimente ce champ tourne depuis le 04/08/2026 ; les données sont prêtes, il manque la surface. Rappel de la mesure qui a fixé cette priorité : l'âge médian des offres moissonnées est de **46 jours** (44 % ont plus de 60 jours, seules 617 ont moins de 48 h) — la concurrence sur une offre dépend surtout de son ancienneté, pas du canal de publication. Ensuite seulement : descendre le seuil SIRENE sous 200 salariés (les PME reçoivent moins de candidatures, et toutes les tranches sous 200 dépassent le plafond d'affichage de l'API, donc des dizaines de milliers d'entreprises sont hors périmètre), puis la Brique 3 (Common Crawl → Workday et ATS non énumérables).
 
 ---
 
@@ -40,6 +40,17 @@
 ---
 
 ## Journal
+
+### 2026-08-04 : Marché caché — scan quotidien et date de découverte
+
+- **Quoi :** les deux cadences sont séparées. `.github/workflows/boards-fr.yml` reste hebdomadaire et ne commite plus que l'index et son mémo ; le nouveau `.github/workflows/boards-offres.yml` moissonne les offres **chaque jour à 06:00 UTC** (après la fenêtre du job hebdomadaire, verrou `boucle-autonome` partagé).
+- **Champ ajouté :** `decouverteLe` (`YYYY-MM-DD`) sur chaque offre, reporté du passage précédent par `scripts/boards/nouveaute.mjs` et mis au jour courant si l'offre est inconnue. Un « Nouveau depuis hier » côté app se lit désormais directement dans les données.
+- **Pourquoi pas `publieLe` :** Greenhouse renvoie `updated_at` — une simple retouche rajeunit l'offre ; Ashby et SmartRecruiters ont chacun leur notion, et le champ est parfois vide. `decouverteLe` est notre propre constat, homogène sur les quatre ATS.
+- **Ordre du fichier inchangé** (ats → slug → id) : la datation intervient après le tri, pour qu'un diff quotidien ne montre que ce qui a réellement bougé.
+- **Passage d'amorçage :** 445 boards exploitables sur 448 (3 indéterminés), **9 579 offres**, toutes datées du 04/08/2026 — normal, il n'existait pas de passage antérieur. Le signal « nouveau » n'a de sens qu'à partir du passage suivant.
+- **Vérifs :** `node --test` 61/61, Vitest 617/617, `tsc` propre, `lint` 0 erreur (5 warnings préexistants), `build` OK.
+- **Commit :** `0aa8661` — feat(boards): scan quotidien des offres et date de découverte
+- **Point de vigilance :** `boards-offres.json` fait ~3,4 Mo et sera committé quotidiennement. À surveiller sur quelques semaines ; si l'historique gonfle trop, sortir ce fichier du dépôt (artefact ou stockage externe) plutôt que d'espacer le scan.
 
 ### 2026-08-04 : Marché caché — Brique 2, Task 2 + réorientation mesurée de la suite
 
