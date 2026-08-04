@@ -247,6 +247,73 @@ personnelle, tous les appels IA retombent sur la clé serveur partagée
 | Cohérence | 2 | Un plafond introduit de la friction sur des parcours IA centraux (adapter la lettre, scorer l'ATS) — en tension avec « postuler mieux, plus vite » plutôt qu'à son service, même si nécessaire à la soutenabilité du produit. |
 | **Total** | **8** | Dernière du classement à égalité de total (8) parmi quatre autres idées (n°13, 14, 15, 16) : la seule des cinq où la Cohérence traduit une tension active avec la promesse (une friction ajoutée sur un parcours IA central) plutôt qu'un simple terrain voisin ou un défaut d'hygiène neutre et invisible pour l'utilisateur, comme chez les autres. Placée après elles. Signalée explicitement comme sensible : décider d'un plafond sur la clé serveur partagée est un choix de modèle économique, à trancher par le propriétaire en connaissance de cause. |
 
+## Nouvelles idées non notées (Éclaireur, 04/08/2026, performance)
+
+Constat détaillé : `boucle/constats/2026-08-04-performance.md`. Ce constat corrige
+d'abord une confusion héritée du 31/07 : `/pack` n'est pas l'éditeur CV (c'est un
+éditeur de lettre à variables, sans Monaco ni aperçu PDF) — le vrai éditeur (Monaco +
+aperçu PDF live) est à la route **`/`**. Deux idées nouvelles, non notées :
+
+- **Alléger ou décaler le premier aperçu PDF de `/` au chargement** — mesuré : **~9,2 s
+  en moyenne (9061-9512 ms)** jusqu'au premier `<canvas>` d'aperçu réellement rendu,
+  sous Slow 4G + CPU x4, contre un seuil MISSION.md de 2,5 s — **dépassement de
+  facteur ~3,7**, le plus net mesuré depuis le début des audits performance de la
+  boucle (31/07 avait mesuré `/pack` par erreur, avec un sélecteur `button` qui ne
+  garantissait pas l'aperçu prêt, et se savait sous-estimé). Cause identifiée par
+  poids : deux chunks non lazy-loadés totalisant 1 866 850 o (55 % du poids jusqu'à
+  l'aperçu) — polices de génération PDF (1 443 775 o) et moteur PDF.js de rendu
+  (423 075 o) — chargés automatiquement au montage de `PreviewPane.tsx`, sans action
+  de l'utilisateur. Ce dépassement dépasse le facteur 2 qui, selon la règle de
+  tranchage de `MISSION.md`, fait primer un chantier technique sur un manque
+  fonctionnel. Plusieurs pistes possibles (aperçu HTML/CSS provisoire, préchargement
+  réordonné, réduction du jeu de polices par défaut), aucune tranchée dans le
+  constat — chacune a un compromis produit ou technique différent à arbitrer.
+- **Décider du sort du chargement de Monaco depuis `cdn.jsdelivr.net`** — mesuré :
+  ouvrir l'onglet JSON (mode Expert) déclenche 15 requêtes vers un CDN externe non
+  maîtrisé par CVMatchr (~4,1 Mo, dont un seul fichier de 3 669 759 o), pour
+  **11 235 ms** avant que l'éditeur soit utilisable sous Slow 4G + CPU x4. Ce n'est
+  pas un appel facturé (jsdelivr est gratuit), donc hors du seuil « coût des appels
+  externes » de `MISSION.md` au sens strict, mais c'est le seul endroit de tout le
+  produit où le navigateur dépend d'un tiers pour du code plutôt qu'une donnée
+  applicative — à mettre en balance avec le poids qu'un bundle Monaco local
+  ajouterait au build. Ampleur estimée petite à moyenne (config de chargement à
+  changer, pas de réécriture).
+
+Par ailleurs, ce réveil referme l'idée n°5 déjà classée (« Performance `/jobs` —
+remesurer ») : remesuré à **~2,03 s en moyenne (2010-2075 ms)**, contre ~3,9 s le
+31/07 — dépassement résiduel du seuil de 2 s réduit d'un facteur ~2 à un facteur
+~1,02. Plus de raison de le faire primer sur un manque fonctionnel selon la règle de
+tranchage de `MISSION.md`. À l'Arbitre de décider s'il retire ou reclasse cette ligne
+au prochain réveil — l'Éclaireur ne réordonne pas le classement existant.
+
+## Nouvelles idées non notées (Éclaireur, 03/08/2026, 2e réveil)
+
+Constat détaillé : `boucle/constats/2026-08-03-manques-fonctionnels-2.md`. Trois
+manques fonctionnels nouveaux, absents du constat du 02/08 déjà classé. Non
+notés : c'est à l'Arbitre de les noter et de les intégrer au classement
+ci-dessus au prochain réveil.
+
+- **Assistant de négociation salariale** — présent chez Careerflow (IA, arguments
+  de négociation à partir de l'offre), Teal (analyse d'offre + comparaison au
+  marché) et Simplify (service payant humain, 3/8 produits consultés). Absent à
+  100 % de CVMatchr : rien entre l'obtention d'une offre et son acceptation.
+  Ampleur estimée moyenne, réutiliserait l'infra IA existante.
+- **Alertes sur de nouvelles offres correspondant au profil** — présent chez Teal
+  (instantané ou résumé quotidien par e-mail) et Careerflow (e-mail temps réel),
+  2/8 produits. CVMatchr est intégralement à la demande : sans notification,
+  rien ne prévient le candidat entre deux visites de `/jobs`. **Sensible** :
+  contrairement aux deux autres idées de ce constat, ce n'est pas un module de
+  calcul pur — ça suppose un envoi programmé serveur (donc potentiellement un
+  contact hors navigateur, l'app étant 100 % locale aujourd'hui) ou une
+  notification push navigateur avec ses limites. Ampleur estimée grosse.
+- **Correction orthographique/grammaticale dédiée avec rapport** — présent chez
+  Enhancv (outil dédié, gratuit, liste de fautes) et Kickresume (correcteur IA +
+  option de relecture humaine payante), 2/8 produits. Chez CVMatchr, la seule
+  voie existante est de le demander au chat libre de l'éditeur (`prompts.ts:337`),
+  sans rapport ni liste de fautes. Chevauchement probable avec le panneau ATS
+  existant (`AtsPanel.tsx`, axe « Structure ») à vérifier avant de spécifier.
+  Ampleur estimée petite.
+
 ## Écartées
 
 - **Préparation d'entretien par IA (mock interview)** — écartée le 02/08/2026. Présente
