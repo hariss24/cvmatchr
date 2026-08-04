@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Marché caché — **brancher les offres sur la recherche** (Brique 2, Tasks 3 à 5 : texte complet par ATS, source `searchBoards`, intégration dans `SourceId`/`dedupe.ts`/la route de recherche), puis afficher « Nouveau depuis hier » à partir du champ `decouverteLe`. Le scan quotidien qui alimente ce champ tourne depuis le 04/08/2026 ; les données sont prêtes, il manque la surface. Rappel de la mesure qui a fixé cette priorité : l'âge médian des offres moissonnées est de **46 jours** (44 % ont plus de 60 jours, seules 617 ont moins de 48 h) — la concurrence sur une offre dépend surtout de son ancienneté, pas du canal de publication. Ensuite seulement : descendre le seuil SIRENE sous 200 salariés (les PME reçoivent moins de candidatures, et toutes les tranches sous 200 dépassent le plafond d'affichage de l'API, donc des dizaines de milliers d'entreprises sont hors périmètre), puis la Brique 3 (Common Crawl → Workday et ATS non énumérables).
+**Prochaine étape suggérée :** Marché caché — afficher **« Nouveau depuis hier »** à partir du champ `decouverteLe` (le scan quotidien l'alimente depuis le 04/08/2026 ; il faut le faire remonter jusqu'à `JobOffer` puis le montrer sur la carte d'offre). La source « Marché caché » est branchée et vérifiée en navigateur depuis le 04/08/2026. Rappel de la mesure qui a fixé cette priorité : l'âge médian des offres moissonnées est de **46 jours** (44 % ont plus de 60 jours, seules 617 ont moins de 48 h) — la concurrence sur une offre dépend surtout de son ancienneté, pas du canal de publication. Ensuite seulement : descendre le seuil SIRENE sous 200 salariés (les PME reçoivent moins de candidatures, et toutes les tranches sous 200 dépassent le plafond d'affichage de l'API, donc des dizaines de milliers d'entreprises sont hors périmètre), puis la Brique 3 (Common Crawl → Workday et ATS non énumérables).
 
 ---
 
@@ -40,6 +40,16 @@
 ---
 
 ## Journal
+
+### 2026-08-04 : Marché caché — quatrième source branchée sur « Offres »
+
+- **Quoi :** Brique 2, Tasks 3 à 5. `boardsText.ts` récupère le texte complet en direct ; `boardsFr.ts` expose `searchBoards(profile)` ; `boards` devient un `SourceId` à part entière (route de recherche, dédoublonnage, `SourcePicker`, `JobsView`, `profileSchema`, `getApiUsage`). Décochée par défaut.
+- **Coût réseau par ATS :** Greenhouse et SmartRecruiters ont un endpoint par offre (1 appel/offre) ; Lever et Ashby n'en ont pas, leur endpoint liste porte déjà `descriptionPlain` — donc **un seul appel par board touché**, pas par offre.
+- **Défaut trouvé à la mesure, pas en relecture :** le plafond de 60 candidates se prélevait sur l'index rangé par `ats/slug/id`, donc toujours sur la tête de l'alphabet. Mesuré en direct sur « développeur » : **0 offre SmartRecruiters sur 60**, tout l'alphabet s'arrêtant avant. Les candidates sont maintenant triées **de la plus récente à la plus ancienne avant le plafond**. Après correction : **39 offres dont 33 SmartRecruiters**, les trois premières publiées le jour même (ALTEN). Le tri sert aussi le but du dispositif — une offre du jour a moins de candidats.
+- **Fausse piste à ne pas refaire :** le premier test navigateur ne remontait aucune offre du marché caché. Ce n'était pas le pipeline : le profil cherchait « Webmaster », qui n'apparaît dans **aucun** des 9 579 titres de l'index. Vérifier le mot-clé contre l'index avant de suspecter le code.
+- **Test manuel (navigateur, `/jobs`) :** mot-clé « développeur », les quatre sources cochées → **180 cartes affichées dont 37 offres du marché caché**, liens pointant vers greenhouse.io / lever.co / ashbyhq.com / jobs.smartrecruiters.com, textes complets (aucune offre à texte vide), 5,2 s pour le groupe. `BoardIcon` accepte bien un domaine vide et retombe sur l'initiale.
+- **Vérifs :** `node --test` 61/61, Vitest **630/630**, `tsc` propre, `lint` 0 erreur (5 warnings préexistants), `build` OK, Playwright **38/38**.
+- **Commit :** `25f76e9` — feat(jobs): brancher le marché caché comme quatrième source d'offres
 
 ### 2026-08-04 : Marché caché — scan quotidien et date de découverte
 
