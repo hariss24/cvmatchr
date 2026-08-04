@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Marché caché — afficher **« Nouveau depuis hier »** à partir du champ `decouverteLe` (le scan quotidien l'alimente depuis le 04/08/2026 ; il faut le faire remonter jusqu'à `JobOffer` puis le montrer sur la carte d'offre). La source « Marché caché » est branchée et vérifiée en navigateur depuis le 04/08/2026. Rappel de la mesure qui a fixé cette priorité : l'âge médian des offres moissonnées est de **46 jours** (44 % ont plus de 60 jours, seules 617 ont moins de 48 h) — la concurrence sur une offre dépend surtout de son ancienneté, pas du canal de publication. Ensuite seulement : descendre le seuil SIRENE sous 200 salariés (les PME reçoivent moins de candidatures, et toutes les tranches sous 200 dépassent le plafond d'affichage de l'API, donc des dizaines de milliers d'entreprises sont hors périmètre), puis la Brique 3 (Common Crawl → Workday et ATS non énumérables).
+**Prochaine étape suggérée :** deux chantiers indépendants. (a) **Stabiliser la suite Playwright**, instable en exécution parallèle sur cette machine et donc inexploitable comme garde-fou (détail dans l'entrée du 04/08/2026). (b) Marché caché — **descendre le seuil SIRENE sous 200 salariés**. La chaîne est complète et vérifiée : index hebdomadaire, scan quotidien, source branchée, pastille de fraîcheur sur la carte. Rappel de la mesure qui guide la suite : l'âge médian des offres moissonnées est de **46 jours** (44 % ont plus de 60 jours, seules 617 ont moins de 48 h) — la concurrence sur une offre dépend surtout de son ancienneté, pas du canal de publication. Ensuite seulement : descendre le seuil SIRENE sous 200 salariés (les PME reçoivent moins de candidatures, et toutes les tranches sous 200 dépassent le plafond d'affichage de l'API, donc des dizaines de milliers d'entreprises sont hors périmètre), puis la Brique 3 (Common Crawl → Workday et ATS non énumérables).
 
 ---
 
@@ -40,6 +40,23 @@
 ---
 
 ## Journal
+
+### 2026-08-04 : Marché caché — quatre défauts corrigés, et la fraîcheur affichée
+
+Quatre défauts trouvés en relisant et en mesurant la source fraîchement branchée.
+
+- **Le filtre de lieu était ignoré.** Une recherche à Toulouse renvoyait des offres parisiennes. `web/src/lib/jobs/boardsLieu.ts` applique la distance réelle aux offres qui portent des coordonnées (**5 104 sur 9 579, soit 53 %** — SmartRecruiters est le seul ATS à en fournir) et rapproche les libellés pour les autres, après avoir retiré du libellé le code INSEE et l'arrondissement (« Paris 12e (75012) » → « paris »). **Limite assumée :** le rayon n'est vrai que pour les 53 % à coordonnées ; ailleurs c'est une correspondance de ville stricte, donc une offre à Boulogne sortira d'une recherche « Paris » si son ATS ne donne pas de coordonnées. Une offre sans lieu **ni** coordonnées est gardée — l'absence d'information n'est pas une preuve d'éloignement.
+- **Les offres clignotaient.** Un board injoignable voyait ses offres sortir du fichier, puis y revenir le lendemain datées du jour — annoncées comme neuves à tort. Mesuré : **3 boards indéterminés sur 448, 345 offres concernées en un seul passage**. `reprendreIndetermines` garde les entrées du passage précédent, dans la même discipline qu'en Brique 1 : `null` = « on ne sait pas ».
+- **`publieLe` ment chez Greenhouse** (c'est `updated_at`, 1 578 offres) : une correction de faute de frappe rajeunissait une annonce de trois mois. L'ancienneté se mesure désormais sur la **plus ancienne des deux dates connues**, `publieLe` et `decouverteLe` — cette dernière ne peut pas être rajeunie par l'entreprise.
+- **Le texte arrivait en HTML brut.** Greenhouse encode son `content` en entités (`&lt;p&gt;…`), SmartRecruiters rend du HTML direct. La carte affichait littéralement `<p>ALTEN joue un rôle…`, et surtout la notation ATS et « Adapter mon CV » recevaient les balises comme du texte d'offre. `texteBrut` décode, retire les balises, puis redécode (les entités ne se révèlent qu'au premier passage). Vérifié en direct après correction : **0 offre sur 53 ne contient encore du HTML**.
+
+**Affichage de la fraîcheur** — le mot « Nouveau » existait déjà sur la carte et voulait dire « pas encore ouverte », pas « offre récente » ; il **évinçait la date**, seule information qui dise combien de candidats sont déjà passés. Trois faits tiennent maintenant dans le même emplacement sans un mot de plus : pastille de 6 px = repérée au dernier scan quotidien, couleur de la date = pas encore ouverte, date toujours lisible. Mesuré sur mobile (375 px) : bloc de **79 × 17 px**, une seule ligne, aucun débordement horizontal. Tolérance d'un jour dans `estFraiche` : le scan tourne à 06:00 UTC, sans elle la pastille disparaîtrait chaque nuit.
+
+- **Vérifs :** `node --test` 64/64, Vitest **658/658**, `tsc` propre, `lint` 0 erreur, `build` OK, Playwright `jobs` + `mobile` 13/13.
+- **Test en direct :** « ingénieur », Paris + 10 km, marché caché seul → 53 offres, toutes en Île-de-France (Boulogne, Saint-Ouen, Montrouge…), textes propres.
+- **Commit :** `f4bcb2d` — fix(boards): lieu, ancienneté fiable, texte lisible, et pastille de fraîcheur
+
+⚠️ **Suite Playwright instable en parallèle sur cette machine** : la suite complète a rendu 5 échecs puis 1 échec sur des specs *différentes* (`editor`, `chat`, `import-text`, `form-reorder`), toutes vertes relancées seules — et **reproduit à l'identique sur le code d'avant ces changements** (vérifié par `git stash`). C'est de la contention, pas une régression. À traiter pour lui-même : tant que ça dure, un échec e2e ne prouve rien sans relance ciblée.
 
 ### 2026-08-04 : Marché caché — quatrième source branchée sur « Offres »
 
