@@ -41,6 +41,14 @@
 
 ## Journal
 
+### 2026-08-04 : Marché caché — Brique 1, Task 3 (plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md`)
+
+- **Quoi :** module `scripts/boards/ats.mjs` — `compterFR(ats, slug, fetchImpl?)` par ATS (Greenhouse, Lever, Ashby, SmartRecruiters), avec distinction stricte `null` (panne réseau/5xx/JSON illisible = « on ne sait pas ») vs `0` (testé, rien trouvé).
+- **Pourquoi :** sans cette distinction, une panne d'un ATS viderait l'index au premier incident et le commiterait ; SmartRecruiters est compté via `totalFound` filtré côté serveur (`country=fr`).
+- **Fichiers touchés :** créés `scripts/boards/ats.mjs`, `scripts/boards/ats.test.mjs`.
+- **Résultat vérifs :** `node --test` 23/23 verts (Tasks 1-3) ; pas de fichier web touché.
+- **Commit :** `aa5da85` — feat(boards): comptage des offres françaises par ATS, sans confondre panne et vide
+
 ### 2026-08-04 : Marché caché — Brique 1, Task 2 (plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md`)
 
 - **Quoi :** module `scripts/boards/france.mjs` — `estFrancais(lieu, paysIso?)`, fonction pure : champ pays structuré → marqueur de pays → ville/région française, avec gardes contre les homonymes étrangers (Paris TX, Grande-Bretagne).
