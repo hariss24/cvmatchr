@@ -41,6 +41,14 @@
 
 ## Journal
 
+### 2026-08-04 : Marché caché — Brique 1, Task 2 (plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md`)
+
+- **Quoi :** module `scripts/boards/france.mjs` — `estFrancais(lieu, paysIso?)`, fonction pure : champ pays structuré → marqueur de pays → ville/région française, avec gardes contre les homonymes étrangers (Paris TX, Grande-Bretagne).
+- **Pourquoi :** reconnaître « une offre en France » malgré les quatre formats de lieu incompatibles des ATS ; sans la règle ville/région, deux boards réels (On Running, Loft Orbital) sortiraient entièrement de l'index.
+- **Fichiers touchés :** créés `scripts/boards/france.mjs`, `scripts/boards/france.test.mjs`.
+- **Résultat vérifs :** `node --test` 13/13 verts (Task 1 + 2) ; pas de fichier web touché.
+- **Commit :** `8c5a3b2` — feat(boards): détection des offres situées en France
+
 ### 2026-08-04 : Marché caché — Brique 1, Task 1 (plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md`)
 
 - **Quoi :** module `scripts/boards/slugs.mjs` (nom d'entreprise → slugs candidats), jumeau de `ats.ts` de l'app, épinglé par des vecteurs de test identiques ; commentaire de jumelage ajouté dans `ats.test.ts`.
