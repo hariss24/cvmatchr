@@ -41,6 +41,14 @@
 
 ## Journal
 
+### 2026-08-04 : Marché caché — Brique 2, Task 1 (plan `docs/superpowers/plans/2026-08-04-marche-cache-offres.md`)
+
+- **Quoi :** module `scripts/boards/offres.mjs` — `listerOffresFR(ats, slug, fetchImpl?)` : liste les offres françaises LÉGÈRES (id, titre, lieu, url, date) sans texte, par ATS ; SmartRecruiters paginé (page 0-base, limit 100), URL publique construite (`jobs.smartrecruiters.com/{slug}/{id}`), lat/lng repris quand présents ; `null` = réponse inexploitable, jamais un résultat partiel.
+- **Pourquoi :** complète `ats.mjs` (Brique 1, qui ne fait que compter) sans le modifier pour ne prendre aucun risque de régression ; la duplication des URLs est assumée.
+- **Fichiers touchés :** créés `scripts/boards/offres.mjs`, `scripts/boards/offres.test.mjs`.
+- **Résultat vérifs :** `node --test` 55/55 verts (Tasks B1 + B2-T1) ; pas de fichier web touché.
+- **Commit :** `41fa843` — feat(boards): listage léger des offres françaises par board
+
 ### 2026-08-04 : Marché caché — Brique 1, Task 8 (plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md`)
 
 - **Quoi :** exécution de la source B (SIRENE), workflow hebdomadaire `boards-fr.yml`, documentation (spec « Réserves », `PROJECT_INDEX.md`). **Deux correctifs** ont été nécessaires à `scripts/boards/sources.mjs` : politesse + retry sur 429 (l'API SIRENE plafonne en pagination rapide — premier run : 2 100 entreprises au lieu de 14 651), et dérivation des slugs depuis `nom_raison_sociale` (repli `nom_complet` sans parenthèse — « ACCOR (ACCOR) » donnait `accor-accor`, jamais le slug du board). Tests ajoutés pour les deux.
