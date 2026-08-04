@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Phase 2 du détecteur d'ATS — récupérer les offres depuis les boards détectés et les mêler aux résultats de recherche. La Phase 1 est vérifiée à l'écran (lien Nexton → SmartRecruiters).
+**Prochaine étape suggérée :** Marché caché — Brique 1 (index des boards français), plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md` en cours d'exécution (Task 2/8 — détection France).
 
 ---
 
@@ -40,6 +40,14 @@
 ---
 
 ## Journal
+
+### 2026-08-04 : Marché caché — Brique 1, Task 1 (plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md`)
+
+- **Quoi :** module `scripts/boards/slugs.mjs` (nom d'entreprise → slugs candidats), jumeau de `ats.ts` de l'app, épinglé par des vecteurs de test identiques ; commentaire de jumelage ajouté dans `ats.test.ts`.
+- **Pourquoi :** le script de build (`.mjs`) ne peut pas importer le `.ts` de l'app ; la dérivation est dupliquée et verrouillée par tests pour qu'une divergence casse une suite.
+- **Fichiers touchés :** créés `scripts/boards/slugs.mjs`, `scripts/boards/slugs.test.mjs` ; modifié `web/src/lib/jobs/ats.test.ts` (commentaire 3 lignes).
+- **Résultat vérifs :** `node --test` 5/5 verts ; `tsc --noEmit` OK ; `lint` 0 erreur (5 warnings pré-existants) ; Vitest 607/607 ; `build` OK.
+- **Commit :** `d97ef03` — feat(boards): dérivation des slugs candidats, jumelle de celle de l'app
 
 ### 2026-08-03 : Détecteur d'ATS — quatre ATS au lieu de deux, choisis par la mesure
 

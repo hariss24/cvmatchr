@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { atsSlugs, resolveAts, boardUrl, NO_ATS } from "./ats";
 
+// ⚠️ VECTEURS JUMEAUX — les mêmes cas existent dans scripts/boards/slugs.test.mjs,
+// qui teste la copie `.mjs` de cette dérivation (le script de build ne peut pas
+// importer ce fichier TypeScript). Si tu modifies un cas ici, modifie-le là-bas.
+
 describe("atsSlugs", () => {
   it("met en minuscules et retire les accents", () => {
     expect(atsSlugs("Société Générale")).toContain("societe-generale");
