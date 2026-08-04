@@ -679,7 +679,7 @@ export async function bumpApiUsage(calls: Partial<Record<SourceId, number>>): Pr
 /** Appels consommés ce mois-ci, par source. */
 export async function getApiUsage(): Promise<Record<SourceId, number>> {
   const now = new Date();
-  const out: Record<SourceId, number> = { francetravail: 0, adzuna: 0, jsearch: 0 };
+  const out: Record<SourceId, number> = { francetravail: 0, adzuna: 0, jsearch: 0, boards: 0 };
   try {
     for (const source of Object.keys(out) as SourceId[]) {
       out[source] = (await db.apiUsage.get(usageKey(source, now)))?.count ?? 0;

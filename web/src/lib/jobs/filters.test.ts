@@ -35,9 +35,9 @@ describe("libellés de pastilles", () => {
   });
 
   it("sources : compte les sources interrogées", () => {
-    expect(sourcesLabel({ francetravail: true, adzuna: false, jsearch: false })).toBe("1 source");
-    expect(sourcesLabel({ francetravail: true, adzuna: true, jsearch: true })).toBe("3 sources");
-    expect(sourcesLabel({ francetravail: false, adzuna: false, jsearch: false })).toBe("aucune source");
+    expect(sourcesLabel({ francetravail: true, adzuna: false, jsearch: false, boards: false })).toBe("1 source");
+    expect(sourcesLabel({ francetravail: true, adzuna: true, jsearch: true, boards: false })).toBe("3 sources");
+    expect(sourcesLabel({ francetravail: false, adzuna: false, jsearch: false, boards: false })).toBe("aucune source");
   });
 });
 
@@ -62,7 +62,7 @@ describe("resetFilters", () => {
     ...EMPTY_PROFILE,
     keywords: ["Webmaster"],
     location: { kind: "commune" as const, code: "75056", label: "Paris", radiusKm: 20 },
-    sources: { francetravail: true, adzuna: true, jsearch: true },
+    sources: { francetravail: true, adzuna: true, jsearch: true, boards: false },
     homeAddress: "10 rue de Paris",
     prefilterKeywords: ["seo", "wordpress"],
     contractTypes: ["MIS"],

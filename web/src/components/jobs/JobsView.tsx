@@ -44,7 +44,7 @@ export default function JobsView() {
   const [scanning, setScanning] = useState(false);
   const [progress, setProgress] = useState<ScanState>(ZERO);
   const [configMsg, setConfigMsg] = useState<string | null>(null);
-  const [usage, setUsage] = useState<Record<SourceId, number>>({ francetravail: 0, adzuna: 0, jsearch: 0 });
+  const [usage, setUsage] = useState<Record<SourceId, number>>({ francetravail: 0, adzuna: 0, jsearch: 0, boards: 0 });
   const [atsParEntreprise, setAtsParEntreprise] = useState<Record<string, { ats: AtsProvider; slug: string }>>({});
   const setPendingJobDesc = useDocStore((s) => s.setPendingJobDesc);
   const setCompany = useDocStore((s) => s.setCompany);
@@ -304,11 +304,14 @@ export default function JobsView() {
       // Les sources ne répondent pas à la même vitesse : France Travail et Adzuna
       // en ~0,5 s, JSearch en ~16 s (leur API met ~5 s par mot-clé). Les attendre
       // ensemble faisait patienter devant un écran vide pour des offres déjà
-      // disponibles. On les interroge donc en deux groupes, affichés séparément.
+      // disponibles. On les interroge donc par groupes, affichés séparément.
+      // Le marché caché a son propre profil de latence (jusqu'à 60 boards
+      // interrogés en direct) : à part, pour ne retarder ni JSearch ni l'inverse.
       const groupes = [
-        { francetravail: p.sources.francetravail, adzuna: p.sources.adzuna, jsearch: false },
-        { francetravail: false, adzuna: false, jsearch: p.sources.jsearch },
-      ].filter((s) => s.francetravail || s.adzuna || s.jsearch);
+        { francetravail: p.sources.francetravail, adzuna: p.sources.adzuna, jsearch: false, boards: false },
+        { francetravail: false, adzuna: false, jsearch: p.sources.jsearch, boards: false },
+        { francetravail: false, adzuna: false, jsearch: false, boards: p.sources.boards },
+      ].filter((s) => s.francetravail || s.adzuna || s.jsearch || s.boards);
 
       if (groupes.length === 0) {
         setConfigMsg("Aucune source sélectionnée. Coche au moins une source dans « Où chercher ».");

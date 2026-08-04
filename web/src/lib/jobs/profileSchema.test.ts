@@ -30,13 +30,13 @@ describe("parseProfile", () => {
 describe("sources", () => {
   it("active France Travail seule par défaut", () => {
     expect(parseProfile({}).sources).toEqual({
-      francetravail: true, adzuna: false, jsearch: false,
+      francetravail: true, adzuna: false, jsearch: false, boards: false,
     });
   });
 
   it("respecte un choix explicite", () => {
-    const p = parseProfile({ sources: { francetravail: false, adzuna: true, jsearch: true } });
-    expect(p.sources).toEqual({ francetravail: false, adzuna: true, jsearch: true });
+    const p = parseProfile({ sources: { francetravail: false, adzuna: true, jsearch: true, boards: false } });
+    expect(p.sources).toEqual({ francetravail: false, adzuna: true, jsearch: true, boards: false });
   });
 
   it("retombe sur le défaut si la valeur est absurde", () => {

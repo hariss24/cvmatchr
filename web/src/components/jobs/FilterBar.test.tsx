@@ -7,7 +7,7 @@ import "@testing-library/jest-dom/vitest";
 import { EMPTY_PROFILE } from "@/lib/jobs/profile";
 import { FilterBar } from "./FilterBar";
 
-const usage = { francetravail: 0, adzuna: 0, jsearch: 0 };
+const usage = { francetravail: 0, adzuna: 0, jsearch: 0, boards: 0 };
 const base = {
   profile: EMPTY_PROFILE, onChange: () => {}, usage,
   resultCount: 0, canScan: false, scanning: false, onScan: () => {},

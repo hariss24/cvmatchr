@@ -16,10 +16,11 @@ import { normKey } from "@/lib/applications/normKey";
 import type { JobOffer, SourceId } from "./offer";
 
 /**
- * France Travail d'abord (description la plus complète, lien direct), puis
+ * France Travail d'abord (description la plus complète, lien direct), puis le
+ * marché caché (lien vers le board de l'entreprise, sans intermédiaire), puis
  * JSearch (apporte le logo), puis Adzuna. Plus petit = prioritaire.
  */
-const PRIORITY: Record<SourceId, number> = { francetravail: 0, jsearch: 1, adzuna: 2 };
+const PRIORITY: Record<SourceId, number> = { francetravail: 0, boards: 1, jsearch: 2, adzuna: 3 };
 
 export function dedupeOffers(offers: JobOffer[]): JobOffer[] {
   const best = new Map<string, JobOffer>();

@@ -4,11 +4,18 @@ import { SOURCES, type SourceToggles } from "@/lib/jobs/sources";
 import type { SourceId } from "@/lib/jobs/offer";
 import { BoardIcon } from "./BoardIcon";
 
-/** Domaine de chaque source, pour afficher son favicon (aucun logo stocké). */
+/**
+ * Domaine de chaque source, pour afficher son favicon (aucun logo stocké).
+ *
+ * `boards` n'en a pas : ses offres viennent de quatre ATS différents, aucun
+ * domaine ne la représente. `BoardIcon` retombe alors sur l'initiale, comme
+ * pour toute entreprise sans logo résolu.
+ */
 export const SOURCE_DOMAIN: Record<SourceId, string> = {
   francetravail: "francetravail.fr",
   jsearch: "google.com",
   adzuna: "adzuna.fr",
+  boards: "",
 };
 
 /**

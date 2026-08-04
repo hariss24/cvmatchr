@@ -5,7 +5,7 @@
  */
 
 /** Source technique ayant fait remonter l'offre (≠ jobboard où elle est publiée). */
-export type SourceId = "francetravail" | "adzuna" | "jsearch";
+export type SourceId = "francetravail" | "adzuna" | "jsearch" | "boards";
 
 /** Offre normalisée pour l'affichage et le scoring (contrat unique client ⇄ serveur). */
 export interface JobOffer {

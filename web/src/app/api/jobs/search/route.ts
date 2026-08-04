@@ -3,6 +3,7 @@ import { resolveProfile } from "@/lib/jobs/resolveProfile";
 import { search as searchFranceTravail } from "@/lib/jobs/francetravail";
 import { searchAdzuna } from "@/lib/jobs/adzuna";
 import { searchJSearch } from "@/lib/jobs/jsearch";
+import { searchBoards } from "@/lib/jobs/boardsFr";
 import { dedupeOffers } from "@/lib/jobs/dedupe";
 import { matchesIncludeKeywords } from "@/lib/jobs/includeFilter";
 import type { JobOffer, SourceId } from "@/lib/jobs/offer";
@@ -11,7 +12,7 @@ import type { JobOffer, SourceId } from "@/lib/jobs/offer";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-const ZERO_CALLS: Record<SourceId, number> = { francetravail: 0, adzuna: 0, jsearch: 0 };
+const ZERO_CALLS: Record<SourceId, number> = { francetravail: 0, adzuna: 0, jsearch: 0, boards: 0 };
 
 /**
  * Recherche les offres pour le profil courant, sur les seules sources activées.
@@ -67,6 +68,8 @@ export async function POST(req: Request): Promise<Response> {
     francetravail: () => searchFranceTravail(profile, { clientId: ftId!, clientSecret: ftSecret! }),
     adzuna: () => searchAdzuna(profile, { appId: adzId!, appKey: adzKey! }),
     jsearch: () => searchJSearch(profile, { apiKey: jsKey! }),
+    // Aucune clé : les quatre ATS sont publics — d'où son absence du bloc `missing`.
+    boards: () => searchBoards(profile),
   };
 
   // `allSettled` : une source qui jette ne doit pas emporter les autres.

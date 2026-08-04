@@ -47,7 +47,7 @@ afterEach(() => vi.unstubAllGlobals());
 describe("POST /api/jobs/search", () => {
   it("n'interroge que les sources activées", async () => {
     const res = await POST(req({ ...hariss, keywords: ["x"],
-      sources: { francetravail: true, adzuna: false, jsearch: false } }));
+      sources: { francetravail: true, adzuna: false, jsearch: false, boards: false } }));
     expect(res.status).toBe(200);
     expect(ft).toHaveBeenCalledTimes(1);
     expect(adz).not.toHaveBeenCalled();
@@ -56,7 +56,7 @@ describe("POST /api/jobs/search", () => {
 
   it("interroge les trois quand elles sont activées", async () => {
     await POST(req({ ...hariss, keywords: ["x"],
-      sources: { francetravail: true, adzuna: true, jsearch: true } }));
+      sources: { francetravail: true, adzuna: true, jsearch: true, boards: false } }));
     expect(ft).toHaveBeenCalledTimes(1);
     expect(adz).toHaveBeenCalledTimes(1);
     expect(js).toHaveBeenCalledTimes(1);
@@ -66,7 +66,7 @@ describe("POST /api/jobs/search", () => {
     ft.mockRejectedValue(new Error("FT HS"));
     js.mockResolvedValue({ offers: [offer("1", "jsearch")], calls: 1 });
     const res = await POST(req({ ...hariss, keywords: ["x"],
-      sources: { francetravail: true, adzuna: false, jsearch: true } }));
+      sources: { francetravail: true, adzuna: false, jsearch: true, boards: false } }));
     const data = await res.json();
     expect(res.status).toBe(200);
     expect(data.offers).toHaveLength(1);
@@ -77,9 +77,9 @@ describe("POST /api/jobs/search", () => {
     ft.mockResolvedValue({ offers: [], calls: 2 });
     js.mockResolvedValue({ offers: [], calls: 3 });
     const res = await POST(req({ ...hariss, keywords: ["a", "b"],
-      sources: { francetravail: true, adzuna: false, jsearch: true } }));
+      sources: { francetravail: true, adzuna: false, jsearch: true, boards: false } }));
     const data = await res.json();
-    expect(data.calls).toEqual({ francetravail: 2, adzuna: 0, jsearch: 3 });
+    expect(data.calls).toEqual({ francetravail: 2, adzuna: 0, jsearch: 3, boards: 0 });
   });
 
   it("dédoublonne entre sources", async () => {
@@ -88,7 +88,7 @@ describe("POST /api/jobs/search", () => {
     js.mockResolvedValue({ offers: [offer("b", "jsearch",
       { company: "ACME", title: "Webmaster" })], calls: 1 });
     const res = await POST(req({ ...hariss, keywords: ["x"],
-      sources: { francetravail: true, adzuna: false, jsearch: true } }));
+      sources: { francetravail: true, adzuna: false, jsearch: true, boards: false } }));
     const data = await res.json();
     expect(data.offers).toHaveLength(1);
     expect(data.offers[0].source).toBe("francetravail");
@@ -97,14 +97,14 @@ describe("POST /api/jobs/search", () => {
   it("400 config si les clés d'une source activée manquent", async () => {
     delete process.env.JSEARCH_API_KEY;
     const res = await POST(req({ ...hariss, keywords: ["x"],
-      sources: { francetravail: false, adzuna: false, jsearch: true } }));
+      sources: { francetravail: false, adzuna: false, jsearch: true, boards: false } }));
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe("config");
   });
 
   it("400 config si aucune source n'est activée", async () => {
     const res = await POST(req({ ...hariss, keywords: ["x"],
-      sources: { francetravail: false, adzuna: false, jsearch: false } }));
+      sources: { francetravail: false, adzuna: false, jsearch: false, boards: false } }));
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe("config");
   });
@@ -115,7 +115,7 @@ describe("POST /api/jobs/search", () => {
       offer("2", "francetravail", { title: "Sans rien", jobText: "" }),
     ], calls: 1 });
     const res = await POST(req({ ...hariss, keywords: ["x"], includeKeywords: ["wordpress"],
-      sources: { francetravail: true, adzuna: false, jsearch: false } }));
+      sources: { francetravail: true, adzuna: false, jsearch: false, boards: false } }));
     const data = await res.json();
     expect(data.offers).toHaveLength(1);
     expect(data.offers[0].title).toBe("Avec wordpress");

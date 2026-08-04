@@ -12,6 +12,7 @@ const sourcesSchema = z.object({
   francetravail: z.boolean().catch(EMPTY_PROFILE.sources.francetravail),
   adzuna: z.boolean().catch(EMPTY_PROFILE.sources.adzuna),
   jsearch: z.boolean().catch(EMPTY_PROFILE.sources.jsearch),
+  boards: z.boolean().catch(EMPTY_PROFILE.sources.boards),
 }).catch(EMPTY_PROFILE.sources);
 
 /**
