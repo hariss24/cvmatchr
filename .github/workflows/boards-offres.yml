@@ -1,0 +1,54 @@
+name: Scan quotidien des offres
+
+# Séparé de « Index des boards français » parce que les deux rythmes n'ont rien
+# à voir : une entreprise ne change pas d'ATS en une semaine, mais une offre
+# neuve perd sa valeur en quelques jours. Mesure du 04/08/2026 : âge médian des
+# offres moissonnées 46 jours, seules 617 sur 9 719 à moins de 48 h. Voir un
+# poste le jour de sa parution, c'est tout l'intérêt du dispositif.
+on:
+  schedule:
+    # 06:00 UTC : après la fenêtre du job hebdomadaire (lundi 03:00 + 120 min max),
+    # pour que les deux ne se disputent pas le verrou.
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+# Même groupe que la boucle autonome et que l'index : tous commitent sur `main`,
+# et sans ce verrou partagé un push simultané échoue ou écrase.
+concurrency:
+  group: boucle-autonome
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  offres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.LOOP_GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Tests des modules de l'index
+        run: node --test "scripts/boards/*.test.mjs"
+
+      - name: Moissonner les offres légères
+        run: node scripts/build-boards-offres.mjs
+
+      - name: Commiter si les offres ont changé
+        run: |
+          if git diff --quiet -- web/src/lib/jobs/data/boards-offres.json; then
+            echo "Aucun changement."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add web/src/lib/jobs/data/boards-offres.json
+          git commit -m "chore(boards): scan quotidien des offres"
+          git pull --rebase
+          git push

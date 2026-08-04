@@ -12,6 +12,7 @@ type Entree = {
   lieu: string;
   url: string;
   publieLe: string;
+  decouverteLe: string;
   lat?: number;
   lng?: number;
 };
@@ -32,6 +33,9 @@ describe("index léger des offres des boards", () => {
       expect(o.titre.length, `titre vide pour ${o.ats}/${o.slug}/${o.id}`).toBeGreaterThan(0);
       expect(o.url.startsWith("http"), `url invalide pour ${o.ats}/${o.slug}/${o.id}`).toBe(true);
       if (o.publieLe !== "") expect(() => new Date(o.publieLe).toISOString()).not.toThrow();
+      expect(o.decouverteLe, `decouverteLe invalide pour ${o.ats}/${o.slug}/${o.id}`).toMatch(
+        /^\d{4}-\d{2}-\d{2}$/,
+      );
     }
   });
 

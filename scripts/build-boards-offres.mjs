@@ -7,7 +7,8 @@
 //
 // Contrairement à build-boards-fr.mjs, pas de mémo ni de TTL : ce fichier est
 // entièrement réécrit à chaque passage — un board retombé à zéro (donc sorti
-// de boards-fr.json) sort aussi de celui-ci.
+// de boards-fr.json) sort aussi de celui-ci. Seul `decouverteLe` est repris du
+// passage précédent (voir boards/nouveaute.mjs).
 
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -15,6 +16,7 @@ import { fileURLToPath } from "node:url";
 
 import { listerOffresFR } from "./boards/offres.mjs";
 import { enLot } from "./boards/lot.mjs";
+import { dater, jour } from "./boards/nouveaute.mjs";
 
 const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "web", "src", "lib", "jobs", "data");
 const F_INDEX = join(DATA_DIR, "boards-fr.json");
@@ -51,7 +53,14 @@ index.sort(
   (a, b) => a.ats.localeCompare(b.ats) || a.slug.localeCompare(b.slug) || a.id.localeCompare(b.id),
 );
 
-mkdirSync(DATA_DIR, { recursive: true });
-writeFileSync(F_OFFRES, `${JSON.stringify(index, null, 2)}\n`, "utf8");
+// Tri AVANT datation : l'ordre du fichier reste celui de l'index, pas celui de
+// la nouveauté. Un diff quotidien ne doit montrer que ce qui a réellement bougé.
+const precedentes = existsSync(F_OFFRES) ? JSON.parse(readFileSync(F_OFFRES, "utf8")) : [];
+const aujourdhui = jour(new Date());
+const datees = dater(precedentes, index, aujourdhui);
+const nouvelles = datees.filter((o) => o.decouverteLe === aujourdhui).length;
 
-console.log(`OK — ${index.length} offres légères écrites dans ${F_OFFRES}.`);
+mkdirSync(DATA_DIR, { recursive: true });
+writeFileSync(F_OFFRES, `${JSON.stringify(datees, null, 2)}\n`, "utf8");
+
+console.log(`OK — ${datees.length} offres légères écrites dans ${F_OFFRES}, dont ${nouvelles} nouvelles.`);
