@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** deux chantiers indépendants. (a) **Stabiliser la suite Playwright**, instable en exécution parallèle sur cette machine et donc inexploitable comme garde-fou (détail dans l'entrée du 04/08/2026). (b) Marché caché — **descendre le seuil SIRENE sous 200 salariés**. La chaîne est complète et vérifiée : index hebdomadaire, scan quotidien, source branchée, pastille de fraîcheur sur la carte. Rappel de la mesure qui guide la suite : l'âge médian des offres moissonnées est de **46 jours** (44 % ont plus de 60 jours, seules 617 ont moins de 48 h) — la concurrence sur une offre dépend surtout de son ancienneté, pas du canal de publication. Ensuite seulement : descendre le seuil SIRENE sous 200 salariés (les PME reçoivent moins de candidatures, et toutes les tranches sous 200 dépassent le plafond d'affichage de l'API, donc des dizaines de milliers d'entreprises sont hors périmètre), puis la Brique 3 (Common Crawl → Workday et ATS non énumérables).
+**Prochaine étape suggérée :** Marché caché — **descendre le seuil SIRENE sous 200 salariés**. La chaîne est complète et vérifiée : index hebdomadaire, scan quotidien, source branchée, pastille de fraîcheur sur la carte, et suite e2e redevenue fiable depuis le 05/08/2026. Rappel de la mesure qui guide la suite : l'âge médian des offres moissonnées est de **46 jours** (44 % ont plus de 60 jours, seules 617 ont moins de 48 h) — la concurrence sur une offre dépend surtout de son ancienneté, pas du canal de publication. Ensuite seulement : descendre le seuil SIRENE sous 200 salariés (les PME reçoivent moins de candidatures, et toutes les tranches sous 200 dépassent le plafond d'affichage de l'API, donc des dizaines de milliers d'entreprises sont hors périmètre), puis la Brique 3 (Common Crawl → Workday et ATS non énumérables).
 
 ---
 
@@ -41,6 +41,22 @@
 
 ## Journal
 
+### 2026-08-05 : Suite Playwright stabilisée — la contention, pas la lenteur
+
+- **Symptôme :** des échecs différents à chaque exécution complète (`chat`, `editor`, `import-text`, `export`, `form-reorder`…), tous verts relancés seuls, et **reproductibles sur du code inchangé** — donc pas une régression.
+- **Diagnostic :** tous portaient **la même assertion**, l'apparition de l'aperçu PDF. Chaque test qui y touche fabrique un vrai PDF (react-pdf) puis le rastérise (pdf.js) — du calcul lourd dans le navigateur. À huit workers sur seize cœurs, ces rendus se disputaient le processeur au point de ne jamais aboutir : « element(s) not found », **y compris après quinze secondes**.
+- **Hypothèse écartée par la mesure :** porter le délai d'attente global à 15 s ne suffisait pas (8 échecs sur une exécution). À quatre workers, le délai d'origine de 5 s suffit — ce qui désigne la contention, pas la lenteur. La première correction a donc été annulée.
+
+| Parallélisme | Échecs par exécution complète | Durée |
+|---|---|---|
+| 8 workers (défaut, 50 % des cœurs) | 4, 8, 3, 0, 5, 1 | 39 à 56 s |
+| 4 workers (`workers: "25%"`) | **1 sur 31 exécutions** | 26 à 30 s |
+
+- Moins de parallélisme est **à la fois plus sûr et plus rapide** : le surengagement coûtait plus en contention qu'il ne rapportait. Pourcentage plutôt que nombre en dur, pour garder la proportion sur une machine plus petite — un `workers: 4` en dur y serait pire que le défaut.
+- **`retries: 1`** rend visible ce qui reste : une régression réelle échoue deux fois et reste `failed`, un aléa passe au second essai et s'affiche `flaky`. C'est aussi ce qui donne enfin un sens à `trace: "on-first-retry"`, qui **n'enregistrait jamais rien** avec `retries: 0` (le second essai n'existait pas) — d'où l'unique échec resté inexpliqué faute de trace. Enregistrer la trace de tous les tests aurait coûté 60 % de temps (27 s → 43 s) pour la même information.
+- **Vérifs :** 5 exécutions complètes consécutives avec la configuration finale, **38/38**, 27 s chacune. `tsc` propre, `lint` 0 erreur.
+- **Commit :** `d8e9c6e` — fix(e2e): stabiliser Playwright en réduisant le parallélisme
+
 ### 2026-08-04 : Marché caché — quatre défauts corrigés, et la fraîcheur affichée
 
 Quatre défauts trouvés en relisant et en mesurant la source fraîchement branchée.
@@ -56,7 +72,7 @@ Quatre défauts trouvés en relisant et en mesurant la source fraîchement branc
 - **Test en direct :** « ingénieur », Paris + 10 km, marché caché seul → 53 offres, toutes en Île-de-France (Boulogne, Saint-Ouen, Montrouge…), textes propres.
 - **Commit :** `f4bcb2d` — fix(boards): lieu, ancienneté fiable, texte lisible, et pastille de fraîcheur
 
-⚠️ **Suite Playwright instable en parallèle sur cette machine** : la suite complète a rendu 5 échecs puis 1 échec sur des specs *différentes* (`editor`, `chat`, `import-text`, `form-reorder`), toutes vertes relancées seules — et **reproduit à l'identique sur le code d'avant ces changements** (vérifié par `git stash`). C'est de la contention, pas une régression. À traiter pour lui-même : tant que ça dure, un échec e2e ne prouve rien sans relance ciblée.
+⚠️ **Suite Playwright instable en parallèle sur cette machine** : la suite complète a rendu 5 échecs puis 1 échec sur des specs *différentes* (`editor`, `chat`, `import-text`, `form-reorder`), toutes vertes relancées seules — et **reproduit à l'identique sur le code d'avant ces changements** (vérifié par `git stash`). C'est de la contention, pas une régression. *(Résolu le 05/08/2026 — voir l'entrée du jour.)*
 
 ### 2026-08-04 : Marché caché — quatrième source branchée sur « Offres »
 
