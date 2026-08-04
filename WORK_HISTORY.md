@@ -41,6 +41,14 @@
 
 ## Journal
 
+### 2026-08-04 : Marché caché — Brique 1, Task 7 (plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md`)
+
+- **Quoi :** test de cohérence Vitest `web/src/lib/jobs/data/boards-fr.test.ts` (6 champs, `ats` connu, `offresFR ≥ 1`, pas de doublon, trié) + étape CI `Tests des scripts de l'index des boards` dans `web.yml`.
+- **Pourquoi :** même convention que `rome-data.test.ts` — on teste le fichier produit, pas les scripts ; un zéro dans l'index ou un ordre instable doit casser la suite.
+- **Fichiers touchés :** créé `web/src/lib/jobs/data/boards-fr.test.ts` ; modifié `.github/workflows/web.yml`.
+- **Résultat vérifs :** `node --test` 44/44 ; `tsc` OK ; `lint` 0 erreur ; Vitest **612/612** (607 + 5) ; `build` OK.
+- **Commit :** `8c02aa3` — test(boards): cohérence de l'index et tests de script en CI
+
 ### 2026-08-04 : Marché caché — Brique 1, Task 6 (plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md`)
 
 - **Quoi :** `scripts/boards/lot.mjs` (concurrence plafonnée, une tâche qui jette ne tue pas le lot), orchestrateur `scripts/build-boards-fr.mjs` (CLI `--source`, `--complet`, `null` jamais écrit), et **premier index réel issu de la source A**.
