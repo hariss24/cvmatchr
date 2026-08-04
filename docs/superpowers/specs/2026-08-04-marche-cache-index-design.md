@@ -352,11 +352,21 @@ produit** — c'est ce que fait `rome-data.test.ts`. Même convention :
 
 ## Réserves
 
-**Le rendement de la source B est une extrapolation, pas une mesure.** Les 33 %
-avancés viennent d'un sondage sur 49 entreprises françaises choisies à la main,
-majoritairement tech et connues. La population SIRENE est tout autre — on y
-trouve La Poste et des industriels régionaux. Le rendement réel sera plus bas.
-La première exécution du script donnera le chiffre ; il faudra l'inscrire ici.
+**Rendement de la source B, mesuré le 04/08/2026.** 14 630 entreprises
+françaises énumérées (SIRENE, tranches 31→53), 97 838 couples testés dont
+97 755 exploitables et 83 indéterminées. **49 boards ajoutés** par rapport à la
+source A seule (399 → 448), dont **47 `smartrecruiters`** — la source B est le
+seul chemin vers cet ATS — et 49 entrées portant un SIREN. Répartition finale par
+ATS : greenhouse 225, ashby 96, lever 80, smartrecruiters 47. Le rendement est de
+~0,33 % des entreprises testées (~0,05 % des couples) : la dérivation des slugs
+depuis le nom légal ne matche qu'une minorité des boards, et des employeurs connus
+(Nexton, Thales…) restent hors index. Deux correctifs ont été nécessaires pour
+atteindre ce chiffre : la pagination SIRENE était coupée par des 429 (politesse
+300 ms + retry sur 429 avec `Retry-After` ajoutés) et les slugs dérivés de
+`nom_complet` (« ACCOR (ACCOR) » → `accor-accor`) ne matchaient rien — la
+dérivation passe désormais par `nom_raison_sociale` (repli : `nom_complet` sans
+parenthèse), ce qui a permis de retrouver Accor (`smartrecruiters`/`accor`, 193
+offres FR, SIREN 602036444).
 
 **Le volume final restera modeste.** La source A donne ~1 400 offres françaises,
 extrapolées d'un échantillon de 450 boards. Ce ne sera jamais France Travail.

@@ -200,6 +200,15 @@ systématiquement avantagées.
 Le référentiel ROME 4.0 est embarqué (`lib/jobs/data/`, régénérable par
 `scripts/build-rome.mjs`). Le code ROME sert surtout de filtre anti-bruit.
 
+L'index des boards français (`lib/jobs/data/boards-fr.json`) liste les
+entreprises dont le board ATS public a au moins une offre en France — le
+répertoire du « marché caché ». Régénérable par `node scripts/build-boards-fr.mjs`
+et rafraîchi chaque lundi par `.github/workflows/boards-fr.yml`.
+`boards-fr-testes.json` est la mémoire des couples déjà testés (échecs compris) ;
+rien d'autre ne le lit. **La brique 2 — moissonner les offres depuis ces boards et
+les afficher dans « Offres » — n'est pas faite** : l'index ne sert encore à rien
+dans l'app. Voir `docs/superpowers/specs/2026-08-04-marche-cache-index-design.md`.
+
 Google Maps n'est plus appelé pendant le scan (c'était 354 appels facturés par
 passage) mais au dépliage d'une offre, avec un cache de 30 jours.
 

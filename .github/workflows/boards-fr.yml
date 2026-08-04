@@ -1,0 +1,49 @@
+name: Index des boards français
+
+on:
+  schedule:
+    # Lundi 03:00 UTC. Hebdomadaire : c'est l'index des boards, pas les offres —
+    # une entreprise ne change pas d'ATS en une semaine.
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+# Même groupe que la boucle autonome : les deux workflows commitent sur `main`,
+# et sans ce verrou partagé un push simultané échoue ou écrase.
+concurrency:
+  group: boucle-autonome
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.LOOP_GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Tests des modules de l'index
+        run: node --test "scripts/boards/*.test.mjs"
+
+      - name: Rafraîchir l'index
+        run: node scripts/build-boards-fr.mjs --source=tout
+
+      - name: Commiter si l'index a changé
+        run: |
+          if git diff --quiet -- web/src/lib/jobs/data/boards-fr.json web/src/lib/jobs/data/boards-fr-testes.json; then
+            echo "Aucun changement."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add web/src/lib/jobs/data/boards-fr.json web/src/lib/jobs/data/boards-fr-testes.json
+          git commit -m "chore(boards): rafraîchissement hebdomadaire de l'index"
+          git pull --rebase
+          git push

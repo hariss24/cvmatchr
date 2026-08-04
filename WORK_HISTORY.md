@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Marché caché — Brique 1 (index des boards français), plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md` en cours d'exécution (Task 2/8 — détection France).
+**Prochaine étape suggérée :** Marché caché — Brique 2 : moissonner les offres depuis les boards indexés (`boards-fr.json`, 448 boards / 9 714 offres FR) et les afficher dans « Offres ».
 
 ---
 
@@ -40,6 +40,16 @@
 ---
 
 ## Journal
+
+### 2026-08-04 : Marché caché — Brique 1, Task 8 (plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md`)
+
+- **Quoi :** exécution de la source B (SIRENE), workflow hebdomadaire `boards-fr.yml`, documentation (spec « Réserves », `PROJECT_INDEX.md`). **Deux correctifs** ont été nécessaires à `scripts/boards/sources.mjs` : politesse + retry sur 429 (l'API SIRENE plafonne en pagination rapide — premier run : 2 100 entreprises au lieu de 14 651), et dérivation des slugs depuis `nom_raison_sociale` (repli `nom_complet` sans parenthèse — « ACCOR (ACCOR) » donnait `accor-accor`, jamais le slug du board). Tests ajoutés pour les deux.
+- **Pourquoi :** l'index doit couvrir les entreprises françaises et SmartRecruiters, que la source A (listes publiques, 98 % US) ne peut pas atteindre.
+- **Chiffres réels :** 14 630 entreprises énumérées, 97 838 couples testés (97 755 exploitables, 83 indéterminées). Index final : **448 boards, 9 714 offres FR** (source A seule : 399 / 3 980), dont **47 `smartrecruiters`** et 49 entrées avec SIREN. Accor retrouvé (`smartrecruiters`/`accor`, 193 offres FR, SIREN 602036444). Mémo : 128 275 couples.
+- **Fichiers touchés :** créé `.github/workflows/boards-fr.yml` ; modifiés `scripts/boards/sources.mjs`, `sources.test.mjs`, `web/src/lib/jobs/data/boards-fr.json`, `boards-fr-testes.json`, `docs/superpowers/specs/2026-08-04-marche-cache-index-design.md`, `PROJECT_INDEX.md`.
+- **Résultat vérifs :** `node --test` 46/46 ; `tsc` OK ; `lint` 0 erreur ; Vitest 612/612 ; `build` OK.
+- **Commit :** `e6a84c9` — feat(boards): source SIRENE, rafraîchissement hebdomadaire et documentation
+- **Note :** rendement réel de la source B ~0,33 % des entreprises testées ; des employeurs connus (Nexton, Thales) restent hors index (nom légal ≠ slug du board) — inscrit dans la spec « Réserves ».
 
 ### 2026-08-04 : Marché caché — Brique 1, Task 7 (plan `docs/superpowers/plans/2026-08-04-marche-cache-index.md`)
 

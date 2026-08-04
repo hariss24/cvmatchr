@@ -69,3 +69,37 @@ test("une tranche en panne ne fait pas tomber les autres", async () => {
   };
   assert.deepEqual(await entreprisesFrancaises(f, ["52", "53"]), [{ nom: "ALPHA", siren: "1" }]);
 });
+
+// « ACCOR (ACCOR) » dériverait en accor-accor — jamais le slug du board. La
+// raison sociale prime, la parenthèse est retirée en repli.
+test("préfère la raison sociale et enlève la parenthèse du nom complet", async () => {
+  const f = async () => Response.json({
+    results: [
+      { nom_raison_sociale: "ACCOR", nom_complet: "ACCOR (ACCOR)", siren: "602036444" },
+      { nom_raison_sociale: null, nom_complet: "MAAF VIE", siren: "2" },
+      { nom_complet: "LA POSTE (LA POSTE)", siren: "3" },
+    ],
+    total_pages: 1,
+  });
+  assert.deepEqual(await entreprisesFrancaises(f, ["53"]), [
+    { nom: "ACCOR", siren: "602036444" },
+    { nom: "MAAF VIE", siren: "2" },
+    { nom: "LA POSTE", siren: "3" },
+  ]);
+});
+
+// Mesuré le 04/08/2026 : l'API répond 429 en pagination rapide. Un 429 se
+// retente (Retry-After honoré), puis la pagination reprend là où elle était.
+test("retente après un 429 et poursuit la pagination", async () => {
+  let appels = 0;
+  const f = async (url) => {
+    appels += 1;
+    const p = new URL(String(url)).searchParams.get("page");
+    if (p === "1" && appels <= 2) return new Response("", { status: 429, headers: { "retry-after": "0" } });
+    if (p === "2") return new Response("", { status: 429, headers: { "retry-after": "0" } });
+    return Response.json({ results: [{ nom_complet: "ALPHA", siren: "1" }], total_pages: 2 });
+  };
+  const r = await entreprisesFrancaises(f, ["53"]);
+  assert.equal(r.length, 1);
+  assert.equal(r[0].nom, "ALPHA");
+});

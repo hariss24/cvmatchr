@@ -39,6 +39,37 @@ const PAR_PAGE = 25;
 
 const TIMEOUT_MS = 15_000;
 
+/**
+ * Attente entre deux requêtes SIRENE. L'API plafonne : mesuré à 429 le
+ * 04/08/2026 en pagination rapide (69 appels tranche 31 au lieu de 125).
+ * 300 ms entre requêtes + retry sur 429 suffisent à la traverser.
+ */
+const ATTENTE_MS = 300;
+
+/** Tentatives sur un 429 avant d'abandonner la tranche. */
+const RETRY_MAX = 6;
+
+const attendre = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Délai avant de retenter un 429 : Retry-After du serveur, sinon 5 s. */
+function delaiRetry(res) {
+  const ra = Number(res.headers?.get("retry-after"));
+  return (Number.isFinite(ra) && ra >= 0 ? ra : 5) * 1000;
+}
+
+/**
+ * Nom à tester : la raison sociale quand elle est disponible, sinon le nom
+ * complet débarrassé de sa parenthèse (« ACCOR (ACCOR) » → « ACCOR »).
+ * Sans ce repli, les slugs dérivés du nom légal ne matchent jamais le board
+ * (accor-accor au lieu d'accor) et le rendement de la source B s'effondre.
+ */
+function nomTirable(e) {
+  const raison = String(e?.nom_raison_sociale ?? "").trim();
+  if (raison) return raison;
+  const complet = String(e?.nom_complet ?? "").trim();
+  return complet.replace(/\s*\([^)]*\)\s*$/, "").trim() || complet;
+}
+
 /** Un fichier de liste est soit un tableau de chaînes, soit un tableau d'objets. */
 function extraireSlugs(brut) {
   const arr = Array.isArray(brut) ? brut : (brut?.companies ?? []);
@@ -78,15 +109,25 @@ export async function entreprisesFrancaises(fetchImpl = fetch, tranches = TRANCH
       while (page <= total) {
         const url = `${SIRENE}?tranche_effectif_salarie=${tranche}&etat_administratif=A`
           + `&per_page=${PAR_PAGE}&page=${page}`;
-        const res = await fetchImpl(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
+
+        // Un 429 (quota de l'API) se retente, en honorant Retry-After. Un autre
+        // statut non-OK abandonne la tranche sans faire tomber les autres.
+        let res;
+        for (let essai = 0; essai < RETRY_MAX; essai++) {
+          res = await fetchImpl(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
+          if (res.status !== 429) break;
+          await attendre(delaiRetry(res));
+        }
         if (!res.ok) break;
 
         const corps = await res.json();
         total = Number(corps?.total_pages ?? 1);
         for (const e of corps?.results ?? []) {
-          if (e?.nom_complet) out.push({ nom: e.nom_complet, siren: String(e.siren ?? "") });
+          const nom = nomTirable(e);
+          if (nom) out.push({ nom, siren: String(e.siren ?? "") });
         }
         page += 1;
+        await attendre(ATTENTE_MS);
       }
     } catch {
       console.warn(`Tranche ${tranche} interrompue, on passe à la suivante.`);
