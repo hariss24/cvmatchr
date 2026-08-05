@@ -41,6 +41,14 @@
 
 ## Journal
 
+### 2026-08-05 : `LIMITES.md` — inventaire de ce qui n'est pas résolu
+
+- **Quoi :** un fichier à la racine qui rassemble ce qui était éparpillé entre les sections « Réserves » de six specs, les points de vigilance du journal et les lignes ouvertes de `TODO.md`. Référencé depuis `CLAUDE.md` (lecture nº3), `PROJECT_INDEX.md` et `TODO.md`.
+- **Convention posée :** une limite y reste tant qu'elle n'est pas levée ; quand elle l'est, on la barre avec sa date et son commit plutôt que de la supprimer — savoir qu'une contrainte a existé évite d'y retomber.
+- **Le document part de la cause, pas du symptôme.** Le verrou principal est que tout vit dans IndexedDB : ni base serveur, ni comptes. Huit fonctionnalités en découlent et attendent le même socle — dont **toute offre payante** (le compteur de quota est local et se remet à zéro en vidant le cache) et les **alertes email sur le marché caché**, dont la donnée est déjà produite chaque matin sans personne à qui l'envoyer.
+- **Chiffres consignés :** rendement de la découverte par nom d'entreprise 0,33 % (≥ 200 salariés) → **0,113 %** (PME) ; 399 des 503 boards viennent de listes en **CC BY-NC**, donc bloquantes le jour d'une exploitation commerciale ; trois filtres (contrat, qualification, temps de travail) **inopérants** sur la source marché caché ; rayon géographique vrai pour 53 % des offres seulement ; données commitées 20,4 Mo + 4,2 Mo par semaine et par jour.
+- **Commit :** `0f1a4ee` — docs: inventaire des limites non résolues et des fonctionnalités bloquées
+
 ### 2026-08-05 : Marché caché — l'index s'ouvre aux PME de 50 à 199 salariés
 
 **Résultat : 448 → 503 boards, 9 714 → 11 098 offres françaises.** Les 55 nouveaux sont tous SmartRecruiters, dont COLISEE FRANCE (1 192 offres), SPIE BATIGNOLLES (541) et SCALIAN (479). L'index léger passe à 11 076 offres, dont **1 385 nouvelles** — premier signal de fraîcheur réel depuis la mise en place de `decouverteLe`.
