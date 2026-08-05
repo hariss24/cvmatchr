@@ -66,6 +66,13 @@ celle du constat `2026-08-04-briques-externes.md` (remplacer les sélecteurs CSS
 fichier. Les 21 idées déjà notées gardent leurs notes et justifications à l'identique —
 voir `boucle/journal/2026-08-04-arbitre-2.md` pour le détail.*
 
+*Mise à jour du 05/08/2026 (Arbitre) : trois idées notées et intégrées — celles du
+constat `2026-08-05-manques-fonctionnels-3.md` (traduction du CV/lettre, publication en
+ligne, relecture humaine payante), laissées non notées par l'Éclaireur en fin de
+fichier. Les 22 idées déjà notées gardent leurs notes et justifications à l'identique,
+seule leur numérotation a changé pour accueillir les trois nouvelles — voir
+`boucle/journal/2026-08-05-arbitre.md` pour le détail des égalités tranchées.*
+
 ### 1. Optimisation de profil LinkedIn (analyse + suggestions) — 14/20
 
 | Critère | Note | Justification |
@@ -141,7 +148,19 @@ réduction du jeu de polices par défaut).
 | Cohérence | 4 | Directement lié à l'adéquation candidat/offre — au cœur de « postuler mieux ». |
 | **Total** | **12** | Monterait à Facilité 5 si la vérification confirme un simple nouvel affichage du calcul ATS existant ; descendrait si un moteur distinct s'avère nécessaire. |
 
-### 7. Alléger `/` (l'éditeur) — lazy-load des modales d'import/adaptation — 11/20
+### 7. Traduction du CV/lettre dans une autre langue — 12/20 — *estimation Facilité peu fiable*
+
+Constat détaillé : `boucle/constats/2026-08-05-manques-fonctionnels-3.md` §1.
+
+| Critère | Note | Justification |
+|---|---|---|
+| Apport | 3 | Un candidat qui postule hors francophonie doit aujourd'hui retraduire son CV entièrement à la main, en perdant la mise en forme — aucun chemin intégré. Reste à 3 et pas plus : ne concerne qu'un sous-ensemble de candidats (ceux qui visent une offre ou un recruteur non francophone), pas le parcours par défaut. |
+| Facilité | 3 | Réutiliserait probablement l'infra IA existante (nouveau prompt, sur le modèle de `tailor-resume`/`adapt-letter`), mais le constat lui-même signale une inconnue technique réelle avant toute spec : un prompt de traduction doit préserver fidèlement la structure JSON du CV sans repasser par tout le pipeline de génération, jamais vérifié. **Estimation peu fiable** tant que ce point n'est pas tranché. |
+| Écart | 2 | Présent chez 2 produits (Kickresume — fonctionnalité dédiée gratuite, 8 langues ; Enhancv — traduction des intitulés de section, moins aboutie), pas une majorité. |
+| Cohérence | 4 | Quand l'offre visée est dans une autre langue, traduire fait partie intégrante de produire « un CV et une lettre adaptés à une offre précise » (`MISSION.md`) — pas un terrain voisin mais une extension directe du tailoring déjà au cœur du produit. Aggravant : CVMatchr ne se contente pas d'ignorer ce besoin, son chat **refuse explicitement** la demande (`prompts.ts:326`) — un candidat qui la formule reçoit un rejet plutôt qu'un silence. |
+| **Total** | **12** | Égalité de total et de profil complet (3/3/2/4) avec l'idée n°6 (skill gap) — aucune des deux notes ne les différencie sur le barème. Conservée juste après elle, faute de raison objective de l'y faire passer devant, sur le même principe déjà appliqué à l'idée n°10 (filtre Cadre/Non-cadre) le 03/08/2026. |
+
+### 8. Alléger `/` (l'éditeur) — lazy-load des modales d'import/adaptation — 11/20
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -151,7 +170,7 @@ réduction du jeu de polices par défaut).
 | Cohérence | 4 | Le seuil de chargement de l'éditeur est un des seuils vérifiables les plus centraux de `MISSION.md` — premier écran du produit. |
 | **Total** | **11** | À mesurer d'abord (temps réel sous Slow 4G + CPU x4) avant de décider si le lazy-load est nécessaire — le poids seul ne dit pas si le seuil est dépassé. |
 
-### 8. Robustesse du scan face à une offre malformée — 11/20
+### 9. Robustesse du scan face à une offre malformée — 11/20
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -161,7 +180,7 @@ réduction du jeu de polices par défaut).
 | Cohérence | 3 | La fiabilité perçue du chasseur d'offres (une des fonctions cœur) dépend de ne pas perdre un scan entier pour une cause externe. |
 | **Total** | **11** | Non reproduit en production à ce jour (le type `JobOffer` rend le champ obligatoire) — une source tierce malformée suffirait à déclencher le cas. |
 
-### 9. Câbler ou retirer le filtre « Cadre / Non-cadre » (`QUALIFICATION_OPTIONS`) — 11/20
+### 10. Câbler ou retirer le filtre « Cadre / Non-cadre » (`QUALIFICATION_OPTIONS`) — 11/20
 
 Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §4.
 
@@ -173,7 +192,7 @@ Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §4.
 | Cohérence | 3 | Filtre de recherche d'offres, terrain central de « postuler mieux, plus vite », mais reste un raffinement de recherche plutôt que le cœur du parcours candidature. |
 | **Total** | **11** | Égalité de total avec l'idée « Robustesse du scan » (n°7) — profil identique sur les quatre critères (Apport 3, Facilité 4, Écart 1, Cohérence 3). Conservée juste après elle : aucune raison objective identifiée de l'y faire passer devant. |
 
-### 10. Performance `/pack` — mesurer le vrai temps d'interactivité (Monaco/react-pdf) — 11/20
+### 11. Performance `/pack` — mesurer le vrai temps d'interactivité (Monaco/react-pdf) — 11/20
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -183,7 +202,7 @@ Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §4.
 | Cohérence | 3 | Seuil explicite de `MISSION.md` pour l'éditeur, le cœur du produit. |
 | **Total** | **11** | La marge de 120 ms mesurée est trop faible pour trancher sans cette remesure — à traiter comme un quasi-échec plutôt qu'une marge confortable tant que non refait. |
 
-### 11. `/api/editor-chat` : élaguer l'historique et ne pas répéter un `doc_json` inchangé — 10/20
+### 12. `/api/editor-chat` : élaguer l'historique et ne pas répéter un `doc_json` inchangé — 10/20
 
 Constat détaillé : `boucle/constats/2026-08-02-cout-appels-externes.md` §3. Chaque message
 du chat éditeur (`ChatPanel.tsx`) repart avec tout l'historique de la conversation
@@ -202,7 +221,7 @@ historique qui grossit de façon quadratique.
 | Cohérence | 3 | Correspond au seuil « coût des appels externes » de `MISSION.md`, mais sur une fonctionnalité secondaire (le chat de l'éditeur) plutôt que sur le parcours principal comme l'idée n°3. |
 | **Total** | **10** | Égalité avec l'idée « Journal de candidature » tranchée en sa faveur par Cohérence (3 contre 2) : celle-ci sert un seuil explicite de `MISSION.md`, l'autre est en tension avec un principe déjà établi du produit (voir sa justification). |
 
-### 12. Correction orthographique/grammaticale dédiée avec rapport — 10/20 — *estimation Facilité peu fiable*
+### 13. Correction orthographique/grammaticale dédiée avec rapport — 10/20 — *estimation Facilité peu fiable*
 
 Constat détaillé : `boucle/constats/2026-08-03-manques-fonctionnels-2.md` §3.
 
@@ -214,7 +233,7 @@ Constat détaillé : `boucle/constats/2026-08-03-manques-fonctionnels-2.md` §3.
 | Cohérence | 3 | Touche à la qualité du CV produit, terrain de « postuler mieux », mais reste secondaire à l'adéquation candidat/offre elle-même. |
 | **Total** | **10** | Égalité avec les idées n°11 (élaguer editor-chat) et n°13 (journal de candidature) tranchée par Facilité : l'idée n°11 est entièrement spécifiée par son constat (Facilité 4) contre une estimation encore incertaine ici, elle passe donc devant. Placée avant l'idée n°13 (Cohérence 3 contre 2) au même titre que la n°11. |
 
-### 13. Journal de candidature (réalisations, culture d'entreprise, questions à poser) — 10/20
+### 14. Journal de candidature (réalisations, culture d'entreprise, questions à poser) — 10/20
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -224,7 +243,20 @@ Constat détaillé : `boucle/constats/2026-08-03-manques-fonctionnels-2.md` §3.
 | Cohérence | 2 | Va à contre-courant du principe directeur du tracker actuel (statut dérivé, zéro saisie, `PROJECT_INDEX.md` §8 bis) — même tension que le CRM déjà écarté par le propriétaire. |
 | **Total** | **10** | Même tension structurelle que la ligne « CRM de networking » déjà écartée (voir Écartées ci-dessous) — signalé explicitement pour que le propriétaire tranche en connaissance de cause plutôt que par surprise. |
 
-### 14. Faire de `DEFAULT_STALE_DAYS` la seule source de vérité du délai de 30 jours — 9/20
+### 15. Relecture de CV par un humain (service payant) — 9/20 — *sensible : touche
+potentiellement au modèle économique*
+
+Constat détaillé : `boucle/constats/2026-08-05-manques-fonctionnels-3.md` §3.
+
+| Critère | Note | Justification |
+|---|---|---|
+| Apport | 3 | Un second avis humain, distinct de l'IA du chat de l'éditeur — la base la plus large des trois manques trouvés par ce constat (3 produits payants sur 8), signal cohérent qu'il est perçu comme une valeur ajoutée réelle et pas redondant avec un correcteur automatique. |
+| Facilité | 1 | Ce n'est pas un chantier de code : suppose soit un partenariat avec des relecteurs externes, soit une nouvelle ligne de service humaine opérée par CVMatchr — hors du modèle « application locale sans opération humaine côté serveur » (`PROJECT_INDEX.md` §9), le changement le plus étranger au produit actuel de tout le classement avec l'idée n°18 (alertes offres). |
+| Écart | 3 | Présent chez 3 produits (Careerflow, Rezi, Kickresume), tous payants — la base la plus large des trois manques de ce constat. |
+| Cohérence | 2 | Touche au sujet sensible « modèle économique » nommé dans `MISSION.md` : ce n'est pas un raffinement du produit actuel mais l'ajout d'une ligne de service humaine que CVMatchr n'opère pas aujourd'hui — terrain voisin plutôt que cœur de la promesse « postuler mieux, plus vite » par l'IA et le local. |
+| **Total** | **9** | Égalité de total avec l'idée n°16 (`DEFAULT_STALE_DAYS`) tranchée en sa faveur par Apport (3 contre 1) : celle-ci répond à un vrai manque perçu par 3 concurrents payants, l'autre corrige une désynchronisation interne pas encore réelle. Signalée explicitement sensible : décider d'opérer ou de sous-traiter un service humain payant est un choix de modèle économique, à trancher par le propriétaire en connaissance de cause. |
+
+### 16. Faire de `DEFAULT_STALE_DAYS` la seule source de vérité du délai de 30 jours — 9/20
 
 Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §3.
 
@@ -236,7 +268,7 @@ Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §3.
 | Cohérence | 2 | Touche un seuil nommé de `MISSION.md` (hygiène du dépôt : « aucun fichier ni export sans appelant démontré »), mais sur une valeur qui régit une fonctionnalité secondaire (le calcul du statut « sans suite » du tracker de candidatures), pas un parcours central. |
 | **Total** | **9** | Corrige une désynchronisation silencieuse *potentielle*, pas encore réelle aujourd'hui — à traiter avant qu'un des deux nombres change sans l'autre, pas en urgence. |
 
-### 15. Import direct du profil LinkedIn pour préremplir le CV — 8/20
+### 17. Import direct du profil LinkedIn pour préremplir le CV — 8/20
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -246,7 +278,7 @@ Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §3.
 | Cohérence | 3 | Touche à l'import CV, terrain connu de la promesse « postuler mieux, plus vite », côté onboarding. |
 | **Total** | **8** | À vérifier en premier, avant toute spec : la faisabilité technique (API officielle LinkedIn payante ? scraping toléré ?), sans quoi le chantier s'arrête avant de commencer. |
 
-### 16. Alertes sur de nouvelles offres correspondant au profil — 8/20 — *sensible : suppose
+### 18. Alertes sur de nouvelles offres correspondant au profil — 8/20 — *sensible : suppose
 un envoi programmé serveur (contact hors navigateur) ou une notification push, hors de
 l'architecture 100 % locale actuelle*
 
@@ -260,7 +292,7 @@ Constat détaillé : `boucle/constats/2026-08-03-manques-fonctionnels-2.md` §2.
 | Cohérence | 2 | Prolonge le chasseur d'offres existant, mais suppose une infrastructure fondamentalement différente (serveur + contact hors navigateur) — touche potentiellement au sujet sensible « comptes et authentification » nommé dans `MISSION.md`, donc un terrain voisin plutôt que le cœur du produit actuel. |
 | **Total** | **8** | Signalée explicitement sensible : contrairement aux autres manques fonctionnels du classement, ce n'est pas un module de calcul pur greffé sur l'existant, c'est un choix d'architecture (sortir du 100 % local) à trancher par le propriétaire avant toute spec. Placée devant les idées d'hygiène du dépôt et de capture d'offre par Apport (3 contre 1 pour chacune). |
 
-### 17. Décider du sort du chargement de Monaco depuis `cdn.jsdelivr.net` — 8/20
+### 19. Décider du sort du chargement de Monaco depuis `cdn.jsdelivr.net` — 8/20
 
 Constat détaillé : `boucle/constats/2026-08-04-performance.md`. Ouvrir l'onglet JSON
 (mode Expert) de l'éditeur déclenche 15 requêtes vers un CDN externe non maîtrisé par
@@ -279,7 +311,7 @@ plutôt qu'une donnée applicative.
 | Cohérence | 2 | Ne touche aucun seuil nommé de `MISSION.md` au sens strict (le constat le dit explicitement) et concerne une fonctionnalité secondaire (mode Expert), pas un parcours principal. |
 | **Total** | **8** | Seul endroit de tout le produit où le navigateur dépend d'un tiers pour du code plutôt qu'une donnée — signalé pour cette raison architecturale, mais sans urgence : aucun seuil `MISSION.md` explicite n'est violé. |
 
-### 18. Supprimer les fonctions mortes de `db.ts` et `completeJson` de `clients.ts` — 8/20
+### 20. Supprimer les fonctions mortes de `db.ts` et `completeJson` de `clients.ts` — 8/20
 
 Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §1-2.
 
@@ -291,7 +323,7 @@ Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §1-2.
 | Cohérence | 2 | Touche le seuil nommé de `MISSION.md` sur l'hygiène du dépôt, mais sur du code de stockage jamais exécuté et invisible pour l'utilisateur — aucun lien avec un parcours candidat. |
 | **Total** | **8** | Corrige la violation la plus nette et la plus large des trois idées du constat (sept exports à zéro appelant, la totalité des cas trouvés par l'audit) — mais reste un chantier d'hygiène pure, sans gain candidat direct. |
 
-### 19. Capture d'offre native dans l'extension navigateur (éviter le copier-coller d'URL) — 8/20 — *estimation Facilité peu fiable*
+### 21. Capture d'offre native dans l'extension navigateur (éviter le copier-coller d'URL) — 8/20 — *estimation Facilité peu fiable*
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -301,7 +333,7 @@ Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §1-2.
 | Cohérence | 2 | Terrain voisin de l'extension déjà construite, mais gain marginal plutôt que central. |
 | **Total** | **8** | Explicitement écartée du premier chantier autofill (spec `2026-08-02-extension-autofill-design.md` §2) faute de gain net démontré face à l'extracteur d'URL existant — à chiffrer une fois Greenhouse/Lever mesurés en usage réel plus large. |
 
-### 20. Générateur de lettre de démission — 8/20
+### 22. Générateur de lettre de démission — 8/20
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -311,7 +343,7 @@ Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §1-2.
 | Cohérence | 1 | Hors du parcours candidature qui est le cœur de la promesse du produit. |
 | **Total** | **8** | Mention pour mémoire seulement dans le constat source lui-même — à ne prioriser que si un chantier lettre s'ouvre pour une autre raison, jamais en tête de liste. |
 
-### 21. Compter/plafonner les appels IA comme les job-boards — 8/20 — *sensible : touche
+### 23. Compter/plafonner les appels IA comme les job-boards — 8/20 — *sensible : touche
 potentiellement à un vrai plafond produit, pas seulement un compteur*
 
 Constat détaillé : `boucle/constats/2026-08-02-cout-appels-externes.md` §4. Aucune des
@@ -332,7 +364,21 @@ personnelle, tous les appels IA retombent sur la clé serveur partagée
 | Cohérence | 2 | Un plafond introduit de la friction sur des parcours IA centraux (adapter la lettre, scorer l'ATS) — en tension avec « postuler mieux, plus vite » plutôt qu'à son service, même si nécessaire à la soutenabilité du produit. |
 | **Total** | **8** | Dernière du classement à égalité de total (8) parmi quatre autres idées (n°13, 14, 15, 16) : la seule des cinq où la Cohérence traduit une tension active avec la promesse (une friction ajoutée sur un parcours IA central) plutôt qu'un simple terrain voisin ou un défaut d'hygiène neutre et invisible pour l'utilisateur, comme chez les autres. Placée après elles. Signalée explicitement comme sensible : décider d'un plafond sur la clé serveur partagée est un choix de modèle économique, à trancher par le propriétaire en connaissance de cause. |
 
-### 22. Remplacer les sélecteurs CSS faits main de `scrapeJobText` par `@mozilla/readability` — 7/20 — *sensible : ajout d'une dépendance npm importante, feu vert requis ; estimation Facilité peu fiable*
+### 24. Publier son CV en ligne (site personnel ou lien partageable) — 7/20 — *sensible :
+suppose de sortir du 100 % local, terrain voisin de « migration des données hors
+d'IndexedDB »*
+
+Constat détaillé : `boucle/constats/2026-08-05-manques-fonctionnels-3.md` §2.
+
+| Critère | Note | Justification |
+|---|---|---|
+| Apport | 2 | Un lien web se colle dans un message LinkedIn ou une candidature en ligne sans pièce jointe — mais l'import/export PDF existant couvre déjà l'essentiel du besoin de partage, cet apport reste un confort de format plutôt qu'une capacité nouvelle. |
+| Facilité | 1 | La variante la plus simple (lien de consultation stable, à la Rezi) suppose déjà un minimum de stockage ou de rendu côté serveur — CVMatchr n'a aujourd'hui aucune exposition publique de données utilisateur (`PROJECT_INDEX.md` §9). Premier changement d'architecture nécessaire, pas une fonctionnalité qui s'ajoute au-dessus de l'existant. |
+| Écart | 2 | Présent chez 2 produits, sous deux formes différentes (Kickresume — site personnel complet avec gabarits ; Rezi — simple lien de partage stable), pas une majorité. |
+| Cohérence | 2 | Touche potentiellement au sujet sensible « migration des données hors d'IndexedDB » nommé dans `MISSION.md` — un changement d'architecture plutôt qu'un raffinement du parcours candidature actuel. |
+| **Total** | **7** | Égalité de total avec l'idée n°25 (remplacer les sélecteurs CSS par `@mozilla/readability`) tranchée en sa faveur par Écart (2 contre 1) : celle-ci correspond à une capacité réellement comparée à la concurrence chez 2 produits sur 8, l'autre concerne un détail d'implémentation serveur invisible depuis l'extérieur d'un produit concurrent, le constat le dit lui-même « sans objet pour ce domaine ». Signalée explicitement sensible : sortir du 100 % local est un choix d'architecture, à trancher par le propriétaire. |
+
+### 25. Remplacer les sélecteurs CSS faits main de `scrapeJobText` par `@mozilla/readability` — 7/20 — *sensible : ajout d'une dépendance npm importante, feu vert requis ; estimation Facilité peu fiable*
 
 Constat détaillé : `boucle/constats/2026-08-04-briques-externes.md` §1.
 
@@ -343,58 +389,6 @@ Constat détaillé : `boucle/constats/2026-08-04-briques-externes.md` §1.
 | Écart | 1 | Le constat le dit explicitement : « sans objet pour ce domaine » — l'extraction de contenu est un détail d'implémentation serveur invisible depuis l'extérieur d'un produit concurrent, aucun des huit produits de référence ne publie sa pile technique d'extraction. |
 | Cohérence | 2 | Lien indirect avec le seuil « coût des appels externes » de `MISSION.md` (Jina AI Reader fonctionne sur le même principe de quota gratuit dépassable) sans le violer au sens strict — le constat précise que Jina n'est pas dans la liste des services facturés nommés. Reste un raffinement de fiabilité du scraper d'offres, pas un parcours central. |
 | **Total** | **7** | Dernière du classement : profil proche de l'idée n°21 (Apport modeste, Écart quasi nul faute de comparaison possible avec la concurrence) mais avec un Apport non chiffré en plus d'une Facilité non chiffrée — les deux à mesurer avant de trancher, comme le dit le constat lui-même. Signalée sensible : décision d'ajouter `jsdom` en production à faire trancher par le propriétaire, pas seulement une question de code. |
-
-## À noter (Éclaireur, non notées)
-
-*Ajouté le 05/08/2026 par l'Éclaireur. Constat détaillé :
-`boucle/constats/2026-08-05-manques-fonctionnels-3.md`. Non notées : c'est l'Arbitre
-qui note et classe au réveil suivant.*
-
-### Traduction du CV/lettre dans une autre langue
-
-Offerte par **2 produits** : Kickresume (fonctionnalité dédiée « Proofread &
-Translate », 8 langues, gratuite, en moins d'une minute,
-https://www.kickresume.com/en/resume-translation/, consulté 2026-08-05) et Enhancv
-(traduction des intitulés de section via un réglage de langue de l'éditeur, français/
-espagnol/allemand et d'autres langues européennes, moins abouti que Kickresume,
-https://help.enhancv.com/en/articles/2804484-how-to-create-your-resume-in-another-language,
-consulté 2026-08-05). Absente à 100 % de CVMatchr — pire, le chat de l'éditeur
-**refuse explicitement** toute « traduction indépendante du CV » comme hors sujet
-(`lib/ai/prompts.ts:326`). Apport : un candidat qui postule hors francophonie doit
-retraduire son CV entièrement à la main. Ampleur estimée petite à moyenne :
-réutiliserait probablement l'infra IA existante (nouveau prompt), pas de nouvelle
-intégration externe évidente.
-
-### Publier son CV en ligne (site personnel ou lien partageable)
-
-Offerte par **2 produits**, sous deux formes différentes : Kickresume (site web
-personnel complet généré en un clic, 1 gabarit gratuit + 6 premium, URL publique,
-https://www.kickresume.com/en/online-web/, consulté 2026-08-05) et Rezi (lien de
-partage stable et personnalisable par CV, `app.rezi.ai/s/<nom>`,
-https://www.rezi.ai/rezi-changelog, entrée d'octobre 2024 toujours documentée,
-consulté 2026-08-05). CVMatchr ne produit aujourd'hui qu'un fichier PDF téléchargé,
-aucun lien web ni page publique. Apport : coller un lien dans un message LinkedIn ou
-une candidature en ligne plutôt qu'une pièce jointe. Ampleur estimée moyenne — **la
-variante la plus simple (lien de consultation, à la Rezi) suppose déjà de sortir du
-100 % local** (`PROJECT_INDEX.md` §9), CVMatchr n'ayant aucun stockage ni rendu côté
-serveur exposé publiquement aujourd'hui ; terrain voisin du sujet sensible
-« migration des données hors d'IndexedDB » nommé dans `MISSION.md`.
-
-### Relecture de CV par un humain (service payant)
-
-Offerte par **3 produits** (la base la plus large des trois manques de ce constat) :
-Careerflow (relecture 100 % humaine, retour sous 3 jours ouvrés, 79-249 $ selon
-ancienneté, https://www.careerflow.ai/resume-review, consulté 2026-08-05), Rezi (une
-relecture humaine gratuite par mois sur le plan Pro à 29 $/mois, à l'unité dès 8 $ en
-gratuit, https://www.rezi.ai/pricing, consulté 2026-08-05) et Kickresume (éditeurs
-humains, anglais/espagnol, https://www.kickresume.com/en/resume-optimization/,
-consulté 2026-08-05). CVMatchr n'offre aucun accès à un avis humain, seulement le
-chat IA de l'éditeur. Apport : un second avis humain, distinct et perçu comme une
-valeur ajoutée par 3 concurrents payants sur ce point précis. Ampleur estimée
-moyenne mais **service humain, pas seulement un chantier de code** : suppose soit un
-partenariat externe, soit une opération humaine que CVMatchr n'exploite pas
-aujourd'hui — touche potentiellement au sujet sensible « modèle économique » nommé
-dans `MISSION.md`.
 
 ## Écartées
 
