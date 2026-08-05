@@ -3,34 +3,39 @@
 *(fichier court, écrasé à chaque réveil — ce n'est pas un historique,
 le journal est dans `boucle/journal/`)*
 
-- **Dernier réveil :** 2026-08-04 (Arbitre, deuxième réveil du rôle ce jour-là)
-- **Rôle joué :** Arbitre
-- **PR en cours :** aucune — l'Arbitre n'écrit que dans `boucle/` et `docs/`.
-- **Ce qui a été fait :** noté et intégré au classement l'unique idée laissée non notée
-  par l'Éclaireur en fin de `IDEES.md` (« À noter (Éclaireur, non notées) ») : remplacer
-  les sélecteurs CSS faits main de `scrapeJobText` par `@mozilla/readability` (constat
-  `boucle/constats/2026-08-04-briques-externes.md` §1). Notée Apport 2, Facilité 2,
-  Écart 1, Cohérence 2 = **7/20** — dernière position du classement (n°22, 22 idées au
-  total), sous l'ancienne dernière (plafonnement des appels IA, 8/20) : total inédit,
-  aucune égalité à trancher. Note basse malgré un constat solide, faute de chiffrage
-  (gain réel non mesuré faute de télémétrie, coût de `jsdom` en production non mesuré) et
-  d'écart à la concurrence mesurable (le constat le dit lui-même « sans objet »).
-  Signalée sensible (nouvelle dépendance npm importante, feu vert requis) et estimation
-  Facilité peu fiable. La section « À noter » a été retirée de `IDEES.md` : son contenu
-  est maintenant dans le classement. Détail : `boucle/journal/2026-08-04-arbitre-2.md`.
-- **Vérifications :** relu `MISSION.md`, `ETAT.md`, `IDEES.md` (en entier, y compris
-  « Écartées »), `roles/arbitre.md` avant de noter. Relu le constat
-  `2026-08-04-briques-externes.md` en entier. Vérifié que la section « À planifier » de
-  `BACKLOG.md` ne contient rien de nouveau (tout déjà représenté dans `IDEES.md`).
-  Vérifié qu'aucun autre constat récent ne contient de bloc non représenté. Relu
-  `IDEES.md` après édition pour confirmer l'absence d'artefact de fusion en fin de
-  fichier. `git status --short` vérifié juste avant ce commit, confirmé qu'aucun fichier
-  hors de `boucle/` n'a été touché.
-- **Domaine audité en dernier (Éclaireur) :** briques externes (04/08/2026, inchangé —
-  ce réveil est un Arbitre, pas un Éclaireur). Rotation Éclaireur inchangée : manques
-  fonctionnels → coût des appels externes → hygiène du dépôt → manques fonctionnels →
-  performance → briques externes → **manques fonctionnels (prochain domaine pour
-  l'Éclaireur)** → accessibilité → parcours d'un nouvel arrivant → manques fonctionnels →
-  cohérence visuelle → sécurité → (retour au début).
+- **Dernier réveil :** 2026-08-05 (Éclaireur)
+- **Rôle joué :** Éclaireur
+- **PR en cours :** aucune — l'Éclaireur n'écrit que dans `boucle/` et `docs/`.
+- **Ce qui a été fait :** audité le domaine « manques fonctionnels » (3e passage,
+  rotation `boucle/roles/eclaireur.md`). Confronté le périmètre actuel de CVMatchr
+  (`PROJECT_INDEX.md` §§4, 6, 7, 10) et une vérification par `grep` sur `web/src/` à
+  une consultation directe des 8 produits de référence. Trois manques nouveaux
+  trouvés, chacun franchissant le seuil de `MISSION.md` (≥ 2 produits) : traduction
+  du CV/lettre dans une autre langue (Kickresume, Enhancv — et CVMatchr **refuse
+  explicitement** cette demande dans son chat, `prompts.ts:326`), publier son CV en
+  ligne sous forme de site personnel ou de lien partageable (Kickresume, Rezi — la
+  variante la plus simple suppose déjà de sortir du 100 % local, sujet sensible),
+  relecture de CV par un humain payante (Careerflow, Rezi, Kickresume — 3/8, service
+  humain hors du modèle actuel, sujet sensible modèle économique). Constat :
+  `boucle/constats/2026-08-05-manques-fonctionnels-3.md`. Les trois idées ajoutées
+  non notées en fin de `## Classement` de `IDEES.md`, section « À noter (Éclaireur,
+  non notées) » — à l'Arbitre de noter et intégrer au réveil suivant.
+- **Vérifications :** relu `MISSION.md`, `ETAT.md`, `IDEES.md` (classement entier et
+  section « Écartées »), `roles/eclaireur.md` avant d'auditer — confirmé qu'aucune des
+  trois idées trouvées n'est déjà classée ni écartée. Vérifié l'absence côté code par
+  `grep -rniE` sur `traduc|translat`, `portfolio|site (personnel|web)|lien
+  partag|shareable|public.?link` et `relecture|proofread|human review` dans
+  `web/src/`, chaque résultat lu et confirmé sans rapport avec la capacité cherchée
+  (labels de champ libre, fonction CSS `translate()`, clause d'exclusion du prompt).
+  Chaque affirmation sur la concurrence sourcée par une URL officielle et la date de
+  consultation (2026-08-05), récupérée par `WebSearch`/`WebFetch` réels, jamais de
+  mémoire. `git status --short` vérifié juste avant ce commit, confirmé qu'aucun
+  fichier hors de `boucle/` n'a été touché.
+- **Domaine audité en dernier (Éclaireur) :** manques fonctionnels (05/08/2026).
+  Rotation : coût des appels externes → hygiène du dépôt → manques fonctionnels →
+  performance → briques externes → manques fonctionnels →
+  **accessibilité (prochain domaine pour l'Éclaireur)** → parcours d'un nouvel
+  arrivant → manques fonctionnels → cohérence visuelle → sécurité → manques
+  fonctionnels → (retour au début).
 - **Échecs consécutifs du Gardien sur la PR courante :** 0 (aucune PR issue de ce
-  réveil — l'Arbitre ne produit pas de code).
+  réveil — l'Éclaireur ne produit pas de code).
