@@ -390,6 +390,70 @@ Constat détaillé : `boucle/constats/2026-08-04-briques-externes.md` §1.
 | Cohérence | 2 | Lien indirect avec le seuil « coût des appels externes » de `MISSION.md` (Jina AI Reader fonctionne sur le même principe de quota gratuit dépassable) sans le violer au sens strict — le constat précise que Jina n'est pas dans la liste des services facturés nommés. Reste un raffinement de fiabilité du scraper d'offres, pas un parcours central. |
 | **Total** | **7** | Dernière du classement : profil proche de l'idée n°21 (Apport modeste, Écart quasi nul faute de comparaison possible avec la concurrence) mais avec un Apport non chiffré en plus d'une Facilité non chiffrée — les deux à mesurer avant de trancher, comme le dit le constat lui-même. Signalée sensible : décision d'ajouter `jsdom` en production à faire trancher par le propriétaire, pas seulement une question de code. |
 
+## À noter (Éclaireur, non notées)
+
+*Ajouté le 05/08/2026 (deuxième réveil) par l'Éclaireur. Constat détaillé :
+`boucle/constats/2026-08-05-accessibilite.md`. Non notées : c'est l'Arbitre qui note
+et classe au réveil suivant.*
+
+### Champs du formulaire de CV sans label accessible (screen readers muets sur 36 champs)
+
+Le composant partagé `Field` (`web/src/components/form/FormEditor.tsx:400-425`,
+utilisé pour quasiment tous les champs texte du formulaire CV : nom, titre, ville,
+email, téléphone, LinkedIn, chaque expérience/formation/compétence/loisir…) rend un
+`<label>` sans `htmlFor` à côté d'un `<input>` sans `id` — association purement
+visuelle, jamais programmatique. Mesuré par `pa11y`/axe (WCAG2AA) sur `/` : **36
+erreurs `label`** (impact *critical*, « Form elements must have labels ») + 1 erreur
+`label-title-only` (le sélecteur de modèle `toolbar-select`, nommé seulement par son
+attribut `title`, sans label visible). Un lecteur d'écran annonce un champ vide sans
+nom pour chacun. Ampleur estimée petite : cause unique, un seul composant partagé à
+corriger. Non vérifiable si les concurrents font pareil ou mieux sur leur propre
+formulaire de CV (derrière connexion, hors de portée sans compte) — voir constat
+§« Écart à la concurrence ».
+
+### Contraste insuffisant du texte secondaire dans toute l'application (`--faint`)
+
+`--faint` (`globals.css:15` clair `#9A9187`, `:73` sombre `#857D72`), utilisée par
+**17 déclarations CSS distinctes** pour des indices de champ, placeholders,
+sous-titres et badges — du texte porteur d'information, pas décoratif. Ratio de
+contraste calculé sur les couleurs réelles du thème contre `--bg` : **2,97:1**
+(clair) et **3,89:1** (sombre), tous deux sous le seuil AA de 4,5:1 pour texte
+normal. Confirmé en direct sur `/candidatures` (10 occurrences mesurées :
+`.app-tile__hint` × 5, `.app-chip__count` × 5, toutes à 2,97:1 exactement). 8/8
+produits de référence ont eux aussi des défauts de contraste détectés sur leur page
+publique par le même outil — pas un retard propre à CVMatchr, un défaut quasi
+universel du secteur (voir constat §« Ce que fait la concurrence »). Ampleur
+estimée petite : un ajustement de valeur hexadécimale par thème, pas de
+changement structurel.
+
+### Contraste insuffisant du texte blanc sur les boutons d'action orange (`--cta-grad`)
+
+`.btn-orange`/`.go.go-top`/`.flt-go` (texte blanc sur `--cta-grad`, un dégradé
+orange, `globals.css:229-233` et 13 autres déclarations utilisant la même
+variable) : ratio mesuré **2,97-3,50:1** selon l'extrémité du dégradé, sur 4
+boutons vérifiés directement (« Télécharger », « Adapter à une offre », « Ajouter »,
+« Rechercher »), tous sous le seuil AA de 4,5:1. Fait notable : une variable
+`--on-orange: #201200` existe déjà dans le thème (déjà utilisée ailleurs une seule
+fois) et donnerait 5,2-6,2:1 sur les mêmes dégradés — recalculé, pas supposé.
+Ampleur estimée petite : remplacer une valeur de couleur par un jeton déjà présent
+dans le code, sur 4 classes CSS.
+
+### Indicateur de focus clavier supprimé sur le chasseur d'offres (`/jobs`)
+
+`.flt-box .ui-input:focus { box-shadow: none; }` (`globals.css:1550`) écrase sans
+rien y substituer l'anneau de focus par défaut de `.ui-input:focus`
+(`globals.css:379-381`). Confirmé en direct par focus programmatique réel sur le
+champ « Où » de la recherche d'offres : `outline-style: none`, `box-shadow: none`
+— un utilisateur clavier seul ne voit aucun indice qu'il est arrivé sur ce champ.
+Même défaut en lecture de code (non déclenché en direct, élément conditionnel) sur
+`.flt-radius select` (`globals.css:1387-1390`, `outline: none` sans aucune règle
+`:focus` compensatoire dans tout le fichier). S'y ajoute, mesuré par `pa11y`/axe sur
+`/` : l'aperçu PDF (`.pdf-preview`, contenant le `<canvas>` de rendu) est une zone
+défilante sans `tabindex`, donc non focusable et non défilable au clavier
+(`scrollable-region-focusable`) — Huntr a le même défaut sur sa page publique (3
+occurrences), CVMatchr n'est pas seul sur cette catégorie précise. Ampleur estimée
+petite : une règle CSS à retirer, une à ajouter, un `tabindex` à poser.
+
 ## Écartées
 
 - **Préparation d'entretien par IA (mock interview)** — écartée le 02/08/2026. Présente
