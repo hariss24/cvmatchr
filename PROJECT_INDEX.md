@@ -4,6 +4,10 @@ Carte du dépôt. À lire avant toute modification pour ne pas redécouvrir à l
 ce qui existe déjà. Pour les règles de comportement (Karpathy, vérifications,
 interdictions), voir `CLAUDE.md` (racine) et `web/CLAUDE.md`.
 
+Ce document décrit ce qui **existe**. Pour ce qui **manque** — limites connues
+non résolues, et fonctionnalités bloquées faute de comptes et de base serveur —
+voir `LIMITES.md` (racine).
+
 ---
 
 ## 1. Vue d'ensemble

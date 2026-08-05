@@ -2,6 +2,12 @@
 
 Suivi des fonctionnalités de l'application (version Next.js).
 
+> Ce fichier liste ce qu'on **veut faire**. Pour ce qui est **empêché** — limites
+> mesurées et non résolues, fonctionnalités bloquées faute de comptes et de base
+> serveur — voir `LIMITES.md`. Plusieurs lignes ci-dessous y renvoient : la
+> faille du quota et l'extraction LinkedIn/Indeed, notamment, n'attendent pas
+> une décision mais une brique d'infrastructure.
+
 ---
 
 ## ✅ Fait

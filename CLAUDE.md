@@ -10,9 +10,13 @@
 1. `PROJECT_INDEX.md` (racine) — architecture actuelle.
 2. `WORK_HISTORY.md` (racine) — ce qui a été fait récemment et pourquoi (section
    « État actuel » + dernières entrées du Journal).
-3. `web/CADRAGE_EXECUTION.md` — contrat d'exécution à suivre si on te confie un
+3. `LIMITES.md` (racine) — ce que l'app ne sait **pas** faire et pourquoi :
+   limites connues non résolues, et fonctionnalités bloquées par l'absence de
+   comptes et de base serveur. À lire avant de promettre quoi que ce soit, et à
+   mettre à jour dès qu'une limite est levée ou découverte.
+4. `web/CADRAGE_EXECUTION.md` — contrat d'exécution à suivre si on te confie un
    plan à réaliser tâche par tâche (protocole de vérification, format de rapport).
-4. `docs/archive/REWRITE_PROGRESS.md` — uniquement si tu as besoin du détail
+5. `docs/archive/REWRITE_PROGRESS.md` — uniquement si tu as besoin du détail
    exhaustif, phase par phase, des réécritures Next.js et React PDF (archive
    figée, ne plus y écrire — le journal actif est `WORK_HISTORY.md`).
 
