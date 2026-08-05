@@ -344,6 +344,58 @@ Constat détaillé : `boucle/constats/2026-08-04-briques-externes.md` §1.
 | Cohérence | 2 | Lien indirect avec le seuil « coût des appels externes » de `MISSION.md` (Jina AI Reader fonctionne sur le même principe de quota gratuit dépassable) sans le violer au sens strict — le constat précise que Jina n'est pas dans la liste des services facturés nommés. Reste un raffinement de fiabilité du scraper d'offres, pas un parcours central. |
 | **Total** | **7** | Dernière du classement : profil proche de l'idée n°21 (Apport modeste, Écart quasi nul faute de comparaison possible avec la concurrence) mais avec un Apport non chiffré en plus d'une Facilité non chiffrée — les deux à mesurer avant de trancher, comme le dit le constat lui-même. Signalée sensible : décision d'ajouter `jsdom` en production à faire trancher par le propriétaire, pas seulement une question de code. |
 
+## À noter (Éclaireur, non notées)
+
+*Ajouté le 05/08/2026 par l'Éclaireur. Constat détaillé :
+`boucle/constats/2026-08-05-manques-fonctionnels-3.md`. Non notées : c'est l'Arbitre
+qui note et classe au réveil suivant.*
+
+### Traduction du CV/lettre dans une autre langue
+
+Offerte par **2 produits** : Kickresume (fonctionnalité dédiée « Proofread &
+Translate », 8 langues, gratuite, en moins d'une minute,
+https://www.kickresume.com/en/resume-translation/, consulté 2026-08-05) et Enhancv
+(traduction des intitulés de section via un réglage de langue de l'éditeur, français/
+espagnol/allemand et d'autres langues européennes, moins abouti que Kickresume,
+https://help.enhancv.com/en/articles/2804484-how-to-create-your-resume-in-another-language,
+consulté 2026-08-05). Absente à 100 % de CVMatchr — pire, le chat de l'éditeur
+**refuse explicitement** toute « traduction indépendante du CV » comme hors sujet
+(`lib/ai/prompts.ts:326`). Apport : un candidat qui postule hors francophonie doit
+retraduire son CV entièrement à la main. Ampleur estimée petite à moyenne :
+réutiliserait probablement l'infra IA existante (nouveau prompt), pas de nouvelle
+intégration externe évidente.
+
+### Publier son CV en ligne (site personnel ou lien partageable)
+
+Offerte par **2 produits**, sous deux formes différentes : Kickresume (site web
+personnel complet généré en un clic, 1 gabarit gratuit + 6 premium, URL publique,
+https://www.kickresume.com/en/online-web/, consulté 2026-08-05) et Rezi (lien de
+partage stable et personnalisable par CV, `app.rezi.ai/s/<nom>`,
+https://www.rezi.ai/rezi-changelog, entrée d'octobre 2024 toujours documentée,
+consulté 2026-08-05). CVMatchr ne produit aujourd'hui qu'un fichier PDF téléchargé,
+aucun lien web ni page publique. Apport : coller un lien dans un message LinkedIn ou
+une candidature en ligne plutôt qu'une pièce jointe. Ampleur estimée moyenne — **la
+variante la plus simple (lien de consultation, à la Rezi) suppose déjà de sortir du
+100 % local** (`PROJECT_INDEX.md` §9), CVMatchr n'ayant aucun stockage ni rendu côté
+serveur exposé publiquement aujourd'hui ; terrain voisin du sujet sensible
+« migration des données hors d'IndexedDB » nommé dans `MISSION.md`.
+
+### Relecture de CV par un humain (service payant)
+
+Offerte par **3 produits** (la base la plus large des trois manques de ce constat) :
+Careerflow (relecture 100 % humaine, retour sous 3 jours ouvrés, 79-249 $ selon
+ancienneté, https://www.careerflow.ai/resume-review, consulté 2026-08-05), Rezi (une
+relecture humaine gratuite par mois sur le plan Pro à 29 $/mois, à l'unité dès 8 $ en
+gratuit, https://www.rezi.ai/pricing, consulté 2026-08-05) et Kickresume (éditeurs
+humains, anglais/espagnol, https://www.kickresume.com/en/resume-optimization/,
+consulté 2026-08-05). CVMatchr n'offre aucun accès à un avis humain, seulement le
+chat IA de l'éditeur. Apport : un second avis humain, distinct et perçu comme une
+valeur ajoutée par 3 concurrents payants sur ce point précis. Ampleur estimée
+moyenne mais **service humain, pas seulement un chantier de code** : suppose soit un
+partenariat externe, soit une opération humaine que CVMatchr n'exploite pas
+aujourd'hui — touche potentiellement au sujet sensible « modèle économique » nommé
+dans `MISSION.md`.
+
 ## Écartées
 
 - **Préparation d'entretien par IA (mock interview)** — écartée le 02/08/2026. Présente
