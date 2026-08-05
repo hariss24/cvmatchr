@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Marché caché — **descendre le seuil SIRENE sous 200 salariés**. La chaîne est complète et vérifiée : index hebdomadaire, scan quotidien, source branchée, pastille de fraîcheur sur la carte, et suite e2e redevenue fiable depuis le 05/08/2026. Rappel de la mesure qui guide la suite : l'âge médian des offres moissonnées est de **46 jours** (44 % ont plus de 60 jours, seules 617 ont moins de 48 h) — la concurrence sur une offre dépend surtout de son ancienneté, pas du canal de publication. Ensuite seulement : descendre le seuil SIRENE sous 200 salariés (les PME reçoivent moins de candidatures, et toutes les tranches sous 200 dépassent le plafond d'affichage de l'API, donc des dizaines de milliers d'entreprises sont hors périmètre), puis la Brique 3 (Common Crawl → Workday et ATS non énumérables).
+**Prochaine étape suggérée :** Marché caché — **Brique 3, les ATS non énumérables** (Common Crawl → Workday, SuccessFactors, Talentsoft), là où sont les grands employeurs français encore hors de portée : deviner une URL de tenant Workday échoue 10 fois sur 10, Common Crawl lève ce verrou. Deux pistes plus petites avant, si besoin de résultats rapides : descendre encore le seuil SIRENE sous 50 salariés (à mesurer d'abord — le rendement chutait déjà à 0,1 % chez les 50–199), et surveiller la taille du mémo (20,4 Mo, commité chaque semaine). La chaîne est complète et vérifiée de bout en bout : index hebdomadaire ouvert aux PME, scan quotidien, source branchée dans « Offres », pastille de fraîcheur sur la carte, suite e2e fiable. Rappel de la mesure qui guide la suite : l'âge médian des offres moissonnées est de **46 jours** (44 % ont plus de 60 jours, seules 617 ont moins de 48 h) — la concurrence sur une offre dépend surtout de son ancienneté, pas du canal de publication. Ensuite seulement : descendre le seuil SIRENE sous 200 salariés (les PME reçoivent moins de candidatures, et toutes les tranches sous 200 dépassent le plafond d'affichage de l'API, donc des dizaines de milliers d'entreprises sont hors périmètre), puis la Brique 3 (Common Crawl → Workday et ATS non énumérables).
 
 ---
 
@@ -40,6 +40,26 @@
 ---
 
 ## Journal
+
+### 2026-08-05 : Marché caché — l'index s'ouvre aux PME de 50 à 199 salariés
+
+**Résultat : 448 → 503 boards, 9 714 → 11 098 offres françaises.** Les 55 nouveaux sont tous SmartRecruiters, dont COLISEE FRANCE (1 192 offres), SPIE BATIGNOLLES (541) et SCALIAN (479). L'index léger passe à 11 076 offres, dont **1 385 nouvelles** — premier signal de fraîcheur réel depuis la mise en place de `decouverteLe`.
+
+- **⚠️ Le découpage par département ne fonctionne pas** — à ne jamais réessayer. `departement=75` change bien le total annoncé mais ne renvoie que **12 résultats conformes sur 25**, le premier ayant son siège dans le 95 : le filtre porte sur les **établissements** (une chaîne nationale avec une boutique à Paris ressort dans « 75 ») et le classement reste national, si bien que les premières pages de chaque département sont presque identiques — 400 lignes n'avaient donné que **170 entreprises distinctes**.
+- **La section NAF est la bonne partition** : une entreprise n'a qu'une activité principale. Même mesure, 5 146 lignes → **5 122 noms distincts** (0,5 % de recouvrement). C'est la seule façon de passer sous le plafond d'affichage de 10 000 résultats. Ouvre **49 438 PME** (tranche 21 → 33 760, tranche 22 → 15 678).
+- **Ces PME ne sont sondées que contre SmartRecruiters**, et c'est une mesure : sur 5 122 d'entre elles testées contre les quatre ATS, 5 boards trouvés, **tous SmartRecruiters**. Le sixième, `ibanfirst` chez Greenhouse, figurait déjà dans l'index via la liste publique. Zéro Lever, zéro Ashby — même constat qu'au-dessus de 200 salariés, où 47 des 49 boards issus de SIRENE sont SmartRecruiters et **aucun** n'est Greenhouse ou Lever.
+
+**L'incident qui a failli passer pour un succès.** Le premier passage réel a rendu **71 724 réponses indéterminées sur 85 840** — 84 % du travail jeté — et j'ai failli prendre ses 11 nouveaux boards pour un résultat. Diagnostic reproduit : SmartRecruiters accepte **environ 4 800 requêtes** puis refuse tout le reste de la fenêtre avec un `429` portant un `retry-after: 0` inutilisable, et `compterFR` traitait tout statut non-OK comme un échec définitif.
+
+- **`compterFR` retente un 429**, avec un plancher de 2 s — repartir aussitôt renverrait dans le mur.
+- **La passe SmartRecruiters est bridée** à 4 requêtes de front avec 200 ms de pause (`enLot` accepte désormais une pause). Mesuré : 25 000 requêtes à 12 de front → **4 825 réponses et 20 175 refus** ; à cadence réduite → **6 000 requêtes, zéro refus, 16 par seconde**. Les trois autres ATS gardent la cadence pleine, ils ne bronchent pas.
+- Deuxième passage : **70 649 sondages, zéro indéterminée**.
+- **La discipline `null` ≠ `0` a tenu pendant l'incident** : aucune des 71 724 non-réponses n'a été écrite, l'index n'a pas été amputé ni commité vide. C'est exactement ce pour quoi elle avait été posée.
+
+- **Coûts :** mémo 12 → **20,4 Mo** ; workflow hebdomadaire relevé de 120 à **180 minutes** (le passage à froid a duré ~75 min ; le mémo en épargnera ensuite la majeure partie).
+- **Réserve :** trois sections (22/C, 22/G, 22/H) ont été interrompues par l'API SIRENE, soit ~860 PME non énumérées ce coup-ci. Elles rentreront au passage suivant.
+- **Vérifs :** `node --test` **73/73**, Vitest 658/658, `tsc` propre, `lint` 0 erreur, `build` OK, Playwright `jobs` 9/9.
+- **Commit :** `99b5c9b` — feat(boards): ouvrir l'index aux PME de 50 à 199 salariés
 
 ### 2026-08-05 : Suite Playwright stabilisée — la contention, pas la lenteur
 
