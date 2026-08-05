@@ -101,6 +101,31 @@ async function texteSmartRecruiters(o: OffreLegere, fetchImpl: FetchLike): Promi
   }
 }
 
+/**
+ * Workday : l'API de détail vit sous `/wday/cxs/{locataire}/{site}`, alors que
+ * l'URL publique de l'offre n'a que `/{site}`. On dérive l'une de l'autre —
+ * `id` seul ne suffit pas, le chemin de l'offre porte aussi la ville.
+ */
+export function urlDetailWorkday(url: string): string | null {
+  const m = /^https:\/\/([a-zA-Z0-9_-]+)\.(wd\d+)\.myworkdayjobs\.com\/([^/]+)(\/.+)$/.exec(url);
+  if (!m) return null;
+  const [, locataire, wd, site, chemin] = m;
+  return `https://${locataire}.${wd}.myworkdayjobs.com/wday/cxs/${locataire}/${site}${chemin}`;
+}
+
+async function texteWorkday(o: OffreLegere, fetchImpl: FetchLike): Promise<string | null> {
+  const url = urlDetailWorkday(o.url);
+  if (!url) return null;
+  try {
+    const res = await fetchImpl(url, { headers: { accept: "application/json" } });
+    if (!res.ok) return null;
+    const corps = (await res.json()) as { jobPostingInfo?: { jobDescription?: string } };
+    return texteBrut(corps.jobPostingInfo?.jobDescription ?? "");
+  } catch {
+    return null;
+  }
+}
+
 /** Un seul appel liste pour toutes les offres candidates d'un même board Lever. */
 async function textesLever(
   slug: string,
@@ -152,12 +177,15 @@ export async function obtenirTextes(
 ): Promise<Map<string, string>> {
   const out = new Map<string, string>();
 
-  const parId = offres.filter((o) => o.ats === "greenhouse" || o.ats === "smartrecruiters");
+  // Ces trois-là n'ont pas d'appel liste porteur du texte : une requête par offre.
+  const parId = offres.filter(
+    (o) => o.ats === "greenhouse" || o.ats === "smartrecruiters" || o.ats === "workday",
+  );
   const resultatsParId = await parVagues(parId, async (o) => {
-    const texte =
-      o.ats === "greenhouse"
-        ? await texteGreenhouse(o, fetchImpl)
-        : await texteSmartRecruiters(o, fetchImpl);
+    let texte: string | null;
+    if (o.ats === "greenhouse") texte = await texteGreenhouse(o, fetchImpl);
+    else if (o.ats === "workday") texte = await texteWorkday(o, fetchImpl);
+    else texte = await texteSmartRecruiters(o, fetchImpl);
     return texte === null ? null : { cle: cleOffre(o), texte };
   });
   for (const r of resultatsParId) if (r) out.set(r.cle, r.texte);

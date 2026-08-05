@@ -10,3 +10,6 @@ node_modules/
 test-results/
 playwright-report/
 .worktrees/
+
+# Journal d'avancement de la moisson Workday (voir scripts/build-boards-workday.mjs)
+boards-workday-suivi.log

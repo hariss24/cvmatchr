@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Prochaine étape suggérée :** Marché caché — **Brique 3, les ATS non énumérables** (Common Crawl → Workday, SuccessFactors, Talentsoft), là où sont les grands employeurs français encore hors de portée : deviner une URL de tenant Workday échoue 10 fois sur 10, Common Crawl lève ce verrou. Deux pistes plus petites avant, si besoin de résultats rapides : descendre encore le seuil SIRENE sous 50 salariés (à mesurer d'abord — le rendement chutait déjà à 0,1 % chez les 50–199), et surveiller la taille du mémo (20,4 Mo, commité chaque semaine). La chaîne est complète et vérifiée de bout en bout : index hebdomadaire ouvert aux PME, scan quotidien, source branchée dans « Offres », pastille de fraîcheur sur la carte, suite e2e fiable. Rappel de la mesure qui guide la suite : l'âge médian des offres moissonnées est de **46 jours** (44 % ont plus de 60 jours, seules 617 ont moins de 48 h) — la concurrence sur une offre dépend surtout de son ancienneté, pas du canal de publication. Ensuite seulement : descendre le seuil SIRENE sous 200 salariés (les PME reçoivent moins de candidatures, et toutes les tranches sous 200 dépassent le plafond d'affichage de l'API, donc des dizaines de milliers d'entreprises sont hors périmètre), puis la Brique 3 (Common Crawl → Workday et ATS non énumérables).
+**Prochaine étape suggérée :** le **socle comptes + base serveur**. C'est le seul chantier qui transforme l'outil en produit : il débloque d'un coup les huit fonctionnalités listées en tête de `LIMITES.md` — alertes email sur le marché caché (la donnée est déjà produite chaque matin, il n'y a simplement personne à qui l'envoyer), synchronisation multi-appareils, offre payante, partage d'un CV par lien — et ferme la faille du quota, non corrigeable sans compteur serveur. La brique 3 vient d'ajouter du volume mais ne débloque aucune de ces fonctionnalités. Pistes secondaires, par ordre de rapport : **SuccessFactors et Talentsoft** (même méthode Common Crawl que Workday, API non mesurée) ; descendre le seuil SIRENE sous 50 salariés (à mesurer d'abord — le rendement chutait déjà à 0,113 % chez les 50–199) ; **surveiller le poids des données** (mémo 20,6 Mo hebdomadaire, index d'offres 7,9 Mo **quotidien** — presque doublé avec Workday). La chaîne est complète et vérifiée de bout en bout : index hebdomadaire (4 ATS devinés + Workday lu dans Common Crawl), scan quotidien, source branchée dans « Offres », pastille de fraîcheur, suite e2e fiable. Rappel de la mesure qui guide la suite : l'âge médian des offres moissonnées est de **46 jours** — la concurrence sur une offre dépend surtout de son ancienneté, pas du canal de publication.
 
 ---
 
@@ -40,6 +40,96 @@
 ---
 
 ## Journal
+
+### 2026-08-06 : Marché caché — Brique 3, Workday entre par la lecture
+
+**Le verrou.** Les quatre ATS de la brique 1 se découvrent en devinant un slug
+depuis un nom d'entreprise. Workday l'interdit : son adresse porte un
+identifiant attribué au contrat (`airliquidehr.wd3/AirLiquideExternalCareer` —
+« AirLiquide », deviné, rend 404). Or c'est là que sont les grands employeurs
+français. **Solution : arrêter de deviner, lire.** Common Crawl publie l'index
+des adresses rencontrées sur le web ; on y trouve les vraies.
+
+**Résultat : 361 boards Workday, 8 538 offres françaises.** L'index passe de 503
+à 864 boards, les offres légères de 11 076 à **19 555**. Thales 1 541, Airbus
+469, Deloitte 417, Chanel 399, Air Liquide 312, Grand Frais 343, Valeo 251,
+Michelin 200, RATP 111. Une recherche « ingénieur » à Paris rend 43 offres dont
+34 Workday (Safran AI, Exegy, Wakam, Capfi).
+
+**Le service d'index de Common Crawl est en panne**, 504 sur *toutes* les
+requêtes, y compris `url=example.com` — vérifié avant d'accuser les nôtres. On
+lit donc directement les fichiers sur `data.commoncrawl.org` : 74 ms au lieu
+d'un timeout, et une dépendance de moins. `cluster.idx` fait 99 Mo mais il est
+trié : une dichotomie sur les plages d'octets isole la zone Workday en
+13 appels de 4 Ko, puis 20 blocs (6,7 Mo, 8 s) donnent 1 458 locataires.
+
+**Cinq pièges, tous révélés par la mesure et non par l'intuition :**
+
+1. **La facette pays est *ignorée*, pas refusée**, quand le board ne l'a pas
+   configurée : GEA rend ses 356 offres à l'identique avec et sans le filtre
+   France. Un premier sondage annonçait « Dollar Tree, 23 838 offres en
+   France ». 26 484 fausses offres sur 125 boards. D'où la vérification
+   préalable de l'existence de la facette.
+2. **`estFrancais` est inutilisable ici.** Workday n'expose aucun pays, et écrit
+   « Vitry-sur-Seine », « Gentilly », « Le Trait » — aucune liste de villes ne
+   couvrira 35 000 communes. C'est le pays déclaré par Workday qui tranche,
+   jamais une déduction depuis le nom de la ville. (`searchText: "France"` ne
+   filtre pas non plus : il remonte Bogota, Madrid, Hong Kong.)
+3. **Un locataire a souvent plusieurs vitrines, sans recoupement.** Détecté par
+   Hariss, qui a comparé une offre à la source : `workday.wd5/Workday` porte
+   5 offres FR, `Workday_Early_Career` aucune ; les 18 offres de `..._PROSOL`
+   sont absentes des 343 de `..._GRAND_FRAIS` (0 offre commune dans les deux
+   cas). N'en garder qu'une jetait **1 253 offres**.
+4. **Le locataire n'est pas un nom d'entreprise.** Le candidat lisait « Ag »
+   pour Airbus, « Cc » pour Chanel, « Fina » pour Deloitte, « Alliancewd » pour
+   Renault. `nomWorkday` déduit le nom de l'adresse : 101 noms redressés sur
+   291. Restent 34 sigles non capitalisés (Abb, CSL) — lisibles, non raffinés
+   pour ne pas casser les 327 cas justes.
+5. **Une entrée sur vingt n'est pas une offre** : Workday renvoie des objets
+   sans titre ni chemin (Accenture), qui auraient produit des cartes vides. Et
+   **Accenture n'expose pas non plus `locationsText`** : ses 200 offres
+   entraient sans ville, donc absentes des recherches par rayon.
+
+**Deux échecs d'exécution, instructifs.**
+
+*Le premier passage a rendu 0 sur 1 458.* Cause : `mois()` et `estFrais()`
+exigent une date en argument, appelées sans elles jettent. L'exception,
+rattrapée par `enLot`, était **indiscernable d'un board injoignable**. Le
+garde-fou `null` ≠ `0` a de nouveau tenu : zéro écriture, index intact. Et le
+diagnostic a dû éliminer les fausses pistes une à une (adresses correctes, code
+correct en séquentiel 9/11, cadence correcte 36/40) avant d'arriver au code du
+script — un échec à *exactement* 100 % ne ressemble pas à un problème réseau.
+Corrigé ; le script tient désormais un journal écrit **immédiatement sur
+disque** (`appendFileSync`), parce que `console.log` reste en tampon quand la
+sortie est redirigée : 1 h 40 sans une ligne alors qu'il échouait depuis la
+première seconde.
+
+*Un ouvrier est ensuite resté 15 minutes bloqué* pendant que les 1 450 autres
+boards étaient finis : les détails s'ouvraient en file indienne. Passés à six de
+front, avec un test qui provoque une panne au milieu du lot pour vérifier que
+l'erreur n'est pas avalée par les autres.
+
+**Effet de bord mesuré à temps.** Cette parallélisation, combinée aux 12 boards
+de front de `build-boards-offres.mjs`, faisait 72 requêtes simultanées :
+121 boards Workday sur 361 sont tombés, dont Thales, Airbus, Deloitte et
+Chanel — **6 144 offres perdues**, et le script ne réessayait jamais. Workday
+passe à 3 boards de front avec deux réessais : 22 indéterminés au lieu de 123.
+
+**Décision de qualité (Hariss) :** une offre sans lieu exploitable n'entre pas
+dans l'index. Le filtre vit **à l'écriture du fichier**, pas seulement chez
+chaque ATS — les offres reprises d'un board injoignable viennent du fichier
+précédent, donc d'un code plus ancien (93 offres Europcar), et le même trou
+existait déjà ailleurs (56 offres `lever:ippon`).
+
+**Vérifié :** `node --test` 112/112 · Vitest 660/660 · `tsc` propre · `lint`
+0 erreur · `build` OK · recherche réelle bout en bout. Index final :
+19 555 offres, 828 entreprises, **0 sans lieu, 0 sans titre, 0 sans URL**.
+`boards-fr.yml` gagne une étape Workday (timeout 180 → 300 min),
+`boards-offres.yml` passe de 60 à 150 min.
+
+**Non fait :** SuccessFactors et Talentsoft. Même méthode probable, mais chacun
+a son API à mesurer — les empiler aurait multiplié l'inconnu au lieu d'en lever
+une proprement.
 
 ### 2026-08-05 : `LIMITES.md` — inventaire de ce qui n'est pas résolu
 

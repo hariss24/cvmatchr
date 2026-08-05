@@ -24,7 +24,9 @@ permissions:
 jobs:
   offres:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # Relevé de 60 à 150 le 06/08/2026 : Workday a porté l'index de 503 à 864
+    # boards, et ses gros boards s'ouvrent offre par offre pour lire le pays.
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
         with:

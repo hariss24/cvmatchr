@@ -218,13 +218,28 @@ l'API et sont découpées **par section NAF, jamais par département** : le filt
 département porte sur les établissements et renvoie des résultats largement hors
 périmètre. Voir `docs/superpowers/specs/2026-08-04-marche-cache-index-design.md`.
 
+**Workday se découvre autrement** (`scripts/build-boards-workday.mjs`, étape
+distincte du même workflow hebdomadaire). Son adresse
+`{locataire}.{wdN}.myworkdayjobs.com/{site}` porte un identifiant attribué au
+contrat : la deviner échoue systématiquement. Elle est donc **lue** dans l'index
+public de Common Crawl (`scripts/boards/crawl.mjs`), qu'on interroge par
+`data.commoncrawl.org` — pas par le service CDX, en panne totale le 05/08/2026,
+y compris sur `url=example.com`. ⚠️ Un locataire expose souvent **plusieurs
+vitrines qui ne se recoupent pas** (`Workday` vs `Workday_Early_Career`,
+`..._GRAND_FRAIS` vs `..._PROSOL`) : n'en garder qu'une jetait ~1 250 offres.
+⚠️ Workday ne donne **aucun pays** dans sa liste et sa facette pays est
+*ignorée* — pas refusée — quand le board ne l'a pas configurée ; s'y fier
+produisait 26 484 fausses offres. Détail des deux voies dans
+`scripts/boards/workday.mjs`.
+
 **Quatrième source « Marché caché »** (`lib/jobs/boardsFr.ts`, décochée par
 défaut) : lit l'index léger `lib/jobs/data/boards-offres.json`
 (titre/entreprise/lieu/url/date, sans texte, rafraîchi **chaque jour** par
 `.github/workflows/boards-offres.yml`), ne garde que les offres dont le titre
 matche les mots-clés du profil, applique le **filtre de lieu** (distance réelle
-pour les 53 % d'offres qui portent des coordonnées — SmartRecruiters est le seul
-ATS à en donner ; rapprochement de libellés pour les autres, voir
+pour les offres qui portent des coordonnées — SmartRecruiters est le seul ATS à
+en donner, soit 36 % de l'index depuis Workday ; rapprochement de libellés pour
+les autres, voir
 `lib/jobs/boardsLieu.ts`), les classe **de la plus récente à la plus
 ancienne**, puis récupère le texte complet **en direct** pour les 60 premières
 — jamais de texte committé, pour ne pas faire grossir le dépôt à chaque scan.

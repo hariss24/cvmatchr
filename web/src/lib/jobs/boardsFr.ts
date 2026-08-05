@@ -17,7 +17,7 @@ import { geocodeHome } from "./homeCoords";
 import boardsOffresData from "./data/boards-offres.json";
 
 export interface OffreLegere {
-  ats: "greenhouse" | "lever" | "ashby" | "smartrecruiters";
+  ats: "greenhouse" | "lever" | "ashby" | "smartrecruiters" | "workday";
   slug: string;
   entreprise: string;
   id: string;
@@ -41,6 +41,7 @@ const NOMS_ATS: Record<OffreLegere["ats"], string> = {
   lever: "Lever",
   ashby: "Ashby",
   smartrecruiters: "SmartRecruiters",
+  workday: "Workday",
 };
 
 /**

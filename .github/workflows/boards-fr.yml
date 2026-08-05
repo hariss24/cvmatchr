@@ -20,9 +20,11 @@ jobs:
   index:
     runs-on: ubuntu-latest
     # Relevé à 180 le 05/08/2026, quand les PME de 50 à 199 salariés se sont
-    # ajoutées : 49 438 entreprises de plus à énumérer puis à sonder. Un premier
-    # passage à froid est le pire cas ; ensuite le mémo en épargne la majorité.
-    timeout-minutes: 180
+    # ajoutées : 49 438 entreprises de plus à énumérer puis à sonder. Puis à 300
+    # le 06/08/2026 avec Workday, dont le premier passage a duré 1 h 30 sur
+    # 2 467 vitrines. Un passage à froid est le pire cas ; ensuite le mémo en
+    # épargne la majorité.
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,6 +39,14 @@ jobs:
 
       - name: Rafraîchir l'index
         run: node scripts/build-boards-fr.mjs --source=tout
+
+      # Workday à part : ses adresses ne se devinent pas depuis un nom
+      # d'entreprise, elles se lisent dans l'index public de Common Crawl.
+      # Voir scripts/boards/crawl.mjs. Le mémo mensuel fait que seuls les
+      # locataires non testés du mois repassent — le premier passage à froid a
+      # duré 1 h 30 sur 2 467 vitrines, les suivants sont bien plus courts.
+      - name: Rafraîchir les boards Workday
+        run: node scripts/build-boards-workday.mjs
 
       - name: Commiter si l'index a changé
         run: |

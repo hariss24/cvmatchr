@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { obtenirTextes, texteBrut, type FetchLike } from "./boardsText";
+import { obtenirTextes, texteBrut, urlDetailWorkday, type FetchLike } from "./boardsText";
 import type { OffreLegere } from "./boardsFr";
 
 function offre(partial: Partial<OffreLegere>): OffreLegere {
@@ -139,6 +139,35 @@ describe("obtenirTextes", () => {
     expect(r.get("ashby:alan:x")).toBe("Texte X");
     expect(r.get("ashby:alan:y")).toBe("Texte Y");
     expect(appels).toBe(1);
+  });
+
+  it("urlDetailWorkday : rend null sur ce qui n'est pas une URL Workday", () => {
+    expect(urlDetailWorkday("https://boards.greenhouse.io/onrunning/jobs/1")).toBeNull();
+    expect(urlDetailWorkday("https://sanofi.wd3.myworkdayjobs.com/SanofiCareers")).toBeNull();
+  });
+
+  it("Workday : lit jobDescription sous /wday/cxs, pas sous l'URL publique", async () => {
+    let vue = "";
+    const f: FetchLike = async (url) => {
+      vue = url;
+      return new Response(
+        JSON.stringify({ jobPostingInfo: { jobDescription: "<p>Missions</p><p>Profil</p>" } }),
+        { status: 200 },
+      );
+    };
+    const r = await obtenirTextes(
+      [offre({
+        ats: "workday",
+        slug: "sanofi.wd3/SanofiCareers",
+        id: "Clinical_R285",
+        url: "https://sanofi.wd3.myworkdayjobs.com/SanofiCareers/job/Vitry-sur-Seine/Clinical_R285",
+      })],
+      f,
+    );
+    expect(vue).toBe(
+      "https://sanofi.wd3.myworkdayjobs.com/wday/cxs/sanofi/SanofiCareers/job/Vitry-sur-Seine/Clinical_R285",
+    );
+    expect(r.get("workday:sanofi.wd3/SanofiCareers:Clinical_R285")).toBe("Missions\nProfil");
   });
 
   it("une offre en échec réseau est absente du résultat, les autres restent servies", async () => {

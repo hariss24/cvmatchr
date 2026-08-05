@@ -24,6 +24,30 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "4flow.wd3/4flow",
+    "nom": "4flow",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "abb.wd3/external_career_page",
+    "nom": "Abb",
+    "offresFR": 24,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "abbott.wd5/abbottcareers",
+    "nom": "Abbottcareers",
+    "offresFR": 28,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "ABBVIE",
     "ats": "smartrecruiters",
     "slug": "abbvie",
@@ -32,12 +56,44 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "abercrombie.wd108/anf",
+    "nom": "Abercrombie",
+    "offresFR": 24,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "accenture.wd103/AccentureCareers",
+    "nom": "Accenture",
+    "offresFR": 200,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "acciona.wd3/ACCIONA_Employment_Channel",
+    "nom": "Acciona",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "ACCOR",
     "ats": "smartrecruiters",
     "slug": "accor",
     "offresFR": 193,
     "siren": "602036444",
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "hpe.wd5/acjobsite",
+    "nom": "Acjobsite",
+    "offresFR": 6,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "ACRELEC",
@@ -64,6 +120,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "adient.wd3/External",
+    "nom": "Adient",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "adobe.wd5/external_experienced",
+    "nom": "Adobe",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "ADVENS",
     "ats": "smartrecruiters",
     "slug": "advens",
@@ -88,12 +160,36 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "aggreko.wd3/Aggreko_Careers_1",
+    "nom": "Aggreko",
+    "offresFR": 8,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Agicap",
     "ats": "lever",
     "slug": "agicap",
     "offresFR": 12,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "agilent.wd5/Agilent_Careers",
+    "nom": "Agilent",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "airliquidehr.wd3/AirLiquideExternalCareer",
+    "nom": "Air Liquide",
+    "offresFR": 312,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Airapps",
@@ -112,12 +208,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "ag.wd3/Airbus",
+    "nom": "Airbus",
+    "offresFR": 469,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Aircall",
     "ats": "lever",
     "slug": "aircall",
     "offresFR": 16,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "airproducts.wd5/AP0001",
+    "nom": "Airproducts",
+    "offresFR": 9,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Airtable",
@@ -168,6 +280,30 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "alcon.wd5/careers_alcon",
+    "nom": "Alcon",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "alfalaval.wd3/Alfa_Laval_jobs",
+    "nom": "Alfa Laval",
+    "offresFR": 24,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "alfalaval.wd3/Framo_jobs",
+    "nom": "Alfalaval",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Algolia",
     "ats": "greenhouse",
     "slug": "algolia",
@@ -176,12 +312,36 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "aliaxis.wd3/Aliaxis",
+    "nom": "Aliaxis",
+    "offresFR": 21,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "aliaxis.wd3/Aliaxis_EMEA",
+    "nom": "Aliaxis EMEA",
+    "offresFR": 21,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Alice Bob",
     "ats": "lever",
     "slug": "alice-bob",
     "offresFR": 20,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "allegion.wd5/careers",
+    "nom": "Allegion",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Alma31",
@@ -208,6 +368,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "alsglobal.wd103/External",
+    "nom": "Alsglobal",
+    "offresFR": 9,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "alsglobal.wd103/Nuvisan_Careers",
+    "nom": "Alsglobal",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "ALTEN",
     "ats": "smartrecruiters",
     "slug": "alten",
@@ -224,6 +400,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "altusgroup.wd3/AltusGroup",
+    "nom": "Altus Group",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "ALVEUS",
     "ats": "smartrecruiters",
     "slug": "alveus",
@@ -232,12 +416,52 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "amadeus.wd502/jobs",
+    "nom": "Amadeus",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "amat.wd1/External",
+    "nom": "Amat",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "pae.wd1/amentum_careers",
+    "nom": "Amentum",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "amgen.wd1/Careers",
+    "nom": "Amgen",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Amo",
     "ats": "ashby",
     "slug": "amo",
     "offresFR": 31,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "analogdevices.wd1/External",
+    "nom": "Analogdevices",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Anaplan",
@@ -280,6 +504,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "theapexgroup.wd3/apexgroupcareers",
+    "nom": "Apexgroupcareers",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "athene.wd5/apollononpubliccareersite",
+    "nom": "Apollononpubliccareersite",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Appen",
     "ats": "lever",
     "slug": "appen",
@@ -296,12 +536,60 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "aptiv.wd5/APTIV_CAREERS",
+    "nom": "Aptiv",
+    "offresFR": 29,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "arabellesolutions.wd3/Arabelle_Solutions",
+    "nom": "Arabelle Solutions",
+    "offresFR": 67,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Arago",
     "ats": "ashby",
     "slug": "arago",
     "offresFR": 15,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "archgroup.wd1/careers",
+    "nom": "Archgroup",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "aresmgmt.wd1/External",
+    "nom": "Aresmgmt",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "argenx.wd3/External_Careers",
+    "nom": "Argenx",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "arrow.wd1/AC",
+    "nom": "Arrow",
+    "offresFR": 9,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Artefact",
@@ -368,12 +656,76 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "astrazeneca.wd3/Careers",
+    "nom": "Astrazeneca",
+    "offresFR": 15,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "astrazeneca.wd3/Alexion",
+    "nom": "Astrazeneca",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "astrazeneca.wd3/broadbean_external",
+    "nom": "Astrazeneca",
+    "offresFR": 9,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "puma.wd502/Jobs_at_Puma",
+    "nom": "At Puma",
+    "offresFR": 8,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "athene.wd5/Apollo_Careers",
+    "nom": "Athene",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Atolls",
     "ats": "greenhouse",
     "slug": "atolls",
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "att.wd1/ATTGeneral",
+    "nom": "ATT General",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "autodesk.wd1/Ext",
+    "nom": "Autodesk",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "vwr.wd1/avantorJobs",
+    "nom": "Avantor",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Avepoint",
@@ -384,12 +736,36 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "aveva.wd3/AVEVA_careers",
+    "nom": "Aveva",
+    "offresFR": 8,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "avisbudget.wd1/ABG_Careers",
+    "nom": "Avisbudget",
+    "offresFR": 27,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Awin",
     "ats": "greenhouse",
     "slug": "awin",
     "offresFR": 2,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "axalta.wd1/Axalta",
+    "nom": "Axalta",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Axelera",
@@ -416,6 +792,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "ayvens.wd3/AyvensCareers",
+    "nom": "Ayvens",
+    "offresFR": 67,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "azelis.wd3/Azelis_Careers",
+    "nom": "Azelis",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "BABYLANGUES SERVICES",
     "ats": "smartrecruiters",
     "slug": "babylanguesservices",
@@ -432,12 +824,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "bakerhughes.wd5/BakerHughes",
+    "nom": "Baker Hughes",
+    "offresFR": 11,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Banyansoftware",
     "ats": "greenhouse",
     "slug": "banyansoftware",
     "offresFR": 2,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "barclays.wd3/External_Career_Site_Barclays",
+    "nom": "Barclays",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Bazaarvoice",
@@ -464,6 +872,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "beigene.wd5/BeiGene",
+    "nom": "Bei Gene",
+    "offresFR": 6,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "BELIEVE",
     "ats": "smartrecruiters",
     "slug": "believe",
@@ -480,6 +896,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "bernergroup.wd3/Careers_Berner_Group",
+    "nom": "Berner Group",
+    "offresFR": 50,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Bigblue",
     "ats": "lever",
     "slug": "bigblue",
@@ -494,6 +918,22 @@
     "offresFR": 12,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "biibhr.wd3/external",
+    "nom": "Biibhr",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "mouvrh.wd103/External_Career_Site_BIOFRAIS",
+    "nom": "Biofrais",
+    "offresFR": 32,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Bioptimus8",
@@ -528,6 +968,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "bb.wd3/BlackBerry",
+    "nom": "Black Berry",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "blackrock.wd1/BlackRock_Professional",
+    "nom": "Black Rock Professional",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Block",
     "ats": "greenhouse",
     "slug": "block",
@@ -550,6 +1006,14 @@
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "boeing.wd1/EXTERNAL_CAREERS",
+    "nom": "Boeing",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Boomilp",
@@ -576,6 +1040,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "bpinternational.wd3/bpCareers",
+    "nom": "Bpinternational",
+    "offresFR": 6,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "brenntag.wd3/brenntag_jobs",
+    "nom": "Brenntag",
+    "offresFR": 13,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Brevo",
     "ats": "lever",
     "slug": "brevo",
@@ -584,12 +1064,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "icon.wd3/broadbean_external",
+    "nom": "Broadbean",
+    "offresFR": 29,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Burga",
     "ats": "lever",
     "slug": "burga",
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "burkert.wd502/burkert-career",
+    "nom": "Burkert",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Bursonglobalcareers",
@@ -622,6 +1118,30 @@
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "cadence.wd1/External_Careers",
+    "nom": "Cadence",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "cae.wd3/career",
+    "nom": "Cae",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "pwc.wd3/Global_Campus_Careers",
+    "nom": "Campus",
+    "offresFR": 41,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Canarytechnologies",
@@ -664,12 +1184,44 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "saxobank.wd3/CareeratSaxoBank",
+    "nom": "Careerat Saxo Bank",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Careersday",
     "ats": "greenhouse",
     "slug": "careersday",
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "belron.wd3/Carglass_Careers",
+    "nom": "Carglass",
+    "offresFR": 32,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "carharttwip.wd103/CarharttWIP",
+    "nom": "Carhartt WIP",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "carrier.wd5/jobs",
+    "nom": "Carrier",
+    "offresFR": 40,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Castaigroupinc",
@@ -680,12 +1232,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "catalent.wd1/External",
+    "nom": "Catalent",
+    "offresFR": 8,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Catawiki",
     "ats": "greenhouse",
     "slug": "catawiki",
     "offresFR": 10,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "cat.wd5/CaterpillarCareers",
+    "nom": "Caterpillar",
+    "offresFR": 11,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Catonetworks",
@@ -728,12 +1296,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "cgm.wd3/cgm",
+    "nom": "Cgm",
+    "offresFR": 16,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Chainguard",
     "ats": "greenhouse",
     "slug": "chainguard",
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "cc.wd3/ChanelCareers",
+    "nom": "Chanel",
+    "offresFR": 399,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Chargepoint",
@@ -776,6 +1360,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "cisco.wd5/Cisco_Careers",
+    "nom": "Cisco",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "CITECH",
     "ats": "smartrecruiters",
     "slug": "citech",
@@ -784,12 +1376,76 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "citi.wd5/2",
+    "nom": "Citi",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "claires.wd12/Claires",
+    "nom": "Claires",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "clarivate.wd3/Clarivate_Careers",
+    "nom": "Clarivate",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "clarivate.wd3/jobs",
+    "nom": "Clarivate",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Clinchoice",
     "ats": "greenhouse",
     "slug": "clinchoice",
     "offresFR": 2,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "cloudera.wd5/External_Career",
+    "nom": "Cloudera",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "cnx.wd1/external_global",
+    "nom": "Cnx",
+    "offresFR": 34,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "costar.wd1/CoStarCareers",
+    "nom": "Co Star",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "coke.wd1/coca-cola-careers",
+    "nom": "Coca Cola",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Coderabbit",
@@ -824,12 +1480,52 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "cohesity.wd5/cohesity_careers",
+    "nom": "Cohesity",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "COLISEE FRANCE",
     "ats": "smartrecruiters",
     "slug": "coliseefrance",
     "offresFR": 1192,
     "siren": "480080969",
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "columbiasportswearcompany.wd5/Columbia_Career_Site",
+    "nom": "Columbia",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "columbiasportswearcompany.wd5/CSC_Careers",
+    "nom": "Columbiasportswearcompany",
+    "offresFR": 12,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "columbiasportswearcompany.wd5/retail",
+    "nom": "Columbiasportswearcompany",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "comcast.wd5/Comcast_Careers",
+    "nom": "Comcast",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Commvault",
@@ -856,6 +1552,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "convatec.wd1/convatec",
+    "nom": "Convatec",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Convelio",
     "ats": "lever",
     "slug": "convelio",
@@ -872,12 +1576,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "sonoco.wd1/CorporateCareers",
+    "nom": "Corporate",
+    "offresFR": 15,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Coupa",
     "ats": "lever",
     "slug": "coupa",
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "covestro.wd3/cov_external",
+    "nom": "Cov",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Crossing Minds",
@@ -888,12 +1608,52 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "crowdstrike.wd5/crowdstrikecareers",
+    "nom": "Crowdstrikecareers",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "csl.wd1/CSL_External",
+    "nom": "CSL",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "cultura.wd3/Cultura",
+    "nom": "Cultura",
+    "offresFR": 136,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "DAILYMOTION",
     "ats": "smartrecruiters",
     "slug": "dailymotion",
     "offresFR": 13,
     "siren": "483487112",
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "damen.wd3/Damen_Careers",
+    "nom": "Damen",
+    "offresFR": 11,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "darktrace.wd3/DarktaceExternal",
+    "nom": "Darktrace",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Dashlane",
@@ -944,6 +1704,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "db.wd3/DBWebsite",
+    "nom": "DB Website",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Ddome",
     "ats": "greenhouse",
     "slug": "ddome",
@@ -966,6 +1734,14 @@
     "offresFR": 76,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "deckers.wd5/Deckers",
+    "nom": "Deckers",
+    "offresFR": 14,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Delinea",
@@ -992,6 +1768,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "fina.wd103/DeloitteRecrute",
+    "nom": "Deloitte",
+    "offresFR": 417,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "dentsuaegis.wd3/DAN_GLOBAL",
+    "nom": "Dentsuaegis",
+    "offresFR": 21,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Dept",
     "ats": "greenhouse",
     "slug": "dept",
@@ -1016,12 +1808,44 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "diageo.wd3/Diageo_Careers",
+    "nom": "Diageo",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Didomi",
     "ats": "lever",
     "slug": "didomi",
     "offresFR": 6,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "disney.wd5/disneycareer",
+    "nom": "Disneycareer",
+    "offresFR": 35,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "disney.wd5/disneycareerdc",
+    "nom": "Disneycareerdc",
+    "offresFR": 102,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "jj.wd5/displacedemployees",
+    "nom": "Displacedemployees",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Doctolib",
@@ -1056,6 +1880,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "donaldson.wd115/DonaldsonCareers",
+    "nom": "Donaldson",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Dotfile",
     "ats": "ashby",
     "slug": "dotfile",
@@ -1070,6 +1902,22 @@
     "offresFR": 4,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "dow.wd1/ExternalCareers",
+    "nom": "Dow",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "dssmith.wd3/careers",
+    "nom": "Dssmith",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Duettoresearch",
@@ -1088,6 +1936,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "dxctechnology.wd1/DXCJobs",
+    "nom": "DXC",
+    "offresFR": 16,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "dyson.wd3/dyson_careers",
+    "nom": "Dyson",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Easygenerator",
     "ats": "ashby",
     "slug": "easygenerator",
@@ -1104,12 +1968,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "ebay.wd5/apply",
+    "nom": "Ebay",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Ebury",
     "ats": "greenhouse",
     "slug": "ebury",
     "offresFR": 3,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "ecolab.wd1/Ecolab_External",
+    "nom": "Ecolab",
+    "offresFR": 13,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Ecosio",
@@ -1126,6 +2006,22 @@
     "offresFR": 1,
     "siren": "497842914",
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "eduservices.wd103/Carrieres",
+    "nom": "Eduservices",
+    "offresFR": 37,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "edwards.wd5/edwardscareers",
+    "nom": "Edwardscareers",
+    "offresFR": 13,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Ekimetrics",
@@ -1160,12 +2056,60 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "relx.wd3/ElsevierJobs",
+    "nom": "Elsevier",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "embl.wd103/EMBL",
+    "nom": "EMBL",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "ENERGIE ET SERVICES DE SEYSSEL",
     "ats": "smartrecruiters",
     "slug": "energieetservicesdeseyssel",
     "offresFR": 1,
     "siren": "485010847",
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "trellix.wd1/EnterpriseCareers",
+    "nom": "Enterprise",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "entrust.wd1/EntrustCareers",
+    "nom": "Entrust",
+    "offresFR": 8,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "envista.wd1/envistacareers",
+    "nom": "Envistacareers",
+    "offresFR": 8,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "enzazaden.wd103/Enza-Careers",
+    "nom": "Enza",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "EOS FRANCE",
@@ -1200,6 +2144,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "erm.wd3/ERM_Careers",
+    "nom": "ERM",
+    "offresFR": 8,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Espace",
     "ats": "lever",
     "slug": "espace",
@@ -1214,6 +2166,14 @@
     "offresFR": 2,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "europcar.wd103/EuropcarCareerPage",
+    "nom": "Europcar",
+    "offresFR": 93,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Everai",
@@ -1240,6 +2200,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "evonik.wd3/External_Careers",
+    "nom": "Evonik",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Examplecorpsandbox",
     "ats": "greenhouse",
     "slug": "examplecorpsandbox",
@@ -1262,6 +2230,22 @@
     "offresFR": 1,
     "siren": "851641944",
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "hp.wd5/exteu-ac-careersite",
+    "nom": "Exteu Ac Careersite",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "ffive.wd5/f5jobs",
+    "nom": "F5jobs",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Fanaticscollectibles",
@@ -1294,6 +2278,14 @@
     "offresFR": 15,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "fico.wd1/External",
+    "nom": "Fico",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "FIDELI COURSE",
@@ -1352,12 +2344,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "flexerasoftware.wd1/FlexeraSoftware",
+    "nom": "Flexera Software",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Flexport",
     "ats": "greenhouse",
     "slug": "flexport",
     "offresFR": 2,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "flir.wd1/flircareers",
+    "nom": "Flircareers",
+    "offresFR": 24,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "FLOWDESK",
@@ -1368,6 +2376,46 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "flowserve.wd1/applied",
+    "nom": "Flowserve",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "novartis.wd3/Internal_Careers_for_Acquired_Entities",
+    "nom": "For Acquired Entities",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "ossur.wd3/CareersForMotion",
+    "nom": "For Motion",
+    "offresFR": 9,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "unhcr.wd3/FormerStaff",
+    "nom": "Former Staff",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "fourseasons.wd3/search",
+    "nom": "Fourseasons",
+    "offresFR": 153,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "FRANCE DISTRIBUTION EXPRESS",
     "ats": "smartrecruiters",
     "slug": "francedistributionexpress",
@@ -1376,12 +2424,36 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "freseniusmedicalcare.wd3/fme",
+    "nom": "Freseniusmedicalcare",
+    "offresFR": 19,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Fresha",
     "ats": "lever",
     "slug": "fresha",
     "offresFR": 4,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "freshfields.wd3/FBD_101",
+    "nom": "Freshfields",
+    "offresFR": 14,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "fronius.wd3/Job_Board",
+    "nom": "Fronius",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Frontcareers",
@@ -1400,6 +2472,46 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "salesforce.wd12/Futureforce_NewGradRoles",
+    "nom": "Futureforce New Grad Roles",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "gartner.wd5/EXT",
+    "nom": "Gartner",
+    "offresFR": 9,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "gategroup.wd3/GateGroup_External_Careers",
+    "nom": "Gate Group",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "gea.wd3/GEACareers",
+    "nom": "GEA",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "gehc.wd5/GEHC_ExternalSite",
+    "nom": "GEHC",
+    "offresFR": 49,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "GENERIX GROUP",
     "ats": "smartrecruiters",
     "slug": "generixgroup",
@@ -1408,12 +2520,52 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "genesys.wd1/Genesys",
+    "nom": "Genesys",
+    "offresFR": 6,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "genpt.wd1/Careers",
+    "nom": "Genpt",
+    "offresFR": 8,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "georgfischer.wd103/GeorgFischer_Careers",
+    "nom": "Georg Fischer",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Getyourguide",
     "ats": "greenhouse",
     "slug": "getyourguide",
     "offresFR": 2,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "gevernova.wd5/Vernova_ExternalSite",
+    "nom": "Gevernova",
+    "offresFR": 121,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "gide.wd103/GIDE",
+    "nom": "GIDE",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Gigs",
@@ -1448,6 +2600,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "globalhr.wd5/REC_RTX_Ext_Gateway",
+    "nom": "Globalhr",
+    "offresFR": 23,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "gn.wd3/GN-Careers",
+    "nom": "GN",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "GOELAN",
     "ats": "smartrecruiters",
     "slug": "goelan",
@@ -1472,6 +2640,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "fastretailing.wd3/graduates_eu_Uniqlo",
+    "nom": "Graduates Eu Uniqlo",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Grafanalabs",
     "ats": "greenhouse",
     "slug": "grafanalabs",
@@ -1480,12 +2656,36 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "mouvrh.wd103/External_Career_Site_GRAND_FRAIS",
+    "nom": "Grand Frais",
+    "offresFR": 343,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "greif.wd5/Greif",
+    "nom": "Greif",
+    "offresFR": 6,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Gruve",
     "ats": "greenhouse",
     "slug": "gruve",
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "gsk.wd5/GSKCareers",
+    "nom": "GSK",
+    "offresFR": 41,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Guidepostmontessori",
@@ -1512,6 +2712,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "haier.wd3/HaierEurope_Professional_Careers",
+    "nom": "Haier Europe Professional",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "HANA GROUP",
     "ats": "smartrecruiters",
     "slug": "hanagroup",
@@ -1528,12 +2736,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "harriscomputer.wd3/1",
+    "nom": "Harriscomputer",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Harvey",
     "ats": "ashby",
     "slug": "harvey",
     "offresFR": 5,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "hcmportal.wd5/Search",
+    "nom": "Hcmportal",
+    "offresFR": 24,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Hcompany",
@@ -1544,12 +2768,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "fastretailing.wd3/headquarters_eu_Uniqlo",
+    "nom": "Headquarters Eu Uniqlo",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Heetch",
     "ats": "lever",
     "slug": "heetch",
     "offresFR": 8,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "heidelbergmaterials.wd3/Global_HM_Career_Site",
+    "nom": "Heidelbergmaterials",
+    "offresFR": 39,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Hellofresh",
@@ -1568,6 +2808,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "henryschein.wd1/External_Careers",
+    "nom": "Henryschein",
+    "offresFR": 13,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Heritageholdings",
     "ats": "greenhouse",
     "slug": "heritageholdings",
@@ -1582,6 +2830,14 @@
     "offresFR": 23,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "hexcel.wd5/HexcelCareers",
+    "nom": "Hexcel",
+    "offresFR": 25,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Higgsfieldai",
@@ -1608,6 +2864,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "hitachi.wd1/hitachi",
+    "nom": "Hitachi",
+    "offresFR": 64,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Hive",
     "ats": "greenhouse",
     "slug": "hive",
@@ -1616,12 +2880,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "hoganlovells.wd3/Search",
+    "nom": "Hoganlovells",
+    "offresFR": 9,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Hopae",
     "ats": "ashby",
     "slug": "hopae",
     "offresFR": 4,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "hp.wd5/ExternalCareerSite",
+    "nom": "Hp",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Hrtechx",
@@ -1648,6 +2928,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "huron.wd1/huroncareers",
+    "nom": "Huroncareers",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Ibanfirst",
     "ats": "greenhouse",
     "slug": "ibanfirst",
@@ -1656,12 +2944,36 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "ing.wd3/ICSGBLCOR",
+    "nom": "Icsgblcor",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "iff.wd5/IFF_Careers",
+    "nom": "IFF",
+    "offresFR": 14,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Ifm Us",
     "ats": "lever",
     "slug": "ifm-us",
     "offresFR": 3,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "illumina.wd1/illumina-careers",
+    "nom": "Illumina",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "IMPLICITY",
@@ -1688,12 +3000,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "ingrammicro.wd5/IngramMicro",
+    "nom": "Ingram Micro",
+    "offresFR": 12,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "INTERLOGEMENT 93",
     "ats": "smartrecruiters",
     "slug": "interlogement93",
     "offresFR": 14,
     "siren": "381627280",
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "greystar.wd1/international_career_site",
+    "nom": "International",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Interstellarlab",
@@ -1728,12 +3056,52 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "iqvia.wd1/IQVIA",
+    "nom": "Iqvia",
+    "offresFR": 25,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Ircagroup",
     "ats": "lever",
     "slug": "ircagroup",
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "ironmountain.wd5/iron-mountain-jobs",
+    "nom": "Iron Mountain",
+    "offresFR": 8,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "issgovernance.wd1/ISScareers",
+    "nom": "Issgovernance",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "itron.wd5/Itron",
+    "nom": "Itron",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "itw.wd5/external",
+    "nom": "Itw",
+    "offresFR": 10,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Ivalua",
@@ -1752,6 +3120,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "jbtm.wd108/JBT_Marel_Career_Site",
+    "nom": "JBT Marel",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "jci.wd5/JCI",
+    "nom": "JCI",
+    "offresFR": 47,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Jetsupport",
     "ats": "lever",
     "slug": "jetsupport",
@@ -1768,6 +3152,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "jj.wd5/JJ",
+    "nom": "JJ",
+    "offresFR": 15,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "jll.wd1/jllcareers",
+    "nom": "Jllcareers",
+    "offresFR": 47,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Jobgether",
     "ats": "lever",
     "slug": "jobgether",
@@ -1776,12 +3176,44 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "bayware.wd3/jobsatbayware",
+    "nom": "Jobsatbayware",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "hpe.wd5/Jobsathpe",
+    "nom": "Jobsathpe",
+    "offresFR": 9,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "JOBTEASER",
     "ats": "smartrecruiters",
     "slug": "jobteaser",
     "offresFR": 7,
     "siren": "508271715",
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "johnsonelectric.wd3/Career_JE",
+    "nom": "Johnsonelectric",
+    "offresFR": 7,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "sonder.wd1/Join_Sonder",
+    "nom": "Join Sonder",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Joko",
@@ -1832,6 +3264,30 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "kantar.wd3/KANTAR",
+    "nom": "Kantar",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "kantar.wd3/KANTAREL",
+    "nom": "Kantarel",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "kantar.wd3/KANTARSC",
+    "nom": "Kantarsc",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Kcasbio",
     "ats": "lever",
     "slug": "kcasbio",
@@ -1862,6 +3318,46 @@
     "offresFR": 3,
     "siren": "819999293",
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "kimberlyclark.wd1/GLOBAL",
+    "nom": "Kimberlyclark",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "kimberlyclark.wd1/LinkedIn",
+    "nom": "Kimberlyclark",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "kiongroup.wd3/KIONGroup",
+    "nom": "KION Group",
+    "offresFR": 95,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "kiongroup.wd3/KION_SCS",
+    "nom": "Kiongroup",
+    "offresFR": 7,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "kla.wd1/Search",
+    "nom": "Kla",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Klaviyo",
@@ -1920,12 +3416,52 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "kpluss.wd3/Career-KplusS",
+    "nom": "Kplus S",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "heinz.wd1/KraftHeinz_Careers",
+    "nom": "Kraft Heinz",
+    "offresFR": 7,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "heinz.wd1/kraftheinz_careers_ur",
+    "nom": "Kraftheinz Ur",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Kraken123",
     "ats": "lever",
     "slug": "kraken123",
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "kyndryl.wd5/KyndrylEarlyCareers",
+    "nom": "Kyndryl Early",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "lgroup.wd3/L-Acoustics_Group_career",
+    "nom": "L Acoustics Group",
+    "offresFR": 34,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "LA FOURCHETTE",
@@ -1936,12 +3472,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "labcorp.wd1/External",
+    "nom": "Labcorp",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Landor",
     "ats": "greenhouse",
     "slug": "landor",
     "offresFR": 5,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "ghr.wd1/lateral-emea",
+    "nom": "Lateral Emea",
+    "offresFR": 6,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "LE CHATEAU DE BEAULIEU",
@@ -1968,6 +3520,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "lego.wd103/LEGO_External",
+    "nom": "LEGO",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Legora",
     "ats": "ashby",
     "slug": "legora",
@@ -1992,6 +3552,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "relx.wd3/LexisNexisLegal",
+    "nom": "Lexis Nexis Legal",
+    "offresFR": 15,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "lhoist.wd3/Careers",
+    "nom": "Lhoist",
+    "offresFR": 15,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "LIDAL",
     "ats": "smartrecruiters",
     "slug": "lidal",
@@ -2000,12 +3576,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "scj.wd5/External_Career_Site_Lifestyle_Brands",
+    "nom": "Lifestyle Brands",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Lightspeedhq",
     "ats": "ashby",
     "slug": "lightspeedhq",
     "offresFR": 4,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "lilly.wd115/LLY",
+    "nom": "Lilly",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Lilt Production",
@@ -2024,12 +3616,36 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "livenation.wd503/LNExternalSite",
+    "nom": "Livenation",
+    "offresFR": 8,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Loftorbital",
     "ats": "lever",
     "slug": "loftorbital",
     "offresFR": 14,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "logitech.wd5/Logitech",
+    "nom": "Logitech",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "lonza.wd3/Lonza_Careers",
+    "nom": "Lonza",
+    "offresFR": 11,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "LOUVRE HOTELS GROUP",
@@ -2048,12 +3664,36 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "lseg.wd3/Careers",
+    "nom": "Lseg",
+    "offresFR": 14,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Lucis",
     "ats": "ashby",
     "slug": "lucis",
     "offresFR": 10,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "maersk.wd3/Maersk_Careers",
+    "nom": "Maersk",
+    "offresFR": 9,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "maersk.wd3/Maersk_Manual",
+    "nom": "Maersk Manual",
+    "offresFR": 6,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "MAGELLAN",
@@ -2072,6 +3712,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "mango.wd3/Mango_Work_Your_Passion",
+    "nom": "Mango",
+    "offresFR": 287,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "manh.wd5/External",
+    "nom": "Manh",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "MANPOWER FRANCE",
     "ats": "smartrecruiters",
     "slug": "manpowerfrance",
@@ -2088,6 +3744,30 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "marmon.wd501/Marmon_Careers",
+    "nom": "Marmon",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "mars.wd3/External",
+    "nom": "Mars",
+    "offresFR": 30,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "mastercard.wd1/CorporateCareers",
+    "nom": "Mastercard",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Matchgroup",
     "ats": "lever",
     "slug": "matchgroup",
@@ -2102,6 +3782,14 @@
     "offresFR": 1,
     "siren": "304653553",
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "medtronic.wd1/MedtronicCareers",
+    "nom": "Medtronic",
+    "offresFR": 22,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Meili",
@@ -2136,6 +3824,30 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "michelinhr.wd3/Michelin",
+    "nom": "Michelin",
+    "offresFR": 200,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "miele.wd3/miele-jobs",
+    "nom": "Miele",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "millerknoll.wd1/MillerKnoll",
+    "nom": "Miller Knoll",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Minitab",
     "ats": "greenhouse",
     "slug": "minitab",
@@ -2166,6 +3878,38 @@
     "offresFR": 11,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "mksinst.wd1/MKSCareersUniversity",
+    "nom": "MKS University",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "mksinst.wd1/MKSCareersEMEA",
+    "nom": "Mksinst",
+    "offresFR": 8,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "mmc.wd1/mmc",
+    "nom": "Mmc",
+    "offresFR": 58,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "mmc.wd1/careers",
+    "nom": "Mmc",
+    "offresFR": 47,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "MOBIAPPS",
@@ -2208,12 +3952,116 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "monolithicpower.wd12/MPS_Careers",
+    "nom": "Monolithicpower",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "motorolasolutions.wd5/Careers",
+    "nom": "Motorolasolutions",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "mouvrh.wd103/External_Career_Site_BDM",
+    "nom": "Mouvrh",
+    "offresFR": 87,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "mouvrh.wd103/External_Career_Site_FRESH",
+    "nom": "Mouvrh",
+    "offresFR": 187,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "mouvrh.wd103/External_Career_Site_PROSOL",
+    "nom": "Mouvrh",
+    "offresFR": 18,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "movadogroup.wd1/Careers",
+    "nom": "Movadogroup",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Mozilla",
     "ats": "greenhouse",
     "slug": "mozilla",
     "offresFR": 3,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "ms.wd5/External",
+    "nom": "Ms",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "msd.wd5/SearchJobs",
+    "nom": "Msd",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "mufgub.wd3/MUFG-Careers",
+    "nom": "Mufgub",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "murex.wd3/MurexCareerPage1",
+    "nom": "Murex Page1",
+    "offresFR": 14,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "myhrabc.wd5/Global",
+    "nom": "Myhrabc",
+    "offresFR": 75,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "mymvw.wd5/MVW",
+    "nom": "Mymvw",
+    "offresFR": 7,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "nvent.wd5/nVent",
+    "nom": "N Vent",
+    "offresFR": 7,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Nabla",
@@ -2230,6 +4078,14 @@
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "nasdaq.wd1/Global_External_Site",
+    "nom": "Nasdaq",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Nebius",
@@ -2328,6 +4184,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "nike.wd1/nke",
+    "nom": "Nike",
+    "offresFR": 24,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "alliance.wd3/nissanjobs",
+    "nom": "Nissanjobs",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Nlcventures",
     "ats": "greenhouse",
     "slug": "nlcventures",
@@ -2336,12 +4208,36 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "jj.wd5/NonCompetetiveHiring",
+    "nom": "Non Competetive",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "vfc.wd5/northface_careers",
+    "nom": "Northface",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Notion",
     "ats": "ashby",
     "slug": "notion",
     "offresFR": 2,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "novartis.wd3/Novartis_Careers",
+    "nom": "Novartis",
+    "offresFR": 17,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Novaspace",
@@ -2360,12 +4256,36 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "nrf.wd3/External",
+    "nom": "Nrf",
+    "offresFR": 31,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "NUMBERLY",
     "ats": "smartrecruiters",
     "slug": "numberly",
     "offresFR": 2,
     "siren": "908030018",
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "nvidia.wd5/NVIDIAExternalCareerSite",
+    "nom": "Nvidia",
+    "offresFR": 7,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "nxp.wd3/careers",
+    "nom": "Nxp",
+    "offresFR": 22,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "OCTO-TECHNOLOGY",
@@ -2406,6 +4326,30 @@
     "offresFR": 2,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "onehealthineers.wd3/SHSJB",
+    "nom": "Onehealthineers",
+    "offresFR": 6,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "onehealthineers.wd3/ijmhrms",
+    "nom": "Onehealthineers",
+    "offresFR": 6,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "gevernova.wd5/only_confidential_executive_recruiting",
+    "nom": "Only Confidential Executive Recruiting",
+    "offresFR": 103,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Onrunning",
@@ -2456,6 +4400,38 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "orthoclinical.wd1/Search",
+    "nom": "Orthoclinical",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "oshkoshcorporation.wd5/Oshkosh",
+    "nom": "Oshkosh",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "ossur.wd3/OssurCareersGlobal",
+    "nom": "Ossur",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "otis.wd5/REC_Ext_Gateway",
+    "nom": "Otis",
+    "offresFR": 292,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Ouihelp",
     "ats": "greenhouse",
     "slug": "ouihelp",
@@ -2480,12 +4456,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "pae.wd1/UK_Careers",
+    "nom": "Pae",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Palantir",
     "ats": "lever",
     "slug": "palantir",
     "offresFR": 3,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "paloaltonetworks.wd5/panwexternalcareers",
+    "nom": "Panwexternalcareers",
+    "offresFR": 21,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Paradox",
@@ -2512,6 +4504,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "parsons.wd5/Search",
+    "nom": "Parsons",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Payhawkio",
     "ats": "greenhouse",
     "slug": "payhawkio",
@@ -2520,12 +4520,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "paypal.wd1/jobs",
+    "nom": "Paypal",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Pennylane",
     "ats": "ashby",
     "slug": "pennylane",
     "offresFR": 102,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "calyx.wd1/Perceptive",
+    "nom": "Perceptive",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "PERFORMANSE",
@@ -2544,6 +4560,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "pernodricard.wd3/pernod-ricard",
+    "nom": "Pernod Ricard",
+    "offresFR": 88,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "PETIT-BATEAU",
     "ats": "smartrecruiters",
     "slug": "petitbateau",
@@ -2552,12 +4576,36 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "pfizer.wd1/PfizerCareers",
+    "nom": "Pfizer",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Pfm",
     "ats": "greenhouse",
     "slug": "pfm",
     "offresFR": 3,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "pg.wd5/1000",
+    "nom": "Pg",
+    "offresFR": 30,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "philips.wd3/jobs-and-careers",
+    "nom": "Philips",
+    "offresFR": 28,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "PHOENIX OCP",
@@ -2582,6 +4630,14 @@
     "offresFR": 10,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "pierrefabre.wd3/External_Career_Site",
+    "nom": "Pierrefabre",
+    "offresFR": 89,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Pigment",
@@ -2624,6 +4680,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "myhr.wd3/PlanseeGroup_Career",
+    "nom": "Plansee Group",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Platformsh",
     "ats": "greenhouse",
     "slug": "platformsh",
@@ -2646,6 +4710,14 @@
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "plugpower.wd5/Plug_Power_Inc",
+    "nom": "Plug Power Inc",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Point72",
@@ -2712,12 +4784,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "ms.wd5/private",
+    "nom": "Private",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Privateequityinsights",
     "ats": "greenhouse",
     "slug": "privateequityinsights",
     "offresFR": 5,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "proofpoint.wd5/proofpointcareers",
+    "nom": "Proofpointcareers",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Proton",
@@ -2736,12 +4824,60 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "prysmiangroup.wd3/Careers",
+    "nom": "Prysmiangroup",
+    "offresFR": 54,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "ptc.wd1/PTC",
+    "nom": "PTC",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Purestorage",
     "ats": "greenhouse",
     "slug": "purestorage",
     "offresFR": 3,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "pwc.wd3/Global_Experienced_Careers",
+    "nom": "Pwc",
+    "offresFR": 141,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "q8hcm.wd3/External_KPNWE",
+    "nom": "Q8hcm",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "qlar.wd3/Qlar_Careers",
+    "nom": "Qlar",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "bb.wd3/QNX",
+    "nom": "QNX",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Qonto",
@@ -2768,12 +4904,52 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "qualys.wd5/Careers",
+    "nom": "Qualys",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Quberesearchandtechnologies",
     "ats": "greenhouse",
     "slug": "quberesearchandtechnologies",
     "offresFR": 27,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "ratp.wd3/RATP_Externe",
+    "nom": "Ratp",
+    "offresFR": 111,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "medtronic.wd1/redeploymentmedtroniccareers",
+    "nom": "Redeploymentmedtroniccareers",
+    "offresFR": 24,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "redhat.wd5/jobs",
+    "nom": "Redhat",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "relx.wd3/ReedExhibitions",
+    "nom": "Reed Exhibitions",
+    "offresFR": 17,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Referralsuseonly",
@@ -2792,12 +4968,36 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "regalrexnord.wd1/Careers",
+    "nom": "Regalrexnord",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "regeneron.wd1/Careers",
+    "nom": "Regeneron",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Relex",
     "ats": "greenhouse",
     "slug": "relex",
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "relx.wd3/relx",
+    "nom": "Relx",
+    "offresFR": 39,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Remotecom",
@@ -2822,6 +5022,38 @@
     "offresFR": 7,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "alliancewd.wd3/renault-group-careers",
+    "nom": "Renault Group",
+    "offresFR": 156,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "repsol.wd3/Repsol",
+    "nom": "Repsol",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "repsol.wd3/Ref_Ext",
+    "nom": "Repsol",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "resmed.wd3/ResMed_External_Careers",
+    "nom": "Res Med",
+    "offresFR": 10,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Resolvetosavelives",
@@ -2854,6 +5086,70 @@
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "relx.wd3/RiskSolutions",
+    "nom": "Risk Solutions",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "roche.wd3/roche-ext",
+    "nom": "Roche",
+    "offresFR": 16,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "rockwellautomation.wd1/External_Rockwell_Automation",
+    "nom": "Rockwell Automation",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "rockwoolgroup.wd3/ROCKWOOL",
+    "nom": "Rockwool",
+    "offresFR": 9,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "rohlig.wd103/Rohlig_Careers",
+    "nom": "Rohlig",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "rollsroyce.wd3/Apprentice",
+    "nom": "Rollsroyce",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "roquette.wd3/External",
+    "nom": "Roquette",
+    "offresFR": 14,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "rothschildandco.wd3/RothschildAndCo_Lateral",
+    "nom": "Rothschild And Co Lateral",
+    "offresFR": 63,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Rtbhouse",
@@ -2896,6 +5192,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "sailpoint.wd1/SailPoint",
+    "nom": "Sail Point",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "salesforce.wd12/External_Career_Site",
+    "nom": "Salesforce",
+    "offresFR": 30,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Salonkee",
     "ats": "ashby",
     "slug": "salonkee",
@@ -2926,6 +5238,62 @@
     "offresFR": 2,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "sec.wd3/Samsung_Careers",
+    "nom": "Samsung",
+    "offresFR": 6,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "sandoz.wd103/sandoz_careers",
+    "nom": "Sandoz",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "sandvik.wd3/sandvik-jobs",
+    "nom": "Sandvik",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "sandvik.wd3/walter-jobs",
+    "nom": "Sandvik",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "sandvik.wd3/Sandvik_Internal_for_nonWD_employees",
+    "nom": "Sandvik For Non WD Employees",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "sanofi.wd3/SanofiCareers",
+    "nom": "Sanofi",
+    "offresFR": 83,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "santander.wd3/SantanderCareers",
+    "nom": "Santander",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "SANTEN",
@@ -2968,12 +5336,36 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "scj.wd5/External_Career_Site",
+    "nom": "Scj",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "sedgwick.wd1/Sedgwick",
+    "nom": "Sedgwick",
+    "offresFR": 13,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "SEMJI",
     "ats": "smartrecruiters",
     "slug": "semji",
     "offresFR": 1,
     "siren": "539381582",
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "semtech.wd1/SemtechCareers",
+    "nom": "Semtech",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Sentinellabs",
@@ -3080,6 +5472,30 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "sifive.wd1/sifivecareers",
+    "nom": "Sifivecareers",
+    "offresFR": 6,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "simcorp.wd3/SimCorp_Jobs",
+    "nom": "Sim Corp",
+    "offresFR": 8,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "skechers.wd5/One-career-site",
+    "nom": "Skechers",
+    "offresFR": 39,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Skillsoft",
     "ats": "greenhouse",
     "slug": "skillsoft",
@@ -3088,12 +5504,52 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "slihrms.wd3/Careers",
+    "nom": "Slihrms",
+    "offresFR": 9,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "smithnephew.wd5/External",
+    "nom": "Smithnephew",
+    "offresFR": 14,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "snapchat.wd1/snap",
+    "nom": "Snap",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "snapchat.wd1/sourced",
+    "nom": "Snapchat",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Snowflake",
     "ats": "ashby",
     "slug": "snowflake",
     "offresFR": 6,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "snyk.wd103/External",
+    "nom": "Snyk",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "SOCIABBLE",
@@ -3128,6 +5584,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "solenis.wd1/Solenis",
+    "nom": "Solenis",
+    "offresFR": 16,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "solera.wd5/Global_Career_Site",
+    "nom": "Solera",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Solidgate",
     "ats": "ashby",
     "slug": "solidgate",
@@ -3158,6 +5630,14 @@
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "sonos.wd1/Sonos",
+    "nom": "Sonos",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Sonyinteractiveentertainmentglobal",
@@ -3240,6 +5720,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "spgi.wd5/spgi_internal",
+    "nom": "Spgi",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "spgi.wd5/SPGI_Careers",
+    "nom": "SPGI",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "SPIE BATIGNOLLES",
     "ats": "smartrecruiters",
     "slug": "spie-batignolles",
@@ -3264,12 +5760,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "sprinklr.wd1/careers",
+    "nom": "Sprinklr",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Squarepointcapital",
     "ats": "greenhouse",
     "slug": "squarepointcapital",
     "offresFR": 2,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "sbdinc.wd1/Stanley_Black_Decker_Career_Site",
+    "nom": "Stanley Black Decker",
+    "offresFR": 14,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Staycation",
@@ -3288,12 +5800,36 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "storaenso.wd502/Stora_Enso_site_opportunities",
+    "nom": "Stora Enso",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "fastretailing.wd3/store_staff_eu_Uniqlo",
+    "nom": "Store Staff Eu Uniqlo",
+    "offresFR": 30,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Stripe",
     "ats": "greenhouse",
     "slug": "stripe",
     "offresFR": 6,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "stryker.wd1/StrykerCareers",
+    "nom": "Stryker",
+    "offresFR": 37,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Studsinc",
@@ -3304,12 +5840,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "boeing.wd1/external_subsidiary",
+    "nom": "Subsidiary",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Suitsupply",
     "ats": "greenhouse",
     "slug": "suitsupply",
     "offresFR": 2,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "sulzer.wd502/SulzerJobs",
+    "nom": "Sulzer",
+    "offresFR": 8,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Sumup",
@@ -3328,6 +5880,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "swarovski.wd3/swarovski",
+    "nom": "Swarovski",
+    "offresFR": 22,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Swile",
     "ats": "lever",
     "slug": "swile",
@@ -3342,6 +5902,14 @@
     "offresFR": 1,
     "siren": "438230104",
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "syneoshealth.wd12/Syneos_Health_External_Site",
+    "nom": "Syneos Health",
+    "offresFR": 17,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Synthesia",
@@ -3376,6 +5944,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "tapestry.wd108/Tapestry_Careers",
+    "nom": "Tapestry",
+    "offresFR": 6,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Taskrabbit",
     "ats": "greenhouse",
     "slug": "taskrabbit",
@@ -3390,6 +5966,14 @@
     "offresFR": 1,
     "siren": "884688342",
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "synnex.wd5/tdsynnexcareers",
+    "nom": "Tdsynnexcareers",
+    "offresFR": 13,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Teads1",
@@ -3424,12 +6008,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "tencent.wd1/tencent_careers",
+    "nom": "Tencent",
+    "offresFR": 9,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Testendouble",
     "ats": "greenhouse",
     "slug": "testendouble",
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "thales.wd3/Careers",
+    "nom": "Thales",
+    "offresFR": 1541,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "The Exploration Company",
@@ -3480,6 +6080,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "thermofisher.wd5/ThermoFisherCareers",
+    "nom": "Thermo Fisher",
+    "offresFR": 25,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Thetradedesk",
     "ats": "greenhouse",
     "slug": "thetradedesk",
@@ -3502,6 +6110,14 @@
     "offresFR": 2,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "tiaa.wd1/Search",
+    "nom": "Tiaa",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Tide",
@@ -3528,12 +6144,36 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "vfc.wd5/timberland_careers",
+    "nom": "Timberland",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "us.wd103/tobii_dynavox",
+    "nom": "Tobii Dynavox",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Toogoodtogo",
     "ats": "greenhouse",
     "slug": "toogoodtogo",
     "offresFR": 2,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "toryburch.wd1/toryburchcareers",
+    "nom": "Toryburchcareers",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Tourlane",
@@ -3568,12 +6208,36 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "transperfect.wd5/transperfect",
+    "nom": "Transperfect",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "TRANSPORT SF",
     "ats": "smartrecruiters",
     "slug": "transportsf",
     "offresFR": 1,
     "siren": "890446552",
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "trendmicro.wd3/External",
+    "nom": "Trendmicro",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "trimble.wd1/TrimbleCareers",
+    "nom": "Trimble",
+    "offresFR": 7,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Tripactions",
@@ -3606,6 +6270,14 @@
     "offresFR": 2,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "trumpf.wd3/TRUMPF_Graduates_and_Professionals",
+    "nom": "Trumpf Graduates And Professionals",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "TRUST TRANSPORT SERVICES",
@@ -3648,12 +6320,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "turo.wd12/Turo_careers",
+    "nom": "Turo",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Uipath",
     "ats": "ashby",
     "slug": "uipath",
     "offresFR": 2,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "umusic.wd5/UMGFRA",
+    "nom": "Umusic",
+    "offresFR": 7,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Unframe",
@@ -3664,12 +6352,60 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "unhcr.wd3/External",
+    "nom": "Unhcr",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "unilever.wd3/TMICC",
+    "nom": "Unilever",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "unilever.wd3/Unilever_Early_Careers",
+    "nom": "Unilever Early",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "unilever.wd3/Unilever_Experienced_Professionals",
+    "nom": "Unilever Professionals",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "uniphore.wd503/Uniphore",
+    "nom": "Uniphore",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Unispace",
     "ats": "greenhouse",
     "slug": "unispace",
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "unisys.wd5/External",
+    "nom": "Unisys",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Unitedmedia",
@@ -3688,6 +6424,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "urw.wd3/urw_career_site",
+    "nom": "Urw",
+    "offresFR": 32,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "valeo.wd3/valeo_jobs",
+    "nom": "Valeo",
+    "offresFR": 251,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Valiantys",
     "ats": "lever",
     "slug": "valiantys",
@@ -3702,6 +6454,14 @@
     "offresFR": 13,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "vfc.wd5/vans_careers",
+    "nom": "Vans",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Veeamsoftware",
@@ -3776,12 +6536,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "vfc.wd5/vfc_careers",
+    "nom": "Vfc",
+    "offresFR": 10,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Via",
     "ats": "greenhouse",
     "slug": "via",
     "offresFR": 4,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "viatris.wd5/External",
+    "nom": "Viatris",
+    "offresFR": 25,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Vibe",
@@ -3792,12 +6568,28 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "villeroyboch.wd3/careers",
+    "nom": "Villeroyboch",
+    "offresFR": 8,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Viralnation",
     "ats": "greenhouse",
     "slug": "viralnation",
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "visa.wd5/Visa",
+    "nom": "Visa",
+    "offresFR": 7,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "VISIAN",
@@ -3864,6 +6656,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "warnerbros.wd5/global",
+    "nom": "Warnerbros",
+    "offresFR": 6,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Waterworks",
     "ats": "lever",
     "slug": "waterworks",
@@ -3878,6 +6678,14 @@
     "offresFR": 1,
     "siren": null,
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "wattswater.wd5/External",
+    "nom": "Wattswater",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "WEYTRA",
@@ -3896,6 +6704,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "wiley.wd1/wiley_careers",
+    "nom": "Wiley",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Winamax",
     "ats": "lever",
     "slug": "winamax",
@@ -3912,12 +6728,52 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "wk.wd3/External",
+    "nom": "Wk",
+    "offresFR": 7,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "WMH PROJECT",
     "ats": "smartrecruiters",
     "slug": "wmhproject",
     "offresFR": 17,
     "siren": "402423420",
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "wnc.wd3/wnc_external",
+    "nom": "Wnc",
+    "offresFR": 1,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "wonderbox.wd3/WONDERBOX_GROUP_CAREERS",
+    "nom": "Wonderbox Group",
+    "offresFR": 15,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "workday.wd5/Workday",
+    "nom": "Workday",
+    "offresFR": 5,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "workiva.wd503/careers",
+    "nom": "Workiva",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Worldquant",
@@ -3960,6 +6816,14 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "xylem.wd5/xylem-careers",
+    "nom": "Xylem",
+    "offresFR": 3,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "YESPARK",
     "ats": "smartrecruiters",
     "slug": "yespark",
@@ -4000,6 +6864,22 @@
     "vuLe": "2026-08"
   },
   {
+    "ats": "workday",
+    "slug": "zeissgroup.wd3/External",
+    "nom": "Zeissgroup",
+    "offresFR": 15,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
+    "ats": "workday",
+    "slug": "zendesk.wd1/zendesk",
+    "nom": "Zendesk",
+    "offresFR": 2,
+    "vuLe": "2026-08",
+    "siren": null
+  },
+  {
     "nom": "Zetaglobal",
     "ats": "greenhouse",
     "slug": "zetaglobal",
@@ -4014,6 +6894,14 @@
     "offresFR": 1,
     "siren": "391673357",
     "vuLe": "2026-08"
+  },
+  {
+    "ats": "workday",
+    "slug": "zoll.wd5/zollmedicalcorp",
+    "nom": "Zollmedicalcorp",
+    "offresFR": 4,
+    "vuLe": "2026-08",
+    "siren": null
   },
   {
     "nom": "Zscaler",

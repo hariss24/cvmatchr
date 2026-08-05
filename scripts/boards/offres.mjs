@@ -9,6 +9,7 @@
 // justification dans docs/superpowers/specs/2026-08-04-marche-cache-offres-design.md §3.
 
 import { estFrancais } from "./france.mjs";
+import { listerWorkdayFR } from "./workday.mjs";
 
 const TIMEOUT_MS = 15_000;
 
@@ -111,6 +112,8 @@ async function listerSmartRecruiters(slug, fetchImpl) {
  */
 export async function listerOffresFR(ats, slug, fetchImpl = fetch) {
   try {
+    // Workday n'a ni endpoint unique ni pays dans sa liste : voir workday.mjs.
+    if (ats === "workday") return await listerWorkdayFR(slug, fetchImpl);
     if (ats === "smartrecruiters") return await listerSmartRecruiters(slug, fetchImpl);
 
     const e = ENDPOINTS[ats];

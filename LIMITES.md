@@ -73,8 +73,16 @@ d'être du marché caché — contourner le problème plutôt que l'affronter.
 
 `docs/superpowers/specs/2026-08-04-marche-cache-index-design.md`, « Hors scope » :
 
-- **ATS exigeant l'URL du locataire** : Workday, SuccessFactors, Talentsoft. Deviner cette URL a échoué **10 fois sur 10**. C'est l'objet de la brique 3 (Common Crawl), non commencée. C'est là que sont beaucoup de grands employeurs français.
+- ~~**ATS exigeant l'URL du locataire** : Workday, SuccessFactors, Talentsoft.~~ **Levé pour Workday le 06/08/2026** (commit de la brique 3) : les adresses ne se devinent toujours pas, elles se **lisent** dans l'index public de Common Crawl (`scripts/boards/crawl.mjs`). 2 467 vitrines énumérées, **361 boards français, 8 538 offres**. La contrainte reste entière pour **SuccessFactors et Talentsoft**, dont l'API n'a pas été mesurée — les traiter d'un bloc aurait empilé trois inconnues au lieu d'en lever une.
 - **ATS à authentification** : Taleez, Flatchr, Digitalrecruiters, Welcome to the Jungle. Aucune piste.
+
+### 2.2 bis Ce que Workday coûte et ne dit pas
+
+- **Aucun pays dans la liste d'offres.** Seul un libellé libre, souvent une commune inconnue de toute liste (« Vitry-sur-Seine », « Le Trait »). `estFrancais` est donc inutilisable ici : c'est le pays déclaré par Workday qui tranche, lu soit dans la facette du board, soit dans le détail de chaque offre.
+- **La facette pays est ignorée, pas refusée, quand le board ne l'a pas configurée.** GEA rend ses 356 offres à l'identique avec et sans le filtre France. Croire ce total produisait **26 484 fausses offres** sur un échantillon de 125 boards (mesuré le 05/08/2026). D'où la vérification préalable de l'existence de la facette, verrouillée par test.
+- **Coût par offre pour les boards sans facette pays** : un appel de détail par offre candidate, six de front. C'est le poste le plus lourd de toute la chaîne.
+- **Le nom de l'entreprise n'est pas donné.** Il est déduit de l'adresse (`nomWorkday`) : sans cela le candidat lisait « Ag » pour Airbus, « Cc » pour Chanel. 101 noms redressés sur 291, mais **34 restent des sigles non capitalisés** (Abb, Cae, CSL) et quelques-uns gardent un nom de site (« Zollmedicalcorp »). Lisible, jamais trompeur — non raffiné davantage pour ne pas casser les 327 cas justes.
+- **Une entrée sur vingt n'est pas une offre** : Workday renvoie des objets ne portant que des métadonnées internes, sans titre ni chemin (relevé chez Accenture). Écartés.
 
 ### 2.3 Rendement de la découverte par nom d'entreprise
 
@@ -90,8 +98,9 @@ faudrait une correspondance nom → domaine → slug, qui n'existe pas.
 
 Pour les offres du marché caché (`boardsFr.ts`) :
 
-- **Type de contrat et salaire toujours vides.** Aucun des quatre ATS n'expose de distinction CDI/CDD fiable. Conséquence directe : les filtres **« Contrat », « Qualification » et « Temps de travail » ne s'appliquent pas** à cette source. Une offre du marché caché remonte quel que soit le réglage de ces pastilles.
-- **Le rayon géographique n'est vrai que pour 53 % des offres** — SmartRecruiters est le seul ATS à fournir des coordonnées. Pour les 47 % restants, c'est une correspondance de ville stricte : une offre à Boulogne sort d'une recherche « Paris ».
+- **Type de contrat et salaire toujours vides.** Aucun des cinq ATS n'expose de distinction CDI/CDD fiable. Conséquence directe : les filtres **« Contrat », « Qualification » et « Temps de travail » ne s'appliquent pas** à cette source. Une offre du marché caché remonte quel que soit le réglage de ces pastilles.
+- **Le rayon géographique n'est vrai que pour une partie des offres** — SmartRecruiters est le seul ATS à fournir des coordonnées (53 % de l'index avant Workday, 36 % après). Pour les autres, c'est une correspondance de ville stricte : une offre à Boulogne sort d'une recherche « Paris ».
+- **Une offre sans lieu exploitable n'entre pas dans l'index** (`build-boards-offres.mjs`, décision du 06/08/2026). Sans ville, elle serait absente des recherches par rayon tout en s'affichant ailleurs — incohérence invisible pour le candidat. Le filtre vit à l'écriture du fichier et pas seulement chez chaque ATS, parce que les offres reprises d'un board injoignable viennent du fichier précédent, donc d'un code plus ancien. 56 offres écartées au dernier passage, toutes de `lever:ippon`.
 - **Plafond de 60 offres par recherche** dont on récupère le texte complet. Nombre choisi, jamais mesuré sur un usage réel.
 
 ### 2.5 La date de publication n'est pas fiable chez Greenhouse
@@ -126,15 +135,17 @@ Trois fichiers de données sont commités et régénérés automatiquement :
 
 | Fichier | Taille | Rythme de réécriture |
 |---|---|---|
-| `boards-fr-testes.json` | **20,4 Mo** | hebdomadaire |
-| `boards-offres.json` | **4,2 Mo** | **quotidien** |
-| `boards-fr.json` | 64 Ko | hebdomadaire |
+| `boards-fr-testes.json` | **20,6 Mo** | hebdomadaire |
+| `boards-offres.json` | **7,9 Mo** | **quotidien** |
+| `boards-fr.json` | 105 Ko | hebdomadaire |
 
 Git compresse bien des fichiers presque identiques, mais la trajectoire est à
-surveiller : le mémo a doublé en ouvrant l'index aux PME, et descendre encore le
-seuil le ferait grossir d'autant. **Si l'historique gonfle trop, la bonne
-réponse est de sortir ces fichiers du dépôt** (artefact de build ou stockage
-externe), pas d'espacer les scans — qui sont justement toute la valeur.
+surveiller : le mémo a doublé en ouvrant l'index aux PME, et l'index d'offres a
+presque doublé avec Workday (4,2 → 7,9 Mo), **réécrit chaque jour**. Descendre
+encore le seuil SIRENE, ou ajouter SuccessFactors, aggraverait les deux.
+**Si l'historique gonfle trop, la bonne réponse est de sortir ces fichiers du
+dépôt** (artefact de build ou stockage externe), pas d'espacer les scans — qui
+sont justement toute la valeur.
 
 ---
 

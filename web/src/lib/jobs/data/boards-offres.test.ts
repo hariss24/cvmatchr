@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import offres from "./boards-offres.json";
 
-const ATS_CONNUS = ["greenhouse", "lever", "ashby", "smartrecruiters"];
+const ATS_CONNUS = ["greenhouse", "lever", "ashby", "smartrecruiters", "workday"];
 
 type Entree = {
   ats: string;
