@@ -16,6 +16,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "365TALENTS",
+    "ats": "smartrecruiters",
+    "slug": "365talents",
+    "offresFR": 2,
+    "siren": "812215804",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "ABBVIE",
     "ats": "smartrecruiters",
     "slug": "abbvie",
@@ -29,6 +37,14 @@
     "slug": "accor",
     "offresFR": 193,
     "siren": "602036444",
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "ACRELEC",
+    "ats": "smartrecruiters",
+    "slug": "acrelec",
+    "offresFR": 13,
+    "siren": "351251962",
     "vuLe": "2026-08"
   },
   {
@@ -205,6 +221,14 @@
     "slug": "alterea",
     "offresFR": 77,
     "siren": "479558017",
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "ALVEUS",
+    "ats": "smartrecruiters",
+    "slug": "alveus",
+    "offresFR": 1,
+    "siren": "803885128",
     "vuLe": "2026-08"
   },
   {
@@ -392,6 +416,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "BABYLANGUES SERVICES",
+    "ats": "smartrecruiters",
+    "slug": "babylanguesservices",
+    "offresFR": 9,
+    "siren": "509788097",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Backmarket",
     "ats": "ashby",
     "slug": "backmarket",
@@ -568,6 +600,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "C.N.S. COMMUNICATIONS",
+    "ats": "smartrecruiters",
+    "slug": "cnscommunications",
+    "offresFR": 1,
+    "siren": "453526519",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "C12qe",
     "ats": "lever",
     "slug": "c12qe",
@@ -733,6 +773,14 @@
     "slug": "choose",
     "offresFR": 5,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "CITECH",
+    "ats": "smartrecruiters",
+    "slug": "citech",
+    "offresFR": 50,
+    "siren": "794019430",
     "vuLe": "2026-08"
   },
   {
@@ -1072,6 +1120,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "ECOVADIS",
+    "ats": "smartrecruiters",
+    "slug": "ecovadis",
+    "offresFR": 1,
+    "siren": "497842914",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Ekimetrics",
     "ats": "lever",
     "slug": "ekimetrics",
@@ -1104,11 +1160,27 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "ENERGIE ET SERVICES DE SEYSSEL",
+    "ats": "smartrecruiters",
+    "slug": "energieetservicesdeseyssel",
+    "offresFR": 1,
+    "siren": "485010847",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "EOS FRANCE",
     "ats": "smartrecruiters",
     "slug": "eosfrance",
     "offresFR": 12,
     "siren": "488825217",
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "EPICENTRE",
+    "ats": "smartrecruiters",
+    "slug": "epicentre",
+    "offresFR": 1,
+    "siren": "340494905",
     "vuLe": "2026-08"
   },
   {
@@ -1184,6 +1256,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "EXIOM PARTNERS",
+    "ats": "smartrecruiters",
+    "slug": "exiompartners",
+    "offresFR": 1,
+    "siren": "851641944",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Fanaticscollectibles",
     "ats": "greenhouse",
     "slug": "fanaticscollectibles",
@@ -1248,6 +1328,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "FINANCE ACTIVE",
+    "ats": "smartrecruiters",
+    "slug": "financeactive",
+    "offresFR": 6,
+    "siren": "531663326",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Finary",
     "ats": "ashby",
     "slug": "finary",
@@ -1272,6 +1360,22 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "FLOWDESK",
+    "ats": "smartrecruiters",
+    "slug": "flowdesk",
+    "offresFR": 2,
+    "siren": "883604647",
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "FRANCE DISTRIBUTION EXPRESS",
+    "ats": "smartrecruiters",
+    "slug": "francedistributionexpress",
+    "offresFR": 3,
+    "siren": "422335349",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Fresha",
     "ats": "lever",
     "slug": "fresha",
@@ -1285,6 +1389,14 @@
     "slug": "frontcareers",
     "offresFR": 2,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "FTMM",
+    "ats": "smartrecruiters",
+    "slug": "ftmm",
+    "offresFR": 2,
+    "siren": "887501476",
     "vuLe": "2026-08"
   },
   {
@@ -1336,6 +1448,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "GOELAN",
+    "ats": "smartrecruiters",
+    "slug": "goelan",
+    "offresFR": 1,
+    "siren": "408310985",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Gojob",
     "ats": "lever",
     "slug": "gojob",
@@ -1381,6 +1501,22 @@
     "slug": "gympass",
     "offresFR": 7,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "H2M EXPRESS",
+    "ats": "smartrecruiters",
+    "slug": "h2mexpress",
+    "offresFR": 1,
+    "siren": "837645373",
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "HANA GROUP",
+    "ats": "smartrecruiters",
+    "slug": "hanagroup",
+    "offresFR": 378,
+    "siren": "810668145",
     "vuLe": "2026-08"
   },
   {
@@ -1528,6 +1664,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "IMPLICITY",
+    "ats": "smartrecruiters",
+    "slug": "implicity",
+    "offresFR": 1,
+    "siren": "820529089",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Inato",
     "ats": "ashby",
     "slug": "inato",
@@ -1541,6 +1685,14 @@
     "slug": "infinit",
     "offresFR": 1,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "INTERLOGEMENT 93",
+    "ats": "smartrecruiters",
+    "slug": "interlogement93",
+    "offresFR": 14,
+    "siren": "381627280",
     "vuLe": "2026-08"
   },
   {
@@ -1656,6 +1808,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "JUMP TECHNOLOGY",
+    "ats": "smartrecruiters",
+    "slug": "jumptechnology",
+    "offresFR": 1,
+    "siren": "341358190",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Jumptrading",
     "ats": "greenhouse",
     "slug": "jumptrading",
@@ -1720,6 +1880,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "KLAXOON",
+    "ats": "smartrecruiters",
+    "slug": "klaxoon",
+    "offresFR": 3,
+    "siren": "511962219",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Kog",
     "ats": "ashby",
     "slug": "kog",
@@ -1776,6 +1944,22 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "LE CHATEAU DE BEAULIEU",
+    "ats": "smartrecruiters",
+    "slug": "lechateaudebeaulieu",
+    "offresFR": 1,
+    "siren": "379231335",
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "LE COLLECTIONIST",
+    "ats": "smartrecruiters",
+    "slug": "lecollectionist",
+    "offresFR": 9,
+    "siren": "789370152",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Ledger",
     "ats": "ashby",
     "slug": "ledger",
@@ -1797,6 +1981,22 @@
     "slug": "lemlist",
     "offresFR": 4,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "LES BONS ARTISANS",
+    "ats": "smartrecruiters",
+    "slug": "lesbonsartisans",
+    "offresFR": 1,
+    "siren": "753805035",
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "LIDAL",
+    "ats": "smartrecruiters",
+    "slug": "lidal",
+    "offresFR": 3,
+    "siren": "305869265",
     "vuLe": "2026-08"
   },
   {
@@ -1968,6 +2168,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "MOBIAPPS",
+    "ats": "smartrecruiters",
+    "slug": "mobiapps",
+    "offresFR": 1,
+    "siren": "800456097",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Mobilefirst",
     "ats": "ashby",
     "slug": "mobilefirst",
@@ -2061,6 +2269,14 @@
     "slug": "netgear",
     "offresFR": 2,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "NETIMMO",
+    "ats": "smartrecruiters",
+    "slug": "netimmo",
+    "offresFR": 3,
+    "siren": "800273211",
     "vuLe": "2026-08"
   },
   {
@@ -2280,6 +2496,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "PARITRANS",
+    "ats": "smartrecruiters",
+    "slug": "paritrans",
+    "offresFR": 1,
+    "siren": "890253487",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Parloa",
     "ats": "greenhouse",
     "slug": "parloa",
@@ -2301,6 +2525,14 @@
     "slug": "pennylane",
     "offresFR": 102,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "PERFORMANSE",
+    "ats": "smartrecruiters",
+    "slug": "performanse",
+    "offresFR": 1,
+    "siren": "343961546",
     "vuLe": "2026-08"
   },
   {
@@ -2648,6 +2880,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "SA TRANSPORTS",
+    "ats": "smartrecruiters",
+    "slug": "satransports",
+    "offresFR": 1,
+    "siren": "891487324",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Safran Ai",
     "ats": "lever",
     "slug": "safran-ai",
@@ -2661,6 +2901,14 @@
     "slug": "salonkee",
     "offresFR": 5,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "SALVIA DEVELOPPEMENT",
+    "ats": "smartrecruiters",
+    "slug": "salviadeveloppement",
+    "offresFR": 2,
+    "siren": "791960768",
     "vuLe": "2026-08"
   },
   {
@@ -2680,6 +2928,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "SANTEN",
+    "ats": "smartrecruiters",
+    "slug": "santen",
+    "offresFR": 2,
+    "siren": "432584225",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Satispay",
     "ats": "ashby",
     "slug": "satispay",
@@ -2696,6 +2952,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "SCALIAN",
+    "ats": "smartrecruiters",
+    "slug": "scalian",
+    "offresFR": 479,
+    "siren": "350992707",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Scality",
     "ats": "lever",
     "slug": "scality",
@@ -2704,11 +2968,27 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "SEMJI",
+    "ats": "smartrecruiters",
+    "slug": "semji",
+    "offresFR": 1,
+    "siren": "539381582",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Sentinellabs",
     "ats": "greenhouse",
     "slug": "sentinellabs",
     "offresFR": 2,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "SEPTEO",
+    "ats": "smartrecruiters",
+    "slug": "septeo",
+    "offresFR": 43,
+    "siren": "790675037",
     "vuLe": "2026-08"
   },
   {
@@ -2744,6 +3024,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "SGS",
+    "ats": "smartrecruiters",
+    "slug": "sgs",
+    "offresFR": 288,
+    "siren": "402844237",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Sharkninjaoperatingllc",
     "ats": "greenhouse",
     "slug": "sharkninjaoperatingllc",
@@ -2757,6 +3045,30 @@
     "slug": "shifttechnology",
     "offresFR": 11,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "SHIPPEO",
+    "ats": "smartrecruiters",
+    "slug": "shippeo",
+    "offresFR": 5,
+    "siren": "801689415",
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "SHOPPING FLUX",
+    "ats": "smartrecruiters",
+    "slug": "shoppingflux",
+    "offresFR": 1,
+    "siren": "531496339",
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "SIDETRADE",
+    "ats": "smartrecruiters",
+    "slug": "sidetrade",
+    "offresFR": 1,
+    "siren": "430007252",
     "vuLe": "2026-08"
   },
   {
@@ -2781,6 +3093,14 @@
     "slug": "snowflake",
     "offresFR": 6,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "SOCIABBLE",
+    "ats": "smartrecruiters",
+    "slug": "sociabble",
+    "offresFR": 4,
+    "siren": "492054937",
     "vuLe": "2026-08"
   },
   {
@@ -2928,6 +3248,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "SPOREO",
+    "ats": "smartrecruiters",
+    "slug": "sporeo",
+    "offresFR": 4,
+    "siren": "847962420",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Spothopper",
     "ats": "greenhouse",
     "slug": "spothopper",
@@ -2949,6 +3277,14 @@
     "slug": "staycation",
     "offresFR": 1,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "STEP BY STEP TRANSPORT",
+    "ats": "smartrecruiters",
+    "slug": "stepbysteptransport",
+    "offresFR": 1,
+    "siren": "897600938",
     "vuLe": "2026-08"
   },
   {
@@ -3000,6 +3336,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "SYCOMORE ASSET MANAGEMENT",
+    "ats": "smartrecruiters",
+    "slug": "sycomoreassetmanagement",
+    "offresFR": 1,
+    "siren": "438230104",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Synthesia",
     "ats": "ashby",
     "slug": "synthesia",
@@ -3037,6 +3381,14 @@
     "slug": "taskrabbit",
     "offresFR": 1,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "TDM EXPRESS",
+    "ats": "smartrecruiters",
+    "slug": "tdmexpress",
+    "offresFR": 1,
+    "siren": "884688342",
     "vuLe": "2026-08"
   },
   {
@@ -3160,6 +3512,22 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "TIKEHAU CAPITAL",
+    "ats": "smartrecruiters",
+    "slug": "tikehaucapital",
+    "offresFR": 1,
+    "siren": "477599104",
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "TIM'S LD TRANSPORT",
+    "ats": "smartrecruiters",
+    "slug": "timsldtransport",
+    "offresFR": 1,
+    "siren": "880065040",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Toogoodtogo",
     "ats": "greenhouse",
     "slug": "toogoodtogo",
@@ -3200,6 +3568,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "TRANSPORT SF",
+    "ats": "smartrecruiters",
+    "slug": "transportsf",
+    "offresFR": 1,
+    "siren": "890446552",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Tripactions",
     "ats": "greenhouse",
     "slug": "tripactions",
@@ -3216,11 +3592,27 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "TROISGROS",
+    "ats": "smartrecruiters",
+    "slug": "troisgros",
+    "offresFR": 4,
+    "siren": "406180455",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Truelogic",
     "ats": "ashby",
     "slug": "truelogic",
     "offresFR": 2,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "TRUST TRANSPORT SERVICES",
+    "ats": "smartrecruiters",
+    "slug": "trusttransportservices",
+    "offresFR": 1,
+    "siren": "892802638",
     "vuLe": "2026-08"
   },
   {
@@ -3245,6 +3637,14 @@
     "slug": "ttcglobal",
     "offresFR": 1,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "TURNER & TOWNSEND",
+    "ats": "smartrecruiters",
+    "slug": "turnertownsend",
+    "offresFR": 15,
+    "siren": "537590390",
     "vuLe": "2026-08"
   },
   {
@@ -3277,6 +3677,14 @@
     "slug": "unitedmedia",
     "offresFR": 4,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "UNOWHY",
+    "ats": "smartrecruiters",
+    "slug": "unowhy",
+    "offresFR": 3,
+    "siren": "498645274",
     "vuLe": "2026-08"
   },
   {
@@ -3392,6 +3800,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "VISIAN",
+    "ats": "smartrecruiters",
+    "slug": "visian",
+    "offresFR": 9,
+    "siren": "879403566",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Vistar",
     "ats": "ashby",
     "slug": "vistar",
@@ -3461,6 +3877,14 @@
     "slug": "wattpad",
     "offresFR": 1,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "WEYTRA",
+    "ats": "smartrecruiters",
+    "slug": "weytra",
+    "offresFR": 1,
+    "siren": "910066075",
     "vuLe": "2026-08"
   },
   {
@@ -3536,6 +3960,14 @@
     "vuLe": "2026-08"
   },
   {
+    "nom": "YESPARK",
+    "ats": "smartrecruiters",
+    "slug": "yespark",
+    "offresFR": 1,
+    "siren": "801558495",
+    "vuLe": "2026-08"
+  },
+  {
     "nom": "Yext",
     "ats": "greenhouse",
     "slug": "yext",
@@ -3573,6 +4005,14 @@
     "slug": "zetaglobal",
     "offresFR": 4,
     "siren": null,
+    "vuLe": "2026-08"
+  },
+  {
+    "nom": "ZG LIGHTING FRANCE",
+    "ats": "smartrecruiters",
+    "slug": "zglightingfrance",
+    "offresFR": 1,
+    "siren": "391673357",
     "vuLe": "2026-08"
   },
   {

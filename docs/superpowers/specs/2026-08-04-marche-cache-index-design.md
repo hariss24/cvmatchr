@@ -188,9 +188,42 @@ tranche d'effectif par tranche d'effectif. Comptes relevés le 04/08/2026 :
 
 Ce découpage n'est pas cosmétique : **l'API plafonne la pagination à 10 000
 résultats**. Chacune de ces tranches passe sous le plafond, donc aucun découpage
-supplémentaire n'est nécessaire. Les tranches 21 (50–99) et 22 (100–199) le
-dépassent toutes deux et sont hors périmètre initial ; les inclure exigera un
-découpage par département, ce qui est un travail distinct.
+supplémentaire n'est nécessaire.
+
+### 3.3 bis Les PME, ajoutées le 05/08/2026
+
+Les tranches 21 (50–99) et 22 (100–199) dépassent le plafond et exigent un
+découpage. **Ce découpage se fait par section d'activité NAF, pas par
+département.**
+
+Le département avait l'air naturel ; il ne marche pas. Vérifié en direct :
+`departement=75` change bien le total annoncé, mais ne renvoie que **12
+résultats conformes sur 25**, le premier ayant son siège dans le 95. Le filtre
+porte sur les **établissements** — une chaîne nationale ayant une boutique à
+Paris ressort dans « 75 » — et le classement reste national, si bien que les
+premières pages de chaque département sont presque identiques : 400 lignes
+n'avaient donné que **170 entreprises distinctes**. Une entreprise n'a en
+revanche qu'une seule activité principale : même mesure par section NAF,
+5 146 lignes → **5 122 noms distincts**, soit 0,5 % de recouvrement.
+
+| Tranche | Effectif | Entreprises actives (somme des 21 sections) | Plus grosse section |
+|---|---|---|---|
+| 21 | 50–99 | 33 760 | P = 5 411 |
+| 22 | 100–199 | 15 678 | C = 2 182 |
+| | **Total** | **49 438** | sous le plafond |
+
+**Ces entreprises ne sont sondées que contre SmartRecruiters**, et c'est une
+mesure. Sur 5 122 PME sondées contre les quatre ATS : 5 boards trouvés, tous
+SmartRecruiters (dont SCALIAN, 479 offres). Le sixième, `ibanfirst` chez
+Greenhouse, figurait déjà dans l'index via la liste publique — apporté par la
+source A, pas par celle-ci. Zéro Lever, zéro Ashby. Le même constat vaut au
+dessus de 200 salariés : des 49 boards que SIRENE a fait découvrir, 47 sont
+SmartRecruiters et **aucun** n'est Greenhouse ou Lever. Sonder les trois autres
+coûterait quatre fois plus de requêtes et quatre fois plus de mémo pour ce que
+les listes publiques donnent déjà.
+
+**Limite connue :** une entreprise sans section NAF renseignée échappe à ce
+découpage. Le total réel est donc un plancher, pas un compte exact.
 
 **`per_page` est plafonné à 25** — l'API refuse toute valeur supérieure. Énumérer
 les 14 651 entreprises coûte donc 587 pages, soit quelques minutes. Vérifié le
@@ -308,7 +341,8 @@ code, et l'échec de l'une ne doit pas emporter l'autre.
 | | requêtes | volume | durée |
 |---|---|---|---|
 | Source A, balayage complet | 15 862 | 1,6 Go mesurés | ~5 min mesurées |
-| Source B, 14 651 entreprises | ~117 000 | faible | ~20–40 min estimées |
+| Source B, 14 651 entreprises ≥ 200 salariés, 4 ATS | ~117 000 | faible | ~20–40 min estimées |
+| Source B bis, 49 438 PME, SmartRecruiters seul | ~86 000 | faible | ~20 min estimées |
 
 La source A est mesurée. La source B est estimée, et **117 000 est un majorant,
 pas une prévision** : `atsSlugs` ne rend qu'un seul slug quand la variante collée

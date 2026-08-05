@@ -19,7 +19,10 @@ permissions:
 jobs:
   index:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    # Relevé à 180 le 05/08/2026, quand les PME de 50 à 199 salariés se sont
+    # ajoutées : 49 438 entreprises de plus à énumérer puis à sonder. Un premier
+    # passage à froid est le pire cas ; ensuite le mémo en épargne la majorité.
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
         with:

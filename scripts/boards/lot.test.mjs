@@ -28,3 +28,17 @@ test("une tâche qui jette n'emporte pas le lot", async () => {
   });
   assert.deepEqual([...r].filter((x) => x !== null).sort(), [1, 3]);
 });
+
+// Mesuré le 05/08/2026 : sans frein, SmartRecruiters refuse 20 175 requêtes
+// sur 25 000. La pause est la seule chose qui rende la passe PME exploitable.
+test("la pause fait souffler chaque ouvrier entre deux éléments", async () => {
+  const t0 = Date.now();
+  await enLot([1, 2, 3, 4], 1, async (x) => x, 30);
+  assert.ok(Date.now() - t0 >= 100, "quatre éléments à 30 ms de pause : au moins 120 ms attendues");
+});
+
+test("sans pause, rien ne ralentit le lot", async () => {
+  const t0 = Date.now();
+  await enLot([1, 2, 3, 4], 1, async (x) => x);
+  assert.ok(Date.now() - t0 < 50);
+});

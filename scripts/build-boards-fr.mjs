@@ -2,7 +2,9 @@
 //
 // Usage : node scripts/build-boards-fr.mjs [--source=a|b|tout] [--complet]
 //   --source=a      les listes de slugs publiques seulement (~5 min)
-//   --source=b      les entreprises françaises SIRENE seulement (~20-40 min)
+//   --source=b      les entreprises SIRENE seulement : 200 salariés et plus
+//                   contre les quatre ATS, puis les PME de 50 à 199 salariés
+//                   contre SmartRecruiters seul (~45-60 min à froid)
 //   --source=tout   les deux (défaut)
 //   --complet       ignore la TTL et reteste tout
 //
@@ -18,7 +20,7 @@ import { fileURLToPath } from "node:url";
 
 import { ATS, compterFR } from "./boards/ats.mjs";
 import { slugsCandidats } from "./boards/slugs.mjs";
-import { slugsDesListes, entreprisesFrancaises } from "./boards/sources.mjs";
+import { slugsDesListes, entreprisesFrancaises, TRANCHES_PME, SECTIONS } from "./boards/sources.mjs";
 import { enLot } from "./boards/lot.mjs";
 import { cle, mois, estFrais, nomDepuisSlug, trierMemo, fusionner } from "./boards/memo.mjs";
 
@@ -27,6 +29,10 @@ const F_INDEX = join(OUT_DIR, "boards-fr.json");
 const F_MEMO = join(OUT_DIR, "boards-fr-testes.json");
 
 const PLAFOND = 12;
+
+/** Cadence tolérée par SmartRecruiters — voir le commentaire au point de sondage. */
+const PLAFOND_SR = 4;
+const PAUSE_SR_MS = 200;
 
 const args = process.argv.slice(2);
 const complet = args.includes("--complet");
@@ -78,22 +84,72 @@ if (source === "a" || source === "tout") {
   for (const c of couples) if (aTester(c.ats, c.slug)) cibles.push(c);
 }
 
-// --- Source B : les entreprises françaises, contre les quatre ATS
-if (source === "b" || source === "tout") {
-  const entreprises = await entreprisesFrancaises();
-  console.log(`Source B : ${entreprises.length} entreprises françaises.`);
+/** Ajoute aux cibles les couples encore à tester pour ces entreprises. */
+function viser(entreprises, atsSondes) {
+  const avant = cibles.length;
   for (const e of entreprises) {
     for (const slug of slugsCandidats(e.nom)) {
-      for (const ats of ATS) {
+      for (const ats of atsSondes) {
         if (aTester(ats, slug)) cibles.push({ ats, slug, nom: e.nom, siren: e.siren });
       }
     }
   }
+  return cibles.length - avant;
 }
 
-console.log(`${cibles.length} couples à tester (${memo.length} déjà en mémoire).`);
+// --- Source B : les entreprises françaises, contre les quatre ATS
+if (source === "b" || source === "tout") {
+  const entreprises = await entreprisesFrancaises();
+  console.log(`Source B : ${entreprises.length} entreprises de 200 salariés et plus.`);
+  console.log(`  → ${viser(entreprises, ATS)} couples à tester sur ${ATS.length} ATS.`);
+}
 
-const brut = await enLot(cibles, PLAFOND, tester);
+// --- Source B bis : les PME (50 à 199 salariés), SmartRecruiters seul
+//
+// SmartRecruiters seul, et c'est une mesure, pas une intuition. Sur 5 122 PME
+// sondées le 05/08/2026 contre les quatre ATS : 5 boards trouvés, tous
+// SmartRecruiters (dont SCALIAN, 479 offres). Le sixième, `ibanfirst` chez
+// Greenhouse, figurait déjà dans l'index via la liste publique — donc apporté
+// par la source A, pas par celle-ci. Zéro Lever, zéro Ashby. Le même constat
+// vaut au-dessus de 200 salariés : sur les 49 boards que SIRENE a fait
+// découvrir, 47 sont SmartRecruiters et aucun n'est Greenhouse ou Lever, que
+// les listes publiques couvrent déjà.
+//
+// Sonder les trois autres coûterait quatre fois plus de requêtes et quatre fois
+// plus de mémo pour ce que les listes publiques donnent déjà gratuitement.
+if (source === "b" || source === "tout") {
+  const pme = await entreprisesFrancaises(fetch, TRANCHES_PME, SECTIONS);
+  console.log(`Source B bis : ${pme.length} PME de 50 à 199 salariés.`);
+  console.log(`  → ${viser(pme, ["smartrecruiters"])} couples à tester sur SmartRecruiters.`);
+}
+
+// Deux entreprises portant le même nom, ou une entreprise vue par deux sources,
+// produisent le même couple ats+slug. `aTester` consulte le mémo du passage
+// PRÉCÉDENT, pas la file en cours : sans ce dédoublonnage, le même board serait
+// interrogé plusieurs fois dans la même exécution.
+const parCle = new Map();
+for (const c of cibles) if (!parCle.has(cle(c.ats, c.slug))) parCle.set(cle(c.ats, c.slug), c);
+const aSonder = [...parCle.values()];
+
+console.log(
+  `${aSonder.length} couples à tester (${cibles.length - aSonder.length} doublons écartés, `
+  + `${memo.length} déjà en mémoire).`,
+);
+
+// SmartRecruiters à part, et bridé. C'est le seul des quatre à refuser la
+// cadence : mesuré le 05/08/2026, 25 000 requêtes à 12 de front donnent 4 825
+// réponses puis 20 175 refus. À 4 de front avec 200 ms de pause, 6 000
+// requêtes passent sans un seul refus, à 16 par seconde. Les trois autres
+// gardent la cadence pleine — ils ne bronchent pas, et les faire ralentir
+// coûterait dix minutes par passage pour rien.
+const sr = aSonder.filter((c) => c.ats === "smartrecruiters");
+const autres = aSonder.filter((c) => c.ats !== "smartrecruiters");
+console.log(`  → ${autres.length} en cadence pleine, ${sr.length} sur SmartRecruiters à cadence réduite.`);
+
+const brut = [
+  ...(await enLot(autres, PLAFOND, tester)),
+  ...(await enLot(sr, PLAFOND_SR, tester, PAUSE_SR_MS)),
+];
 const trouvailles = brut.filter(Boolean);
 
 console.log(`${trouvailles.length} réponses exploitables, ${brut.length - trouvailles.length} indéterminées.`);

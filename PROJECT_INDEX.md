@@ -205,7 +205,14 @@ entreprises dont le board ATS public a au moins une offre en France — le
 répertoire du « marché caché ». Régénérable par `node scripts/build-boards-fr.mjs`
 et rafraîchi chaque lundi par `.github/workflows/boards-fr.yml`.
 `boards-fr-testes.json` est la mémoire des couples déjà testés (échecs compris) ;
-rien d'autre ne le lit. Voir `docs/superpowers/specs/2026-08-04-marche-cache-index-design.md`.
+rien d'autre ne le lit. Deux gisements d'entreprises : celles de **200 salariés
+et plus** (14 651) sondées contre les quatre ATS, et les **PME de 50 à 199
+salariés** (49 438) sondées contre SmartRecruiters seul — les trois autres ATS
+n'y apportent rien que les listes publiques ne donnent déjà, mesuré sur 5 122
+PME. ⚠️ Ces tranches PME dépassent le plafond d'affichage de 10 000 résultats de
+l'API et sont découpées **par section NAF, jamais par département** : le filtre
+département porte sur les établissements et renvoie des résultats largement hors
+périmètre. Voir `docs/superpowers/specs/2026-08-04-marche-cache-index-design.md`.
 
 **Quatrième source « Marché caché »** (`lib/jobs/boardsFr.ts`, décochée par
 défaut) : lit l'index léger `lib/jobs/data/boards-offres.json`

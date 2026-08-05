@@ -41,6 +41,23 @@ const ENDPOINTS = {
   },
 };
 
+const attendre = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Tentatives sur un 429 avant d'abandonner le couple. */
+const RETRY_MAX = 4;
+
+/**
+ * Délai avant de retenter un 429.
+ *
+ * ⚠️ SmartRecruiters annonce `retry-after: 0`, ce qui reviendrait à repartir
+ * aussitôt dans le mur. On plancher donc à 2 s. Mesuré le 05/08/2026 : l'API
+ * accepte environ 4 800 requêtes puis refuse tout le reste de la fenêtre.
+ */
+function delaiRetry(res) {
+  const ra = Number(res.headers?.get("retry-after"));
+  return Math.max(2000, (Number.isFinite(ra) && ra > 0 ? ra : 0) * 1000);
+}
+
 /**
  * Nombre d'offres françaises sur ce board.
  *
@@ -49,15 +66,23 @@ const ENDPOINTS = {
  *   - `null` → réseau, 5xx, JSON illisible. On ne sait pas, et l'appelant n'a
  *              le droit d'en conclure RIEN — surtout pas de retirer l'entrée
  *              de l'index.
+ *
+ * Un 429 se retente. Sans cela, un bridage passager se traduisait par un `null`
+ * définitif : mesuré le 05/08/2026, une passe de 85 840 couples avait rendu
+ * 71 724 indéterminées — 84 % du travail jeté sans que rien ne le signale.
  */
 export async function compterFR(ats, slug, fetchImpl = fetch) {
   const e = ENDPOINTS[ats];
 
   let res;
-  try {
-    res = await fetchImpl(e.url(slug), { signal: AbortSignal.timeout(TIMEOUT_MS) });
-  } catch {
-    return null;
+  for (let essai = 0; essai < RETRY_MAX; essai++) {
+    try {
+      res = await fetchImpl(e.url(slug), { signal: AbortSignal.timeout(TIMEOUT_MS) });
+    } catch {
+      return null;
+    }
+    if (res.status !== 429) break;
+    await attendre(delaiRetry(res));
   }
 
   if (res.status === 404) return 0;

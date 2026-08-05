@@ -79,3 +79,22 @@ test("un JSON illisible vaut null, pas zéro", async () => {
   const f = async () => new Response("<html>maintenance</html>", { status: 200 });
   assert.equal(await compterFR("lever", "swile", f), null);
 });
+
+// Mesuré le 05/08/2026 : une passe de 85 840 couples avait rendu 71 724
+// indéterminées, parce qu'un 429 valait échec définitif. SmartRecruiters annonce
+// `retry-after: 0`, d'où le plancher — repartir aussitôt renverrait dans le mur.
+test("un 429 est retenté, pas jeté", async () => {
+  let appels = 0;
+  const f = async () => {
+    appels += 1;
+    if (appels === 1) return new Response("", { status: 429, headers: { "retry-after": "0" } });
+    return Response.json({ totalFound: 7 });
+  };
+  assert.equal(await compterFR("smartrecruiters", "acme", f), 7);
+  assert.equal(appels, 2);
+});
+
+test("un 429 obstiné finit par rendre null, jamais 0", async () => {
+  const f = async () => new Response("", { status: 429, headers: { "retry-after": "0" } });
+  assert.equal(await compterFR("smartrecruiters", "acme", f), null);
+});

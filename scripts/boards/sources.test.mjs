@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { LISTES, TRANCHES, slugsDesListes, entreprisesFrancaises } from "./sources.mjs";
+import { LISTES, TRANCHES, TRANCHES_PME, SECTIONS, slugsDesListes, entreprisesFrancaises } from "./sources.mjs";
 
 test("les trois listes publiques sont déclarées, sans SmartRecruiters", () => {
   assert.deepEqual(Object.keys(LISTES).sort(), ["ashby", "greenhouse", "lever"]);
@@ -8,6 +8,61 @@ test("les trois listes publiques sont déclarées, sans SmartRecruiters", () => 
 
 test("les sept tranches d'effectif sont déclarées", () => {
   assert.deepEqual(TRANCHES, ["31", "32", "41", "42", "51", "52", "53"]);
+});
+
+test("les deux tranches PME et les 21 sections NAF sont déclarées", () => {
+  assert.deepEqual(TRANCHES_PME, ["21", "22"]);
+  assert.equal(SECTIONS.length, 21);
+  assert.equal(SECTIONS[0], "A");
+  assert.equal(SECTIONS.at(-1), "U");
+  // Aucune tranche ne doit figurer dans les deux listes : ce serait sonder deux
+  // fois les mêmes entreprises, et gonfler le mémo pour rien.
+  assert.deepEqual(TRANCHES.filter((t) => TRANCHES_PME.includes(t)), []);
+});
+
+test("sans sections, une seule requête par tranche", async () => {
+  const urls = [];
+  const f = async (url) => {
+    urls.push(String(url));
+    return Response.json({ results: [{ nom_complet: "ALPHA", siren: "1" }], total_pages: 1 });
+  };
+  await entreprisesFrancaises(f, ["31", "32"]);
+  assert.equal(urls.length, 2);
+  assert.ok(urls.every((u) => !u.includes("section_activite_principale")));
+});
+
+// Les tranches PME dépassent le plafond d'affichage de 10 000 résultats : sans
+// découpage, l'API en cache la moitié sans le dire.
+test("avec sections, chaque tranche est découpée par section NAF", async () => {
+  const vues = [];
+  const f = async (url) => {
+    const p = new URL(String(url)).searchParams;
+    vues.push(`${p.get("tranche_effectif_salarie")}/${p.get("section_activite_principale")}`);
+    return Response.json({ results: [{ nom_complet: "ALPHA", siren: "1" }], total_pages: 1 });
+  };
+  const r = await entreprisesFrancaises(f, ["21", "22"], ["J", "K"]);
+  assert.deepEqual(vues, ["21/J", "21/K", "22/J", "22/K"]);
+  assert.equal(r.length, 4);
+});
+
+test("une section en panne ne fait pas tomber les autres", async () => {
+  const f = async (url) => {
+    const s = new URL(String(url)).searchParams.get("section_activite_principale");
+    if (s === "J") throw new Error("ECONNRESET");
+    return Response.json({ results: [{ nom_complet: "ALPHA", siren: "1" }], total_pages: 1 });
+  };
+  assert.deepEqual(await entreprisesFrancaises(f, ["21"], ["J", "K"]), [{ nom: "ALPHA", siren: "1" }]);
+});
+
+test("la pagination repart de la page 1 à chaque section", async () => {
+  const pages = [];
+  const f = async (url) => {
+    const p = new URL(String(url)).searchParams;
+    pages.push(`${p.get("section_activite_principale")}${p.get("page")}`);
+    return Response.json({ results: [{ nom_complet: "A", siren: "1" }], total_pages: 2 });
+  };
+  await entreprisesFrancaises(f, ["21"], ["J", "K"]);
+  assert.deepEqual(pages, ["J1", "J2", "K1", "K2"]);
 });
 
 test("les listes sont aplaties en couples ats+slug", async () => {
