@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { searchBoards, dateEffective } from "./boardsFr";
+import { searchBoards, dateEffective, repartirParEntreprise } from "./boardsFr";
 import { EMPTY_PROFILE } from "./profile";
 
 vi.mock("./data/boards-offres.json", () => ({
@@ -130,5 +130,46 @@ describe("dateEffective", () => {
     const classees = [vieille, recenteSansDate]
       .sort((a, b) => dateEffective(b).localeCompare(dateEffective(a)));
     expect(classees[0]).toBe(recenteSansDate);
+  });
+});
+
+describe("repartirParEntreprise", () => {
+  const lot = (entreprise: string, n: number) =>
+    Array.from({ length: n }, (_, i) => ({ entreprise, id: `${entreprise}${i}` }));
+
+  it("empêche un employeur de manger toute la sélection", () => {
+    // ⚠️ Cas réel du 06/08/2026 : « infirmier » rendait 34 offres Air Liquide
+    // sur 60, « vendeur » 17 Petit-Bateau et 17 Uniqlo.
+    const offres = [...lot("Air Liquide", 34), ...lot("Colisee", 10), ...lot("Korian", 10)];
+    const retenues = repartirParEntreprise(offres, 12);
+    expect(retenues.filter((o) => o.entreprise === "Air Liquide").length).toBe(4);
+    expect(new Set(retenues.map((o) => o.entreprise)).size).toBe(3);
+  });
+
+  it("un quota fixe ne suffirait pas : les places restantes doivent aussi tourner", () => {
+    // Le piège mesuré le 06/08/2026 : avec un quota de 3 puis un remplissage
+    // des places libres, « infirmier » gardait ses 34 Air Liquide sur 60. Ici
+    // deux employeurs seulement, dont un très gros : la dégradation doit être
+    // progressive, pas un basculement.
+    const offres = [...lot("Gros", 50), ...lot("Petit", 2)];
+    const retenues = repartirParEntreprise(offres, 10);
+    expect(retenues.filter((o) => o.entreprise === "Petit").length).toBe(2);
+    expect(retenues.filter((o) => o.entreprise === "Gros").length).toBe(8);
+  });
+
+  it("un employeur seul remplit toutes les places, aucune offre perdue", () => {
+    // « aide-soignant » : une seule entreprise dans l'index, treize offres.
+    expect(repartirParEntreprise(lot("Colisee", 17), 13).length).toBe(13);
+    expect(repartirParEntreprise(lot("Colisee", 5), 13).length).toBe(5);
+  });
+
+  it("sert la meilleure offre de chaque employeur avant la deuxième de quiconque", () => {
+    const offres = [...lot("A", 3), ...lot("B", 3)];
+    expect(repartirParEntreprise(offres, 4).map((o) => o.id)).toEqual(["A0", "B0", "A1", "B1"]);
+  });
+
+  it("s'arrête sans boucler quand les offres manquent pour atteindre le plafond", () => {
+    expect(repartirParEntreprise([...lot("A", 1), ...lot("B", 1)], 60).length).toBe(2);
+    expect(repartirParEntreprise([], 60)).toEqual([]);
   });
 });
