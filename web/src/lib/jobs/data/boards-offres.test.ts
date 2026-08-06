@@ -39,9 +39,24 @@ describe("index léger des offres des boards", () => {
     }
   });
 
-  it("lat/lng n'apparaissent que sur des entrées SmartRecruiters", () => {
+  it("lat et lng vont par paire et tombent en France", () => {
+    // ⚠️ Ce test exigeait auparavant que seules les entrées SmartRecruiters
+    // portent des coordonnées — c'était vrai tant qu'aucun autre ATS n'en
+    // fournissait. Depuis le 06/08/2026, `scripts/boards/geo.mjs` géocode les
+    // libellés de tous les ATS à la construction de l'index : le filtre par
+    // rayon ne pouvait sinon travailler que sur 31 % des offres, et manquait
+    // 884 offres de banlieue sur cinq agglomérations (82 à Villeurbanne pour
+    // une recherche lyonnaise). Ce qui doit rester vrai, c'est la cohérence
+    // des coordonnées elles-mêmes.
     for (const o of index) {
-      if (o.lat !== undefined || o.lng !== undefined) expect(o.ats).toBe("smartrecruiters");
+      expect(o.lat === undefined, `lat sans lng pour ${o.ats}/${o.slug}/${o.id}`)
+        .toBe(o.lng === undefined);
+      if (o.lat === undefined) continue;
+      // Métropole et outre-mer compris, bornes larges.
+      expect(o.lat, `latitude hors de France pour ${o.ats}/${o.slug}/${o.id}`).toBeGreaterThan(-25);
+      expect(o.lat).toBeLessThan(52);
+      expect(o.lng, `longitude hors de France pour ${o.ats}/${o.slug}/${o.id}`).toBeGreaterThan(-64);
+      expect(o.lng).toBeLessThan(56);
     }
   });
 

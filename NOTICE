@@ -48,7 +48,21 @@ Licence : Licence Ouverte / Open Licence (données ouvertes)
 Aucune restriction d'usage commercial. Attribution recommandée, faite ici.
 
 
-3. Index Common Crawl
+3. Base Adresse Nationale
+--------------------------
+
+Source  : api-adresse.data.gouv.fr
+Licence : Licence Ouverte / Open Licence (données ouvertes)
+
+Utilisée par `scripts/boards/geo.mjs` pour donner des coordonnées aux offres
+dont l'ATS n'en fournit pas. Les résultats sont mis en cache dans
+`web/src/lib/jobs/data/boards-geo.json` : l'API n'est interrogée qu'une fois
+par libellé, jamais pendant une recherche d'utilisateur.
+
+Aucune restriction d'usage commercial. Attribution recommandée, faite ici.
+
+
+4. Index Common Crawl
 ----------------------
 
 Source  : https://data.commoncrawl.org
@@ -63,7 +77,7 @@ l'exploitation des données. Cette contradiction n'est pas tranchée ; elle est
 documentée dans LIMITES.md.
 
 
-4. API publiques des ATS
+5. API publiques des ATS
 -------------------------
 
 Les offres elles-mêmes viennent des API publiques des employeurs. Elles ne sont

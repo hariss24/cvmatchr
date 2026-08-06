@@ -4,9 +4,14 @@
  * Les trois autres sources délèguent ce filtre à leur API. Ici il n'y a pas
  * d'API : l'index est local, et deux informations seulement décrivent le lieu.
  *
- *   - des coordonnées, mais sur 53 % des offres uniquement (SmartRecruiters
- *     est le seul ATS à les fournir — mesuré le 04/08/2026, 5 104 sur 9 579) ;
- *   - un libellé libre, présent sur 99,4 % d'entre elles.
+ *   - des coordonnées, sur 92 % des offres (18 019 sur 19 555, mesuré le
+ *     06/08/2026). SmartRecruiters est le seul ATS à en fournir, ce qui ne
+ *     couvrait que 31 % de l'index ; les autres sont obtenues en géocodant les
+ *     libellés à la construction — voir `scripts/boards/geo.mjs`. Avant cela,
+ *     le rayon était inopérant pour deux offres sur trois : une recherche
+ *     lyonnaise ne voyait pas les 82 offres de Villeurbanne, et 884 offres de
+ *     banlieue manquaient sur cinq agglomérations ;
+ *   - un libellé libre, présent sur toutes.
  *
  * D'où deux voies : la distance réelle quand les coordonnées existent, le
  * rapprochement de libellés sinon. Une offre sans lieu ET sans coordonnées est

@@ -18,6 +18,7 @@ import { listerOffresFR } from "./boards/offres.mjs";
 import { enLot } from "./boards/lot.mjs";
 import { cle } from "./boards/memo.mjs";
 import { dater, jour, reprendreIndetermines, sansPerimees, PEREMPTION_JOURS } from "./boards/nouveaute.mjs";
+import { coordonneesDe } from "./boards/geo.mjs";
 
 /**
  * Au-delà de cette part de boards injoignables, la moisson est déclarée en
@@ -34,6 +35,7 @@ const SEUIL_ALERTE = 0.1;
 const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "web", "src", "lib", "jobs", "data");
 const F_INDEX = join(DATA_DIR, "boards-fr.json");
 const F_OFFRES = join(DATA_DIR, "boards-offres.json");
+const F_GEO = join(DATA_DIR, "boards-geo.json");
 
 const PLAFOND = 12;
 
@@ -146,6 +148,51 @@ if (situees.length < index.length) {
 }
 index.length = 0;
 index.push(...situees);
+
+/**
+ * Coordonnées des offres qui n'en ont pas — voir `boards/geo.mjs`.
+ *
+ * ⚠️ Le cache est COMMITÉ, et ce n'est pas un détail : chaque exécution part
+ * d'un runner GitHub vierge. Sans lui, les 2 918 libellés distincts seraient
+ * redemandés à la Base Adresse Nationale tous les matins, pour un résultat
+ * identique. Les échecs sont mémorisés eux aussi (`null`) : « France » seul ou
+ * « Remote » ne nomment aucune commune, il est inutile de le redécouvrir.
+ */
+const cache = existsSync(F_GEO) ? JSON.parse(readFileSync(F_GEO, "utf8")) : {};
+const aSituer = [...new Set(
+  index.filter((o) => o.lat === undefined).map((o) => o.lieu),
+)].filter((l) => !(l in cache));
+
+if (aSituer.length > 0) {
+  console.log(`${aSituer.length} libellés de lieu à situer (${Object.keys(cache).length} déjà en cache).`);
+  let trouves = 0;
+  // Cadence volontairement basse : l'API accepte bien plus, mais rien ne presse
+  // et ce service public n'a pas à absorber nos rafales.
+  const resultats = await enLot(aSituer, 4, async (libelle) => {
+    const r = await coordonneesDe(libelle);
+    if (r) trouves += 1;
+    return r ?? null;
+  }, 100);
+  aSituer.forEach((libelle, i) => { cache[libelle] = resultats[i] ?? null; });
+  writeFileSync(F_GEO, `${JSON.stringify(cache, null, 2)}\n`, "utf8");
+  console.log(`${trouves} situés sur ${aSituer.length}.`);
+}
+
+let situeesParGeo = 0;
+for (const o of index) {
+  if (o.lat !== undefined) continue;
+  const c = cache[o.lieu];
+  if (!c) continue;
+  o.lat = c.lat;
+  o.lng = c.lng;
+  situeesParGeo += 1;
+}
+const avecCoords = index.filter((o) => o.lat !== undefined).length;
+console.log(
+  `${avecCoords} offres géolocalisées sur ${index.length} `
+  + `(${Math.round((avecCoords / Math.max(1, index.length)) * 100)} %), `
+  + `dont ${situeesParGeo} par le géocodage des libellés.`,
+);
 
 index.sort(
   (a, b) => a.ats.localeCompare(b.ats) || a.slug.localeCompare(b.slug) || a.id.localeCompare(b.id),
