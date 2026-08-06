@@ -56,16 +56,27 @@ console.log(`${boards.length} boards à moissonner.`);
 const PLAFOND_WD = 3;
 
 /**
- * ⚠️ Deux réessais. `listerOffresFR` rend `null` au premier accroc, sans
- * insister : sur un board volumineux, la probabilité qu'aucune des dizaines de
- * requêtes ne trébuche devient faible, et un board entier disparaît pour un
- * incident passager.
+ * ⚠️ Deux réessais, avec une attente qui s'allonge. `listerOffresFR` rend `null`
+ * au premier accroc, sans insister : sur un board volumineux, la probabilité
+ * qu'aucune des dizaines de requêtes ne trébuche devient faible, et un board
+ * entier disparaît pour un incident passager.
+ *
+ * ⚠️ L'attente monte à 3 s puis 12 s, au lieu de 1,5 s deux fois. Mesuré le
+ * 06/08/2026 en rappelant les 25 boards absents de l'index : Michelin, Sanofi,
+ * la RATP et Mango répondent tous correctement, mais échouent par intermittence
+ * quand on les sollicite en rafale — Sanofi a rendu 81 offres, puis rien en
+ * 0,1 seconde, puis de nouveau 81. Une pause d'une seconde et demie ne laisse
+ * pas le temps à un throttling de retomber ; c'est ce qui a coûté 1 270 offres.
  */
+const ATTENTES_MS = [3_000, 12_000];
+
 async function lister(b) {
   for (let essai = 0; essai < 3; essai++) {
     const offres = await listerOffresFR(b.ats, b.slug);
     if (offres !== null) return offres;
-    await new Promise((r) => setTimeout(r, 1500));
+    if (essai < ATTENTES_MS.length) {
+      await new Promise((r) => setTimeout(r, ATTENTES_MS[essai]));
+    }
   }
   return null;
 }

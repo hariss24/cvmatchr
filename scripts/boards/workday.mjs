@@ -216,6 +216,41 @@ async function enFront(items, travail) {
   return out;
 }
 
+/**
+ * Part d'offres dont le détail peut échouer sans invalider tout le board.
+ *
+ * ⚠️ Un gros board Workday ouvre une requête PAR OFFRE pour lire son lieu :
+ * Mango en demande 299 pour 283 offres, mesuré le 06/08/2026. Sans tolérance,
+ * la moindre de ces 299 qui trébuche fait perdre les 283 — c'est ce qui a laissé
+ * 25 boards, dont Michelin, Renault, la RATP et Sanofi, totalement absents de
+ * l'index malgré 1 270 offres annoncées. Tous répondent correctement quand on
+ * les rappelle : ce n'étaient que des incidents passagers.
+ *
+ * Au-delà du seuil, on rend toujours `null` : une vraie panne doit rester
+ * indiscernable d'un board vide, jamais rendue comme un résultat partiel.
+ *
+ * ⚠️ Le seuil est strictement proportionnel, sans plancher. Un plancher à un
+ * échec toléré paraît anodin et ne l'est pas : sur un petit board de dix offres,
+ * un échec vaut 10 % et doit disqualifier le tout — c'est ce qu'exige le test
+ * « un détail en erreur reste indéterminé malgré la parallélisation ». La
+ * tolérance ne s'ouvre qu'à partir de vingt offres, là où elle a un sens.
+ */
+const TOLERANCE_DETAILS = 0.05;
+
+/** Compteur d'échecs de détail d'un board, tranché en fin de moisson. */
+function compteur(total) {
+  let echecs = 0;
+  return {
+    noter: () => { echecs += 1; },
+    trancher: () => {
+      if (echecs > Math.floor(total() * TOLERANCE_DETAILS)) {
+        throw new Error(`workday : ${echecs} détails en échec sur ${total()} offres`);
+      }
+      return echecs;
+    },
+  };
+}
+
 /** Détail d'une offre, ou `null` si elle a disparu entre la liste et l'appel. */
 async function detail(morceaux, chemin, fetchImpl) {
   const res = await fetchImpl(`${racine(morceaux)}${chemin}`, {
@@ -245,13 +280,21 @@ async function page(morceaux, facettes, texte, offset, fetchImpl) {
  * vague. Elle serait sinon absente des recherches par rayon tout en apparaissant
  * ailleurs — une incohérence que le candidat n'a aucun moyen de comprendre.
  */
-async function avecLieu(poste, morceaux, fetchImpl) {
+async function avecLieu(poste, morceaux, fetchImpl, echecs) {
   if (!estPresentable(poste)) return null;
 
   const brut = String(poste?.locationsText ?? "").trim();
   if (!lieuIncomplet(brut)) return normaliser(poste, morceaux);
 
-  const info = await detail(morceaux, poste.externalPath, fetchImpl);
+  let info;
+  try {
+    info = await detail(morceaux, poste.externalPath, fetchImpl);
+  } catch {
+    // Incident sur CETTE offre : elle sort, le board reste. `compteur.trancher`
+    // décide en fin de moisson si le nombre d'incidents disqualifie le tout.
+    echecs.noter();
+    return null;
+  }
   const lieu = lieuDuDetail(info);
   return lieu ? normaliser(poste, morceaux, lieu) : null;
 }
@@ -260,14 +303,16 @@ async function avecLieu(poste, morceaux, fetchImpl) {
 async function parFacette(morceaux, attendu, fetchImpl) {
   const out = [];
   let vues = 0;
+  const echecs = compteur(() => vues);
   for (let p = 0; p < PAGES_MAX && vues < attendu; p++) {
     const corps = await page(morceaux, { locationCountry: [FRANCE_WID] }, "", p * PAGE, fetchImpl);
     const postes = corps?.jobPostings ?? [];
     vues += postes.length;
-    const offres = await enFront(postes, (poste) => avecLieu(poste, morceaux, fetchImpl));
+    const offres = await enFront(postes, (poste) => avecLieu(poste, morceaux, fetchImpl, echecs));
     out.push(...offres.filter(Boolean));
     if (postes.length < PAGE) break;
   }
+  echecs.trancher();
   return out;
 }
 
@@ -288,10 +333,19 @@ async function parDetail(morceaux, fetchImpl) {
     if (postes.length < PAGE) break;
   }
 
-  const offres = await enFront(candidats.filter(estPresentable), async (poste) => {
+  const presentables = candidats.filter(estPresentable);
+  const echecs = compteur(() => presentables.length);
+
+  const offres = await enFront(presentables, async (poste) => {
     // Une offre retirée entre la liste et le détail rend 404 : elle n'est pas
     // française pour autant, on la passe sans invalider le board.
-    const info = await detail(morceaux, poste.externalPath, fetchImpl);
+    let info;
+    try {
+      info = await detail(morceaux, poste.externalPath, fetchImpl);
+    } catch {
+      echecs.noter();
+      return null;
+    }
     if (info?.country?.id !== FRANCE_WID) return null;
 
     // Le détail est déjà ouvert : nommer la ville d'une offre au lieu masqué ou
@@ -300,6 +354,7 @@ async function parDetail(morceaux, fetchImpl) {
     const lieu = lieuIncomplet(brut) ? lieuDuDetail(info) : brut;
     return lieu ? normaliser(poste, morceaux, lieu) : null;
   });
+  echecs.trancher();
   return offres.filter(Boolean);
 }
 

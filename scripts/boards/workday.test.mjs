@@ -312,6 +312,52 @@ test("un détail en erreur reste indéterminé malgré la parallélisation", asy
   assert.equal(await listerWorkdayFR("x.wd1/Y", f), null);
 });
 
+test("sur un gros board, un incident isolé ne coûte plus les centaines d'autres offres", async () => {
+  // ⚠️ Mesuré le 06/08/2026 : Mango ouvre 299 requêtes pour 283 offres. Sans
+  // tolérance, une seule qui trébuche faisait perdre les 283 — c'est ce qui a
+  // laissé Michelin, Renault, la RATP et Sanofi absents de l'index. Ici 200
+  // offres, 3 détails en échec (1,5 %) : le board tient, les 3 sortent.
+  const f = async (url, init) => {
+    if (init?.method === "POST") {
+      const { offset } = JSON.parse(init.body);
+      return new Response(JSON.stringify({
+        facets: [],
+        jobPostings: offset >= 200
+          ? []
+          : Array.from({ length: 20 }, (_, i) => poste(`P${offset + i}`, "Paris", `/job/Paris/P${offset + i}`)),
+      }), { status: 200 });
+    }
+    if (/\/P(7|42|155)$/.test(String(url))) return new Response("", { status: 500 });
+    return new Response(JSON.stringify({
+      jobPostingInfo: { country: { descriptor: "France", id: FRANCE_WID } },
+    }), { status: 200 });
+  };
+  const r = await listerWorkdayFR("x.wd1/Y", f);
+  assert.notEqual(r, null, "le board ne doit pas être invalidé pour 1,5 % d'incidents");
+  assert.equal(r.length, 197, "les 3 offres en échec sortent, les 197 autres restent");
+});
+
+test("au-delà de la tolérance, le board redevient indéterminé", async () => {
+  // 200 offres, 11 échecs (5,5 %) : au-dessus des 5 %, plus rien n'est rendu.
+  const f = async (url, init) => {
+    if (init?.method === "POST") {
+      const { offset } = JSON.parse(init.body);
+      return new Response(JSON.stringify({
+        facets: [],
+        jobPostings: offset >= 200
+          ? []
+          : Array.from({ length: 20 }, (_, i) => poste(`P${offset + i}`, "Paris", `/job/Paris/P${offset + i}`)),
+      }), { status: 200 });
+    }
+    const n = Number(/\/P(\d+)$/.exec(String(url))?.[1] ?? -1);
+    if (n >= 0 && n < 11) return new Response("", { status: 500 });
+    return new Response(JSON.stringify({
+      jobPostingInfo: { country: { descriptor: "France", id: FRANCE_WID } },
+    }), { status: 200 });
+  };
+  assert.equal(await listerWorkdayFR("x.wd1/Y", f), null);
+});
+
 test("404 sur la liste : le site n'existe pas, c'est un fait — pas un inconnu", async () => {
   const r = await listerWorkdayFR("airliquidehr.wd3/AirLiquide", async () => new Response("", { status: 404 }));
   assert.deepEqual(r, []);
