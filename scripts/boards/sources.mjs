@@ -8,10 +8,14 @@
 // B — les entreprises françaises de la base SIRENE. Seule voie vers
 //     SmartRecruiters, qui n'a ni liste publique ni API d'énumération.
 //
-// ⚠️ Licence des listes de la source A : CC BY-NC 4.0, usage non commercial.
-// Le jour d'une exploitation commerciale, cette source devra être remplacée par
-// une régénération maison depuis Common Crawl. Tout est isolé dans
-// `slugsDesListes` pour que ce remplacement ne touche rien d'autre.
+// ⚠️ Licence des listes de la source A : le CODE du dépôt amont est MIT, mais
+// son répertoire `data/` — celui qu'on lit ici — est sous CC BY-NC 4.0 :
+// attribution obligatoire ET usage non commercial. L'attribution vit dans le
+// fichier NOTICE à la racine ; ne pas l'y retirer sans retirer cette source.
+// Le jour d'une exploitation commerciale, elle devra être remplacée par une
+// régénération maison depuis Common Crawl, comme c'est déjà le cas pour Workday
+// (`crawl.mjs`). Tout est isolé dans `slugsDesListes` pour que ce remplacement
+// ne touche rien d'autre.
 
 const BASE_LISTES = "https://raw.githubusercontent.com/Feashliaa/job-board-aggregator/main/data";
 

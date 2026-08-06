@@ -125,14 +125,33 @@ une annonce de trois mois. Contourné pour le filtre d'ancienneté (on retient l
 plus ancienne de `publieLe` et `decouverteLe`), **mais l'âge affiché sur la
 carte reste celui annoncé par l'ATS**. Concerne 1 578 offres de l'index.
 
-### 2.6 Licence des listes publiques — bloquant pour une exploitation commerciale
+### 2.6 Licence des listes publiques — l'attribution était due dès la publication
 
-Les listes de slugs de la source A (`scripts/boards/sources.mjs`) sont sous
-**CC BY-NC 4.0 : usage non commercial**. Elles fournissent 399 des 503 boards
-de l'index. **Le jour où CVMatchr devient payant, cette source doit être
-remplacée** par une régénération maison depuis Common Crawl. Tout est isolé
-dans `slugsDesListes` pour que le remplacement ne touche rien d'autre, mais le
-travail reste à faire.
+Les listes de slugs de la source A (`scripts/boards/sources.mjs`) viennent de
+`Feashliaa/job-board-aggregator`. Son **code** est MIT, mais son répertoire
+`data/` — celui que nous lisons — est sous **CC BY-NC 4.0 : attribution
+obligatoire, usage non commercial** (vérifié dans son README le 06/08/2026).
+Portée mesurée le même jour : **399 des 864 boards** de l'index, soit **3 895
+des 19 555 offres**.
+
+⚠️ Cette page a longtemps dit que le problème arriverait « le jour où CVMatchr
+devient payant ». **C'était faux sur deux points**, relevés le 06/08/2026 :
+
+- le « BY » exige une attribution, qui n'existait nulle part ;
+- le dépôt est **public et sous MIT** (vérifié : `github.com/hariss24/cvmatchr`,
+  `"visibility": "public"`). Publier un dérivé sous MIT accorde à quiconque
+  l'usage commercial et la sous-licence — exactement ce que le « NC » refuse.
+  Le déclencheur n'était donc pas la monétisation, mais la publication, déjà
+  faite.
+
+Corrigé le 06/08/2026 : le fichier `NOTICE` porte l'attribution et exclut les
+données du périmètre MIT, et `LICENSE` y renvoie.
+
+**Reste à faire** : régénérer ces slugs depuis Common Crawl, comme c'est déjà
+le cas pour Workday (`scripts/boards/crawl.mjs`). Tout est isolé dans
+`slugsDesListes` pour que le remplacement ne touche rien d'autre. Tant que ce
+n'est pas fait, la part dérivée de ces listes ne peut pas être exploitée
+commercialement sans accord de l'auteur, qui invite à le contacter.
 
 ### 2.7 Google for Jobs n'est pas un avantage caché
 

@@ -1,0 +1,80 @@
+CVMatchr — attributions des données tierces
+===========================================
+
+Le code de ce dépôt est distribué sous licence MIT (voir LICENSE).
+Certaines DONNÉES qu'il contient ne le sont pas. Cette page dit lesquelles,
+d'où elles viennent et sous quelles conditions.
+
+
+1. Listes de slugs de boards ATS (Greenhouse, Lever, Ashby)
+-----------------------------------------------------------
+
+Source   : https://github.com/Feashliaa/job-board-aggregator, répertoire `data/`
+Auteur   : Riley Dorrington
+Licence  : CC BY-NC 4.0 — https://creativecommons.org/licenses/by-nc/4.0/
+           (le CODE de ce dépôt est MIT ; seuls les jeux de données `data/`
+           sont sous CC BY-NC, comme l'indique son README)
+
+Utilisation ici : `scripts/boards/sources.mjs` lit ces listes pour découvrir
+des boards, ne garde que ceux qui publient des offres en France, et écrit le
+résultat dans `web/src/lib/jobs/data/boards-fr.json`. Ce fichier est donc une
+œuvre DÉRIVÉE de ces listes.
+
+Portée mesurée le 06/08/2026 : 399 des 864 boards de l'index en proviennent,
+soit 3 895 des 19 555 offres.
+
+Conditions qui s'appliquent :
+
+  - BY — attribution obligatoire. C'est l'objet de cette page.
+  - NC — usage non commercial. La part dérivée de ces listes ne peut pas être
+    exploitée commercialement sans accord de l'auteur, qui invite à le
+    contacter via les issues de son dépôt.
+
+En conséquence, `web/src/lib/jobs/data/boards-fr.json` et la part de
+`web/src/lib/jobs/data/boards-offres.json` qui en découle ne sont PAS couverts
+par la licence MIT de ce dépôt : ils restent sous CC BY-NC 4.0.
+
+Levée prévue : régénérer ces slugs depuis Common Crawl, comme c'est déjà fait
+pour Workday (`scripts/boards/crawl.mjs`). Tout est isolé dans `slugsDesListes`
+pour que le remplacement ne touche rien d'autre.
+
+
+2. Base SIRENE des entreprises françaises
+------------------------------------------
+
+Source  : recherche-entreprises.api.gouv.fr
+Licence : Licence Ouverte / Open Licence (données ouvertes)
+
+Aucune restriction d'usage commercial. Attribution recommandée, faite ici.
+
+
+3. Index Common Crawl
+----------------------
+
+Source  : https://data.commoncrawl.org
+Licence : Common Crawl Terms of Use — https://commoncrawl.org/terms-of-use
+
+Utilisé par `scripts/boards/crawl.mjs` pour découvrir les adresses des
+locataires Workday, qui ne sont pas devinables autrement.
+
+⚠️ Le fichier https://data.commoncrawl.org/robots.txt porte « Disallow: / »
+(vérifié le 06/08/2026), alors que les conditions d'utilisation autorisent
+l'exploitation des données. Cette contradiction n'est pas tranchée ; elle est
+documentée dans LIMITES.md.
+
+
+4. API publiques des ATS
+-------------------------
+
+Les offres elles-mêmes viennent des API publiques des employeurs. Elles ne sont
+pas redistribuées : l'index ne stocke que le titre, le lieu et l'URL, et le
+texte de l'annonce est lu en direct puis jamais conservé.
+
+État des robots.txt, vérifié le 06/08/2026 :
+
+  Greenhouse       autorisé (seul /embed/ est interdit)
+  Ashby            aucun fichier servi (HTTP 401) — autorisé par défaut
+  Lever            autorisé, avec « Crawl-delay: 1 »
+  Workday          aucune règle ne vise /wday/cxs/ chez les locataires sondés
+  SmartRecruiters  ⚠️ « User-agent: * / Disallow: / » — seul LinkedInBot est
+                   autorisé. Voir LIMITES.md.
