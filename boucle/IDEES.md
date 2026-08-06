@@ -450,6 +450,61 @@ Constat détaillé : `boucle/constats/2026-08-04-briques-externes.md` §1.
 | Cohérence | 2 | Lien indirect avec le seuil « coût des appels externes » de `MISSION.md` (Jina AI Reader fonctionne sur le même principe de quota gratuit dépassable) sans le violer au sens strict — le constat précise que Jina n'est pas dans la liste des services facturés nommés. Reste un raffinement de fiabilité du scraper d'offres, pas un parcours central. |
 | **Total** | **7** | Dernière du classement : profil proche de l'idée n°25 (Apport modeste, Écart quasi nul faute de comparaison possible avec la concurrence) mais avec un Apport non chiffré en plus d'une Facilité non chiffrée — les deux à mesurer avant de trancher, comme le dit le constat lui-même. Signalée sensible : décision d'ajouter `jsdom` en production à faire trancher par le propriétaire, pas seulement une question de code. |
 
+## À noter (Éclaireur, non notées)
+
+*Ajouté le 06/08/2026 par l'Éclaireur. Constat détaillé :
+`boucle/constats/2026-08-06-parcours-nouvel-arrivant.md`. Non notées : c'est l'Arbitre
+qui note et classe au réveil suivant.*
+
+### Distinguer les données d'exemple des données réelles, et avertir avant d'exporter un CV encore factice
+
+À l'arrivée sur `/`, sans aucun brouillon existant, le formulaire est déjà rempli du
+CV fictif complet de `DEFAULT_RESUME` (`lib/resume/defaults.ts`) : « Prénom Nom »,
+« Titre du poste », deux expériences et une formation d'exemple, etc. — 36 champs.
+Rien ne distingue visuellement cette donnée d'exemple d'une saisie réelle : mesuré par
+`getComputedStyle` sur le champ « Nom complet » non modifié, couleur de texte
+`rgb(31, 27, 22)`, qui recoupe exactement `--text: #1F1B16` (`globals.css:13`) — la
+couleur de texte normale de l'app, pas une teinte atténuée façon `--faint`. Le bouton
+« Télécharger » (`onConvert`, `TopBar.tsx:59-116`) ne contient aucune validation :
+mesuré en direct sur un contexte neuf, zéro champ modifié, clic sur « Télécharger » →
+téléchargement d'un `CV.pdf` contenant les données factices en **766 ms**. Un candidat
+pressé peut donc, sans le vouloir, télécharger ou transmettre un CV rempli de
+placeholders en croyant avoir terminé. Ampleur estimée petite à moyenne : une règle de
+style pour les valeurs non modifiées, et une comparaison du JSON exporté à
+`DEFAULT_RESUME`/`DEFAULT_LETTER` avant l'export. Aucun des trois concurrents
+vérifiés (Rezi, Kickresume, Teal — constat § « Ce que fait la concurrence ») ne laisse
+un premier export partir avec des données factices non signalées comme telles.
+
+### Sortir « Importer un texte » de « Mode Expert »
+
+Le bouton « Importer un texte » (coller un CV en texte brut) n'apparaît qu'après deux
+clics — sur l'onglet « Mode Expert » (dont le libellé ne mentionne ni import, ni
+texte, et qui ouvre aussi l'éditeur JSON brut Monaco), puis sur son sous-onglet
+« Importer » — mesuré en cherchant le bouton dans le DOM à chaque étape (absent avant,
+absent après le premier clic, présent seulement après le second). Rien ne signale à
+l'arrivée qu'une option d'import texte existe. À l'inverse, « Importer un PDF » est
+déjà visible sans défilement sur l'onglet Formulaire par défaut
+(`FormEditor.tsx:143-150`) — bon point, à ne pas dégrader. La FAQ elle-même
+(`app/help/page.tsx`, accordéon « Comment démarrer rapidement en 4 étapes ») recommande
+l'import PDF/texte comme première étape, mais seulement pour qui a déjà ouvert l'aide.
+Ampleur estimée petite : déplacer un bouton déjà existant, aucune nouvelle logique.
+
+### Poser un choix explicite à l'arrivée sur un document neuf
+
+Aucun écran ne demande jamais au candidat ce qu'il veut faire : ni bannière de
+bienvenue, ni choix « Importer / Partir d'un exemple / Partir de zéro », confirmé par
+lecture de `app/page.tsx` et recherche exhaustive dans `src/` (aucune occurrence
+d'onboarding hors deux faux positifs sans rapport). Les trois concurrents vérifiés
+posent tous un choix explicite avant de remplir un éditeur : Rezi (import / LinkedIn /
+scratch avec questionnaire rôle-expérience, « there's no blank page moment » —
+[Enhancv, Rezi Review](https://enhancv.com/blog/rezi-review/), consulté le 06/08/2026),
+Kickresume (cinq options nommées dont « Use Example » — [Enhancv, Kickresume
+Review](https://enhancv.com/blog/kickresume-review/), consulté le 06/08/2026) et Teal
+(tableau de bord puis builder guidé). CVMatchr reste seul des quatre à n'exiger aucun
+compte, un avantage réel à préserver dans toute proposition. Ampleur estimée moyenne :
+suppose une décision produit sur la forme de l'écran (modale, bandeau, ou état vide
+du formulaire), pas seulement du code.
+
 ## Écartées
 
 - **Préparation d'entretien par IA (mock interview)** — écartée le 02/08/2026. Présente
