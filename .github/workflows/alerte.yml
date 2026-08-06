@@ -1,0 +1,76 @@
+name: Alerte échec de workflow
+
+# Un rendez-vous automatique qui échoue en silence ne se voit pas : le scan
+# quotidien peut ne plus rien rapporter pendant des semaines sans que rien ne le
+# signale (dette relevée dans LIMITES.md § 8). Ce workflow ouvre une issue dès
+# qu'un des rendez-vous échoue.
+#
+# `workflow_run` se déclenche APRÈS la fin d'un autre workflow, quel que soit son
+# résultat ; le job ne fait quelque chose que si ce résultat est un échec.
+#
+# ⚠️ Un workflow `workflow_run` n'est déclenché que par la version présente sur
+# la branche par défaut. Tant que ce fichier n'est pas sur `main`, rien ne se
+# passe — même si les workflows surveillés, eux, tournent.
+
+on:
+  workflow_run:
+    workflows:
+      - "Index des boards français"
+      - "Scan quotidien des offres"
+      - "Boucle autonome"
+      - "Web Next.js CI"
+    types: [completed]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  alerter:
+    # `failure` couvre l'échec réel ; `timed_out` et `cancelled` comptent aussi —
+    # un scan coupé au bout de 150 minutes n'a rien produit non plus.
+    if: >
+      github.event.workflow_run.conclusion == 'failure' ||
+      github.event.workflow_run.conclusion == 'timed_out' ||
+      github.event.workflow_run.conclusion == 'cancelled'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ouvrir ou compléter l'issue d'alerte
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPOT: ${{ github.repository }}
+          NOM: ${{ github.event.workflow_run.name }}
+          ETAT: ${{ github.event.workflow_run.conclusion }}
+          LIEN: ${{ github.event.workflow_run.html_url }}
+          QUAND: ${{ github.event.workflow_run.updated_at }}
+        run: |
+          set -euo pipefail
+          TITRE="Échec automatique : $NOM"
+
+          # Une seule issue ouverte par workflow : un scan qui échoue tous les
+          # matins ne doit pas produire une issue par jour. Les récidives
+          # s'ajoutent en commentaire, ce qui garde l'historique au même endroit.
+          NUM=$(gh issue list --repo "$DEPOT" --state open --label alerte-workflow \
+                  --search "$TITRE in:title" --json number,title \
+                  --jq "map(select(.title == \"$TITRE\")) | .[0].number // empty")
+
+          cat > corps.md <<CORPS
+          **$NOM** s'est terminé en \`$ETAT\` le $QUAND.
+
+          Journal complet : $LIEN
+
+          Cette issue reste ouverte tant que le problème n'est pas réglé ; les
+          récidives s'ajoutent en commentaire plutôt qu'en nouvelle issue.
+          CORPS
+          sed -i 's/^          //' corps.md
+
+          if [ -n "$NUM" ]; then
+            gh issue comment "$NUM" --repo "$DEPOT" --body-file corps.md
+            echo "Récidive ajoutée à l'issue #$NUM."
+          else
+            # Le label peut ne pas exister au tout premier échec.
+            gh label create alerte-workflow --repo "$DEPOT" \
+              --color B60205 --description "Un rendez-vous automatique a échoué" 2>/dev/null || true
+            gh issue create --repo "$DEPOT" --title "$TITRE" \
+              --label alerte-workflow --body-file corps.md
+          fi
