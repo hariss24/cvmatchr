@@ -17,7 +17,19 @@ import { fileURLToPath } from "node:url";
 import { listerOffresFR } from "./boards/offres.mjs";
 import { enLot } from "./boards/lot.mjs";
 import { cle } from "./boards/memo.mjs";
-import { dater, jour, reprendreIndetermines } from "./boards/nouveaute.mjs";
+import { dater, jour, reprendreIndetermines, sansPerimees, PEREMPTION_JOURS } from "./boards/nouveaute.mjs";
+
+/**
+ * Au-delà de cette part de boards injoignables, la moisson est déclarée en
+ * échec : le fichier est écrit et commité, mais le workflow devient rouge et
+ * `alerte.yml` ouvre une issue.
+ *
+ * ⚠️ Sans ce seuil, une panne totale des cinq API est indiscernable d'une
+ * journée sans changement — simulé le 06/08/2026, le fichier produit était
+ * identique à l'octet, `git diff` ne voyait rien et le job restait vert.
+ * Référence mesurée le même jour : 22 boards indéterminés sur 864, soit 2,5 %.
+ */
+const SEUIL_ALERTE = 0.1;
 
 const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "web", "src", "lib", "jobs", "data");
 const F_INDEX = join(DATA_DIR, "boards-fr.json");
@@ -73,6 +85,10 @@ for (const [lot, plafond] of [[autres, PLAFOND], [wd, PLAFOND_WD]]) {
 
 const precedentes = existsSync(F_OFFRES) ? JSON.parse(readFileSync(F_OFFRES, "utf8")) : [];
 
+// ⚠️ Calculé ici, avant toute utilisation. Une date obtenue trop tard dans le
+// fichier a déjà coûté une moisson entière le 06/08/2026.
+const aujourdhui = jour(new Date());
+
 const index = [];
 const indetermines = new Set();
 boards.forEach((board, i) => {
@@ -84,17 +100,23 @@ boards.forEach((board, i) => {
   for (const o of offres) {
     // `pays` est interne au harvest (estFrancais) : pas dans OffreLegere (spec §2).
     const { pays, ...legere } = o;
-    index.push({ ats: board.ats, slug: board.slug, entreprise: board.nom, ...legere });
+    // `vuLe` n'est posé QUE sur les offres réellement moissonnées aujourd'hui :
+    // c'est ce qui permet à `sansPerimees` de distinguer une offre revue d'une
+    // offre simplement recopiée du passage précédent.
+    index.push({ ats: board.ats, slug: board.slug, entreprise: board.nom, ...legere, vuLe: aujourdhui });
   }
 });
 
-// Un board injoignable n'est pas un board vide : on garde ce qu'on savait de lui.
-const repris = reprendreIndetermines(precedentes, indetermines);
+// Un board injoignable n'est pas un board vide : on garde ce qu'on savait de
+// lui — mais pas indéfiniment (voir `sansPerimees`).
+const reprisBruts = reprendreIndetermines(precedentes, indetermines);
+const repris = sansPerimees(reprisBruts, aujourdhui);
 index.push(...repris);
 
 console.log(
   `${boards.length - indetermines.size} boards exploitables, ${indetermines.size} indéterminés `
-  + `(${repris.length} offres reprises du passage précédent).`,
+  + `(${repris.length} offres reprises du passage précédent`
+  + `${reprisBruts.length > repris.length ? `, ${reprisBruts.length - repris.length} périmées depuis plus de ${PEREMPTION_JOURS} jours` : ""}).`,
 );
 
 /**
@@ -120,7 +142,6 @@ index.sort(
 
 // Tri AVANT datation : l'ordre du fichier reste celui de l'index, pas celui de
 // la nouveauté. Un diff quotidien ne doit montrer que ce qui a réellement bougé.
-const aujourdhui = jour(new Date());
 const datees = dater(precedentes, index, aujourdhui);
 const nouvelles = datees.filter((o) => o.decouverteLe === aujourdhui).length;
 
@@ -128,3 +149,19 @@ mkdirSync(DATA_DIR, { recursive: true });
 writeFileSync(F_OFFRES, `${JSON.stringify(datees, null, 2)}\n`, "utf8");
 
 console.log(`OK — ${datees.length} offres légères écrites dans ${F_OFFRES}, dont ${nouvelles} nouvelles.`);
+
+/**
+ * ⚠️ L'échec est déclaré APRÈS l'écriture, jamais avant : ce que la moisson a
+ * réussi à ramener est conservé et commité (l'étape de commit du workflow tourne
+ * en `if: always()`). Seule la couleur du job change — et c'est elle qui
+ * déclenche `alerte.yml`.
+ */
+const partIndeterminee = boards.length === 0 ? 1 : indetermines.size / boards.length;
+if (partIndeterminee > SEUIL_ALERTE) {
+  console.error(
+    `ÉCHEC — ${indetermines.size} boards injoignables sur ${boards.length} `
+    + `(${(partIndeterminee * 100).toFixed(1)} %, seuil ${SEUIL_ALERTE * 100} %). `
+    + `L'index a été écrit avec ce qui a pu être moissonné, mais ce passage n'est pas fiable.`,
+  );
+  process.exitCode = 1;
+}

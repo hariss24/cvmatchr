@@ -27,6 +27,13 @@ export interface OffreLegere {
   publieLe: string;
   /** Jour où le scan quotidien a vu cette offre pour la première fois (`YYYY-MM-DD`). */
   decouverteLe: string;
+  /**
+   * Jour du dernier passage où le board a réellement répondu (`YYYY-MM-DD`).
+   * Absent des fichiers antérieurs au 06/08/2026. Sert à écarter les offres
+   * qu'un board définitivement mort republierait sinon indéfiniment — voir
+   * `sansPerimees` dans `scripts/boards/nouveaute.mjs`.
+   */
+  vuLe?: string;
   lat?: number;
   lng?: number;
 }

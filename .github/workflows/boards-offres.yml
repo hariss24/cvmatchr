@@ -42,7 +42,13 @@ jobs:
       - name: Moissonner les offres légères
         run: node scripts/build-boards-offres.mjs
 
+      # ⚠️ `always()` : quand la moisson déclare l'échec (trop de boards
+      # injoignables), elle a QUAND MÊME écrit ce qu'elle a pu ramener. On
+      # commite ce résultat partiel, puis le job reste rouge et `alerte.yml`
+      # ouvre l'issue. Sans cela, un incident ferait perdre la moisson du jour
+      # en plus de la signaler.
       - name: Commiter si les offres ont changé
+        if: always()
         run: |
           if git diff --quiet -- web/src/lib/jobs/data/boards-offres.json; then
             echo "Aucun changement."

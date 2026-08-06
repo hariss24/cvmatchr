@@ -45,3 +45,29 @@ export function dater(precedentes, courantes, jourCourant) {
 export function reprendreIndetermines(precedentes, clesIndeterminees) {
   return precedentes.filter((o) => clesIndeterminees.has(`${o.ats}:${o.slug}`));
 }
+
+/** Au-delà, une offre reprise d'un board injoignable n'est plus republiée. */
+export const PEREMPTION_JOURS = 14;
+
+/**
+ * Écarte les offres qu'aucun passage n'a revues depuis trop longtemps.
+ *
+ * ⚠️ Contrepartie indispensable de `reprendreIndetermines`. Sans elle, un board
+ * définitivement fermé garde ses offres à VIE : chaque passage le trouve
+ * injoignable, donc reprend ses offres, donc les republie à l'identique.
+ * Simulé le 06/08/2026 — les cinq API tombant le même matin, le fichier produit
+ * était identique à l'octet au précédent, le script sortait en 0 et le workflow
+ * restait vert. Le candidat aurait postulé indéfiniment à des offres pourvues.
+ *
+ * `vuLe` absent veut dire « on ne sait pas » et non « jamais vue » : l'offre est
+ * gardée, comme partout ailleurs dans cette chaîne. Les fichiers antérieurs à ce
+ * champ se résorbent d'eux-mêmes au premier passage réussi.
+ */
+export function sansPerimees(offres, jourCourant, jours = PEREMPTION_JOURS) {
+  const limite = new Date(`${jourCourant}T00:00:00.000Z`).getTime() - jours * 86_400_000;
+  return offres.filter((o) => {
+    if (!o.vuLe) return true;
+    const vue = new Date(`${o.vuLe}T00:00:00.000Z`).getTime();
+    return Number.isNaN(vue) || vue >= limite;
+  });
+}
