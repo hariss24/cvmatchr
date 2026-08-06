@@ -15,6 +15,7 @@ import { hostnameOf } from "./board";
 import { dansLeSecteur, villeDuLibelle } from "./boardsLieu";
 import { geocodeHome } from "./homeCoords";
 import { normKey } from "@/lib/applications/normKey";
+import { elargirMotsCles } from "./synonymes";
 import boardsOffresData from "./data/boards-offres.json";
 
 export interface OffreLegere {
@@ -195,8 +196,14 @@ export async function searchBoards(
       ? await geocodeHome(villeDuLibelle(profile.location.label))
       : null;
 
+  // ⚠️ Élargissement aux intitulés équivalents AVANT tout filtre. Ces boards
+  // sont ceux de grands groupes, qui publient en anglais pour des postes en
+  // France : « développeur » laissait 434 offres invisibles, « responsable RH »
+  // 147 — mesuré le 06/08/2026. Voir `synonymes.ts`.
+  const motsCles = elargirMotsCles(profile.keywords);
+
   const triees = boardsOffres
-    .filter((o) => matchTitre(o.titre, profile.keywords))
+    .filter((o) => matchTitre(o.titre, motsCles))
     .filter((o) => !isExcludedText(o.titre, profile.excludedWords))
     .filter((o) => dansLage(o, profile.maxAgeDays))
     .filter((o) => dansLeSecteur(o, profile.location, cible))

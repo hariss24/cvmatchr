@@ -43,13 +43,25 @@ describe("searchBoards", () => {
     expect(r).toEqual({ offers: [], calls: 0 });
   });
 
-  it("ne garde que les titres qui matchent un mot-clé du profil", async () => {
+  it("ne garde que les titres qui matchent un mot-clé du profil, synonymes compris", async () => {
+    // ⚠️ Ce test attendait une seule offre avant le 06/08/2026. « Data
+    // Engineer » en fait désormais partie, et c'est le but : ces boards sont
+    // ceux de grands groupes qui publient en anglais pour des postes en France,
+    // et « ingénieur » laissait 1 261 offres invisibles. Voir `synonymes.ts`.
     const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["ingénieur"], excludedWords: [] });
-    expect(r.offers).toHaveLength(1);
-    expect(r.offers[0].title).toBe("Ingénieur Logiciel Backend");
-    expect(r.offers[0].company).toBe("On Running");
-    expect(r.offers[0].source).toBe("boards");
-    expect(r.offers[0].jobText).toContain("Node.js");
+    expect(r.offers.map((o) => o.title).sort()).toEqual(["Data Engineer", "Ingénieur Logiciel Backend"]);
+
+    const ingenieur = r.offers.find((o) => o.title === "Ingénieur Logiciel Backend");
+    expect(ingenieur?.company).toBe("On Running");
+    expect(ingenieur?.source).toBe("boards");
+    expect(ingenieur?.jobText).toContain("Node.js");
+  });
+
+  it("un intitulé sans équivalent connu ne ramène que lui-même", async () => {
+    // « logiciel » ne figure dans aucune famille de synonymes : l'élargissement
+    // ne doit alors rien ajouter du tout.
+    const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["logiciel"], excludedWords: [] });
+    expect(r.offers.map((o) => o.title)).toEqual(["Ingénieur Logiciel Backend"]);
   });
 
   it("exclut un titre qui contient un mot interdit avant même le fetch", async () => {
@@ -71,9 +83,12 @@ describe("searchBoards", () => {
   });
 
   it("id préfixé par la source, url et entreprise repris tels quels", async () => {
+    // On cible l'offre par son titre : l'ordre entre deux offres publiées à la
+    // même seconde n'est pas ce que ce test vérifie.
     const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["ingénieur"], excludedWords: [] });
-    expect(r.offers[0].id).toBe("boards-greenhouse-onrunning-1");
-    expect(r.offers[0].url).toBe("https://boards.greenhouse.io/onrunning/jobs/1");
+    const o = r.offers.find((x) => x.title === "Ingénieur Logiciel Backend");
+    expect(o?.id).toBe("boards-greenhouse-onrunning-1");
+    expect(o?.url).toBe("https://boards.greenhouse.io/onrunning/jobs/1");
   });
 
   it("classe les candidates de la plus récente à la plus ancienne", async () => {
@@ -90,13 +105,15 @@ describe("searchBoards", () => {
   });
 
   it("garde les offres du lieu demandé", async () => {
+    // Deux offres : « Ingénieur Logiciel Backend » et « Data Engineer », que
+    // l'élargissement aux intitulés anglais fait remonter depuis le 06/08/2026.
     const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["ingénieur"], excludedWords: [], location: PARIS });
-    expect(r.offers).toHaveLength(1);
+    expect(r.offers).toHaveLength(2);
   });
 
   it("une recherche sans lieu reste nationale", async () => {
     const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["ingénieur"], excludedWords: [] });
-    expect(r.offers).toHaveLength(1);
+    expect(r.offers).toHaveLength(2);
   });
 
   it("une retouche chez Greenhouse ne rajeunit pas une offre ancienne", async () => {
@@ -108,8 +125,7 @@ describe("searchBoards", () => {
 
   it("un mot-clé accentué matche un titre sans accent, et l'inverse", async () => {
     const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["ingenieur"], excludedWords: [] });
-    expect(r.offers).toHaveLength(1);
-    expect(r.offers[0].title).toBe("Ingénieur Logiciel Backend");
+    expect(r.offers.map((o) => o.title)).toContain("Ingénieur Logiciel Backend");
   });
 });
 
