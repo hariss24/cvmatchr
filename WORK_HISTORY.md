@@ -41,6 +41,66 @@
 
 ## Journal
 
+### 2026-08-06 : Marché caché — audit complet, puis six corrections mesurées
+
+**Pourquoi.** Trois erreurs en vingt-quatre heures, toutes du même genre : une
+étape vérifiée juste après l'avoir écrite, un défaut qui vivait une étape plus
+loin, et c'est l'utilisateur ou une mesure faite après coup qui le trouvait. Les
+tests passaient à chaque fois — ils testaient ce qui venait d'être construit,
+pas ce que la chaîne produit bout à bout. D'où un audit qui part de l'écran du
+candidat et remonte, plutôt que du code.
+
+**L'audit.** Treize dimensions (extraction, exactitude Workday, cycle de vie,
+doublons, filtre pays, correspondance des titres, plafond, filtre géographique,
+texte en direct, coût, CI, conformité, tests). Une seule a pu être menée par
+agents avant que la limite de dépense mensuelle ne coupe le reste ; les douze
+autres ont été refaites à la main.
+
+Deux constats ont été rapportés puis **retirés après contre-vérification** : « 25 %
+de liens morts » (le détecteur lisait un texte de gabarit — les offres étaient
+`active: true`, le taux réel est de 2 %) et « les doublons polluent l'affichage »
+(ils sont regroupés en aval ; le vrai coût était ailleurs, dans le quota).
+
+**Ce qui a été mesuré et corrigé, par ordre de coût pour le candidat :**
+
+1. **La moitié du catalogue était invisible.** Ces boards sont ceux de grands
+   groupes, qui publient en anglais pour des postes en France : « responsable
+   RH » trouvait 30 offres et en laissait 147 ; « développeur » 293 contre 434.
+   → `synonymes.ts`, 43 familles d'intitulés bâties sur les titres réels.
+2. **Le rayon ne marchait pas pour 69 % des offres.** Une recherche lyonnaise ne
+   voyait pas les 82 offres de Villeurbanne ; 884 offres de banlieue manquaient
+   sur cinq agglomérations. → `geo.mjs` géocode les libellés à la construction :
+   31 % → **92 %** d'offres situées.
+3. **Une panne totale produisait un workflow vert.** Simulé : les cinq API
+   tombant le même matin, le fichier produit était identique à l'octet, le script
+   sortait en 0, `git diff` ne voyait rien. L'index serait resté gelé
+   indéfiniment. → seuil de 10 % de boards injoignables, plus une péremption de
+   14 jours sur les offres reprises d'un board mort.
+4. **1 270 offres manquaient à l'appel** — Mango, Michelin, Renault, PwC, la
+   RATP, Sanofi, absents alors qu'ils répondent tous correctement. Un gros board
+   ouvre une requête par offre (Mango : 299 pour 283) et la moindre qui trébuchait
+   faisait perdre le tout. → tolérance de 5 % d'échecs de détail, et attente
+   entre réessais portée à 3 s puis 12 s.
+5. **Quelques employeurs monopolisaient les résultats** : 34 offres Air Liquide
+   sur 60 pour « infirmier ». → dédoublonnage **avant** le plafond et
+   distribution par tours entre employeurs.
+6. **Le dépôt est public sous MIT** et redistribuait des listes CC BY-NC sans
+   attribution. `LIMITES.md` datait le problème au « jour où l'app devient
+   payante » : faux, il existait dès la publication. → fichier `NOTICE`.
+
+**Effet combiné, recherche à 30 km, offres affichées :** ressources humaines à
+Paris 4 → 49 (4 → 39 employeurs), commercial à Lyon 22 → 58, ingénieur à
+Toulouse 5 → 23 employeurs, développeur à Toulouse 8 → 18.
+
+**Ce qui reste ouvert.** SmartRecruiters interdit explicitement l'accès
+automatisé dans son `robots.txt` (36 % de l'index) : ce n'est pas un défaut à
+coder, c'est une décision à prendre le jour où l'app aura des utilisateurs.
+Aucun test ne touche le réseau réel, donc un changement d'API resterait invisible
+de la CI. Détail dans `LIMITES.md` § 8.1 bis et § 8.2.
+
+**Commits** : `85822a6`, `f39d57e`, `eb24bc4`, `168ca51`, `43fd841`, `a0f5689`.
+139 tests node, 677 Vitest, tsc, lint et build passent. Rien n'est poussé.
+
 ### 2026-08-06 : Marché caché — Brique 3, Workday entre par la lecture
 
 **Le verrou.** Les quatre ATS de la brique 1 se découvrent en devinant un slug

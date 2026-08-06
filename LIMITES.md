@@ -99,9 +99,25 @@ faudrait une correspondance nom → domaine → slug, qui n'existe pas.
 Pour les offres du marché caché (`boardsFr.ts`) :
 
 - **Type de contrat et salaire toujours vides.** Aucun des cinq ATS n'expose de distinction CDI/CDD fiable. Conséquence directe : les filtres **« Contrat », « Qualification » et « Temps de travail » ne s'appliquent pas** à cette source. Une offre du marché caché remonte quel que soit le réglage de ces pastilles.
-- **Le rayon géographique n'est vrai que pour une partie des offres** — SmartRecruiters est le seul ATS à fournir des coordonnées (53 % de l'index avant Workday, 36 % après). Pour les autres, c'est une correspondance de ville stricte : une offre à Boulogne sort d'une recherche « Paris ».
+- ~~**Le rayon géographique n'est vrai que pour une partie des offres**~~ — **levé le 06/08/2026.** SmartRecruiters restait le seul ATS à fournir des coordonnées, soit 31 % de l'index ; pour les 69 % autres, « à 30 km de Lyon » se réduisait à « le libellé contient le mot Lyon », et Villeurbanne n'en fait pas partie. Coût mesuré avant correction : **884 offres de banlieue invisibles** sur cinq agglomérations, dont 580 en Île-de-France et 82 à Villeurbanne. `scripts/boards/geo.mjs` géocode désormais les libellés à la construction de l'index (Base Adresse Nationale) : **92 % des offres sont situées**, et une recherche à 30 km gagne 2 357 offres à Paris, 462 à Lyon, 168 à Lille. Ce qui reste : les 8 % non situés (« France » seul, « Remote », lieux-dits comme Sophia Antipolis) retombent sur la comparaison de libellés, et **une offre sur 19 555 reste mal placée** (« Saint Paul, Saint Pault Lès Durance », libellé fautif sans région).
 - **Une offre sans lieu exploitable n'entre pas dans l'index** (`build-boards-offres.mjs`, décision du 06/08/2026). Sans ville, elle serait absente des recherches par rayon tout en s'affichant ailleurs — incohérence invisible pour le candidat. Le filtre vit à l'écriture du fichier et pas seulement chez chaque ATS, parce que les offres reprises d'un board injoignable viennent du fichier précédent, donc d'un code plus ancien. 56 offres écartées au dernier passage, toutes de `lever:ippon`.
-- **Plafond de 60 offres par recherche** dont on récupère le texte complet. Nombre choisi, jamais mesuré sur un usage réel.
+- **Plafond de 60 offres par recherche** dont on récupère le texte complet. Nombre choisi, jamais mesuré sur un usage réel. Depuis le 06/08/2026, ces 60 places sont mieux dépensées : les annonces que le dédoublonnage fusionnera de toute façon sont écartées **avant** le plafond (Colisée publiait quinze fois le même poste, qui prenaient quinze places pour une seule ligne affichée), et la sélection sert la meilleure offre de chaque employeur avant la deuxième de quiconque. « infirmier » rendait 34 offres Air Liquide sur 60 et 45 lignes affichées ; il en rend 60, chez 13 employeurs.
+
+### 2.4 ter La correspondance des intitulés reste littérale
+
+`matchTitre` cherche le mot du candidat dans le titre, lettre à lettre. Depuis le
+06/08/2026, `synonymes.ts` élargit d'abord la recherche à 43 familles
+d'intitulés équivalents — sans quoi « développeur » ne trouvait pas « Software
+Engineer », et ces boards de grands groupes publient massivement en anglais pour
+des postes en France (mesuré : « responsable RH » laissait 147 offres
+invisibles sur 177, « ingénieur » 1 261).
+
+**Ce que ça ne fait toujours pas** : la table est écrite à la main et ne couvre
+que les métiers les plus fréquents de l'index. Un métier absent de la table
+n'est trouvé que par son intitulé exact. Il n'y a ni analyse morphologique
+(« ingénieure » au féminin, pluriels irréguliers), ni recherche dans le texte de
+l'annonce — un poste intitulé « Consultant » qui décrit exactement le métier du
+candidat reste invisible.
 
 ### 2.4 bis 92 % des offres Workday n'ont pas de date de publication
 
@@ -165,18 +181,27 @@ l'invisibilité. À ne pas se raconter autrement.
 
 ## 3. Poids des données dans le dépôt
 
-Trois fichiers de données sont commités et régénérés automatiquement :
+Quatre fichiers de données sont commités et régénérés automatiquement
+(tailles relevées le 06/08/2026) :
 
 | Fichier | Taille | Rythme de réécriture |
 |---|---|---|
 | `boards-fr-testes.json` | **20,6 Mo** | hebdomadaire |
-| `boards-offres.json` | **7,9 Mo** | **quotidien** |
-| `boards-fr.json` | 105 Ko | hebdomadaire |
+| `boards-offres.json` | **8,4 Mo** | **quotidien** |
+| `boards-geo.json` | 355 Ko | quotidien, mais quasi figé |
+| `boards-fr.json` | 126 Ko | hebdomadaire |
 
 Git compresse bien des fichiers presque identiques, mais la trajectoire est à
 surveiller : le mémo a doublé en ouvrant l'index aux PME, et l'index d'offres a
-presque doublé avec Workday (4,2 → 7,9 Mo), **réécrit chaque jour**. Descendre
+presque doublé avec Workday (4,2 → 8,4 Mo), **réécrit chaque jour**. Descendre
 encore le seuil SIRENE, ou ajouter SuccessFactors, aggraverait les deux.
+
+Deux mesures rassurantes du 06/08/2026, à ne pas confondre avec la trajectoire
+ci-dessus : le dépôt entier pèse **4,2 Mo** compressés (`git count-objects -vH`),
+et les 8,4 Mo d'offres **ne partent jamais dans le navigateur** — la recherche
+s'exécute sur le serveur (`export const runtime = "nodejs"`), aucun fichier
+client ne contient l'index. Côté serveur, le charger coûte 20 ms et 30 Mo de
+mémoire : rien d'alarmant avant plusieurs centaines de milliers d'offres.
 **Si l'historique gonfle trop, la bonne réponse est de sortir ces fichiers du
 dépôt** (artefact de build ou stockage externe), pas d'espacer les scans — qui
 sont justement toute la valeur.
@@ -245,4 +270,50 @@ d'erreur résiduel est structurel.
 
 - **Le push est manuel.** Aucun agent ne pousse sur `main` — un push déploie la production Vercel. Volontaire, mais cela veut dire que rien n'est en ligne tant qu'un humain n'a pas poussé.
 - **Trois sections SIRENE (22/C, 22/G, 22/H) ont été interrompues** au dernier passage, soit ~860 PME non énumérées. Elles rentreront au passage suivant — mais rien ne surveille ce genre d'incident : il n'est visible que dans les journaux du workflow.
-- ~~**Aucune alerte en cas d'échec des workflows.**~~ **Levé le 06/08/2026** : `.github/workflows/alerte.yml` ouvre une issue étiquetée `alerte-workflow` dès qu'un des quatre rendez-vous se termine en échec, en dépassement de temps ou annulé. Une seule issue par workflow, les récidives en commentaire. **Deux angles morts restent** : un workflow qui réussit *en produisant un mauvais résultat* n'alerte pas (c'est ce qui est arrivé avec les 84 % d'indéterminées de SmartRecruiters, puis les 0/1 458 de Workday — dans les deux cas le script se terminait normalement), et un cron qui ne se déclenche pas du tout ne produit aucun événement, donc aucune alerte.
+- ~~**Aucune alerte en cas d'échec des workflows.**~~ **Levé le 06/08/2026** : `.github/workflows/alerte.yml` ouvre une issue étiquetée `alerte-workflow` dès qu'un des quatre rendez-vous se termine en échec, en dépassement de temps ou annulé. Une seule issue par workflow, les récidives en commentaire. Le premier angle mort — *un workflow qui réussit en produisant un mauvais résultat* — a été refermé le même jour : au-delà de **10 % de boards injoignables**, `build-boards-offres.mjs` sort en code 1 après avoir écrit ce qu'il a pu ramener (l'étape de commit passe en `if: always()`), le job devient rouge et l'alerte part. Vérifié dans les deux sens : 4 boards injoignables sur 4 rendent 1, un sur douze rend 0.
+
+⚠️ Ce garde-fou n'est pas cosmétique. Simulé le 06/08/2026 : les cinq API tombant le même matin, `reprendreIndetermines` republiait les 19 555 offres du dernier passage réussi, le fichier produit était **identique à l'octet**, `git diff` ne voyait rien et le job restait vert. L'index serait resté gelé indéfiniment sans que personne le sache. Contrepartie ajoutée : une offre qu'aucun passage n'a revue depuis **14 jours** sort de l'index au lieu d'être republiée à vie (`sansPerimees`, champ `vuLe`).
+
+**Un angle mort demeure** : un cron qui ne se déclenche pas du tout ne produit aucun événement, donc aucune alerte.
+
+### 8.1 bis Ce que les tests ne verrouillent pas
+
+Les 139 tests de `scripts/` injectent tous un `fetch` factice — aucun ne touche
+le réseau réel. Si Workday renomme un champ, si la Base Adresse Nationale change
+de format ou si Common Crawl modifie la structure de `cluster.idx`, **la CI reste
+verte** ; la moisson rend « indéterminé » partout, et c'est le seuil des 10 %
+ci-dessus qui prévient, pas les tests. Un test de bout en bout quotidien — un
+board par ATS doit rendre au moins une offre avec titre, URL et lieu — reste à
+écrire.
+
+### 8.2 SmartRecruiters interdit explicitement l'accès automatisé
+
+Vérifié le 06/08/2026 :
+
+```
+User-agent: LinkedInBot
+Allow: /v1/companies/
+User-agent: *
+Disallow: /
+```
+
+Tout robot autre que celui de LinkedIn est interdit sur `api.smartrecruiters.com`.
+C'est **36 % de l'index** (7 044 offres) et jusqu'à 34 requêtes à chaque recherche
+d'un candidat, depuis une IP unique et sans cache. Ni le code ni la moisson ne
+lisent ce fichier.
+
+Ce n'est pas un défaut à corriger en codant : c'est une décision à prendre —
+demander un accès partenaire (l'API existe et s'authentifie), basculer sur un
+hôte qui l'autorise, ou retirer la source. Elle se posera le jour où l'app aura
+des utilisateurs.
+
+`data.commoncrawl.org` porte lui aussi « Disallow: / » alors que ses conditions
+d'utilisation autorisent l'exploitation des données — contradiction non tranchée,
+et c'est la seule source d'adresses des 361 boards Workday (44 % des offres).
+Greenhouse et Ashby sont conformes ; Lever autorise explicitement mais demande
+une seconde entre deux requêtes, que la moisson ne respecte pas encore
+(80 boards, 12 de front).
+
+À côté de ça, deux points sains vérifiés le même jour : les scripts ne se font
+**pas** passer pour un navigateur (l'en-tête émis est le `user-agent: node` par
+défaut), et l'index committé ne contient **aucune donnée personnelle**.
