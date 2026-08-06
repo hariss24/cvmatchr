@@ -103,6 +103,21 @@ Pour les offres du marché caché (`boardsFr.ts`) :
 - **Une offre sans lieu exploitable n'entre pas dans l'index** (`build-boards-offres.mjs`, décision du 06/08/2026). Sans ville, elle serait absente des recherches par rayon tout en s'affichant ailleurs — incohérence invisible pour le candidat. Le filtre vit à l'écriture du fichier et pas seulement chez chaque ATS, parce que les offres reprises d'un board injoignable viennent du fichier précédent, donc d'un code plus ancien. 56 offres écartées au dernier passage, toutes de `lever:ippon`.
 - **Plafond de 60 offres par recherche** dont on récupère le texte complet. Nombre choisi, jamais mesuré sur un usage réel.
 
+### 2.4 bis 92 % des offres Workday n'ont pas de date de publication
+
+7 871 des 8 538. Le champ `startDate` n'est renseigné que par une minorité de
+boards. Conséquences : **l'âge affiché sur la carte est vide** pour ces offres,
+et le classement retombe sur `decouverteLe` — la date du premier scan qui les a
+vues, donc au mieux la date d'entrée dans l'index, jamais la vraie parution.
+Une offre publiée il y a six mois mais découverte hier passe pour récente.
+
+⚠️ Ce trou a failli coûter cher : trier sur `publieLe` seul renvoyait ces
+7 871 offres après le plafond de 60 candidates. Mesuré le 06/08/2026,
+« ingénieur » retenait **0 offre Workday sur 1 770 candidates** — Thales, Airbus
+et Safran invisibles. Corrigé par `dateEffective` (`boardsFr.ts`), verrouillé par
+test. C'est la deuxième fois qu'une clé de tri manquante élimine silencieusement
+une source entière, après le tri alphabétique du 04/08.
+
 ### 2.5 La date de publication n'est pas fiable chez Greenhouse
 
 Le champ exposé est `updated_at` : une correction de faute de frappe rajeunit

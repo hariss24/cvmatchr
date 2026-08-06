@@ -79,6 +79,15 @@ function dansLage(o: OffreLegere, maxAgeDays: number): boolean {
   return (Date.now() - Math.min(...dates)) / 86_400_000 <= maxAgeDays;
 }
 
+/**
+ * Date utilisée pour classer une offre : sa parution si l'ATS la donne, sinon
+ * le jour où le scan l'a vue pour la première fois. Une offre sans date ne doit
+ * pas être traitée comme la plus vieille de toutes.
+ */
+export function dateEffective(o: Pick<OffreLegere, "publieLe" | "decouverteLe">): string {
+  return o.publieLe || o.decouverteLe || "";
+}
+
 function cleOffre(o: Pick<OffreLegere, "ats" | "slug" | "id">): string {
   return `${o.ats}:${o.slug}:${o.id}`;
 }
@@ -106,7 +115,14 @@ export async function searchBoards(
     // mesuré le 04/08/2026, « développeur » ne remontait aucune offre
     // SmartRecruiters, tout l'alphabet s'arrêtant avant. Le plus récent d'abord
     // sert aussi le but du dispositif : une offre du jour a moins de candidats.
-    .sort((a, b) => (b.publieLe || "").localeCompare(a.publieLe || ""))
+    //
+    // ⚠️ Le repli sur `decouverteLe` n'est pas cosmétique : 7 871 des 8 538
+    // offres Workday n'ont pas de date de publication. Trier sur `publieLe`
+    // seul les renvoyait toutes en fin de liste, donc hors du plafond — mesuré
+    // le 06/08/2026, « ingénieur » retenait 0 offre Workday sur 1 770
+    // candidates, et Thales, Airbus et Safran étaient invisibles. Même piège
+    // que le tri alphabétique, sous une autre forme.
+    .sort((a, b) => dateEffective(b).localeCompare(dateEffective(a)))
     .slice(0, PLAFOND_CANDIDATES);
 
   if (candidates.length === 0) return { offers: [], calls: 0 };

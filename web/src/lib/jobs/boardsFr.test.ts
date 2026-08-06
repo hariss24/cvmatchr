@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { searchBoards } from "./boardsFr";
+import { searchBoards, dateEffective } from "./boardsFr";
 import { EMPTY_PROFILE } from "./profile";
 
 vi.mock("./data/boards-offres.json", () => ({
@@ -110,5 +110,25 @@ describe("searchBoards", () => {
     const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["ingenieur"], excludedWords: [] });
     expect(r.offers).toHaveLength(1);
     expect(r.offers[0].title).toBe("Ingénieur Logiciel Backend");
+  });
+});
+
+describe("dateEffective", () => {
+  it("retombe sur la découverte quand l'ATS ne date pas l'offre", () => {
+    expect(dateEffective({ publieLe: "2026-08-01T00:00:00.000Z", decouverteLe: "2026-08-06" }))
+      .toBe("2026-08-01T00:00:00.000Z");
+    expect(dateEffective({ publieLe: "", decouverteLe: "2026-08-06" })).toBe("2026-08-06");
+    expect(dateEffective({ publieLe: "", decouverteLe: "" })).toBe("");
+  });
+
+  it("une offre non datée n'est pas classée comme la plus vieille de toutes", () => {
+    // ⚠️ Cas réel : 7 871 des 8 538 offres Workday n'ont pas de date de
+    // publication. Trier sur `publieLe` seul les renvoyait toutes après le
+    // plafond de 60 — « ingénieur » retenait 0 offre Workday sur 1 770.
+    const vieille = { publieLe: "2020-01-01T00:00:00.000Z", decouverteLe: "2020-01-01" };
+    const recenteSansDate = { publieLe: "", decouverteLe: "2026-08-06" };
+    const classees = [vieille, recenteSansDate]
+      .sort((a, b) => dateEffective(b).localeCompare(dateEffective(a)));
+    expect(classees[0]).toBe(recenteSansDate);
   });
 });
