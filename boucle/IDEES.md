@@ -531,6 +531,36 @@ Constat détaillé : `boucle/constats/2026-08-04-briques-externes.md` §1.
 | Cohérence | 2 | Lien indirect avec le seuil « coût des appels externes » de `MISSION.md` (Jina AI Reader fonctionne sur le même principe de quota gratuit dépassable) sans le violer au sens strict — le constat précise que Jina n'est pas dans la liste des services facturés nommés. Reste un raffinement de fiabilité du scraper d'offres, pas un parcours central. |
 | **Total** | **7** | Dernière du classement : profil proche de l'idée n°30 (Apport modeste, Écart quasi nul faute de comparaison possible avec la concurrence) mais avec un Apport non chiffré en plus d'une Facilité non chiffrée — les deux à mesurer avant de trancher, comme le dit le constat lui-même. Signalée sensible : décision d'ajouter `jsdom` en production à faire trancher par le propriétaire, pas seulement une question de code. |
 
+## À noter
+
+*Ajouté le 07/08/2026 par l'Éclaireur (domaine : cohérence visuelle). Non noté,
+à intégrer au classement par l'Arbitre au prochain réveil. Constat détaillé :
+`boucle/constats/2026-08-07-coherence-visuelle.md`.*
+
+- Introduire des variables `--radius-sm/md/lg/pill` et remplacer les 19
+  valeurs de `border-radius` actuellement en dur dans `globals.css` (dont deux
+  valeurs différentes, 999px et 9999px, pour le même « entièrement arrondi »)
+  — aucun token de rayon n'existe aujourd'hui, contrairement aux ~35 variables
+  de couleur déjà tokenisées. Constat §1.
+- Introduire une échelle `--font-size-*` et remplacer les 20 valeurs de
+  `font-size` en dur, dont six au demi-pixel (9.5/10.5/11.5/12.5/13.5/14.5px)
+  qui ne peuvent provenir que d'un ajustement au pixel près plutôt que d'une
+  échelle voulue. Constat §2.
+- Sortir `.ats-mid` (couleur `#f5a623` du panneau ATS, score 45-69/100) du
+  figement hors thème : ses deux voisines `.ats-ok`/`.ats-low` utilisent
+  `--success`/`--error`, qui s'éclaircissent tous deux en thème sombre,
+  pendant qu'elle reste identique au pixel près — contraste vs fond mesuré à
+  1,94:1 en thème clair contre 7,79:1 en thème sombre (×4), un écart que
+  personne n'a choisi. Constat §3.
+- Extraire une classe unique (`.btn-primary`, ou généraliser `.btn-orange`)
+  pour le bouton d'action orange (`var(--cta-grad)`), aujourd'hui redéfini
+  indépendamment dans au moins 10 sélecteurs CSS séparés en plus de
+  `.btn-orange` — explique pourquoi le jeton `--on-orange` (idée n°6 déjà
+  classée, sur le contraste du texte de ce bouton) n'a été repris que dans 1
+  de ces ~13 blocs : sans classe unique, un correctif fait à un endroit ne se
+  propage nulle part ailleurs. Ne redouble pas l'idée n°6, l'explique et la
+  complète — l'Arbitre jugera s'il l'y rattache ou la note à part. Constat §4.
+
 ## Écartées
 
 - **Préparation d'entretien par IA (mock interview)** — écartée le 02/08/2026. Présente
