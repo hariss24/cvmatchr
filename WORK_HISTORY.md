@@ -41,6 +41,21 @@
 
 ## Journal
 
+### 2026-08-07 : Pertinence et géolocalisation de la source « Marché caché »
+
+**Pourquoi.** Une recherche sur la source « Marché caché » rendait des offres hors-sujet et en filtrait à tort d'autres. Quatre causes identifiées et corrigées.
+
+**Ce qui a été corrigé :**
+
+1. **Filtre région/département par département réel (`dept`)** (commit `34225da`) : Le filtre textuel `normalize(lieu).includes(region)` écartait 91 offres franciliennes dont le libellé était "Paris" sans mention "Île-de-France". Désormais, le géocodage BAN extrait le code département (`dept`), rattaché aux régions via les codes INSEE (`departements.ts`).
+2. **Tri à deux niveaux (pertinence puis date)** (commit `a4f3547`) : Le plafond de 60 se remplissait par date seule. Les offres correspondant au mot-clé réellement saisi par le candidat ont désormais la priorité (pertinence 2) sur celles issues de synonymes (pertinence 1).
+3. **Persistance conditionnelle & Purge Dexie** (commit `2cdf33e`) : `shouldPersist` refuse les offres avec un score sous le seuil (lettre D). Ajout d'un bouton « Purger les offres hors-sujet » dans l'UI avec confirmation `uiConfirm`.
+4. **Resserrement des synonymes HSE et données** (commit `c141226`) : Remplacement des termes isolés "securite" et "data" par des expressions précises.
+   - `sécurité informatique` : 382 → 36 offres atteintes (-90,5 %)
+   - `données` : 864 → 324 offres atteintes (-62,5 %)
+
+**Vérification :** 692 tests Vitest verts, `npm run build` et `npm run lint` sans erreur (0 erreur, 3 warnings).
+
 ### 2026-08-06 : Marché caché — audit complet, puis six corrections mesurées
 
 **Pourquoi.** Trois erreurs en vingt-quatre heures, toutes du même genre : une
