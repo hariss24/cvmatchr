@@ -474,6 +474,30 @@ export async function listJobsByGrade(min: Grade): Promise<JobEntry[]> {
   return all.filter((j) => GRADE_ORDER.indexOf(j.grade ?? "D") <= plafond);
 }
 
+/**
+ * Supprime les offres déjà en base dont le score est sous le seuil.
+ *
+ * ⚠️ Nécessaire parce que la base est CUMULATIVE : une recherche y ajoute des
+ * offres, n'en retire jamais. Les offres hors-sujet enregistrées avant que
+ * `shouldPersist` ne devienne effectif resteraient affichées indéfiniment, ce
+ * qui donne l'impression que les corrections en amont ne servent à rien.
+ *
+ * Rend le nombre d'offres supprimées.
+ */
+export async function supprimerJobsSousLeSeuil(seuil: number): Promise<number> {
+  try {
+    const horsSujet = await db.jobs.filter((j) => (j.score ?? 0) < seuil).toArray();
+    const ids = horsSujet.map((j) => j.id);
+    if (ids.length > 0) {
+      await db.jobs.bulkDelete(ids);
+    }
+    return ids.length;
+  } catch (e) {
+    console.warn("supprimerJobsSousLeSeuil error:", e);
+    return 0;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // TEMPLATES API (modèles lettre/email)
 // ---------------------------------------------------------------------------

@@ -113,16 +113,18 @@ export function rankOffer(
 }
 
 /**
- * Point de passage unique de la décision « on enregistre ou pas ».
+ * L'offre mérite-t-elle d'entrer dans la base locale ?
  *
- * Aujourd'hui : on garde TOUT. Le classement étant gratuit, plus rien ne
- * justifie de jeter une offre — c'est ce qui privait l'utilisateur de la
- * visibilité sur le volume réel de ses sources.
+ * ⚠️ Cette fonction rendait `true` sans condition, ce qui rendait la notation
+ * décorative. Mesuré le 07/08/2026 dans la base d'un utilisateur : 44 offres
+ * stockées, dont « Head of HRBP » et « Senior Site Contracts Manager » notées
+ * 18/100 lettre D sur une recherche marketing. Le classement les avait
+ * correctement identifiées comme hors-sujet ; rien n'en tenait compte.
  *
- * Cette fonction existe pour qu'un futur seuil de rejet réglable s'y branche
- * sans réécriture (spec §3.5). Ne PAS y ajouter de logique tant que ce seuil
- * n'est pas demandé.
+ * Le seuil est celui que l'utilisateur règle déjà pour la lettre C : une offre
+ * en D est, par définition de ses propres réglages, hors-sujet.
  */
-export function shouldPersist(_result: RankResult, _profile: JobSearchProfile): boolean {
-  return true;
+export function shouldPersist(result: RankResult, profile: JobSearchProfile): boolean {
+  const seuil = profile.gradeThresholds?.C ?? DEFAULT_THRESHOLDS.C;
+  return result.score >= seuil;
 }

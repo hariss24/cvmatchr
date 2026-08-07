@@ -32,6 +32,7 @@ export function FilterBar({
   canScan,
   scanning,
   onScan,
+  onPurge,
 }: {
   profile: JobSearchProfile;
   onChange: (profile: JobSearchProfile) => void;
@@ -40,6 +41,7 @@ export function FilterBar({
   canScan: boolean;
   scanning: boolean;
   onScan: () => void;
+  onPurge?: () => void;
 }) {
   const [showMore, setShowMore] = useState(false);
 
@@ -225,6 +227,15 @@ export function FilterBar({
             onClick={() => onChange(resetFilters(profile))}
           >
             Réinitialiser
+          </button>
+        )}
+        {onPurge && (
+          <button
+            type="button"
+            className="flt-reset"
+            onClick={onPurge}
+          >
+            Purger les offres hors-sujet
           </button>
         )}
       </div>

@@ -38,10 +38,13 @@ describe("logique de scan", () => {
     offre({ id: "hors", title: "Comptable", jobText: "Bilans.", romeCode: "M1203" }),
   ];
 
-  it("classe toutes les offres sans en écarter aucune", () => {
+  it("n'enregistre que les offres au niveau du seuil (écarte le hors-sujet)", () => {
+    // ⚠️ Mis à jour le 07/08/2026 : shouldPersist filtre désormais les offres hors-sujet (lettre D).
+    // « bon » (notée B) et « bruit » (notée C) sont conservées, « hors » (notée D) est écartée.
     const notees = lot.map((o) => ({ o, r: rankOffer(o, profil, ctx, T0) }));
     expect(notees).toHaveLength(3);
-    expect(notees.every(({ r }) => shouldPersist(r, profil))).toBe(true);
+    expect(shouldPersist(notees[0].r, profil)).toBe(true);
+    expect(shouldPersist(notees[2].r, profil)).toBe(false);
   });
 
   it("place l'offre pertinente devant le bruit et le hors-sujet", () => {

@@ -154,11 +154,24 @@ describe("rankOffer", () => {
 });
 
 describe("shouldPersist", () => {
-  // Couture prévue pour un futur seuil de rejet réglable (spec §3.5).
-  // Aujourd'hui : on garde tout.
-  it("conserve toutes les offres, y compris les plus mauvaises", () => {
-    const r = { score: 0, grade: "D" as const, breakdown: [] };
-    expect(shouldPersist(r, EMPTY_PROFILE)).toBe(true);
+  it("n'enregistre pas une offre sous le seuil de la lettre C", () => {
+    // ⚠️ Cas réel du 07/08/2026 : « Head of HRBP » notée 18/100 sur une recherche
+    // marketing, enregistrée quand même.
+    const rank = { score: 18, grade: "D" as const, breakdown: [] };
+    expect(shouldPersist(rank, profilWeb)).toBe(false);
+  });
+
+  it("enregistre une offre au seuil exact", () => {
+    // Le seuil est inclusif : score === seuil doit passer.
+    const rank = { score: DEFAULT_THRESHOLDS.C, grade: "C" as const, breakdown: [] };
+    expect(shouldPersist(rank, profilWeb)).toBe(true);
+  });
+
+  it("respecte un seuil personnalisé du profil", () => {
+    // gradeThresholds.C réglé à 60 : une offre à 55 ne passe plus.
+    const customProfile = { ...profilWeb, gradeThresholds: { S: 85, A: 70, B: 65, C: 60 } };
+    const rank = { score: 55, grade: "C" as const, breakdown: [] };
+    expect(shouldPersist(rank, customProfile)).toBe(false);
   });
 });
 

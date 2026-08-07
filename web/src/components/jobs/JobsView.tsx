@@ -2,14 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { listJobs, saveJob, markJobSeen, jobExists, jobKeys, setJobStatus, type JobEntry } from "@/lib/storage/db";
+import { listJobs, saveJob, markJobSeen, jobExists, jobKeys, setJobStatus, supprimerJobsSousLeSeuil, type JobEntry } from "@/lib/storage/db";
 import { normKey } from "@/lib/applications/normKey";
 import { useDocStore } from "@/state/docStore";
-import { toast } from "@/state/uiStore";
+import { toast, uiConfirm } from "@/state/uiStore";
 import type { JobOffer } from "@/lib/jobs/francetravail";
 import { EMPTY_PROFILE, type JobSearchProfile } from "@/lib/jobs/profile";
 import { getJobProfile, saveJobProfile, getCachedCommute, setCachedCommute, atsKey, getAtsEntry, saveAtsEntry } from "@/lib/storage/db";
-import { rankOffer, buildRankContext, shouldPersist } from "@/lib/jobs/rank";
+import { rankOffer, buildRankContext, shouldPersist, DEFAULT_THRESHOLDS } from "@/lib/jobs/rank";
 import type { AtsProvider } from "@/lib/jobs/ats";
 import { geocodeHome, commuteCacheKey } from "@/lib/jobs/homeCoords";
 import { upsertApplicationForDocument } from "@/lib/applications/store";
@@ -396,6 +396,27 @@ export default function JobsView() {
     setJobs((prev) => prev.map((j) => (j.id === job.id ? { ...j, seen: true } : j)));
   }
 
+  async function handlePurge() {
+    const seuil = profile.gradeThresholds?.C ?? DEFAULT_THRESHOLDS.C;
+    const allJobs = await listJobs("new");
+    const horsSujetCount = allJobs.filter((j) => (j.score ?? 0) < seuil).length;
+
+    if (horsSujetCount === 0) {
+      toast("Aucune offre hors-sujet à purger.", "info");
+      return;
+    }
+
+    const ok = await uiConfirm(
+      `Voulez-vous supprimer les ${horsSujetCount} offre${horsSujetCount > 1 ? "s" : ""} hors-sujet sous le seuil (${seuil}/100) ?`,
+      "Purger les offres hors-sujet",
+    );
+    if (!ok) return;
+
+    const n = await supprimerJobsSousLeSeuil(seuil);
+    toast(`${n} offre${n > 1 ? "s" : ""} hors-sujet supprimée${n > 1 ? "s" : ""}.`, "success");
+    await reload();
+  }
+
   if (configMsg) {
     return (
       <div className="jobs-config" data-testid="jobs-config">
@@ -434,6 +455,7 @@ export default function JobsView() {
           canScan={canScan}
           scanning={scanning}
           onScan={() => scan()}
+          onPurge={handlePurge}
         />
       )}
 
