@@ -18,8 +18,7 @@ export default function PreviewPane() {
   const json = useDocStore((s) => s.json);
   const docType = useDocStore((s) => s.docType);
   const templateId = useDocStore((s) => s.templateId);
-  const previewOverride = useDocStore((s) => s.previewOverride);
-
+  const setPreviewOverride = useDocStore((s) => s.setPreviewOverride);
 
   const [pages, setPages] = useState(1);
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
@@ -70,7 +69,17 @@ export default function PreviewPane() {
       <div className="pane-title">
         <span>Aperçu</span>
         {isPreview ? (
-          <span className="preview-override-badge">Proposition IA — non appliquée</span>
+          <div className="preview-override-badge">
+            <span>Proposition IA</span>
+            <button
+              type="button"
+              className="preview-override-badge__btn"
+              onClick={() => setPreviewOverride(null)}
+              title="Réafficher le document original"
+            >
+              Voir l&apos;original ✕
+            </button>
+          </div>
         ) : null}
         <span className="zoom-control">
           <button
