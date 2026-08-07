@@ -15,6 +15,8 @@ vi.mock("./data/boards-offres.json", () => ({
     { ats: "ashby", slug: "alan", entreprise: "Alan", id: "6", titre: "Data Engineer", lieu: "Paris", url: "https://jobs.ashbyhq.com/alan/6", publieLe: new Date().toISOString(), decouverteLe: "2026-08-04" },
     // Publiée « aujourd'hui » selon l'ATS, connue de nous depuis six mois.
     { ats: "greenhouse", slug: "onrunning", entreprise: "On Running", id: "7", titre: "Chargé de retouche", lieu: "Paris", url: "https://boards.greenhouse.io/onrunning/jobs/7", publieLe: new Date().toISOString(), decouverteLe: "2026-02-01" },
+    { ats: "greenhouse", slug: "onrunning", entreprise: "On Running", id: "8", titre: "Développeur PHP", lieu: "Paris", url: "https://boards.greenhouse.io/onrunning/jobs/8", publieLe: new Date(Date.now() - 20 * 86_400_000).toISOString(), decouverteLe: "2026-07-15" },
+    { ats: "greenhouse", slug: "onrunning", entreprise: "On Running", id: "9", titre: "Software Engineer", lieu: "Paris", url: "https://boards.greenhouse.io/onrunning/jobs/9", publieLe: new Date().toISOString(), decouverteLe: "2026-08-04" },
   ],
 }));
 
@@ -26,6 +28,8 @@ vi.mock("./boardsText", () => ({
     ["greenhouse:onrunning:4", "Une offre de stage de 6 mois, encadrée par un tuteur."],
     ["ashby:alan:5", "Analyse de données produit."],
     ["ashby:alan:6", "Construction de pipelines de données."],
+    ["greenhouse:onrunning:8", "Développement PHP backend."],
+    ["greenhouse:onrunning:9", "Software engineering."],
   ])),
 }));
 
@@ -44,12 +48,9 @@ describe("searchBoards", () => {
   });
 
   it("ne garde que les titres qui matchent un mot-clé du profil, synonymes compris", async () => {
-    // ⚠️ Ce test attendait une seule offre avant le 06/08/2026. « Data
-    // Engineer » en fait désormais partie, et c'est le but : ces boards sont
-    // ceux de grands groupes qui publient en anglais pour des postes en France,
-    // et « ingénieur » laissait 1 261 offres invisibles. Voir `synonymes.ts`.
+    // ⚠️ Mis à jour le 07/08/2026 : « Software Engineer » s'ajoute à « Data Engineer » et « Ingénieur Logiciel Backend ».
     const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["ingénieur"], excludedWords: [] });
-    expect(r.offers.map((o) => o.title).sort()).toEqual(["Data Engineer", "Ingénieur Logiciel Backend"]);
+    expect(r.offers.map((o) => o.title).sort()).toEqual(["Data Engineer", "Ingénieur Logiciel Backend", "Software Engineer"]);
 
     const ingenieur = r.offers.find((o) => o.title === "Ingénieur Logiciel Backend");
     expect(ingenieur?.company).toBe("On Running");
@@ -98,6 +99,16 @@ describe("searchBoards", () => {
     expect(r.offers.map((o) => o.title)).toEqual(["Data Engineer", "Data Analyst"]);
   });
 
+  it("une offre correspondant au mot tapé passe devant une offre plus récente amenée par un synonyme", async () => {
+    // ⚠️ Défaut mesuré le 07/08/2026 : le plafond de 60 se remplissait par date
+    // seule, et les offres correspondant aux intitulés tapés n'entraient jamais.
+    const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["développeur"], excludedWords: [] });
+    const titles = r.offers.map((o) => o.title);
+    expect(titles).toContain("Développeur PHP");
+    expect(titles).toContain("Software Engineer");
+    expect(titles.indexOf("Développeur PHP")).toBeLessThan(titles.indexOf("Software Engineer"));
+  });
+
   it("écarte les offres hors du lieu demandé", async () => {
     // Toutes les offres de l'index de test sont à Paris.
     const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["ingénieur"], excludedWords: [], location: LYON });
@@ -105,15 +116,14 @@ describe("searchBoards", () => {
   });
 
   it("garde les offres du lieu demandé", async () => {
-    // Deux offres : « Ingénieur Logiciel Backend » et « Data Engineer », que
-    // l'élargissement aux intitulés anglais fait remonter depuis le 06/08/2026.
+    // ⚠️ Mis à jour le 07/08/2026 : 3 offres à Paris pour ingénieur.
     const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["ingénieur"], excludedWords: [], location: PARIS });
-    expect(r.offers).toHaveLength(2);
+    expect(r.offers).toHaveLength(3);
   });
 
   it("une recherche sans lieu reste nationale", async () => {
     const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["ingénieur"], excludedWords: [] });
-    expect(r.offers).toHaveLength(2);
+    expect(r.offers).toHaveLength(3);
   });
 
   it("une retouche chez Greenhouse ne rajeunit pas une offre ancienne", async () => {

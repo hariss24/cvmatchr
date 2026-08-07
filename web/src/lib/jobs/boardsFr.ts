@@ -188,6 +188,25 @@ function sansRedites(offres: OffreLegere[]): OffreLegere[] {
   });
 }
 
+/**
+ * Priorité d'une offre dans la sélection : 2 si son titre contient un mot-clé
+ * réellement saisi par le candidat, 1 s'il ne contient qu'un équivalent ajouté
+ * par la table de synonymes, 0 sinon (ne devrait pas arriver, l'offre ayant
+ * déjà passé `matchTitre`).
+ *
+ * ⚠️ Sans ce niveau de tri, le plafond de 60 se remplissait par date seule.
+ * Mesuré le 07/08/2026 sur une recherche marketing : les 60 places partaient à
+ * des offres amenées par un synonyme, et les offres correspondant aux intitulés
+ * réellement tapés n'entraient jamais dans la sélection. La date reste le
+ * second critère : à pertinence égale, une offre du jour a moins de candidats.
+ */
+function pertinence(titre: string, saisis: string[], elargis: string[]): number {
+  const hay = normalize(titre);
+  if (saisis.some((k) => k.trim() !== "" && hay.includes(normalize(k)))) return 2;
+  if (elargis.some((k) => k.trim() !== "" && hay.includes(normalize(k)))) return 1;
+  return 0;
+}
+
 export async function searchBoards(
   profile: JobSearchProfile,
 ): Promise<{ offers: JobOffer[]; calls: number }> {
@@ -226,7 +245,12 @@ export async function searchBoards(
     // le 06/08/2026, « ingénieur » retenait 0 offre Workday sur 1 770
     // candidates, et Thales, Airbus et Safran étaient invisibles. Même piège
     // que le tri alphabétique, sous une autre forme.
-    .sort((a, b) => dateEffective(b).localeCompare(dateEffective(a)));
+    .sort(
+      (a, b) =>
+        pertinence(b.titre, profile.keywords, motsCles) -
+          pertinence(a.titre, profile.keywords, motsCles) ||
+        dateEffective(b).localeCompare(dateEffective(a)),
+    );
 
   const candidates = repartirParEntreprise(sansRedites(triees), PLAFOND_CANDIDATES);
 
