@@ -495,6 +495,53 @@ Constat détaillé : `boucle/constats/2026-08-04-briques-externes.md` §1.
 | Cohérence | 2 | Lien indirect avec le seuil « coût des appels externes » de `MISSION.md` (Jina AI Reader fonctionne sur le même principe de quota gratuit dépassable) sans le violer au sens strict — le constat précise que Jina n'est pas dans la liste des services facturés nommés. Reste un raffinement de fiabilité du scraper d'offres, pas un parcours central. |
 | **Total** | **7** | Dernière du classement : profil proche de l'idée n°28 (Apport modeste, Écart quasi nul faute de comparaison possible avec la concurrence) mais avec un Apport non chiffré en plus d'une Facilité non chiffrée — les deux à mesurer avant de trancher, comme le dit le constat lui-même. Signalée sensible : décision d'ajouter `jsdom` en production à faire trancher par le propriétaire, pas seulement une question de code. |
 
+## À noter (Éclaireur, non notées)
+
+*Ajouté le 07/08/2026 par l'Éclaireur. Constat détaillé :
+`boucle/constats/2026-08-07-manques-fonctionnels-4.md`. Non notées : c'est l'Arbitre
+qui note et classe au réveil suivant.*
+
+### Surligner les mots-clés en contexte, dans l'offre et dans le CV
+
+Le panneau ATS (`AtsPanel.tsx`) n'affiche les exigences couvertes/manquantes que sous
+forme de pastilles isolées (composant `Pills`, lignes 47-58 et 184-192) — grep sur
+« highlight »/« surlign »/« mark » dans `AtsPanel.tsx` (208 lignes) et `engine.ts`
+(418 lignes) : zéro occurrence. Un candidat voit qu'un terme manque, jamais *où* ni
+*comment* les termes présents apparaissent dans le texte réel de l'offre ou de son
+CV. Jobscan (consulté le 07/08/2026, jobscan.co/targeted-resume) : la section
+« Highlighted Skills » permet de choisir un mot-clé et d'en voir chaque occurrence
+surlignée à la fois dans le CV et dans l'offre, en contexte. Teal (consulté le
+07/08/2026, tealhq.com/tool/job-description-keyword-finder) : le « Keyword Finder »
+surligne directement dans le texte de l'offre les compétences et formulations qui
+reviennent le plus. Ampleur asymétrique, à ampleur non chiffrée précisément :
+l'offre est aujourd'hui une simple `<textarea value={jobDesc}>` (`TailorModal.tsx:365`)
+— y ajouter un surlignage suppose de passer par une vue de lecture balisée, chantier
+moyen. Le CV, lui, n'est jamais montré à l'utilisateur comme un texte continu (saisie
+en champs de formulaire structurés, aperçu PDF rendu en `<canvas>` non sélectionnable)
+— un surlignage y demanderait une approche différente (par exemple signaler le champ
+concerné plutôt que surligner du texte), chantier plus incertain.
+
+### Afficher l'ATS détecté de l'entreprise ciblée, avec un conseil de mise en forme adapté
+
+`web/src/lib/jobs/data/boards-fr.json` recense déjà l'ATS (`ashby`, `lever`,
+`smartrecruiters`, `workday`…) de chaque entreprise du « marché caché » — vérifié en
+tête de fichier : `10xteam` → `ashby`, `360learning` → `lever`, `365TALENTS` →
+`smartrecruiters` (14 651 entreprises ≥ 200 salariés + 49 438 PME,
+`PROJECT_INDEX.md` §8), rafraîchi chaque lundi. `grep -rl "boardsFr\|boards-fr.json"
+web/src` (hors tests) ne renvoie que deux fichiers, `app/api/jobs/search/route.ts`
+et `app/api/jobs/ats/route.ts` — tous deux dans le pipeline de recherche d'offres :
+aucun composant du parcours CV/lettre (`AtsPanel.tsx`, `TailorModal.tsx`,
+`FormEditor.tsx`) ne lit cette donnée. Elle existe, câblée jusqu'au bout pour la
+recherche, jamais montrée au candidat quand il prépare sa candidature à cette même
+entreprise. Jobscan (consulté le 07/08/2026, jobscan.co/jobscan-tutorial) : « Jobscan
+AI detects the applicant tracking system on every job posting and tailors
+recommendations to its specific parsing rules and ranking weights ». Confirmé chez ce
+seul produit à ce stade — Teal, Kickresume, Enhancv, Careerflow, Rezi, Huntr, Simplify
+non vérifiés sur ce point précis faute de temps dans ce créneau, à signaler comme tel
+plutôt que d'affirmer une majorité non vérifiée. Ampleur estimée petite si le
+chevauchement se confirme : une recherche par nom d'entreprise dans une donnée déjà
+construite, plus un texte d'aide par ATS — sans toucher au moteur de score.
+
 ## Écartées
 
 - **Préparation d'entretien par IA (mock interview)** — écartée le 02/08/2026. Présente
