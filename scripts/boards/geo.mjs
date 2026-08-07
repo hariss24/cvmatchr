@@ -211,10 +211,30 @@ function departagerParContexte(recevables, libelle) {
   return notes[0].trait;
 }
 
+/**
+ * Code département tel que la Base Adresse Nationale le donne, premier segment
+ * de `context` (« 93, Seine-Saint-Denis, Île-de-France » → « 93 »).
+ *
+ * ⚠️ Ne pas le dériver du code postal : « 20 » n'existe pas (Corse = 2A/2B) et
+ * les DOM tiennent sur trois chiffres. Le premier segment de `context` est le
+ * seul champ qui porte réellement le code département.
+ */
+export function departementDuTrait(trait) {
+  const contexte = trait?.properties?.context ?? "";
+  const premier = contexte.split(",")[0]?.trim() ?? "";
+  return /^(\d{2,3}|2A|2B)$/.test(premier) ? premier : "";
+}
+
 function retenir(trait, via) {
   const [lng, lat] = trait?.geometry?.coordinates ?? [];
   if (typeof lat !== "number" || typeof lng !== "number") return null;
-  return { ville: trait.properties?.city ?? trait.properties?.name ?? "", lat, lng, via };
+  return {
+    ville: trait.properties?.city ?? trait.properties?.name ?? "",
+    lat,
+    lng,
+    via,
+    departement: departementDuTrait(trait),
+  };
 }
 
 /**

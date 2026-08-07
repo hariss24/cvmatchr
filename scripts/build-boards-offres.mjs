@@ -161,7 +161,13 @@ index.push(...situees);
 const cache = existsSync(F_GEO) ? JSON.parse(readFileSync(F_GEO, "utf8")) : {};
 const aSituer = [...new Set(
   index.filter((o) => o.lat === undefined).map((o) => o.lieu),
-)].filter((l) => !(l in cache));
+)].filter((l) => {
+  // ⚠️ Une entrée du cache antérieure au 07/08/2026 n'a pas de département.
+  // La considérer comme absente force son recalcul, une seule fois.
+  const enCache = cache[l];
+  const utilisable = enCache === null || (enCache && typeof enCache.departement === "string");
+  return !utilisable;
+});
 
 if (aSituer.length > 0) {
   console.log(`${aSituer.length} libellés de lieu à situer (${Object.keys(cache).length} déjà en cache).`);
@@ -180,12 +186,16 @@ if (aSituer.length > 0) {
 
 let situeesParGeo = 0;
 for (const o of index) {
-  if (o.lat !== undefined) continue;
   const c = cache[o.lieu];
-  if (!c) continue;
-  o.lat = c.lat;
-  o.lng = c.lng;
-  situeesParGeo += 1;
+  if (o.lat === undefined) {
+    if (!c) continue;
+    o.lat = c.lat;
+    o.lng = c.lng;
+    if (c.departement) o.dept = c.departement;
+    situeesParGeo += 1;
+  } else {
+    if (c?.departement) o.dept = c.departement;
+  }
 }
 const avecCoords = index.filter((o) => o.lat !== undefined).length;
 console.log(

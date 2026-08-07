@@ -1,7 +1,18 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { requetesPour, normaliser, coordonneesDe } from "./geo.mjs";
+import { requetesPour, normaliser, coordonneesDe, departementDuTrait } from "./geo.mjs";
+
+test("le code département est extrait du contexte BAN", () => {
+  assert.equal(departementDuTrait({ properties: { context: "93, Seine-Saint-Denis, Île-de-France" } }), "93");
+  assert.equal(departementDuTrait({ properties: { context: "2A, Corse-du-Sud, Corse" } }), "2A");
+  assert.equal(departementDuTrait({ properties: { context: "974, La Réunion, La Réunion" } }), "974");
+});
+
+test("un contexte absent ou illisible ne fabrique pas de département", () => {
+  assert.equal(departementDuTrait({ properties: {} }), "");
+  assert.equal(departementDuTrait({ properties: { context: "Île-de-France" } }), "");
+});
 
 const qs = (libelle) => requetesPour(libelle).map((r) => r.q);
 

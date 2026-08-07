@@ -38,6 +38,13 @@ export interface OffreLegere {
   vuLe?: string;
   lat?: number;
   lng?: number;
+  /**
+   * Code département de l'offre (« 75 », « 2A », « 974 »), posé à la
+   * construction de l'index à partir du contexte Base Adresse Nationale.
+   * Absent des fichiers antérieurs au 07/08/2026 et des offres dont le libellé
+   * n'est pas géocodable (« Anywhere in France »).
+   */
+  dept?: string;
 }
 
 const boardsOffres = boardsOffresData as OffreLegere[];

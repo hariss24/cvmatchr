@@ -21,6 +21,7 @@
 
 import { haversineKm, type LatLng } from "./geo";
 import type { LocationFilter } from "./profile";
+import { regionDeDepartement } from "./departements";
 
 /** Minuscule sans accent, tirets et espaces unifiés. */
 function normalize(s: string): string {
@@ -47,7 +48,7 @@ export function villeDuLibelle(label: string): string {
 
 /** L'offre est-elle dans le périmètre demandé ? */
 export function dansLeSecteur(
-  offre: { lieu: string; lat?: number; lng?: number },
+  offre: { lieu: string; lat?: number; lng?: number; dept?: string },
   filtre: LocationFilter,
   cible: LatLng | null,
 ): boolean {
@@ -63,6 +64,21 @@ export function dansLeSecteur(
     return haversineKm(cible, { lat: offre.lat as number, lng: offre.lng as number }) <= Math.max(1, filtre.radiusKm);
   }
 
+  // ⚠️ Département et région se tranchent sur le code, pas sur le libellé.
+  // Avant le 07/08/2026 ils tombaient sur `normalize(offre.lieu).includes(nom)` :
+  // il fallait que l'offre écrive « Île-de-France » en toutes lettres. Mesuré ce
+  // jour-là, 273 libellés le faisaient contre 4 124 qui écrivaient « Paris »
+  // seul. Une recherche francilienne écartait 91 offres franciliennes, et en
+  // retenait une basée à Dublin dont le libellé énumérait dix sites.
+  if (filtre.kind === "departement" && offre.dept) {
+    return offre.dept === filtre.code;
+  }
+  if (filtre.kind === "region" && offre.dept) {
+    return regionDeDepartement(offre.dept) === filtre.code;
+  }
+
+  // Repli inchangé : sans département connu, l'absence d'information n'est pas
+  // une preuve d'éloignement (même règle que pour les dates).
   if (!offre.lieu) return true;
   if (!nom) return true;
   return normalize(offre.lieu).includes(nom);
