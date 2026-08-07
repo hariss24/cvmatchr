@@ -7,14 +7,24 @@
  * l'offre, lettre à lettre : « développeur » ne trouvait pas « Software
  * Engineer », et la moitié du catalogue restait invisible.
  *
- * Mesuré le 06/08/2026 sur les 19 555 offres de l'index, offres pertinentes
- * qu'un candidat francophone ne voyait pas :
+ * Mesuré le 07/08/2026 sur les 19 555 offres de l'index — titres atteints par
+ * un mot-clé, sans élargissement puis avec :
  *
- *   responsable RH     30 trouvées, 147 invisibles  (+490 %)
- *   développeur       293 trouvées, 434 invisibles  (+148 %)
- *   commercial        561 trouvées, 553 invisibles  (+99 %)
- *   chef de projet    387 trouvées, 285 invisibles  (+74 %)
- *   ingénieur       1 770 trouvées, 1 261 invisibles (+71 %)
+ *   ingénieur            1 770 → 3 031
+ *   commercial             561 → 1 188
+ *   chef de projet         387 →   534
+ *   développeur            293 →   727
+ *   responsable RH           5 →    90
+ *   sécurité informatique  382 →    36
+ *   données                864 →   324
+ *
+ * ⚠️ Ce tableau en remplace un premier, du 06/08/2026, qui annonçait pour
+ * « responsable RH » un passage de 30 à 177. Le chiffre était faux : la table
+ * contenait alors un groupe `["responsable", "manager", "head of"]`, et ce seul
+ * mot-clé atteignait 2 807 titres, soit 14 % de l'index — Release Manager, Bid
+ * Manager, Responsable RAMS. La correction du 07/08 supprime les groupes de
+ * niveau hiérarchique (voir plus bas) ; les quatre autres métiers sont
+ * inchangés, ce qui délimite exactement ce que ce groupe apportait : du bruit.
  *
  * Les groupes ci-dessous sont bâtis sur les intitulés RÉELS de l'index — les
  * soixante-dix mots les plus fréquents ont été relevés avant d'écrire la table,
@@ -46,18 +56,25 @@ const GROUPES: readonly (readonly string[])[] = [
   ["developpeur", "developer", "software engineer", "fullstack", "full stack", "backend", "frontend"],
   ["architecte", "architect"],
   ["technicien", "technician"],
-  ["analyste", "analyst"],
-  ["donnees", "data"],
+  // ⚠️ « data » seul est un domaine, pas un métier : il remontait Data Analyst,
+  // Data Engineer, Data Scientist et Master Data Specialist indifféremment.
+  ["donnees", "data analyst", "data engineer", "data scientist", "analyste de donnees"],
   ["testeur", "qa engineer", "test engineer"],
   ["administrateur systeme", "system administrator", "sysadmin", "sre"],
   ["securite informatique", "cybersecurity", "security engineer"],
 
   // Encadrement et gestion
+  //
+  // ⚠️ Aucun groupe ne porte un niveau hiérarchique seul. « responsable »,
+  // « manager », « directeur », « head of » ne désignent pas un métier : ils
+  // désignent une position dans un métier quelconque. Ajoutés comme mots-clés
+  // isolés, ils remontaient n'importe quel intitulé les contenant. Mesuré le
+  // 07/08/2026 sur une recherche marketing en Île-de-France : les 49 offres
+  // affichées venaient toutes de mots ajoutés ici, dont 26 du seul « manager »
+  // — Release Manager, Bid Manager, Supply Chain Project Manager, Responsable
+  // RAMS. Le niveau n'apparaît donc qu'attaché à un domaine.
   ["chef de projet", "project manager", "program manager"],
   ["chef de produit", "product manager", "product owner"],
-  ["responsable", "manager", "head of"],
-  ["directeur", "director", "head of"],
-  ["directrice", "director", "head of"],
 
   // Commerce
   ["commercial", "sales", "account executive", "business developer", "business development"],
@@ -65,10 +82,16 @@ const GROUPES: readonly (readonly string[])[] = [
   ["vendeuse", "sales associate", "sales assistant", "retail"],
   ["conseiller clientele", "customer advisor", "customer success", "account manager"],
   ["acheteur", "buyer", "procurement", "purchasing"],
-  ["marketing", "marketing", "growth"],
+  // ⚠️ « growth » ne désigne pas un métier chez ces employeurs : il nomme
+  // l'équipe. Ajouté seul, il remontait « Fullstack Software Engineer - Growth
+  // Product » et « Sales Development Representative, SME & Growth ». Il ne
+  // subsiste que dans l'expression « growth marketing », qui, elle, est un
+  // métier.
+  ["marketing digital", "digital marketing", "growth marketing", "marketing en ligne"],
+  ["responsable marketing", "marketing manager", "head of marketing", "directeur marketing", "marketing director"],
 
   // Fonctions support
-  ["ressources humaines", "human resources", "hr business partner", "people partner", "talent acquisition"],
+  ["ressources humaines", "human resources", "hr business partner", "people partner", "talent acquisition", "responsable rh", "hr manager", "head of people"],
   ["recruteur", "recruiter", "talent acquisition"],
   ["comptable", "accountant", "accounting"],
   ["controleur de gestion", "financial controller", "fp a"],
@@ -84,7 +107,10 @@ const GROUPES: readonly (readonly string[])[] = [
   ["qualite", "quality"],
   ["maintenance", "maintenance"],
   ["production", "production", "manufacturing"],
-  ["securite", "safety", "hse"],
+  // ⚠️ « securite » seul déclenchait ce groupe depuis « sécurité informatique »,
+  // et un candidat en cybersécurité recevait des postes HSE. Le métier HSE se
+  // nomme en expression.
+  ["responsable hse", "hse manager", "health safety environment", "hygiene securite environnement"],
 
   // Santé et service
   ["infirmier", "nurse"],
@@ -103,8 +129,9 @@ const GROUPES: readonly (readonly string[])[] = [
  * Ajoute aux mots-clés du candidat les intitulés équivalents.
  *
  * Un mot-clé déclenche un groupe quand il contient l'un de ses termes
- * (« responsable RH » déclenche « responsable ») ou quand il en est une
- * abréviation reconnaissable (« ingé » ne déclenche rien, « ingenieur » oui).
+ * (« responsable RH digital » déclenche « responsable rh ») ou quand il en est
+ * une abréviation reconnaissable (« ingé » ne déclenche rien, « ingenieur »
+ * oui).
  *
  * Les mots-clés d'origine sont toujours conservés, en tête et sans doublon :
  * un élargissement ne doit jamais faire perdre un résultat que la recherche

@@ -25,9 +25,32 @@ describe("elargirMotsCles", () => {
   });
 
   it("reconnaît le métier à l'intérieur d'un intitulé plus long", () => {
+    // ⚠️ Assertions changées le 07/08/2026. Ce test attendait « manager » et
+    // « head of » nus. C'est précisément ce qui est supprimé : le niveau
+    // hiérarchique seul n'est pas un métier. L'intention du test — reconnaître
+    // le métier dans un intitulé plus long — est conservée, les équivalents
+    // rendus sont maintenant des expressions.
     const r = elargirMotsCles(["responsable marketing"]);
-    expect(r).toContain("manager");
-    expect(r).toContain("head of");
+    expect(r).toContain("marketing manager");
+    expect(r).toContain("head of marketing");
+  });
+
+  it("un niveau hiérarchique seul ne ramène aucun équivalent", () => {
+    // ⚠️ Le défaut corrigé le 07/08/2026. « responsable » atteignait à lui seul
+    // 2 807 titres de l'index (14 %) : Release Manager, Bid Manager,
+    // Responsable RAMS. Une recherche marketing ne rendait plus que du bruit.
+    expect(elargirMotsCles(["responsable"])).toEqual(["responsable"]);
+    expect(elargirMotsCles(["manager"])).toEqual(["manager"]);
+    expect(elargirMotsCles(["directeur"])).toEqual(["directeur"]);
+    expect(elargirMotsCles(["head of"])).toEqual(["head of"]);
+  });
+
+  it("« growth » seul ne ramène pas des postes de marketing", () => {
+    // ⚠️ Chez ces employeurs « growth » nomme l'équipe, pas le métier :
+    // « Fullstack Software Engineer - Growth Product ». Il ne subsiste que dans
+    // l'expression « growth marketing ».
+    expect(elargirMotsCles(["marketing digital"])).not.toContain("growth");
+    expect(elargirMotsCles(["marketing digital"])).toContain("growth marketing");
   });
 
   it("n'ajoute rien pour un mot-clé sans équivalent connu", () => {
@@ -62,5 +85,18 @@ describe("elargirMotsCles", () => {
     const r = elargirMotsCles(["commercial"]);
     expect(r).toContain("account executive");
     expect(r).not.toContain("account");
+  });
+
+  it("« sécurité informatique » ne ramène pas de postes HSE", () => {
+    const r = elargirMotsCles(["sécurité informatique"]);
+    expect(r).toContain("cybersecurity");
+    expect(r).not.toContain("hse");
+    expect(r).not.toContain("safety");
+  });
+
+  it("« données » ne ramène pas le mot « data » seul", () => {
+    const r = elargirMotsCles(["données"]);
+    expect(r).not.toContain("data");
+    expect(r).toContain("data analyst");
   });
 });
