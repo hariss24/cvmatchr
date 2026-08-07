@@ -37,6 +37,7 @@ export default function PreviewPane() {
   // Régénère le blob (debounce), un résultat périmé est jeté.
   useEffect(() => {
     const gen = ++genRef.current;
+    const isPreview = previewOverride !== null;
     const id = setTimeout(async () => {
       try {
         const jsonToRender = isPreview ? previewOverride : json;
@@ -58,7 +59,7 @@ export default function PreviewPane() {
       }
     }, 500);
     return () => clearTimeout(id);
-  }, [json, docType, templateId, previewOverride, isPreview]);
+  }, [json, docType, templateId, previewOverride]);
 
   const onPdfPages = useCallback((n: number) => setPages(Math.max(1, n)), []);
 
