@@ -17,7 +17,7 @@ const ZOOM_LEVELS: number[] = [1, 1.25, 1.5, 2, 2.5, 3];
 export default function PreviewPane() {
   const json = useDocStore((s) => s.json);
   const docType = useDocStore((s) => s.docType);
-  const templateId = useDocStore((s) => s.templateId);
+  const previewOverride = useDocStore((s) => s.previewOverride);
   const setPreviewOverride = useDocStore((s) => s.setPreviewOverride);
 
   const [pages, setPages] = useState(1);
