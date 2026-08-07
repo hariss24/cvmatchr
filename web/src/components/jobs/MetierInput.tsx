@@ -43,18 +43,8 @@ export function MetierInput({
   const [draft, setDraft] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abort = useRef<AbortController | null>(null);
-
-  // Au-delà de deux postes, la liste tenait sur plusieurs lignes et poussait
-  // toute la barre en hauteur. On n'affiche que les derniers ajoutés ; les
-  // précédents restent atteignables derrière le compteur, sinon on ne pourrait
-  // plus retirer un poste saisi en premier.
-  const MAX_VISIBLE = 2;
-  const overflow = values.length - MAX_VISIBLE;
-  const collapsed = overflow > 0 && !expanded;
-  const shown = collapsed ? values.slice(-MAX_VISIBLE) : values;
 
   function add(label: string) {
     const t = label.trim();
@@ -87,21 +77,10 @@ export function MetierInput({
   }
 
   return (
-    <div className={`jf-tags-field ${collapsed ? "jf-tags-field--collapsed" : ""}`}>
+    <div className="jf-tags-field">
       {values.length > 0 && (
         <div className="jf-tags">
-          {overflow > 0 && (
-            <button
-              type="button"
-              className="jf-tag jf-tag--more"
-              title={collapsed ? values.slice(0, -MAX_VISIBLE).join(", ") : undefined}
-              aria-label={collapsed ? `Afficher les ${overflow} postes masqués` : "Replier la liste des postes"}
-              onClick={() => setExpanded((e) => !e)}
-            >
-              {collapsed ? `+${overflow}` : "Replier"}
-            </button>
-          )}
-          {shown.map((v) => (
+          {values.map((v) => (
             <span key={v} className="jf-tag">
               <span className="jf-tag__label">{v}</span>
               <button type="button" aria-label={`Retirer ${v}`} onClick={() => onChange(values.filter((x) => x !== v))}>
