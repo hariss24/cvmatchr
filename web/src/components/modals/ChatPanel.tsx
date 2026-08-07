@@ -26,6 +26,7 @@ type Item =
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
 export default function ChatPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const previewOverride = useDocStore((s) => s.previewOverride);
   const [items, setItems] = useState<Item[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -115,8 +116,17 @@ export default function ChatPanel({ open, onClose }: { open: boolean; onClose: (
     }
   }
 
-  function previewProposal(p: Proposal) {
-    useDocStore.getState().setPreviewOverride(p.json);
+  function isProposalActive(p: Proposal): boolean {
+    if (!previewOverride) return false;
+    return JSON.stringify(previewOverride) === JSON.stringify(p.json);
+  }
+
+  function togglePreviewProposal(p: Proposal) {
+    if (isProposalActive(p)) {
+      useDocStore.getState().setPreviewOverride(null);
+    } else {
+      useDocStore.getState().setPreviewOverride(p.json);
+    }
   }
 
   function applyProposal(idx: number, p: Proposal) {
@@ -206,11 +216,11 @@ export default function ChatPanel({ open, onClose }: { open: boolean; onClose: (
                 <div className="proposal-actions">
                   <button
                     type="button"
-                    className="proposal-btn"
+                    className={`proposal-btn${isProposalActive(it.data) ? " proposal-btn--active" : ""}`}
                     disabled={it.status !== "open"}
-                    onClick={() => previewProposal(it.data)}
+                    onClick={() => togglePreviewProposal(it.data)}
                   >
-                    Prévisualiser
+                    {isProposalActive(it.data) ? "Masquer l'aperçu" : "Prévisualiser"}
                   </button>
                   <button
                     type="button"
