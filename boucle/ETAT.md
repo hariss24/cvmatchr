@@ -3,38 +3,36 @@
 *(fichier court, écrasé à chaque réveil — ce n'est pas un historique,
 le journal est dans `boucle/journal/`)*
 
-- **Dernier réveil :** 2026-08-08 (Éclaireur, deuxième réveil du jour)
-- **Rôle joué :** Éclaireur
-- **PR en cours :** aucune — l'Éclaireur n'écrit que dans `boucle/` et `docs/`.
-- **Ce qui a été fait :** audité le domaine « manques fonctionnels » (5e passage,
-  rotation `boucle/roles/eclaireur.md`). Deux manques trouvés, nouveaux, vérifiés par
-  `grep` dans le code et par citation directe d'au moins deux produits de référence
-  chacun : **export du CV/lettre au format Word (.docx)**, absent à 100 % du code
-  (`web/src/lib/pdfgen/` ne génère que du PDF), présent chez Rezi/Kickresume/Huntr ;
-  **génération IA de réponses aux questions ouvertes du formulaire de candidature**
-  dans l'extension autofill, explicitement hors périmètre de la spec de conception
-  actuelle (§8), présent chez Simplify/Teal. Constat détaillé :
-  `boucle/constats/2026-08-08-manques-fonctionnels-5.md`. Les deux idées ajoutées, non
-  notées, en fin de `## Classement` d'`IDEES.md` (nouvelle section « À noter »), pour
-  notation par l'Arbitre au prochain réveil.
+- **Dernier réveil :** 2026-08-08 (Arbitre, deuxième réveil du jour)
+- **Rôle joué :** Arbitre
+- **PR en cours :** aucune — l'Arbitre n'écrit que dans `boucle/` et `docs/`.
+- **Ce qui a été fait :** noté et intégré au classement les deux idées laissées en
+  attente par l'Éclaireur dans la section « À noter » d'`IDEES.md` (constat
+  `boucle/constats/2026-08-08-manques-fonctionnels-5.md`) : **export .docx du CV et de
+  la lettre** (12/20, position 18) et **génération IA de réponses aux questions
+  ouvertes du formulaire de candidature dans l'extension autofill** (11/20, position
+  20). Les 44 idées déjà notées gardent leurs notes et justifications à l'identique,
+  seule la numérotation a changé pour accueillir les deux nouvelles (tous les renvois
+  internes `n°X` vers un ancien numéro ≥ 18 corrigés). Section « À noter » supprimée
+  une fois son contenu intégré. Détail complet des deux notations et des égalités
+  tranchées : `boucle/journal/2026-08-08-arbitre-2.md`.
 - **Vérifications :** relu `MISSION.md`, `ETAT.md`, `IDEES.md` (classement complet +
-  « Écartées ») et `boucle/roles/eclaireur.md` avant de commencer. Relu en entier les
-  quatre constats précédents de manques fonctionnels (02/08, 03/08, 05/08, 07/08) pour
-  ne rien répéter — plusieurs pistes explorées puis abandonnées car déjà construites
-  (tableau de bord de candidatures, diff de versions) ou déjà classées. Chaque citation
-  concurrentielle vérifiée mot pour mot dans la réponse de l'outil avant d'être écrite ;
-  une piste (Careerflow, génération IA de réponse aux questions ouvertes) écartée du
-  décompte faute de confirmation directe sur la page consultée, malgré un résumé de
-  recherche suggérant le contraire. Vérifié qu'aucune des deux idées ajoutées
-  n'apparaît déjà dans le classement ni dans `## Écartées`. `git status --short`
-  vérifié avant ce commit : uniquement des fichiers sous `boucle/` (le nouveau
-  constat, `IDEES.md`, `ETAT.md`, le journal du jour) — rien hors de `boucle/`.
-- **Domaine audité en dernier (Éclaireur) :** manques fonctionnels (08/08/2026, ce
-  réveil). Prochain domaine pour l'Éclaireur : performance. Rotation : coût des appels
-  externes → hygiène du dépôt → **manques fonctionnels** → performance → briques
-  externes → **manques fonctionnels** → accessibilité → parcours d'un nouvel arrivant
-  → **manques fonctionnels** → cohérence visuelle → sécurité → **manques fonctionnels**
-  (ce réveil) → **performance (prochain domaine pour l'Éclaireur)** → (retour au
-  début).
+  « Écartées ») et `boucle/roles/arbitre.md` avant de commencer. Vérifié qu'aucune des
+  deux idées n'apparaît déjà dans le classement ni dans `## Écartées`. Recherche
+  exhaustive du motif `n°\d+` sur tout le fichier après chaque bloc d'édits pour
+  retrouver et corriger tous les renvois internes touchés par le décalage de
+  numérotation, chacun vérifié contre son contexte pour ne pas confondre un renvoi vers
+  une idée du classement avec une mention de « priorité n°1 » de `MISSION.md`. Les
+  paragraphes historiques « Mise à jour du JJ/MM/2026 » en tête de fichier laissés
+  inchangés (pratique déjà suivie précédemment). Vérifié après coup que les 46 titres
+  `### N.` sont strictement séquentiels de 1 à 46. `git status --short` vérifié avant
+  ce commit : uniquement `boucle/IDEES.md`, `boucle/ETAT.md` et le journal du jour —
+  rien hors de `boucle/`.
+- **Domaine audité en dernier (Éclaireur) :** manques fonctionnels (08/08/2026).
+  Prochain domaine pour l'Éclaireur : performance. Rotation : coût des appels externes
+  → hygiène du dépôt → manques fonctionnels → performance → briques externes →
+  manques fonctionnels → accessibilité → parcours d'un nouvel arrivant → manques
+  fonctionnels → cohérence visuelle → sécurité → manques fonctionnels →
+  **performance (prochain domaine pour l'Éclaireur)** → (retour au début).
 - **Échecs consécutifs du Gardien sur la PR courante :** 0 (aucune PR issue de ce
-  réveil — l'Éclaireur ne produit pas de code).
+  réveil — l'Arbitre ne produit pas de code).
