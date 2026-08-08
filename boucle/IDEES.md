@@ -589,6 +589,78 @@ Constat détaillé : `boucle/constats/2026-08-07-coherence-visuelle.md` §4.
 | Cohérence | 2 | Ne corrige aucun défaut perceptible par lui-même — contrairement à l'idée n°6, déjà classée, qui porte le vrai défaut de contraste — mais sert la maintenabilité future de ce correctif plutôt que la promesse « postuler mieux, plus vite » directement. |
 | **Total** | **7** | Même profil (Apport 2, Facilité 2, Écart 1, Cohérence 2) que l'idée n°37 (remplacer les sélecteurs de `scrapeJobText` par `@mozilla/readability`) : aucune des quatre notes ne les différencie. Conservée juste après elle — dernière du classement à ce jour. Ne redouble pas l'idée n°6 : le constat le précise lui-même, celle-ci explique pourquoi le correctif de l'idée n°6 ne s'est pas propagé partout, elle ne porte pas le même défaut. |
 
+## À noter (Éclaireur, non notées)
+
+*Ajoutées le 08/08/2026 par l'Éclaireur, domaine sécurité (première fois audité par la
+boucle). Non notées : c'est à l'Arbitre de le faire au réveil suivant. Constat complet,
+preuves et reproductions : `boucle/constats/2026-08-08-securite.md`.*
+
+### Protéger `/api/jobs/logos` contre le SSRF
+
+`POST /api/jobs/logos` accepte un tableau `companies` en texte libre (jusqu'à 120
+entrées) et le fait suivre jusqu'à `fetch(`https://${domain}`)` dans
+`web/src/lib/jobs/logos.ts:197`, sans aucun appel à `validateUrlForScraping` ni à
+aucun autre garde-fou SSRF (`grep` : 0 correspondance dans `logos.ts` et sa route).
+`domainCandidates` (`logos.ts:132-148`) accepte tel quel tout nom d'entreprise qui
+ressemble à un domaine, et le filtre `domaineProche` ne protège de rien quand le nom
+d'entreprise soumis **est** le domaine lui-même. Un attaquant possédant un domaine
+dans l'une des huit extensions acceptées (`.io`, `.com`, `.co`, `.net`, `.org`, `.eu`,
+`.work`, `.agency`, `.group`, `.paris`, `.bzh`) et pointant son enregistrement DNS
+vers une IP interne peut faire émettre au serveur une requête HTTP vers cette IP, à la
+demande, en un seul appel API. À comparer à `/api/extract-job`, qui protège le même
+type d'appel via `ssrf.ts`. Constat §1.
+
+### Fermer le contournement par DNS rebinding de la protection SSRF existante
+
+`validateUrlForScraping` (`web/src/lib/scraper/ssrf.ts`) résout le nom d'hôte, vérifie
+que l'IP n'est pas privée, puis renvoie l'URL textuelle d'origine (hostname inclus) —
+pas l'IP validée. `fetch()` dans `scraper.ts:42` refait ensuite sa propre résolution
+DNS au moment de la connexion. Rien n'épingle la connexion à l'IP déjà contrôlée : un
+attaquant qui maîtrise son serveur DNS peut répondre une IP publique au premier
+lookup (validation acceptée) puis une IP privée au second (celui de `fetch`), schéma
+classique de contournement SSRF par DNS rebinding. Aucun des 8 cas de
+`ssrf.test.ts` ne couvre ce scénario. Constat §2.
+
+### Mettre à jour les dépendances à vulnérabilité connue
+
+`npm audit --production` dans `web/` : 9 vulnérabilités (6 hautes) sur `pdfjs-dist`
+(6.0.227, RCE navigateur à l'ouverture d'un PDF piégé — pertinent car
+`pdfToImages.ts` fait rendre par cette lib, dans le navigateur du candidat, tout PDF
+qu'il importe), `next` (16.2.9, SSRF via rewrites + fuite de endpoints internes non
+authentifiée, 9 avis cumulés), `dompurify` et `postcss` (déjà épinglées par
+`overrides` dans `package.json` mais en dessous du correctif), `nanoid`, `sharp`,
+`undici`, `protobufjs`. La plupart se corrigent par `npm audit fix` sans changement de
+version majeure ; `next`/`postcss`/`sharp` demandent `next@16.3.0` (`--force`, hors de
+la plage `16.2.x` déclarée). Constat §3.
+
+### Remplacer le jeton d'authentification statique
+
+Le cookie `auth_token` posé par `api/login/route.ts` est le SHA-256 du mot de passe
+partagé lui-même (`REMOTE_AUTH_PASSWORD`/`AUTH_PASSWORD`), sans aléa ni horodatage,
+valable 30 jours, comparé par `!==` (non constant en temps) dans `middleware.ts`. Un
+jeton dérobé (poste partagé, export de cookies) vaut un accès de 30 jours équivalent
+au mot de passe, sans jamais le connaître ; le seul moyen de révoquer une session est
+de changer le mot de passe, ce qui déconnecte tout le monde à la fois — aucune
+révocation individuelle possible. Constat §4.
+
+### Vérifier le rate limiting du login en conditions de déploiement réelles
+
+`api/login/route.ts` limite les tentatives via une `Map` en mémoire de process,
+propre à chaque instance serverless. `@vercel/analytics` dans `layout.tsx` suggère
+(sans le certifier — hors périmètre de vérification de l'Éclaireur) un déploiement
+multi-instances, où cette limite ne s'appliquerait qu'à l'instance ayant reçu la
+requête plutôt qu'à l'ensemble du déploiement. À confirmer par le propriétaire, qui a
+accès à l'infrastructure réelle. Constat §5.
+
+### Étoffer le Content-Security-Policy
+
+Le seul CSP posé (`next.config.ts:29`) est `frame-ancestors 'self';` — protège du
+clickjacking, ne restreint ni `script-src` ni `connect-src` ni `object-src`. Deux
+`dangerouslySetInnerHTML` existent déjà dans le code (`layout.tsx`, `JobCard.tsx`),
+tous deux sur du contenu statique aujourd'hui donc sans risque actuel, mais un CSP
+plus complet est la seule défense en profondeur si l'un d'eux — ou un composant futur
+— venait à recevoir une donnée dynamique par erreur. Constat §6.
+
 ## Écartées
 
 - **Préparation d'entretien par IA (mock interview)** — écartée le 02/08/2026. Présente
