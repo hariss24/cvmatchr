@@ -3,39 +3,38 @@
 *(fichier court, écrasé à chaque réveil — ce n'est pas un historique,
 le journal est dans `boucle/journal/`)*
 
-- **Dernier réveil :** 2026-08-08 (Arbitre)
-- **Rôle joué :** Arbitre
-- **PR en cours :** aucune — l'Arbitre n'écrit que dans `boucle/` et `docs/`.
-- **Ce qui a été fait :** noté les six idées du constat sécurité
-  (`boucle/constats/2026-08-08-securite.md`), laissées non notées par l'Éclaireur en fin
-  d'`IDEES.md`. Intégrées au classement : protéger `/api/jobs/logos` contre le SSRF
-  (14/20, nouvelle idée n°3), mettre à jour les dépendances à vulnérabilité connue
-  (13/20, n°5), fermer le contournement par DNS rebinding (10/20, n°24), remplacer le
-  jeton d'authentification statique (9/20, n°29), vérifier le rate limiting du login en
-  conditions réelles (9/20, n°31, estimation Facilité peu fiable), étoffer le CSP (8/20,
-  n°37). Section « À noter » supprimée une fois son contenu intégré. `IDEES.md`
-  entièrement renuméroté de 1 à 44 (38 idées déjà notées + 6 nouvelles), tous les renvois
-  internes (`l'idée n°X`) vérifiés et corrigés un par un pour pointer vers le bon numéro
-  après renumérotation. Les 38 idées déjà notées gardent leurs notes et justifications à
-  l'identique, seule leur position a changé. Détail complet des égalités tranchées et
-  table de correspondance ancienne/nouvelle numérotation :
-  `boucle/journal/2026-08-08-arbitre.md`.
-- **Vérifications :** relu `MISSION.md`, `ETAT.md`, `IDEES.md` (classement complet + « À
-  noter » + « Écartées ») et `boucle/roles/arbitre.md` avant de commencer. Relu le
-  constat `2026-08-08-securite.md` en entier avant de noter, pour ne pas reformuler ni
-  affaiblir des faits déjà vérifiés par l'Éclaireur. Après renumérotation, recherché tous
-  les renvois `n°\d+` du fichier et vérifié un par un qu'ils pointent vers la bonne idée,
-  y compris ceux internes à des paragraphes de rounds précédents référençant des idées
-  déplacées — distingués des mentions de « priorité n°1 » (`MISSION.md`, jamais
-  renumérotées). Vérifié qu'aucune idée écartée par le propriétaire n'a été remontée et
-  qu'aucun arbitrage déjà écrit par le propriétaire n'a été modifié. `git status --short`
-  vérifié avant ce commit : uniquement des fichiers sous `boucle/` (`IDEES.md`,
-  `ETAT.md`, le journal du jour) — rien hors de `boucle/`.
-- **Domaine audité en dernier (Éclaireur) :** sécurité (08/08/2026), désormais noté et
-  intégré au classement par ce réveil. Prochain domaine pour l'Éclaireur : manques
-  fonctionnels. Rotation : hygiène du dépôt → manques fonctionnels → performance →
-  briques externes → manques fonctionnels → accessibilité → parcours d'un nouvel
-  arrivant → manques fonctionnels → cohérence visuelle → sécurité → **manques
-  fonctionnels (prochain domaine pour l'Éclaireur)** → (retour au début).
+- **Dernier réveil :** 2026-08-08 (Éclaireur, deuxième réveil du jour)
+- **Rôle joué :** Éclaireur
+- **PR en cours :** aucune — l'Éclaireur n'écrit que dans `boucle/` et `docs/`.
+- **Ce qui a été fait :** audité le domaine « manques fonctionnels » (5e passage,
+  rotation `boucle/roles/eclaireur.md`). Deux manques trouvés, nouveaux, vérifiés par
+  `grep` dans le code et par citation directe d'au moins deux produits de référence
+  chacun : **export du CV/lettre au format Word (.docx)**, absent à 100 % du code
+  (`web/src/lib/pdfgen/` ne génère que du PDF), présent chez Rezi/Kickresume/Huntr ;
+  **génération IA de réponses aux questions ouvertes du formulaire de candidature**
+  dans l'extension autofill, explicitement hors périmètre de la spec de conception
+  actuelle (§8), présent chez Simplify/Teal. Constat détaillé :
+  `boucle/constats/2026-08-08-manques-fonctionnels-5.md`. Les deux idées ajoutées, non
+  notées, en fin de `## Classement` d'`IDEES.md` (nouvelle section « À noter »), pour
+  notation par l'Arbitre au prochain réveil.
+- **Vérifications :** relu `MISSION.md`, `ETAT.md`, `IDEES.md` (classement complet +
+  « Écartées ») et `boucle/roles/eclaireur.md` avant de commencer. Relu en entier les
+  quatre constats précédents de manques fonctionnels (02/08, 03/08, 05/08, 07/08) pour
+  ne rien répéter — plusieurs pistes explorées puis abandonnées car déjà construites
+  (tableau de bord de candidatures, diff de versions) ou déjà classées. Chaque citation
+  concurrentielle vérifiée mot pour mot dans la réponse de l'outil avant d'être écrite ;
+  une piste (Careerflow, génération IA de réponse aux questions ouvertes) écartée du
+  décompte faute de confirmation directe sur la page consultée, malgré un résumé de
+  recherche suggérant le contraire. Vérifié qu'aucune des deux idées ajoutées
+  n'apparaît déjà dans le classement ni dans `## Écartées`. `git status --short`
+  vérifié avant ce commit : uniquement des fichiers sous `boucle/` (le nouveau
+  constat, `IDEES.md`, `ETAT.md`, le journal du jour) — rien hors de `boucle/`.
+- **Domaine audité en dernier (Éclaireur) :** manques fonctionnels (08/08/2026, ce
+  réveil). Prochain domaine pour l'Éclaireur : performance. Rotation : coût des appels
+  externes → hygiène du dépôt → **manques fonctionnels** → performance → briques
+  externes → **manques fonctionnels** → accessibilité → parcours d'un nouvel arrivant
+  → **manques fonctionnels** → cohérence visuelle → sécurité → **manques fonctionnels**
+  (ce réveil) → **performance (prochain domaine pour l'Éclaireur)** → (retour au
+  début).
 - **Échecs consécutifs du Gardien sur la PR courante :** 0 (aucune PR issue de ce
-  réveil — l'Arbitre ne produit pas de code).
+  réveil — l'Éclaireur ne produit pas de code).

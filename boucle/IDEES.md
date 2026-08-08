@@ -685,3 +685,44 @@ Constat détaillé : `boucle/constats/2026-08-07-coherence-visuelle.md` §4.
 
 **Une idée écartée ne remonte jamais d'elle-même**, même si un audit ultérieur la
 retrouve chez la concurrence. Seul le propriétaire peut la rouvrir.
+
+## À noter
+
+*Ajouté par l'Éclaireur le 08/08/2026 (5e passage manques fonctionnels), à noter et
+intégrer au classement par l'Arbitre au prochain réveil. Constat détaillé :
+`boucle/constats/2026-08-08-manques-fonctionnels-5.md`.*
+
+- **Ajouter un export .docx du CV et de la lettre, en plus du PDF existant.** CVMatchr
+  n'a aujourd'hui qu'un seul format de sortie (`web/src/lib/pdfgen/`, PDF via
+  `@react-pdf/renderer`) — confirmé par `grep -rn "docx" web/src` (zéro occurrence) et
+  `grep -n "docx\|mammoth\|officegen" web/package.json` (zéro occurrence, aucune
+  dépendance de génération Word). Présent chez 3 des 8 produits de référence vérifiés :
+  Rezi (« Microsoft Word .DOCX File » inclus sur toutes les offres,
+  https://www.rezi.ai/pricing, 2026-08-08), Kickresume (export Word confirmé mais
+  dégradé — « it will only be plain text », https://www.kickresume.com/en/help-center/general/,
+  2026-08-08) et Huntr (fonctionnalité ajoutée le 2 décembre 2025, toujours
+  documentée, https://huntr.co/product-updates/font-customizations-custom-resume-sections-docx-export,
+  2026-08-08). Non vérifiés faute de temps : Jobscan, Teal (page inaccessible en
+  direct, HTTP 403), Enhancv, Careerflow, Simplify. Ampleur non chiffrée : suppose soit
+  une bibliothèque npm de génération `.docx` (**ajout de dépendance, feu vert requis**
+  d'après `MISSION.md`), soit un second rendu à écrire pour les 4 gabarits CV + celui
+  de la lettre.
+- **Générer par IA une réponse aux questions ouvertes du formulaire de candidature,
+  dans l'extension autofill.** L'extension actuelle (Greenhouse/Lever) ne reconnaît pas
+  du tout ces champs — `grep -niE "question|open.?ended|réponse"
+  extension/content-autofill.js extension/lib/fieldMatch.js` → zéro occurrence — et le
+  document de conception de l'autofill les exclut explicitement de son périmètre
+  (`docs/superpowers/specs/2026-08-02-extension-autofill-design.md` §8 : « non
+  génériques par nature, hors du mécanisme de reconnaissance de §5.2 »). Présent chez 2
+  des 8 produits de référence, confirmés par citation directe de leur propre page :
+  Simplify Copilot (« Our AI analyzes the job description you're applying to and helps
+  you write tailored answers to questions like 'why are you a good fit for this role?'
+  in 1-click », https://simplify.jobs/copilot, 2026-08-08) et Teal (« The tool uses AI
+  to analyze job descriptions and your career history to create tailored responses for
+  application questions », https://www.tealhq.com/tools/autofill-job-applications,
+  contenu obtenu par recherche indexée le 2026-08-08, accès direct refusé — HTTP 403).
+  Careerflow examiné mais **non retenu** dans le décompte : la page consultée
+  (`careerflow.ai/autofill`) ne confirme que le remplissage de champs structurés, pas
+  de génération IA de réponse ouverte. Ampleur non chiffrée : prolongerait le chantier
+  autofill déjà construit et validé (Greenhouse/Lever) vers un terrain sciemment laissé
+  de côté à l'origine, en réutilisant l'infra IA déjà en place.
