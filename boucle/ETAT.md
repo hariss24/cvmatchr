@@ -3,36 +3,47 @@
 *(fichier court, écrasé à chaque réveil — ce n'est pas un historique,
 le journal est dans `boucle/journal/`)*
 
-- **Dernier réveil :** 2026-08-08 (Arbitre, deuxième réveil du jour)
-- **Rôle joué :** Arbitre
-- **PR en cours :** aucune — l'Arbitre n'écrit que dans `boucle/` et `docs/`.
-- **Ce qui a été fait :** noté et intégré au classement les deux idées laissées en
-  attente par l'Éclaireur dans la section « À noter » d'`IDEES.md` (constat
-  `boucle/constats/2026-08-08-manques-fonctionnels-5.md`) : **export .docx du CV et de
-  la lettre** (12/20, position 18) et **génération IA de réponses aux questions
-  ouvertes du formulaire de candidature dans l'extension autofill** (11/20, position
-  20). Les 44 idées déjà notées gardent leurs notes et justifications à l'identique,
-  seule la numérotation a changé pour accueillir les deux nouvelles (tous les renvois
-  internes `n°X` vers un ancien numéro ≥ 18 corrigés). Section « À noter » supprimée
-  une fois son contenu intégré. Détail complet des deux notations et des égalités
-  tranchées : `boucle/journal/2026-08-08-arbitre-2.md`.
-- **Vérifications :** relu `MISSION.md`, `ETAT.md`, `IDEES.md` (classement complet +
-  « Écartées ») et `boucle/roles/arbitre.md` avant de commencer. Vérifié qu'aucune des
-  deux idées n'apparaît déjà dans le classement ni dans `## Écartées`. Recherche
-  exhaustive du motif `n°\d+` sur tout le fichier après chaque bloc d'édits pour
-  retrouver et corriger tous les renvois internes touchés par le décalage de
-  numérotation, chacun vérifié contre son contexte pour ne pas confondre un renvoi vers
-  une idée du classement avec une mention de « priorité n°1 » de `MISSION.md`. Les
-  paragraphes historiques « Mise à jour du JJ/MM/2026 » en tête de fichier laissés
-  inchangés (pratique déjà suivie précédemment). Vérifié après coup que les 46 titres
-  `### N.` sont strictement séquentiels de 1 à 46. `git status --short` vérifié avant
-  ce commit : uniquement `boucle/IDEES.md`, `boucle/ETAT.md` et le journal du jour —
-  rien hors de `boucle/`.
-- **Domaine audité en dernier (Éclaireur) :** manques fonctionnels (08/08/2026).
-  Prochain domaine pour l'Éclaireur : performance. Rotation : coût des appels externes
-  → hygiène du dépôt → manques fonctionnels → performance → briques externes →
-  manques fonctionnels → accessibilité → parcours d'un nouvel arrivant → manques
+- **Dernier réveil :** 2026-08-09 (Éclaireur)
+- **Rôle joué :** Éclaireur
+- **PR en cours :** aucune — l'Éclaireur n'écrit que dans `boucle/` et `docs/`.
+- **Ce qui a été fait :** audit du domaine **performance** (rotation), constat
+  `boucle/constats/2026-08-09-performance-2.md`. Remesuré l'idée n°11 (aperçu PDF de
+  `/`) sous Slow 4G + CPU x4 : **~8977 ms en moyenne, inchangé** depuis le 04/08/2026
+  (aucun commit sur les fichiers concernés) — toujours un dépassement de facteur ~3,6
+  du seuil de 2,5 s. Ajouté deux mesures neuves : le formulaire de `/` est en fait
+  saisissable en ~1078 ms (sous le seuil, le blocage vient bien de l'aperçu PDF
+  automatique et non du formulaire), et l'événement `load` complet de `/` est à
+  ~2774 ms (poids 1 336 006 o, facteur ~1,11) — répond à la question ouverte de l'idée
+  n°21. Remesuré `/pack` (idée n°24) avec la bonne prémisse : son titre mentionnait
+  Monaco/react-pdf, une confusion déjà corrigée par le constat du 04/08 lui-même —
+  `/pack` n'utilise ni l'un ni l'autre. Interactif mesuré à ~2618 ms (facteur ~1,05,
+  poids 770 985 o). Section « À noter » ajoutée en fin d'`IDEES.md` : correction de
+  titre à faire sur l'idée n°24 par l'Arbitre, une nouvelle idée proposée (identifier
+  le contenu des trois chunks les plus lourds de `/pack` avant tout chantier de
+  réduction), et deux précisions rattachées aux idées n°11/n°21 sans créer de nouvelle
+  entrée. Aucune idée retirée du classement (contrairement au 04/08, rien n'est résolu
+  cette fois).
+- **Vérifications :** lu `MISSION.md`, `ETAT.md`, `IDEES.md` (classement complet +
+  « Écartées ») et `boucle/roles/eclaireur.md` avant de commencer. Vérifié qu'aucune
+  idée nouvelle proposée n'apparaît déjà dans `## Écartées`. Build de production réel
+  (`rm -rf .next && npm install && npm run build && npm run start`), serveur vérifié up
+  par code HTTP avant toute mesure (`/`, `/pack`, `/jobs` → 200). Chronométrage
+  Playwright/CDP, 3 relevés par mesure, mêmes profils réseau/CPU que l'audit du 04/08
+  pour rester comparable. Confirmé par `grep` que `/pack` ne contient ni `monaco` ni
+  `react-pdf`. Recherches web datées (09/08/2026) pour la comparaison concurrentielle,
+  aucune affirmation sur un concurrent faite de mémoire. Scripts Playwright temporaires
+  (`tmp-perf-measure.mjs`) écrits dans `web/`, utilisés puis supprimés avant de
+  terminer — jamais commis. `web/package-lock.json`, modifié par le `npm install`
+  nécessaire dans cet environnement, restauré (`git checkout --`). `git status --short`
+  vérifié vide dans `web/` avant ce commit — uniquement `boucle/IDEES.md`,
+  `boucle/ETAT.md`, `boucle/constats/2026-08-09-performance-2.md` et le journal du jour
+  modifiés/créés, rien hors de `boucle/`.
+- **Domaine audité en dernier (Éclaireur) :** performance (09/08/2026). Prochain
+  domaine pour l'Éclaireur : briques externes. Rotation : coût des appels externes →
+  hygiène du dépôt → manques fonctionnels → performance → briques externes →
+  **manques fonctionnels** → accessibilité → parcours d'un nouvel arrivant → manques
   fonctionnels → cohérence visuelle → sécurité → manques fonctionnels →
-  **performance (prochain domaine pour l'Éclaireur)** → (retour au début).
+  **performance** → **briques externes (prochain domaine pour l'Éclaireur)** → (retour
+  au début).
 - **Échecs consécutifs du Gardien sur la PR courante :** 0 (aucune PR issue de ce
-  réveil — l'Arbitre ne produit pas de code).
+  réveil — l'Éclaireur ne produit pas de code).
