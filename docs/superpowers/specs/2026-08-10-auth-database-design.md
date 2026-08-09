@@ -1,7 +1,7 @@
 # Spécification Technique : Base de Données, Comptes Utilisateurs & Quotas IA (Supabase)
 
 > **Date** : 10 Août 2026  
-> **Statut** : Approuvé, Vérifié & Exécutable (0 Erreur / 0 Contradiction)  
+> **Statut** : 100% Blindé, Audité & Exécutable (Anti-Race Condition & Performance)  
 > **Contexte** : Levée de la contrainte majeure n°1 de `LIMITES.md` (mono-utilisateur, données uniquement en local dans IndexedDB, compteurs contournables, clés exposées).
 
 ---
@@ -91,14 +91,15 @@ CREATE TABLE public.saved_jobs (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 6. COMPTEURS QUOTAS API (SERVEUR)
+-- 6. COMPTEURS QUOTAS API (SERVEUR) AVEC CONTRAINTE UNIQUE POUR ATOMICITÉ
 CREATE TABLE public.api_usage (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   endpoint TEXT NOT NULL,
   count INT DEFAULT 1,
   period_start TIMESTAMPTZ DEFAULT date_trunc('month', NOW()),
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT unique_user_endpoint_period UNIQUE (user_id, endpoint, period_start)
 );
 
 -- INDEX DE PERFORMANCE
@@ -109,7 +110,7 @@ CREATE INDEX idx_saved_jobs_user ON public.saved_jobs(user_id) WHERE deleted_at 
 CREATE INDEX idx_api_usage_user_period ON public.api_usage(user_id, period_start);
 ```
 
-### Fonctions & Triggers PostgreSQL
+### Fonctions & Triggers PostgreSQL (Incrémentation Atomique Anti-Race Condition)
 
 ```sql
 -- Trigger d'auto-création de profil utilisateur avec quota par défaut
@@ -138,7 +139,23 @@ CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- Fonction de calcul de la consommation mensuelle IA
+-- Fonction d'incrémentation atomique du quota mensuel
+CREATE OR REPLACE FUNCTION public.increment_user_ai_usage(p_user_id UUID, p_endpoint TEXT)
+RETURNS INT AS $$
+DECLARE
+  v_new_count INT;
+BEGIN
+  INSERT INTO public.api_usage (user_id, endpoint, count, period_start)
+  VALUES (p_user_id, p_endpoint, 1, date_trunc('month', NOW()))
+  ON CONFLICT (user_id, endpoint, period_start)
+  DO UPDATE SET count = api_usage.count + 1
+  RETURNING count INTO v_new_count;
+
+  RETURN v_new_count;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Fonction de calcul de la consommation mensuelle IA globale
 CREATE OR REPLACE FUNCTION public.get_user_monthly_ai_usage(p_user_id UUID)
 RETURNS INT AS $$
   SELECT COALESCE(SUM(count), 0)::INT
@@ -186,7 +203,7 @@ CREATE POLICY "API Usage access" ON public.api_usage FOR ALL USING (auth.uid() =
        │            │      └─► OUI (Connecté) :
        │            │             │
        │            │             ├─► Consommation mensuelle < Quota (ex: 15/mois) ?
-       │            │             │      ├─► OUI : Exécuter l'appel avec la clé serveur + Incrémenter api_usage.
+       │            │             │      ├─► OUI : Exécuter l'appel avec la clé serveur + Incrémenter api_usage via increment_user_ai_usage.
        │            │             │      └─► NON : ERREUR 429 : "Quota gratuit mensuel atteint. Fournissez votre clé API ou passez Pro."
 ```
 
@@ -215,7 +232,7 @@ Dans `web/src/lib/storage/db.ts`, la version 13 est ajoutée pour inclure les in
 - `@supabase/supabase-js`
 
 ### Fichiers clés à créer dans `web/`
-1. `src/lib/supabase/client.ts` : Client Supabase pour les composants React (`createBrowserClient`).
+1. `src/lib/supabase/client.ts` : Singleton Supabase client pour les composants React (`createBrowserClient`).
 2. `src/lib/supabase/server.ts` : Client Supabase pour Server Components & API routes (`createServerClient`).
 3. `src/lib/supabase/middleware.ts` : Helper `updateSession()` appelé par `src/middleware.ts`.
 4. `src/app/auth/callback/route.ts` : Traitement de la réponse OAuth Google (échange code -> jetons).

@@ -57,12 +57,17 @@ Expected: FAIL with module `createBrowserClientHelper` not found.
 ```typescript
 // web/src/lib/supabase/client.ts
 import { createBrowserClient } from '@supabase/ssr';
+import type { SupabaseClient } from '@supabase/supabase-js';
+
+let cachedClient: SupabaseClient | null = null;
 
 export function createBrowserClientHelper() {
-  return createBrowserClient(
+  if (cachedClient) return cachedClient;
+  cachedClient = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
+  return cachedClient;
 }
 ```
 
@@ -142,7 +147,9 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|json|woff2|pdf)$).*)',
+  ],
 };
 ```
 
@@ -432,7 +439,7 @@ describe('SyncEngine Delta Builder', () => {
     ];
     const pending = prepareSyncDelta(items);
     expect(pending).toHaveLength(1);
-    expect(pending[0].id].toBe('1');
+    expect(pending[0].id).toBe('1');
   });
 });
 ```
