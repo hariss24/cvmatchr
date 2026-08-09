@@ -1,7 +1,7 @@
 # Spécification Technique : Base de Données, Comptes Utilisateurs & Google Auth (Supabase)
 
 > **Date** : 10 Août 2026  
-> **Statut** : Approuvé  
+> **Statut** : Approuvé & Enrichi  
 > **Contexte** : Levée de la contrainte majeure n°1 de `LIMITES.md` (mono-utilisateur, données uniquement en local dans IndexedDB, compteurs contournables, clés exposées).
 
 ---
@@ -15,6 +15,7 @@ L'objectif de ce projet est d'ajouter un système complet d'authentification uti
 2. **Synchronisation Hybride (Cloud + Local)** : Dexie (IndexedDB) reste le cache local réactif à 0 ms. Les modifications (CV, Lettres, Candidatures, Offres) sont poussées en arrière-plan vers Supabase PostgreSQL.
 3. **Sécurité PostgreSQL (RLS)** : Activation du Row Level Security sur toutes les tables pour garantir qu'un utilisateur n'accède qu'à ses propres données (`auth.uid() = user_id`).
 4. **Compteur API Serveur anti-triche** : Suivi des quotas d'appels IA sur Supabase côté serveur pour empêcher la réinitialisation des quotas par vidage du cache local.
+5. **Gestion des Suppressions & Sync (Soft Delete)** : Ajout d'une colonne `deleted_at` pour éviter qu'un élément supprimé localement ne réapparaisse lors d'un PULL cloud.
 
 ---
 
@@ -30,7 +31,7 @@ CREATE TABLE public.profiles (
   display_name TEXT,
   avatar_url TEXT,
   ai_provider TEXT DEFAULT 'gemini',
-  custom_ai_key TEXT, -- Chiffrée ou stockée sur le serveur
+  custom_ai_key TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -42,6 +43,7 @@ CREATE TABLE public.resumes (
   title TEXT NOT NULL,
   content JSONB NOT NULL, -- Structure JSON du CV (schema zod)
   is_primary BOOLEAN DEFAULT FALSE,
+  deleted_at TIMESTAMPTZ DEFAULT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -54,6 +56,7 @@ CREATE TABLE public.letters (
   company TEXT,
   job_title TEXT,
   content JSONB NOT NULL,
+  deleted_at TIMESTAMPTZ DEFAULT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -68,6 +71,7 @@ CREATE TABLE public.applications (
   status TEXT DEFAULT 'draft',
   notes TEXT,
   applied_at TIMESTAMPTZ,
+  deleted_at TIMESTAMPTZ DEFAULT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -77,6 +81,7 @@ CREATE TABLE public.saved_jobs (
   id TEXT PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   job_data JSONB NOT NULL,
+  deleted_at TIMESTAMPTZ DEFAULT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -91,23 +96,59 @@ CREATE TABLE public.api_usage (
 );
 
 -- INDEX DE PERFORMANCE
-CREATE INDEX idx_resumes_user ON public.resumes(user_id);
-CREATE INDEX idx_letters_user ON public.letters(user_id);
-CREATE INDEX idx_applications_user ON public.applications(user_id);
-CREATE INDEX idx_saved_jobs_user ON public.saved_jobs(user_id);
+CREATE INDEX idx_resumes_user ON public.resumes(user_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_letters_user ON public.letters(user_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_applications_user ON public.applications(user_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_saved_jobs_user ON public.saved_jobs(user_id) WHERE deleted_at IS NULL;
 CREATE INDEX idx_api_usage_user_period ON public.api_usage(user_id, period_start);
 ```
 
-### Directives RLS (Row Level Security)
+### Trigger de création automatique de profil lors de l'inscription Google
 
-Pour chaque table (`profiles`, `resumes`, `letters`, `applications`, `saved_jobs`, `api_usage`), RLS est activé avec la règle stricte :
 ```sql
-ALTER TABLE public.resumes ENABLE ROW LEVEL SECURITY;
+-- Trigger d'auto-création de profil utilisateur
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, display_name, avatar_url)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', NEW.email),
+    NEW.raw_user_meta_data->>'avatar_url'
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    display_name = EXCLUDED.display_name,
+    avatar_url = EXCLUDED.avatar_url,
+    updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE POLICY "Users can only read/write their own resumes"
-ON public.resumes FOR ALL
-USING (auth.uid() = user_id)
-WITH CHECK (auth.uid() = user_id);
+CREATE OR REPLACE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+```
+
+### Directives RLS (Row Level Security) exhaustives
+
+```sql
+-- Activer RLS sur toutes les tables
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.resumes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.letters ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.saved_jobs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.api_usage ENABLE ROW LEVEL SECURITY;
+
+-- Politiques de sécurité (Chaque utilisateur n'accède qu'à ses données)
+CREATE POLICY "Profiles access" ON public.profiles FOR ALL USING (auth.uid() = id);
+CREATE POLICY "Resumes access" ON public.resumes FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Letters access" ON public.letters FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Applications access" ON public.applications FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Saved jobs access" ON public.saved_jobs FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "API Usage access" ON public.api_usage FOR ALL USING (auth.uid() = user_id);
 ```
 
 ---
@@ -130,10 +171,10 @@ WITH CHECK (auth.uid() = user_id);
 ## 4. Moteur de Synchronisation Hybride (`SyncEngine`)
 
 ### Fonctionnement
-1. **Écriture locale instantanée** : L'utilisateur crée ou modifie un CV. L'action met à jour Dexie (`db.ts`) immédiatement avec `synced_at = null` ou `updated_at = NOW()`.
+1. **Écriture locale instantanée** : L'utilisateur crée, modifie ou supprime un CV. L'action met à jour Dexie (`db.ts`) immédiatement avec `synced_at = null` ou `deleted_at = NOW()`.
 2. **Synchronisation asynchrone** : Le service `SyncEngine` s'exécute en arrière-plan (quand `user` est connecté et `navigator.onLine == true`) :
    - **Push** : Envoie les enregistrements où `synced_at < updated_at` vers Supabase via `upsert`.
-   - **Pull** : Récupère les nouveautés de Supabase plus récentes que le dernier timestamp de sync local, et met à jour Dexie.
+   - **Pull** : Récupère les nouveautés de Supabase plus récentes que le dernier timestamp de sync local, et met à jour Dexie (ou supprime localement si `deleted_at` est renseigné).
 3. **Résolution des conflits** : Stratégie *Last-Write-Wins* basée sur la date ISO `updated_at`.
 
 ---
