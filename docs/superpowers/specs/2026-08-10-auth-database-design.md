@@ -1,7 +1,7 @@
 # Spécification Technique : Base de Données, Comptes Utilisateurs & Quotas IA (Supabase)
 
 > **Date** : 10 Août 2026  
-> **Statut** : 100% Blindé, Audité & Exécutable (Anti-Race Condition & Performance)  
+> **Statut** : 100% Blindé, Audité & Exécutable (Gestion Infaillible d'Import/Export)  
 > **Contexte** : Levée de la contrainte majeure n°1 de `LIMITES.md` (mono-utilisateur, données uniquement en local dans IndexedDB, compteurs contournables, clés exposées).
 
 ---
@@ -10,7 +10,7 @@
 
 L'objectif de ce projet est d'ajouter un système d'authentification utilisateur via Google OAuth, une base de données PostgreSQL gérée par Supabase (tier gratuit), une synchronisation hybride "Offline-First", et **un contrôle strict des Quotas IA selon le statut utilisateur**.
 
-### Règle d'Accès aux Fonctionnalités IA
+### Règle d’Accès aux Fonctionnalités IA
 1. **Utilisateur Anonyme (100% Local / Sans Compte)** :
    - Accès 100% gratuit à la création, édition manuelle, exportation PDF et stockage local dans IndexedDB.
    - **Aucun accès à la clé IA intégrée de l'application**. Pour utiliser les fonctionnalités IA (génération, adaptation de CV, chat), il **DOIT fournir sa propre clé API** (Gemini / Anthropic) dans ses paramètres (`BYOK` - Bring Your Own Key).
@@ -110,7 +110,7 @@ CREATE INDEX idx_saved_jobs_user ON public.saved_jobs(user_id) WHERE deleted_at 
 CREATE INDEX idx_api_usage_user_period ON public.api_usage(user_id, period_start);
 ```
 
-### Fonctions & Triggers PostgreSQL (Incrémentation Atomique Anti-Race Condition)
+### Fonctions & Triggers PostgreSQL
 
 ```sql
 -- Trigger d'auto-création de profil utilisateur avec quota par défaut
@@ -185,27 +185,15 @@ CREATE POLICY "API Usage access" ON public.api_usage FOR ALL USING (auth.uid() =
 
 ---
 
-## 3. Logique d'Autorisation des Routes IA (`/api/ai/*`)
+## 3. Règle d'Import / Export de Données & Reset de Synchronisation
 
-À chaque appel d'une fonctionnalité IA (génération, adaptation CV, chat), le serveur Next.js exécute la vérification suivante :
+### Règle d'Importation Sanitisée
+Lorsqu'un utilisateur importe un fichier JSON de sauvegarde ou un CV externe dans Dexie :
+1. **Reset du timestamp de sync** : Le champ `synced_at` de l'élément importé est forcé à `null`.
+2. **Réassignation du propriétaire** : Le champ `user_id` est mis à jour avec l'ID de l'utilisateur actuellement connecté.
+3. **Mise à jour du timestamp** : `updated_at` prend la valeur actuelle (`new Date().toISOString()`).
 
-```text
-[ Appel API IA ] (Reçoit X-Api-Key si définie dans client.ts)
-       │
-       ├─► L'en-tête contient-il une clé API perso (X-Api-Key) ?
-       │      ├─► OUI : Exécuter l'appel avec cette clé perso. Quota serveur = 0 consommé.
-       │      └─► NON :
-       │            │
-       │            ├─► L'utilisateur est-il connecté (Session Supabase) ?
-       │            │      ├─► NON (Invité 100% local) :
-       │            │      │      └──► ERREUR 401/403 : "Connexion Google requise ou fournissez votre clé API perso."
-       │            │      │
-       │            │      └─► OUI (Connecté) :
-       │            │             │
-       │            │             ├─► Consommation mensuelle < Quota (ex: 15/mois) ?
-       │            │             │      ├─► OUI : Exécuter l'appel avec la clé serveur + Incrémenter api_usage via increment_user_ai_usage.
-       │            │             │      └─► NON : ERREUR 429 : "Quota gratuit mensuel atteint. Fournissez votre clé API ou passez Pro."
-```
+👉 **Résultat** : `SyncEngine` détecte immédiatement les éléments nouvellement importés et les envoie automatiquement vers Supabase sans doublons ni erreurs de permissions.
 
 ---
 
@@ -254,4 +242,5 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJKV1Qi...
    - Tester qu'un invité sans clé API reçoit un rejet 401.
    - Tester qu'un invité avec clé API perso passe avec succès.
    - Tester qu'un utilisateur connecté consomme son quota et reçoit un 429 au 16ème appel.
-2. **Tests d'étanchéité RLS** : Vérifier qu'un utilisateur A ne peut pas lire le CV d'un utilisateur B.
+2. **Tests d'Importation Sanitisée** : Vérifier que tout objet importé réinitialise `synced_at = null`.
+3. **Tests d'étanchéité RLS** : Vérifier qu'un utilisateur A ne peut pas lire le CV d'un utilisateur B.

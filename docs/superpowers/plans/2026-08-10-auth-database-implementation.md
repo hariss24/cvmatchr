@@ -413,7 +413,7 @@ git commit -m "feat(ai): ajout du moteur d'évaluation des quotas et d'autorisat
 
 ---
 
-### Task 4: Dexie Schema Migration v13 & Sync Engine
+### Task 4: Dexie Schema Migration v13 & Sync Engine (avec Sanitization Import/Export)
 
 **Files:**
 - Modify: `web/src/lib/storage/db.ts`
@@ -422,16 +422,16 @@ git commit -m "feat(ai): ajout du moteur d'évaluation des quotas et d'autorisat
 
 **Interfaces:**
 - Consumes: Dexie IndexedDB tables (`history`, `applications`, `jobs`), `@supabase/ssr` client
-- Produces: Dexie v13 schema update, `prepareSyncDelta()`, `SyncEngine.syncAll()`
+- Produces: Dexie v13 schema update, `prepareSyncDelta()`, `sanitizeImportedItem()`, `SyncEngine.syncAll()`
 
-- [ ] **Step 1: Write failing test for sync delta builder**
+- [ ] **Step 1: Write failing test for sync delta builder & import sanitizer**
 
 ```typescript
 // web/tests/unit/syncEngine.test.ts
 import { describe, it, expect } from 'vitest';
-import { prepareSyncDelta } from '../../src/lib/storage/syncEngine';
+import { prepareSyncDelta, sanitizeImportedItem } from '../../src/lib/storage/syncEngine';
 
-describe('SyncEngine Delta Builder', () => {
+describe('SyncEngine Delta & Import Sanitizer', () => {
   it('identifies unsynced items where synced_at is null or older than updated_at', () => {
     const items = [
       { id: '1', updated_at: '2026-08-10T00:00:00Z', synced_at: null },
@@ -440,6 +440,13 @@ describe('SyncEngine Delta Builder', () => {
     const pending = prepareSyncDelta(items);
     expect(pending).toHaveLength(1);
     expect(pending[0].id).toBe('1');
+  });
+
+  it('resets synced_at to null and updates timestamp when sanitizing imported items', () => {
+    const raw = { id: 'old-1', synced_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z' };
+    const sanitized = sanitizeImportedItem(raw);
+    expect(sanitized.synced_at).toBeNull();
+    expect(new Date(sanitized.updated_at).getTime()).toBeGreaterThan(new Date('2026-01-01').getTime());
   });
 });
 ```
@@ -476,6 +483,14 @@ export function prepareSyncDelta<T extends SyncableItem>(items: T[]): T[] {
     return new Date(item.updated_at).getTime() > new Date(item.synced_at).getTime();
   });
 }
+
+export function sanitizeImportedItem<T extends SyncableItem>(item: T): T {
+  return {
+    ...item,
+    synced_at: null,
+    updated_at: new Date().toISOString(),
+  };
+}
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -487,7 +502,7 @@ Expected: PASS
 
 ```bash
 git add web/src/lib/storage/db.ts web/src/lib/storage/syncEngine.ts web/tests/unit/syncEngine.test.ts
-git commit -m "feat(sync): migration Dexie v13 et moteur delta de synchronisation"
+git commit -m "feat(sync): migration Dexie v13, sanitization import/export et moteur delta"
 ```
 
 ---
