@@ -3,7 +3,7 @@
 // Usage : node scripts/build-boards-workday.mjs [--collection=CC-MAIN-2026-30] [--complet]
 //   --complet   ignore la TTL du mémo et reteste tous les locataires
 //
-// Met à jour : web/src/lib/jobs/data/boards-fr.json et boards-fr-testes.json
+// Met à jour : web/src/lib/jobs/data/boards-fr.json et scripts/data/boards-fr-testes.json
 //
 // Séparé de build-boards-fr.mjs pour une raison de fond : les quatre ATS de la
 // brique 1 se découvrent en DEVINANT un slug depuis un nom d'entreprise, ce que
@@ -25,8 +25,9 @@ import { enLot } from "./boards/lot.mjs";
 import { cle, mois, estFrais, trierMemo, fusionner } from "./boards/memo.mjs";
 
 const OUT_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "web", "src", "lib", "jobs", "data");
+const MEMO_DIR = join(dirname(fileURLToPath(import.meta.url)), "data");
 const F_INDEX = join(OUT_DIR, "boards-fr.json");
-const F_MEMO = join(OUT_DIR, "boards-fr-testes.json");
+const F_MEMO = join(MEMO_DIR, "boards-fr-testes.json");
 
 /**
  * Cadence. Workday n'a pas bridé pendant les essais, mais il fait tomber des
@@ -138,6 +139,7 @@ for (const t of trouvailles) {
 }
 
 mkdirSync(OUT_DIR, { recursive: true });
+mkdirSync(MEMO_DIR, { recursive: true });
 writeFileSync(F_INDEX, `${JSON.stringify(nouvelIndex, null, 2)}\n`, "utf8");
 writeFileSync(F_MEMO, `${JSON.stringify(trierMemo([...memoParCle.values()]), null, 2)}\n`, "utf8");
 

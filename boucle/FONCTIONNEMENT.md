@@ -3,7 +3,7 @@
 Document d'explication, écrit pour être lu par quelqu'un qui ne code pas.
 Pour piloter la boucle au quotidien, la fiche courte est `README.md`.
 Pour les raisons de chaque choix de conception,
-`docs/superpowers/specs/2026-07-31-boucle-autonome-design.md`.
+`docs/archive/superpowers/specs/2026-07-31-boucle-autonome-design.md`.
 
 ---
 

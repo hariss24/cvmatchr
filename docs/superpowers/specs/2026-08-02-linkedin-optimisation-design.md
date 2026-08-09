@@ -3,7 +3,7 @@
 > Spec de conception — 02/08/2026
 > Traite la première ligne de `BACKLOG.md` § À planifier : « Manque fonctionnel —
 > optimisation de profil LinkedIn (analyse + suggestions) ». Constat source :
-> `boucle/constats/2026-08-01-manques-fonctionnels.md` §4 — présente chez 2 produits
+> `docs/archive/boucle/constats/2026-08-01-manques-fonctionnels.md` §4 — présente chez 2 produits
 > avec un outil dédié (Jobscan, Careerflow).
 
 ## 1. Problème

@@ -3,7 +3,7 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans (ou le protocole
 > du loop dans `REWRITE_PROGRESS.md`) to implement this plan task-by-task. Steps use checkbox
 > (`- [ ]`) syntax for tracking.
-> Cadrage parent : `docs/superpowers/plans/2026-07-04-migration-react-pdf.md` (Phase 1).
+> Cadrage parent : `docs/archive/2026-07-04-migration-react-pdf.md` (Phase 1).
 
 **Goal:** générer un PDF valide depuis `Resume`/`Letter` (JSON) **en Node, sans Chromium**,
 avec le template **Graphique** porté visuellement en React PDF, le booster ATS intégré, et des

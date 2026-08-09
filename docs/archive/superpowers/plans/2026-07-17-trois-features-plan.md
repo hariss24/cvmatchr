@@ -8,7 +8,7 @@
 
 **Goal:** Livrer trois features indépendantes de `TODO.md` : vider entreprise/poste au « Nouveau CV », analyse ATS en un clic (IA directe avec fallback local), et pan à la souris dans l'aperçu PDF.
 
-**Architecture:** Trois changements chirurgicaux dans des fichiers disjoints (`TopBar.tsx`, `AtsPanel.tsx`, `PdfPreview.tsx` + `globals.css`). Aucun nouveau module, aucune nouvelle dépendance. Spec validée : `docs/superpowers/specs/2026-07-17-trois-features-ui-ats-design.md`.
+**Architecture:** Trois changements chirurgicaux dans des fichiers disjoints (`TopBar.tsx`, `AtsPanel.tsx`, `PdfPreview.tsx` + `globals.css`). Aucun nouveau module, aucune nouvelle dépendance. Spec validée : `docs/archive/superpowers/specs/2026-07-17-trois-features-ui-ats-design.md`.
 
 **Tech Stack:** Next.js 16 / React 19 / TypeScript strict, Zustand (`docStore`), Vitest.
 

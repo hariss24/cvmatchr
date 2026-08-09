@@ -3,7 +3,7 @@
 > Spec de conception — 01/08/2026
 > Traite la ligne préfixée `!` de `BACKLOG.md` § À planifier : « Poids de `zod`
 > (~283 Ko) chargé sur **toutes** les pages via `docStore.ts` → `lib/resume/schema.ts`
-> ». Constat source : `boucle/journal/2026-08-01-batisseur.md`, qui pointait cette
+> ». Constat source : `docs/archive/boucle/journal/2026-08-01-batisseur.md`, qui pointait cette
 > cause comme raison pour laquelle `/jobs` ne descendait pas sous 700 Ko malgré le
 > plan `2026-08-01-jobs-allegement-bundle.md`.
 

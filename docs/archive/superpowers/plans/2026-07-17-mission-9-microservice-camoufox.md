@@ -162,7 +162,7 @@ __pycache__/
 
 Micro-service local appelé par CV Tailor (`web/`) quand le fetch direct est
 bloqué (LinkedIn, Indeed…). Voir la spec :
-`docs/superpowers/specs/2026-07-17-camoufox-scraper-design.md`.
+`docs/archive/superpowers/specs/2026-07-17-camoufox-scraper-design.md`.
 
 ## Installation (une fois)
 

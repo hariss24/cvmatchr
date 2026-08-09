@@ -742,7 +742,7 @@ Expected: tous les tests verts (les specs existantes, dont `pack.spec.ts`, ne do
 
 - [ ] **Step 4 : Journaliser dans WORK_HISTORY.md**
 
-Ajouter une entrée datée 2026-07-11 dans `WORK_HISTORY.md` (section Journal), résumant : profil « Mes informations » (B) — table Dexie v5, page `/profil` autosave, helpers `applyProfileToResume`/`resolveLetterIdentity`, câblage CV vierge (Effacer/Nouveau CV/1er lancement) + lettre (profil prioritaire, fallback CV). Mentionner le quick win A déjà livré (autofill navigateur, commit `d455335`) et que la spec est `docs/superpowers/specs/2026-07-11-profil-mes-informations-design.md`.
+Ajouter une entrée datée 2026-07-11 dans `WORK_HISTORY.md` (section Journal), résumant : profil « Mes informations » (B) — table Dexie v5, page `/profil` autosave, helpers `applyProfileToResume`/`resolveLetterIdentity`, câblage CV vierge (Effacer/Nouveau CV/1er lancement) + lettre (profil prioritaire, fallback CV). Mentionner le quick win A déjà livré (autofill navigateur, commit `d455335`) et que la spec est `docs/archive/superpowers/specs/2026-07-11-profil-mes-informations-design.md`.
 
 - [ ] **Step 5 : Commit**
 

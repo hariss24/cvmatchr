@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16 (App Router, Turbopack), React 19, TypeScript strict, Zustand, CSS global unique (`src/app/globals.css`), Vitest, Playwright. **Aucune** bibliothèque d'édition ajoutée.
 
-**Spec de référence:** `docs/superpowers/specs/2026-07-10-pack-editeur-etiquettes-design.md`
+**Spec de référence:** `docs/archive/superpowers/specs/2026-07-10-pack-editeur-etiquettes-design.md`
 
 ## Global Constraints
 

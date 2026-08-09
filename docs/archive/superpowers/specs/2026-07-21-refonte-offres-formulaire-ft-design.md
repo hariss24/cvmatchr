@@ -7,7 +7,7 @@
 > Indeed / LinkedIn / **France Travail**.
 >
 > **Hors périmètre** : comptes utilisateurs + base serveur (Supabase). Ce chantier
-> reste décrit dans `docs/superpowers/plans/2026-07-21-refonte-offres-multi-utilisateur.md`
+> reste décrit dans `docs/archive/superpowers/plans/2026-07-21-refonte-offres-multi-utilisateur.md`
 > (Phase 2). Le présent spec correspond à une **Phase 1 enrichie** et se termine
 > sur un point d'extension propre (profil dans le corps de requête) qui permettra
 > de brancher les comptes plus tard sans re-toucher le cœur.

@@ -214,7 +214,7 @@ sont justement toute la valeur.
 
 ### 4.1 Notation des offres
 
-`docs/superpowers/specs/2026-07-28-notation-lettres-design.md` §9 :
+`docs/archive/superpowers/specs/2026-07-28-notation-lettres-design.md` §9 :
 
 - **Les pondérations sont des hypothèses**, pas des valeurs mesurées. L'affichage du détail par critère existe précisément pour permettre de les corriger à l'usage — ce qui n'a pas encore été fait.
 - **Les offres non-France-Travail sont notées sur le seul texte** (~52 % du volume) : pas de code métier, donc pas de filtre anti-bruit.

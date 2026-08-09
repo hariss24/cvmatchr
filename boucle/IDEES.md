@@ -41,13 +41,13 @@ vérifié résolu par lecture directe du fichier — plus une idée à classer n
 *Mise à jour du 03/08/2026 (Arbitre) : les trois idées du constat
 `2026-08-02-cout-appels-externes.md`, ajoutées non notées par l'Éclaireur le 02/08, sont
 maintenant notées et intégrées au classement. Le reste des notes n'a pas bougé — voir
-`boucle/journal/2026-08-03-arbitre.md` pour le détail des égalités tranchées.*
+`docs/archive/boucle/journal/2026-08-03-arbitre.md` pour le détail des égalités tranchées.*
 
 *Mise à jour du 03/08/2026 (Arbitre, deuxième réveil) : les trois idées du constat
 `2026-08-03-hygiene-du-depot.md`, ajoutées non notées par l'Éclaireur, sont maintenant
 notées et intégrées au classement. Les 14 idées déjà notées gardent leurs notes et
 justifications à l'identique, seule leur numérotation a changé — voir
-`boucle/journal/2026-08-03-arbitre-2.md` pour le détail des égalités tranchées.*
+`docs/archive/boucle/journal/2026-08-03-arbitre-2.md` pour le détail des égalités tranchées.*
 
 *Mise à jour du 04/08/2026 (Arbitre) : cinq idées notées et intégrées — deux du constat
 `2026-08-04-performance.md` (aperçu PDF de `/`, chargement Monaco/CDN) et trois du
@@ -57,21 +57,21 @@ est retirée du classement : remesurée par l'Éclaireur à ~2,03 s en moyenne c
 seuil de 2 s, dépassement résiduel réduit à un facteur ~1,02 (contre ~2 le 31/07) — les
 deux plans déjà livrés en ont eu raison, ce n'est plus un manque actionnable. Les 17
 idées déjà notées gardent leurs notes et justifications à l'identique, seule leur
-numérotation a changé — voir `boucle/journal/2026-08-04-arbitre.md` pour le détail des
+numérotation a changé — voir `docs/archive/boucle/journal/2026-08-04-arbitre.md` pour le détail des
 égalités tranchées.*
 
 *Mise à jour du 04/08/2026 (Arbitre, deuxième réveil) : une idée notée et intégrée —
 celle du constat `2026-08-04-briques-externes.md` (remplacer les sélecteurs CSS de
 `scrapeJobText` par `@mozilla/readability`), laissée non notée par l'Éclaireur en fin de
 fichier. Les 21 idées déjà notées gardent leurs notes et justifications à l'identique —
-voir `boucle/journal/2026-08-04-arbitre-2.md` pour le détail.*
+voir `docs/archive/boucle/journal/2026-08-04-arbitre-2.md` pour le détail.*
 
 *Mise à jour du 05/08/2026 (Arbitre) : trois idées notées et intégrées — celles du
 constat `2026-08-05-manques-fonctionnels-3.md` (traduction du CV/lettre, publication en
 ligne, relecture humaine payante), laissées non notées par l'Éclaireur en fin de
 fichier. Les 22 idées déjà notées gardent leurs notes et justifications à l'identique,
 seule leur numérotation a changé pour accueillir les trois nouvelles — voir
-`boucle/journal/2026-08-05-arbitre.md` pour le détail des égalités tranchées.*
+`docs/archive/boucle/journal/2026-08-05-arbitre.md` pour le détail des égalités tranchées.*
 
 *Mise à jour du 06/08/2026 (Arbitre) : quatre idées notées et intégrées — celles du
 constat `2026-08-05-accessibilite.md` (labels de formulaire non associés, contraste
@@ -82,7 +82,7 @@ justifications à l'identique, seule leur numérotation a changé pour accueilli
 quatre nouvelles. À l'occasion de cette renumérotation, quatre renvois internes déjà
 erronés avant ce réveil (numéros de croisement stales de rounds antérieurs, pointant
 vers la mauvaise idée après des insertions passées non répercutées partout) ont été
-corrigés pour pointer vers la bonne idée — voir `boucle/journal/2026-08-06-arbitre.md`
+corrigés pour pointer vers la bonne idée — voir `docs/archive/boucle/journal/2026-08-06-arbitre.md`
 pour le détail complet des égalités tranchées et des corrections de renvoi.*
 
 *Mise à jour du 07/08/2026 (Arbitre) : trois idées notées et intégrées — celles du
@@ -91,7 +91,7 @@ distinguer les données d'exemple des données réelles, sortir l'import texte d
 Expert), laissées non notées par l'Éclaireur en fin d'`IDEES.md` (section « À noter »,
 désormais supprimée une fois son contenu intégré). Les 29 idées déjà notées gardent
 leurs notes et justifications à l'identique, seule leur numérotation a changé pour
-accueillir les trois nouvelles — voir `boucle/journal/2026-08-07-arbitre.md` pour le
+accueillir les trois nouvelles — voir `docs/archive/boucle/journal/2026-08-07-arbitre.md` pour le
 détail des égalités tranchées.*
 
 *Mise à jour du 07/08/2026 (Arbitre, deuxième réveil) : deux idées notées et intégrées
@@ -101,7 +101,7 @@ contexte dans l'offre et dans le CV), laissées non notées par l'Éclaireur en 
 d'`IDEES.md` (section « À noter », désormais supprimée une fois son contenu intégré).
 Les 32 idées déjà notées gardent leurs notes et justifications à l'identique, seule leur
 numérotation a changé pour accueillir les deux nouvelles (insérées en positions 11 et
-15) — voir `boucle/journal/2026-08-07-arbitre-2.md` pour le détail des égalités
+15) — voir `docs/archive/boucle/journal/2026-08-07-arbitre-2.md` pour le détail des égalités
 tranchées et la table de correspondance complète ancienne/nouvelle numérotation.*
 
 *Mise à jour du 07/08/2026 (Arbitre, troisième réveil) : quatre idées notées et intégrées
@@ -111,7 +111,7 @@ non notées par l'Éclaireur en fin d'`IDEES.md` (section « À noter », désor
 une fois son contenu intégré). Les 34 idées déjà notées gardent leurs notes et
 justifications à l'identique, seule leur numérotation a changé pour accueillir les quatre
 nouvelles (insérées en positions 12, 24, 28 et 38) — voir
-`boucle/journal/2026-08-07-arbitre-3.md` pour le détail des égalités tranchées et la table
+`docs/archive/boucle/journal/2026-08-07-arbitre-3.md` pour le détail des égalités tranchées et la table
 de correspondance complète ancienne/nouvelle numérotation.*
 
 *Mise à jour du 08/08/2026 (Arbitre) : six idées notées et intégrées — celles du constat
@@ -123,7 +123,7 @@ notées par l'Éclaireur en fin d'`IDEES.md` (section « À noter », désormais
 fois son contenu intégré) — premier passage de la boucle sur le domaine sécurité. Les 38
 idées déjà notées gardent leurs notes et justifications à l'identique, seule leur
 numérotation a changé pour accueillir les six nouvelles (insérées en positions 3, 5, 24,
-29, 31 et 37) — voir `boucle/journal/2026-08-08-arbitre.md` pour le détail des égalités
+29, 31 et 37) — voir `docs/archive/boucle/journal/2026-08-08-arbitre.md` pour le détail des égalités
 tranchées et la table de correspondance complète ancienne/nouvelle numérotation.*
 
 *Mise à jour du 08/08/2026 (Arbitre, deuxième réveil) : deux idées notées et intégrées —
@@ -133,7 +133,7 @@ dans l'extension autofill), laissées non notées par l'Éclaireur en fin d'`IDE
 (section « À noter », désormais supprimée une fois son contenu intégré). Les 44 idées
 déjà notées gardent leurs notes et justifications à l'identique, seule leur numérotation
 a changé pour accueillir les deux nouvelles (insérées en positions 18 et 20) — voir
-`boucle/journal/2026-08-08-arbitre-2.md` pour le détail des égalités tranchées et la
+`docs/archive/boucle/journal/2026-08-08-arbitre-2.md` pour le détail des égalités tranchées et la
 table de correspondance complète ancienne/nouvelle numérotation.*
 
 *Mise à jour du 09/08/2026 (Arbitre) : une idée notée et intégrée — l'identification du
@@ -149,12 +149,12 @@ première, facteur ~1,11 confirmé pour la seconde) sans changement de score, su
 recommandation explicite de l'Éclaireur. Les 46 idées déjà notées gardent leurs notes
 et justifications à l'identique, seule leur numérotation a changé à partir de la
 position 35 pour accueillir la nouvelle idée en position 34 — voir
-`boucle/journal/2026-08-09-arbitre.md` pour le détail complet et la table de
+`docs/archive/boucle/journal/2026-08-09-arbitre.md` pour le détail complet et la table de
 correspondance ancienne/nouvelle numérotation.*
 
 ### 1. Poser un choix explicite à l'arrivée sur un document neuf (importer / exemple / zéro) — 14/20
 
-Constat détaillé : `boucle/constats/2026-08-06-parcours-nouvel-arrivant.md` §5 (chantier 3).
+Constat détaillé : `docs/archive/boucle/constats/2026-08-06-parcours-nouvel-arrivant.md` §5 (chantier 3).
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -166,7 +166,7 @@ Constat détaillé : `boucle/constats/2026-08-06-parcours-nouvel-arrivant.md` §
 
 ### 2. Associer les labels aux champs du formulaire de CV (36 champs muets pour un lecteur d'écran) — 14/20
 
-Constat détaillé : `boucle/constats/2026-08-05-accessibilite.md` §1.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-05-accessibilite.md` §1.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -178,7 +178,7 @@ Constat détaillé : `boucle/constats/2026-08-05-accessibilite.md` §1.
 
 ### 3. Protéger `/api/jobs/logos` contre le SSRF — 14/20
 
-Constat détaillé : `boucle/constats/2026-08-08-securite.md` §1.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-08-securite.md` §1.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -200,7 +200,7 @@ Constat détaillé : `boucle/constats/2026-08-08-securite.md` §1.
 
 ### 5. Mettre à jour les dépendances à vulnérabilité connue — 13/20
 
-Constat détaillé : `boucle/constats/2026-08-08-securite.md` §3.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-08-securite.md` §3.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -222,7 +222,7 @@ Constat détaillé : `boucle/constats/2026-08-08-securite.md` §3.
 
 ### 7. `/pack` : dédupliquer `/api/extract-meta` et sauter l'appel quand l'entreprise/le poste sont déjà connus — 13/20
 
-Constat détaillé : `boucle/constats/2026-08-02-cout-appels-externes.md` §1-2.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-02-cout-appels-externes.md` §1-2.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -234,7 +234,7 @@ Constat détaillé : `boucle/constats/2026-08-02-cout-appels-externes.md` §1-2.
 
 ### 8. Remplacer le texte blanc par le jeton `--on-orange` sur les boutons d'action orange (`--cta-grad`) — 13/20
 
-Constat détaillé : `boucle/constats/2026-08-05-accessibilite.md` §3.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-05-accessibilite.md` §3.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -246,7 +246,7 @@ Constat détaillé : `boucle/constats/2026-08-05-accessibilite.md` §3.
 
 ### 9. Distinguer les données d'exemple des données réelles, et avertir avant l'export d'un CV encore factice — 13/20
 
-Constat détaillé : `boucle/constats/2026-08-06-parcours-nouvel-arrivant.md` §1-3 (chantier 1).
+Constat détaillé : `docs/archive/boucle/constats/2026-08-06-parcours-nouvel-arrivant.md` §1-3 (chantier 1).
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -258,7 +258,7 @@ Constat détaillé : `boucle/constats/2026-08-06-parcours-nouvel-arrivant.md` §
 
 ### 10. Assistant de négociation salariale — 13/20
 
-Constat détaillé : `boucle/constats/2026-08-03-manques-fonctionnels-2.md` §1.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-03-manques-fonctionnels-2.md` §1.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -270,7 +270,7 @@ Constat détaillé : `boucle/constats/2026-08-03-manques-fonctionnels-2.md` §1.
 
 ### 11. Retarder ou alléger le premier aperçu PDF de `/` au chargement — 12/20
 
-Constat détaillé : `boucle/constats/2026-08-04-performance.md`. Mesure sous Slow 4G +
+Constat détaillé : `docs/archive/boucle/constats/2026-08-04-performance.md`. Mesure sous Slow 4G +
 CPU x4 (condition mobile combinée) jusqu'au premier `<canvas>` d'aperçu réellement
 rendu par `PdfPreview.tsx` : **~9,2 s en moyenne (9061-9512 ms)**, contre un seuil
 `MISSION.md` de 2,5 s pour l'éditeur — **dépassement de facteur ~3,7**, le plus sévère
@@ -280,7 +280,7 @@ poids : deux chunks non lazy-loadés (polices PDF 1 443 775 o + moteur PDF.js
 `PreviewPane.tsx`, sans action de l'utilisateur. Trois pistes possibles, aucune
 tranchée par le constat (aperçu HTML/CSS provisoire, préchargement réordonné,
 réduction du jeu de polices par défaut). Remesuré le 09/08/2026
-(`boucle/constats/2026-08-09-performance-2.md`) : **~8977 ms en moyenne (8930, 9025,
+(`docs/archive/boucle/constats/2026-08-09-performance-2.md`) : **~8977 ms en moyenne (8930, 9025,
 8976)**, écart de 2,6 % avec le 04/08 — dans le bruit de mesure, aucun commit n'ayant
 touché les fichiers concernés depuis. Dépassement de facteur ~3,6 confirmé inchangé.
 
@@ -294,7 +294,7 @@ touché les fichiers concernés depuis. Dépassement de facteur ~3,6 confirmé i
 
 ### 12. Restaurer le focus clavier sur `/jobs` et rendre l'aperçu PDF focusable — 12/20
 
-Constat détaillé : `boucle/constats/2026-08-05-accessibilite.md` §4-5.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-05-accessibilite.md` §4-5.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -306,7 +306,7 @@ Constat détaillé : `boucle/constats/2026-08-05-accessibilite.md` §4-5.
 
 ### 13. Afficher l'ATS détecté de l'entreprise ciblée, avec un conseil de mise en forme adapté — 12/20
 
-Constat détaillé : `boucle/constats/2026-08-07-manques-fonctionnels-4.md` § Chantiers
+Constat détaillé : `docs/archive/boucle/constats/2026-08-07-manques-fonctionnels-4.md` § Chantiers
 proposés, point 2.
 
 | Critère | Note | Justification |
@@ -319,7 +319,7 @@ proposés, point 2.
 
 ### 14. Sortir `.ats-mid` du figement hors thème dans le panneau ATS — en faire un jeton qui varie comme `--success`/`--error` — 12/20
 
-Constat détaillé : `boucle/constats/2026-08-07-coherence-visuelle.md` §3.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-07-coherence-visuelle.md` §3.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -341,7 +341,7 @@ Constat détaillé : `boucle/constats/2026-08-07-coherence-visuelle.md` §3.
 
 ### 16. Traduction du CV/lettre dans une autre langue — 12/20 — *estimation Facilité peu fiable*
 
-Constat détaillé : `boucle/constats/2026-08-05-manques-fonctionnels-3.md` §1.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-05-manques-fonctionnels-3.md` §1.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -353,7 +353,7 @@ Constat détaillé : `boucle/constats/2026-08-05-manques-fonctionnels-3.md` §1.
 
 ### 17. Sortir « Importer un texte » du sous-onglet « Importer » de « Mode Expert » — 12/20
 
-Constat détaillé : `boucle/constats/2026-08-06-parcours-nouvel-arrivant.md` §4 (chantier 2).
+Constat détaillé : `docs/archive/boucle/constats/2026-08-06-parcours-nouvel-arrivant.md` §4 (chantier 2).
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -365,7 +365,7 @@ Constat détaillé : `boucle/constats/2026-08-06-parcours-nouvel-arrivant.md` §
 
 ### 18. Ajouter un export .docx du CV et de la lettre, en plus du PDF existant — 12/20 — *estimation Facilité peu fiable, sensible : suppose potentiellement l'ajout d'une dépendance npm importante*
 
-Constat détaillé : `boucle/constats/2026-08-08-manques-fonctionnels-5.md` §1.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-08-manques-fonctionnels-5.md` §1.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -377,7 +377,7 @@ Constat détaillé : `boucle/constats/2026-08-08-manques-fonctionnels-5.md` §1.
 
 ### 19. Surligner les mots-clés en contexte, dans l'offre et dans le CV — 11/20
 
-Constat détaillé : `boucle/constats/2026-08-07-manques-fonctionnels-4.md` § Chantiers
+Constat détaillé : `docs/archive/boucle/constats/2026-08-07-manques-fonctionnels-4.md` § Chantiers
 proposés, point 1.
 
 | Critère | Note | Justification |
@@ -390,7 +390,7 @@ proposés, point 1.
 
 ### 20. Générer par IA une réponse aux questions ouvertes du formulaire de candidature, dans l'extension autofill — 11/20 — *estimation Facilité peu fiable*
 
-Constat détaillé : `boucle/constats/2026-08-08-manques-fonctionnels-5.md` §2.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-08-manques-fonctionnels-5.md` §2.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -404,7 +404,7 @@ Constat détaillé : `boucle/constats/2026-08-08-manques-fonctionnels-5.md` §2.
 
 | Critère | Note | Justification |
 |---|---|---|
-| Apport | 2 | `/` reste à ~1,34 Mo (zod compris). Mesuré le 09/08/2026 (`boucle/constats/2026-08-09-performance-2.md`) : événement `load` complet à ~2774 ms, soit un facteur ~1,11 du seuil de 2,5 s — dépassement réel mais modeste, sous le facteur 2 de la règle de tranchage de `MISSION.md`. Reste à 2 : le score anticipait déjà ce cas de figure avant la mesure, et un dépassement aussi faible ne change pas l'appréciation du gain. |
+| Apport | 2 | `/` reste à ~1,34 Mo (zod compris). Mesuré le 09/08/2026 (`docs/archive/boucle/constats/2026-08-09-performance-2.md`) : événement `load` complet à ~2774 ms, soit un facteur ~1,11 du seuil de 2,5 s — dépassement réel mais modeste, sous le facteur 2 de la règle de tranchage de `MISSION.md`. Reste à 2 : le score anticipait déjà ce cas de figure avant la mesure, et un dépassement aussi faible ne change pas l'appréciation du gain. |
 | Facilité | 4 | Même modèle que le plan `/jobs` déjà livré (`import()` dynamique des modales `ImportTextModal`/`TailorModal`/`ImportPdfModal`), terrain connu. |
 | Écart | 1 | Chantier de performance pure, pas de comparaison à la concurrence pertinente. |
 | Cohérence | 4 | Le seuil de chargement de l'éditeur est un des seuils vérifiables les plus centraux de `MISSION.md` — premier écran du produit. |
@@ -422,7 +422,7 @@ Constat détaillé : `boucle/constats/2026-08-08-manques-fonctionnels-5.md` §2.
 
 ### 23. Câbler ou retirer le filtre « Cadre / Non-cadre » (`QUALIFICATION_OPTIONS`) — 11/20
 
-Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §4.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-03-hygiene-du-depot.md` §4.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -434,7 +434,7 @@ Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §4.
 
 ### 24. Performance `/pack` — poids et temps d'interactivité du `VariableEditor` — 11/20
 
-Constat détaillé : `boucle/constats/2026-08-09-performance-2.md`. **Titre corrigé par
+Constat détaillé : `docs/archive/boucle/constats/2026-08-09-performance-2.md`. **Titre corrigé par
 l'Arbitre le 09/08/2026** : la mention « Monaco/react-pdf » était fausse depuis la
 correction de route du 04/08/2026 elle-même — `/pack` (composant `VariableEditor`,
 un simple `<div contentEditable>`) n'utilise ni l'un ni l'autre, confirmé par `grep -rn
@@ -456,7 +456,7 @@ seuil : 770 985 o sur 12 fichiers, dont trois chunks concentrent 68 % du poids
 
 ### 25. Assombrir `--faint` (texte secondaire) jusqu'au seuil AA dans les deux thèmes — 11/20
 
-Constat détaillé : `boucle/constats/2026-08-05-accessibilite.md` §2.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-05-accessibilite.md` §2.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -468,7 +468,7 @@ Constat détaillé : `boucle/constats/2026-08-05-accessibilite.md` §2.
 
 ### 26. Fermer le contournement par DNS rebinding de la protection SSRF existante — 10/20
 
-Constat détaillé : `boucle/constats/2026-08-08-securite.md` §2.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-08-securite.md` §2.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -480,7 +480,7 @@ Constat détaillé : `boucle/constats/2026-08-08-securite.md` §2.
 
 ### 27. `/api/editor-chat` : élaguer l'historique et ne pas répéter un `doc_json` inchangé — 10/20
 
-Constat détaillé : `boucle/constats/2026-08-02-cout-appels-externes.md` §3. Chaque message
+Constat détaillé : `docs/archive/boucle/constats/2026-08-02-cout-appels-externes.md` §3. Chaque message
 du chat éditeur (`ChatPanel.tsx`) repart avec tout l'historique de la conversation
 (`historyRef.current`, sans limite) **et** le CV/lettre entier en JSON (`doc_json`), même
 si le document n'a pas changé depuis le tour précédent — le serveur
@@ -499,7 +499,7 @@ historique qui grossit de façon quadratique.
 
 ### 28. Correction orthographique/grammaticale dédiée avec rapport — 10/20 — *estimation Facilité peu fiable*
 
-Constat détaillé : `boucle/constats/2026-08-03-manques-fonctionnels-2.md` §3.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-03-manques-fonctionnels-2.md` §3.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -511,7 +511,7 @@ Constat détaillé : `boucle/constats/2026-08-03-manques-fonctionnels-2.md` §3.
 
 ### 29. Introduire des jetons `--radius-sm/md/lg/pill` et remplacer les 19 valeurs de `border-radius` en dur — 10/20
 
-Constat détaillé : `boucle/constats/2026-08-07-coherence-visuelle.md` §1.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-07-coherence-visuelle.md` §1.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -533,7 +533,7 @@ Constat détaillé : `boucle/constats/2026-08-07-coherence-visuelle.md` §1.
 
 ### 31. Remplacer le jeton d'authentification statique — 9/20
 
-Constat détaillé : `boucle/constats/2026-08-08-securite.md` §4.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-08-securite.md` §4.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -546,7 +546,7 @@ Constat détaillé : `boucle/constats/2026-08-08-securite.md` §4.
 ### 32. Relecture de CV par un humain (service payant) — 9/20 — *sensible : touche
 potentiellement au modèle économique*
 
-Constat détaillé : `boucle/constats/2026-08-05-manques-fonctionnels-3.md` §3.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-05-manques-fonctionnels-3.md` §3.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -558,7 +558,7 @@ Constat détaillé : `boucle/constats/2026-08-05-manques-fonctionnels-3.md` §3.
 
 ### 33. Vérifier le rate limiting du login en conditions de déploiement réelles — 9/20 — *estimation Facilité peu fiable*
 
-Constat détaillé : `boucle/constats/2026-08-08-securite.md` §5.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-08-securite.md` §5.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -570,7 +570,7 @@ Constat détaillé : `boucle/constats/2026-08-08-securite.md` §5.
 
 ### 34. Identifier le contenu des trois chunks JS/CSS les plus lourds de `/pack` avant tout chantier de réduction — 9/20
 
-Constat détaillé : `boucle/constats/2026-08-09-performance-2.md` § Chantiers proposés,
+Constat détaillé : `docs/archive/boucle/constats/2026-08-09-performance-2.md` § Chantiers proposés,
 point 3. `/pack` dépasse le seuil de 2,5 s de `MISSION.md` d'un facteur ~1,05 (idée
 n°24 ci-dessus) ; trois chunks (`3j9pm5otqxm82.js` 226 355 o, `373yfygk3klou.js`
 138 009 o, `3_qs68yr3bjte.css` 109 982 o) concentrent 68 % des 770 985 o chargés
@@ -587,7 +587,7 @@ source maps lisibles depuis un build de production.
 
 ### 35. Faire de `DEFAULT_STALE_DAYS` la seule source de vérité du délai de 30 jours — 9/20
 
-Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §3.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-03-hygiene-du-depot.md` §3.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -599,7 +599,7 @@ Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §3.
 
 ### 36. Introduire une échelle `--font-size-*` et remplacer les 20 valeurs de `font-size` en dur — 8/20
 
-Constat détaillé : `boucle/constats/2026-08-07-coherence-visuelle.md` §2.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-07-coherence-visuelle.md` §2.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -623,7 +623,7 @@ Constat détaillé : `boucle/constats/2026-08-07-coherence-visuelle.md` §2.
 un envoi programmé serveur (contact hors navigateur) ou une notification push, hors de
 l'architecture 100 % locale actuelle*
 
-Constat détaillé : `boucle/constats/2026-08-03-manques-fonctionnels-2.md` §2.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-03-manques-fonctionnels-2.md` §2.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -635,7 +635,7 @@ Constat détaillé : `boucle/constats/2026-08-03-manques-fonctionnels-2.md` §2.
 
 ### 39. Décider du sort du chargement de Monaco depuis `cdn.jsdelivr.net` — 8/20
 
-Constat détaillé : `boucle/constats/2026-08-04-performance.md`. Ouvrir l'onglet JSON
+Constat détaillé : `docs/archive/boucle/constats/2026-08-04-performance.md`. Ouvrir l'onglet JSON
 (mode Expert) de l'éditeur déclenche 15 requêtes vers un CDN externe non maîtrisé par
 CVMatchr (~4,1 Mo, dont un seul fichier de 3 669 759 o), pour 11 235 ms avant que
 l'éditeur Monaco soit utilisable, sous Slow 4G + CPU x4 — configuration par défaut du
@@ -654,7 +654,7 @@ plutôt qu'une donnée applicative.
 
 ### 40. Étoffer le Content-Security-Policy — 8/20
 
-Constat détaillé : `boucle/constats/2026-08-08-securite.md` §6.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-08-securite.md` §6.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -666,7 +666,7 @@ Constat détaillé : `boucle/constats/2026-08-08-securite.md` §6.
 
 ### 41. Supprimer les fonctions mortes de `db.ts` et `completeJson` de `clients.ts` — 8/20
 
-Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §1-2.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-03-hygiene-du-depot.md` §1-2.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -699,7 +699,7 @@ Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §1-2.
 ### 44. Compter/plafonner les appels IA comme les job-boards — 8/20 — *sensible : touche
 potentiellement à un vrai plafond produit, pas seulement un compteur*
 
-Constat détaillé : `boucle/constats/2026-08-02-cout-appels-externes.md` §4. Aucune des
+Constat détaillé : `docs/archive/boucle/constats/2026-08-02-cout-appels-externes.md` §4. Aucune des
 huit routes IA (`/api/tailor-resume`, `/api/adapt-letter`, `/api/ats-score`,
 `/api/editor-chat`, `/api/pdf-to-resume`, `/api/text-to-resume`, `/api/text-to-letter`,
 `/api/extract-meta`) n'est comptée ni limitée — `web/src/middleware.ts` ne vérifie qu'un
@@ -721,7 +721,7 @@ personnelle, tous les appels IA retombent sur la clé serveur partagée
 suppose de sortir du 100 % local, terrain voisin de « migration des données hors
 d'IndexedDB »*
 
-Constat détaillé : `boucle/constats/2026-08-05-manques-fonctionnels-3.md` §2.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-05-manques-fonctionnels-3.md` §2.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -733,7 +733,7 @@ Constat détaillé : `boucle/constats/2026-08-05-manques-fonctionnels-3.md` §2.
 
 ### 46. Remplacer les sélecteurs CSS faits main de `scrapeJobText` par `@mozilla/readability` — 7/20 — *sensible : ajout d'une dépendance npm importante, feu vert requis ; estimation Facilité peu fiable*
 
-Constat détaillé : `boucle/constats/2026-08-04-briques-externes.md` §1.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-04-briques-externes.md` §1.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -745,7 +745,7 @@ Constat détaillé : `boucle/constats/2026-08-04-briques-externes.md` §1.
 
 ### 47. Extraire une classe unique pour le bouton d'action orange (`--cta-grad`), aujourd'hui redéfini dans ~13 sélecteurs séparés — 7/20
 
-Constat détaillé : `boucle/constats/2026-08-07-coherence-visuelle.md` §4.
+Constat détaillé : `docs/archive/boucle/constats/2026-08-07-coherence-visuelle.md` §4.
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -760,10 +760,10 @@ Constat détaillé : `boucle/constats/2026-08-07-coherence-visuelle.md` §4.
 - **Préparation d'entretien par IA (mock interview)** — écartée le 02/08/2026. Présente
   chez 4 produits (Rezi, Kickresume, Enhancv, Careerflow), techniquement proche de
   l'existant. Le propriétaire la juge secondaire. Voir
-  `boucle/constats/2026-08-01-manques-fonctionnels.md` §2.
+  `docs/archive/boucle/constats/2026-08-01-manques-fonctionnels.md` §2.
 - **CRM de networking / suivi de contacts** — écartée le 02/08/2026. Présente chez 4
   produits, mais en tension avec le principe « le suivi ne coûte rien à l'utilisateur ».
-  Voir `boucle/constats/2026-08-01-manques-fonctionnels.md` §3.
+  Voir `docs/archive/boucle/constats/2026-08-01-manques-fonctionnels.md` §3.
 
 **Une idée écartée ne remonte jamais d'elle-même**, même si un audit ultérieur la
 retrouve chez la concurrence. Seul le propriétaire peut la rouvrir.

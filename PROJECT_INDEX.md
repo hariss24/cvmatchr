@@ -253,7 +253,7 @@ Google Maps n'est plus appelé pendant le scan (c'était 354 appels facturés pa
 passage) mais au dépliage d'une offre, avec un cache de 30 jours.
 
 Conception détaillée et mesures :
-`docs/superpowers/specs/2026-07-28-notation-lettres-design.md`.
+`docs/archive/superpowers/specs/2026-07-28-notation-lettres-design.md`.
 
 Pièges :
 - Décocher une source signifie **ne pas l'interroger**, pas masquer ses résultats.
@@ -353,7 +353,7 @@ téléchargement nettoie. Supprimer ici serait une perte de donnée non demandé
 CV). Cela reposait sur une corvée de nommage que l'utilisateur cible ne fera pas et sur
 une déduction invisible produisant des chiffres faux dès qu'un CV est retouché.
 
-Spec : `docs/superpowers/specs/2026-07-25-tracker-candidatures-design.md`.
+Spec : `docs/archive/superpowers/specs/2026-07-25-tracker-candidatures-design.md`.
 Maquettes validées : `docs/design/candidatures/` (dont un prototype cliquable).
 
 ---
@@ -467,7 +467,7 @@ Un agent Claude se réveille toutes les 6 heures (`.github/workflows/boucle.yml`
 (`boucle/bin/choisir-role.mjs`), jamais par le jugement de l'agent.
 
 Piloter la boucle : `boucle/README.md`.
-Conception : `docs/superpowers/specs/2026-07-31-boucle-autonome-design.md`.
+Conception : `docs/archive/superpowers/specs/2026-07-31-boucle-autonome-design.md`.
 
 Pièges :
 - **La boucle ne pousse jamais sur `main`.** Elle committe en local ; le workflow pousse

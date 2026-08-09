@@ -9,6 +9,7 @@
 node_modules/
 test-results/
 playwright-report/
+.playwright-mcp/
 .worktrees/
 
 # Journal d'avancement de la moisson Workday (voir scripts/build-boards-workday.mjs)

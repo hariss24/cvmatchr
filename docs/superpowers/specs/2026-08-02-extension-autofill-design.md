@@ -3,7 +3,7 @@
 > Spec de conception — 02/08/2026
 > Traite la première ligne de `BACKLOG.md` § À planifier : « Manque fonctionnel —
 > extension navigateur (capture d'offre + autofill de candidature) ». Constat source :
-> `boucle/constats/2026-08-01-manques-fonctionnels.md` §1 — présente chez 7 des 8
+> `docs/archive/boucle/constats/2026-08-01-manques-fonctionnels.md` §1 — présente chez 7 des 8
 > produits de référence, le manque le plus large mesuré à ce jour.
 
 ## 1. Problème

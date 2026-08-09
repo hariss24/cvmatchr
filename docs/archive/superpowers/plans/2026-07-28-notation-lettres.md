@@ -2,7 +2,7 @@
 
 > **Pour les agents d'exécution :** ce plan se lit avec `web/CADRAGE_EXECUTION.md`
 > (le contrat, qui prime en cas de conflit) et
-> `docs/superpowers/specs/2026-07-28-notation-lettres-design.md` (la spec, qui
+> `docs/archive/superpowers/specs/2026-07-28-notation-lettres-design.md` (la spec, qui
 > justifie chaque choix par une mesure réelle).
 > Les étapes utilisent des cases à cocher (`- [ ]`) pour le suivi.
 
@@ -3619,7 +3619,7 @@ Google Maps n'est plus appelé pendant le scan (c'était 354 appels facturés pa
 passage) mais au dépliage d'une offre, avec un cache de 30 jours.
 
 Conception détaillée et mesures :
-`docs/superpowers/specs/2026-07-28-notation-lettres-design.md`.
+`docs/archive/superpowers/specs/2026-07-28-notation-lettres-design.md`.
 ```
 
 Mettre également à jour la liste des fichiers de `lib/jobs/` pour y faire

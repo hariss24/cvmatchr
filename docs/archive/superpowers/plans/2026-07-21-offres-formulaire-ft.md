@@ -43,7 +43,7 @@
  * Tous les réglages modifiables vivent ici, dans un objet unique passé en argument
  * aux fonctions `lib/jobs/`. Défauts neutres (EMPTY_PROFILE) ; les critères réels
  * sont saisis via l'UI et persistés dans Dexie. Cf. spec
- * `docs/superpowers/specs/2026-07-21-refonte-offres-formulaire-ft-design.md`.
+ * `docs/archive/superpowers/specs/2026-07-21-refonte-offres-formulaire-ft-design.md`.
  */
 
 export type CommuteMode = "transit" | "driving" | "bicycling" | "walking";

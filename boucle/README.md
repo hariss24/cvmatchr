@@ -7,7 +7,7 @@ Il alterne : il explore, puis il classe ce qu'il a rapporté.
 Le livrable est `boucle/IDEES.md` — c'est le fichier à lire.
 
 Explication complète pour non-développeur : `FONCTIONNEMENT.md`.
-Conception d'origine : `docs/superpowers/specs/2026-07-31-boucle-autonome-design.md`.
+Conception d'origine : `docs/archive/superpowers/specs/2026-07-31-boucle-autonome-design.md`.
 
 ## Piloter la boucle
 

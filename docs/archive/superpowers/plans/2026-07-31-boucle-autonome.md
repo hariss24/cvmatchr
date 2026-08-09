@@ -19,7 +19,7 @@ automatique — l'agent n'a jamais la main sur la production.
 tests intégré `node --test`), `gh` CLI (préinstallé sur les runners). **Aucune dépendance
 npm ajoutée.**
 
-**Spec de référence :** `docs/superpowers/specs/2026-07-31-boucle-autonome-design.md`
+**Spec de référence :** `docs/archive/superpowers/specs/2026-07-31-boucle-autonome-design.md`
 
 ## Contraintes globales
 
@@ -1347,7 +1347,7 @@ manipuler. L'agent d'exécution rédige la marche à suivre et attend.
 # La boucle autonome — mode d'emploi
 
 Un agent Claude se réveille toutes les 6 heures, joue **un** rôle, et s'arrête.
-Conception : `docs/superpowers/specs/2026-07-31-boucle-autonome-design.md`.
+Conception : `docs/archive/superpowers/specs/2026-07-31-boucle-autonome-design.md`.
 
 ## Piloter la boucle
 
@@ -1473,7 +1473,7 @@ Un agent Claude se réveille toutes les 6 heures (`.github/workflows/boucle.yml`
 (`.claude/loop/bin/choisir-role.mjs`), jamais par le jugement de l'agent.
 
 Piloter la boucle : `.claude/loop/README.md`.
-Conception : `docs/superpowers/specs/2026-07-31-boucle-autonome-design.md`.
+Conception : `docs/archive/superpowers/specs/2026-07-31-boucle-autonome-design.md`.
 
 Pièges :
 - **La boucle ne pousse jamais sur `main`.** Elle committe en local ; le workflow pousse

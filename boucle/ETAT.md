@@ -20,7 +20,7 @@ le journal est dans `boucle/journal/`)*
   la seconde), sur recommandation explicite de l'Éclaireur. Les 46 idées déjà notées
   gardent leurs notes et justifications à l'identique, seule leur numérotation a changé
   à partir de la position 35 (34→35 … 46→47) — voir
-  `boucle/journal/2026-08-09-arbitre.md` pour le détail complet et la table de
+  `docs/archive/boucle/journal/2026-08-09-arbitre.md` pour le détail complet et la table de
   correspondance.
 - **Vérifications :** lu `MISSION.md`, `ETAT.md`, `IDEES.md` en entier (classement
   complet, « À noter », « Écartées ») et `boucle/roles/arbitre.md` avant de commencer.
@@ -30,7 +30,7 @@ le journal est dans `boucle/journal/`)*
   avant renumérotation, puis revérification après coup qu'aucun renvoi interne stale ne
   subsiste. Comptage des 47 titres `### N.` du fichier final : suite continue 1 à 47,
   sans doublon ni trou. Aucune idée écartée remontée. `git status --short` vérifié :
-  seuls `boucle/IDEES.md`, `boucle/ETAT.md` et `boucle/journal/2026-08-09-arbitre.md`
+  seuls `boucle/IDEES.md`, `boucle/ETAT.md` et `docs/archive/boucle/journal/2026-08-09-arbitre.md`
   modifiés/créés, rien hors de `boucle/`.
 - **Domaine audité en dernier (Éclaireur) :** performance (09/08/2026, deuxième
   passage). Prochain domaine pour l'Éclaireur : briques externes. Rotation : coût des

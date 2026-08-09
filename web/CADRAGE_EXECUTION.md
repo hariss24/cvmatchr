@@ -82,7 +82,7 @@ Dans cet ordre :
    entrées du Journal. Pour le détail exhaustif des réécritures passées (Next.js,
    React PDF), voir `docs/archive/REWRITE_PROGRESS.md` si besoin.
 3. Le document de cadrage du chantier s'il est cité par le plan (ex.
-   `docs/superpowers/plans/2026-07-04-migration-react-pdf.md`).
+   `docs/archive/2026-07-04-migration-react-pdf.md`).
 4. **Le plan de la mission** (chemin en tête de ce document), en entier.
 5. Chaque fichier source cité par le plan, AVANT de le modifier — jamais de
    modification à l'aveugle. Les plans citent les fichiers exacts ; s'il t'en manque

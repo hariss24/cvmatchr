@@ -18,7 +18,7 @@
 - Les fonctions d'accès Dexie encapsulent leurs erreurs (`try/catch` + `console.warn` + valeur de repli), comme tout `web/src/lib/storage/db.ts`.
 - Le `DocType` du projet vaut `"CV" | "Lettre"` uniquement (le type `"Autre"` a été supprimé en v3).
 - La maquette de référence est `docs/design/candidatures/prototype.html` (cliquable) et `page-light.html` / `page-dark.html`. Le CSS des tâches 8 et 9 est repris de ce prototype.
-- Spec de référence : `docs/superpowers/specs/2026-07-25-tracker-candidatures-design.md`.
+- Spec de référence : `docs/archive/superpowers/specs/2026-07-25-tracker-candidatures-design.md`.
 
 ---
 

@@ -3,11 +3,11 @@
 > Spec de conception — 01/08/2026
 > Traite la ligne de `BACKLOG.md` § À planifier : « Performance `/jobs` : ~3,9 s
 > pour charger la seule coquille de page sous throttling Slow 4G, contre un
-> seuil de 2 s ». Constat source : `boucle/constats/2026-07-31-performance.md`.
+> seuil de 2 s ». Constat source : `docs/archive/boucle/constats/2026-07-31-performance.md`.
 
 ## 1. Problème
 
-`boucle/constats/2026-07-31-performance.md` mesurait, le 31/07/2026, un poids
+`docs/archive/boucle/constats/2026-07-31-performance.md` mesurait, le 31/07/2026, un poids
 JS+CSS décompressé de **1024 Ko sur 12 fichiers** pour `/jobs`, et un temps de
 chargement de la coquille de page de **~3,9 s sous Slow 4G** — contre un seuil
 MISSION.md de 2 s pour le premier résultat visible. Le CPU n'était pas en
@@ -309,7 +309,7 @@ Clic sur « Rechercher »
    affiche le même nombre de tests verts qu'avant ce chantier (mêmes
    assertions, seule la signature a changé).
 6. Chronométrage Slow 4G + CPU x4 (méthodologie de
-   `boucle/constats/2026-07-31-performance.md`) repassé sous 2 s pour le
+   `docs/archive/boucle/constats/2026-07-31-performance.md`) repassé sous 2 s pour le
    premier atterrissage de `/jobs` — à re-mesurer après implémentation, dans un
    environnement où Chromium est disponible (pas garanti dans toute session de
    boucle, voir §2.6).

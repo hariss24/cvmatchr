@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js (voir `web/AGENTS.md`), React 19, TypeScript, Zod, Dexie 4, Vitest.
 
-**Spec :** `docs/superpowers/specs/2026-07-27-sources-offres-multi-plateformes-design.md`
+**Spec :** `docs/archive/superpowers/specs/2026-07-27-sources-offres-multi-plateformes-design.md`
 **Maquette :** `docs/design/jobs/page-light.html`, `page-dark.html`, `states.html`
 
 ## Global Constraints

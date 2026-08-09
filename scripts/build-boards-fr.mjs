@@ -8,7 +8,7 @@
 //   --source=tout   les deux (défaut)
 //   --complet       ignore la TTL et reteste tout
 //
-// Produit : web/src/lib/jobs/data/boards-fr.json et boards-fr-testes.json
+// Produit : web/src/lib/jobs/data/boards-fr.json et scripts/data/boards-fr-testes.json
 //
 // ⚠️ Un `null` de compterFR n'est JAMAIS écrit : il signifie « on ne sait pas »
 // (réseau, 5xx), et en conclure quoi que ce soit viderait l'index au premier
@@ -25,8 +25,9 @@ import { enLot } from "./boards/lot.mjs";
 import { cle, mois, estFrais, nomDepuisSlug, trierMemo, fusionner } from "./boards/memo.mjs";
 
 const OUT_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "web", "src", "lib", "jobs", "data");
+const MEMO_DIR = join(dirname(fileURLToPath(import.meta.url)), "data");
 const F_INDEX = join(OUT_DIR, "boards-fr.json");
-const F_MEMO = join(OUT_DIR, "boards-fr-testes.json");
+const F_MEMO = join(MEMO_DIR, "boards-fr-testes.json");
 
 const PLAFOND = 12;
 
@@ -161,6 +162,7 @@ for (const t of trouvailles) {
 }
 
 mkdirSync(OUT_DIR, { recursive: true });
+mkdirSync(MEMO_DIR, { recursive: true });
 writeFileSync(F_INDEX, `${JSON.stringify(nouvelIndex, null, 2)}\n`, "utf8");
 writeFileSync(F_MEMO, `${JSON.stringify(trierMemo([...memoParCle.values()]), null, 2)}\n`, "utf8");
 

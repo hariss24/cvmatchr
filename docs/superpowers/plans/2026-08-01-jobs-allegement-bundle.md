@@ -663,7 +663,7 @@ kill %1 2>/dev/null
 Consigner dans `WORK_HISTORY.md` (`## Journal`) le poids total mesuré avant/
 après ce chantier (2 489 Ko → poids mesuré au Step 2), et si possible un
 chronométrage Slow 4G + CPU x4 avec la méthodologie de
-`boucle/constats/2026-07-31-performance.md`, si un environnement avec
+`docs/archive/boucle/constats/2026-07-31-performance.md`, si un environnement avec
 Chromium installé est disponible pour l'exécuter (ce n'était pas le cas dans
 l'environnement où cette spec a été écrite, voir spec §2.6).
 

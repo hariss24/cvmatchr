@@ -12,7 +12,7 @@ intermédiaire dans la cascade d'extraction existante.
 **Architecture :** `scraper-service/` (FastAPI + camoufox) expose
 `POST /scrape` ; `web/src/lib/scraper/scraper.ts` l'appelle entre le
 fetch+cheerio et le fallback Jina, uniquement si `SCRAPER_URL` est définie.
-Spec validée : `docs/superpowers/specs/2026-07-17-camoufox-scraper-design.md`.
+Spec validée : `docs/archive/superpowers/specs/2026-07-17-camoufox-scraper-design.md`.
 
 **Tech stack :** Python 3.11+, FastAPI, uvicorn, `camoufox[geoip]` ;
 côté web : Next.js/TypeScript existant, Vitest.

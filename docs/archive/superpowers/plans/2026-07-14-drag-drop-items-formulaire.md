@@ -4,7 +4,7 @@
 > (recommandé) ou `superpowers:executing-plans` pour exécuter ce plan tâche par tâche. Les étapes
 > sont en cases à cocher (`- [ ]`).
 
-**Spec :** `docs/superpowers/specs/2026-07-14-drag-drop-items-formulaire-design.md`
+**Spec :** `docs/archive/superpowers/specs/2026-07-14-drag-drop-items-formulaire-design.md`
 
 **But :** permettre de réordonner par glisser-déposer les éléments **à l'intérieur** des sections du
 formulaire CV (expériences, formations, compétences, langues…), ce qui n'est aujourd'hui possible

@@ -27,7 +27,7 @@ Décisions utilisateur : migration **progressive** (les 2 moteurs cohabitent, l'
 
 ## Étape 1 — Document de cadrage de la migration
 
-Créer `docs/superpowers/plans/2026-07-04-migration-react-pdf.md` reprenant les phases ci-dessous (contrats de chaque phase, critères de succès, risques), committé séparément. C'est le document de référence des futures sessions/loops.
+Créer `docs/archive/2026-07-04-migration-react-pdf.md` reprenant les phases ci-dessous (contrats de chaque phase, critères de succès, risques), committé séparément. C'est le document de référence des futures sessions/loops.
 
 ---
 
