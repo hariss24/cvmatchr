@@ -1,21 +1,25 @@
-# Spécification Technique : Base de Données, Comptes Utilisateurs & Google Auth (Supabase)
+# Spécification Technique : Base de Données, Comptes Utilisateurs & Quotas IA (Supabase)
 
 > **Date** : 10 Août 2026  
-> **Statut** : Approuvé & Enrichi  
+> **Statut** : Approuvé & Enrichi (Modèle Freemium & Quotas IA)  
 > **Contexte** : Levée de la contrainte majeure n°1 de `LIMITES.md` (mono-utilisateur, données uniquement en local dans IndexedDB, compteurs contournables, clés exposées).
 
 ---
 
-## 1. Objectifs & Vue d'ensemble
+## 1. Objectifs & Modèle Economique IA
 
-L'objectif de ce projet est d'ajouter un système complet d'authentification utilisateur via Google OAuth et une base de données PostgreSQL gérée par Supabase (sur le tier gratuit sans limite de temps), tout en conservant l'expérience réactive instantanée "Offline-First" offerte par IndexedDB (Dexie).
+L'objectif de ce projet est d'ajouter un système d'authentification utilisateur via Google OAuth, une base de données PostgreSQL gérée par Supabase (tier gratuit), une synchronisation hybride "Offline-First", et **un contrôle strict des Quotas IA selon le statut utilisateur**.
 
-### Fonctionnalités principales
-1. **Google Auth & Gestion de compte** : Connexion en 1 clic avec Google, session sécurisée via cookies HTTP-only (`@supabase/ssr`).
-2. **Synchronisation Hybride (Cloud + Local)** : Dexie (IndexedDB) reste le cache local réactif à 0 ms. Les modifications (CV, Lettres, Candidatures, Offres) sont poussées en arrière-plan vers Supabase PostgreSQL.
-3. **Sécurité PostgreSQL (RLS)** : Activation du Row Level Security sur toutes les tables pour garantir qu'un utilisateur n'accède qu'à ses propres données (`auth.uid() = user_id`).
-4. **Compteur API Serveur anti-triche** : Suivi des quotas d'appels IA sur Supabase côté serveur pour empêcher la réinitialisation des quotas par vidage du cache local.
-5. **Gestion des Suppressions & Sync (Soft Delete)** : Ajout d'une colonne `deleted_at` pour éviter qu'un élément supprimé localement ne réapparaisse lors d'un PULL cloud.
+### Règle d'Accès aux Fonctionnalités IA
+1. **Utilisateur Anonyme (100% Local / Sans Compte)** :
+   - Accès 100% gratuit à la création, édition manuelle, exportation PDF et stockage local dans IndexedDB.
+   - **Aucun accès à la clé IA intégrée de l'application**. Pour utiliser les fonctionnalités IA (génération, adaptation de CV, chat), il **DOIT fournir sa propre clé API** (Gemini / Anthropic) dans ses paramètres (`BYOK` - Bring Your Own Key).
+2. **Utilisateur Connecté (Compte Google / Supabase)** :
+   - Bénéficie d'un **Quota Gratuit d'appels IA géré par le serveur** (ex: 15 adaptations/mois).
+   - Les consommations sont enregistrées de façon infalsifiable dans `api_usage` sur Supabase.
+   - Une fois le quota épuisé, l'utilisateur a 2 choix : ajouter sa propre clé API dans ses paramètres, ou passer à une formule Payante / Crédits (`plan_tier`).
+3. **Utilisateur Connecté avec Clé Personnelle** :
+   - S'il renseigne sa propre clé API dans ses paramètres, sa clé est utilisée en priorité et son quota serveur gratuit n'est pas consommé.
 
 ---
 
@@ -24,24 +28,26 @@ L'objectif de ce projet est d'ajouter un système complet d'authentification uti
 Toutes les tables sont créées dans le schéma public et liées à `auth.users(id)`.
 
 ```sql
--- 1. PROFILS UTILISATEURS
+-- 1. PROFILS UTILISATEURS & PLANS
 CREATE TABLE public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
   display_name TEXT,
   avatar_url TEXT,
+  plan_tier TEXT DEFAULT 'free', -- 'free', 'pro', 'unlimited'
+  monthly_quota_limit INT DEFAULT 15, -- Quota mensuel d'appels IA offerts
   ai_provider TEXT DEFAULT 'gemini',
-  custom_ai_key TEXT,
+  custom_ai_key TEXT, -- Clé perso optionnelle
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 2. CV
 CREATE TABLE public.resumes (
-  id TEXT PRIMARY KEY, -- Id UUID ou string généré par Dexie
+  id TEXT PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
-  content JSONB NOT NULL, -- Structure JSON du CV (schema zod)
+  content JSONB NOT NULL,
   is_primary BOOLEAN DEFAULT FALSE,
   deleted_at TIMESTAMPTZ DEFAULT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -91,7 +97,7 @@ CREATE TABLE public.api_usage (
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   endpoint TEXT NOT NULL,
   count INT DEFAULT 1,
-  period_start TIMESTAMPTZ DEFAULT NOW(),
+  period_start TIMESTAMPTZ DEFAULT date_trunc('month', NOW()),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -103,19 +109,21 @@ CREATE INDEX idx_saved_jobs_user ON public.saved_jobs(user_id) WHERE deleted_at 
 CREATE INDEX idx_api_usage_user_period ON public.api_usage(user_id, period_start);
 ```
 
-### Trigger de création automatique de profil lors de l'inscription Google
+### Fonctions & Triggers PostgreSQL
 
 ```sql
--- Trigger d'auto-création de profil utilisateur
+-- Trigger d'auto-création de profil utilisateur avec quota par défaut
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email, display_name, avatar_url)
+  INSERT INTO public.profiles (id, email, display_name, avatar_url, plan_tier, monthly_quota_limit)
   VALUES (
     NEW.id,
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', NEW.email),
-    NEW.raw_user_meta_data->>'avatar_url'
+    NEW.raw_user_meta_data->>'avatar_url',
+    'free',
+    15
   )
   ON CONFLICT (id) DO UPDATE SET
     email = EXCLUDED.email,
@@ -129,12 +137,20 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Fonction de calcul de la consommation mensuelle IA
+CREATE OR REPLACE FUNCTION public.get_user_monthly_ai_usage(p_user_id UUID)
+RETURNS INT AS $$
+  SELECT COALESCE(SUM(count), 0)::INT
+  FROM public.api_usage
+  WHERE user_id = p_user_id
+    AND period_start >= date_trunc('month', NOW());
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 ```
 
-### Directives RLS (Row Level Security) exhaustives
+### Directives RLS (Row Level Security)
 
 ```sql
--- Activer RLS sur toutes les tables
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.resumes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.letters ENABLE ROW LEVEL SECURITY;
@@ -142,7 +158,6 @@ ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.saved_jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.api_usage ENABLE ROW LEVEL SECURITY;
 
--- Politiques de sécurité (Chaque utilisateur n'accède qu'à ses données)
 CREATE POLICY "Profiles access" ON public.profiles FOR ALL USING (auth.uid() = id);
 CREATE POLICY "Resumes access" ON public.resumes FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Letters access" ON public.letters FOR ALL USING (auth.uid() = user_id);
@@ -153,7 +168,31 @@ CREATE POLICY "API Usage access" ON public.api_usage FOR ALL USING (auth.uid() =
 
 ---
 
-## 3. Architecture d'Authentification Next.js 16
+## 3. Logique d'Autorisation des Routes IA (`/api/ai/*`)
+
+À chaque appel d'une fonctionnalité IA (génération, adaptation CV, chat), le serveur Next.js exécute la vérification suivante :
+
+```text
+[ Appel API IA ]
+       │
+       ├─► L'en-tête contient-il une clé API perso (X-Api-Key) ?
+       │      ├─► OUI : Exécuter l'appel avec cette clé perso. Quota serveur = 0 consommé.
+       │      └─► NON :
+       │            │
+       │            ├─► L'utilisateur est-il connecté (Session Supabase) ?
+       │            │      ├─► NON (Invité 100% local) :
+       │            │      │      └──► ERREUR 401/403 : "Connexion Google requise ou fournissez votre clé API perso."
+       │            │      │
+       │            │      └─► OUI (Connecté) :
+       │            │             │
+       │            │             ├─► Consommation mensuelle < Quota (ex: 15/mois) ?
+       │            │             │      ├─► OUI : Exécuter l'appel avec la clé serveur + Incrémenter api_usage.
+       │            │             │      └─► NON : ERREUR 429 : "Quota gratuit mensuel atteint. Fournissez votre clé API ou passez Pro."
+```
+
+---
+
+## 4. Architecture d'Authentification Next.js 16
 
 ### Stack & Packages
 - `@supabase/ssr` (gestion de session SSR et cookies Next.js App Router)
@@ -168,7 +207,7 @@ CREATE POLICY "API Usage access" ON public.api_usage FOR ALL USING (auth.uid() =
 
 ---
 
-## 4. Moteur de Synchronisation Hybride (`SyncEngine`)
+## 5. Moteur de Synchronisation Hybride (`SyncEngine`)
 
 ### Fonctionnement
 1. **Écriture locale instantanée** : L'utilisateur crée, modifie ou supprime un CV. L'action met à jour Dexie (`db.ts`) immédiatement avec `synced_at = null` ou `deleted_at = NOW()`.
@@ -179,7 +218,7 @@ CREATE POLICY "API Usage access" ON public.api_usage FOR ALL USING (auth.uid() =
 
 ---
 
-## 5. Variables d'Environnement Nouveaux (`.env.local`)
+## 6. Variables d'Environnement Nouveaux (`.env.local`)
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://<your-project>.supabase.co
@@ -188,7 +227,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJKV1Qi...
 
 ---
 
-## 6. Plan de Test & Vérification
-1. **Tests unitaires (Vitest)** : Tester le `SyncEngine` avec des mocks IndexedDB et Supabase.
-2. **Tests d'intégration Auth** : Vérifier que le middleware rafraîchit la session sans planter.
-3. **Tests d'étanchéité RLS** : S'assurer via des requêtes de test qu'un utilisateur A ne peut pas lire le CV d'un utilisateur B.
+## 7. Plan de Test & Vérification
+1. **Tests unitaires Quota IA (Vitest)** :
+   - Tester qu'un invité sans clé API reçoit un rejet 401.
+   - Tester qu'un invité avec clé API perso passe avec succès.
+   - Tester qu'un utilisateur connecté consomme son quota et reçoit un 429 au 16ème appel.
+2. **Tests d'étanchéité RLS** : Vérifier qu'un utilisateur A ne peut pas lire le CV d'un utilisateur B.
