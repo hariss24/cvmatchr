@@ -136,6 +136,22 @@ a changé pour accueillir les deux nouvelles (insérées en positions 18 et 20) 
 `boucle/journal/2026-08-08-arbitre-2.md` pour le détail des égalités tranchées et la
 table de correspondance complète ancienne/nouvelle numérotation.*
 
+*Mise à jour du 09/08/2026 (Arbitre) : une idée notée et intégrée — l'identification du
+contenu des trois chunks JS/CSS les plus lourds de `/pack`, issue du constat
+`2026-08-09-performance-2.md`, laissée non notée par l'Éclaireur en fin d'`IDEES.md`
+(section « À noter », désormais supprimée une fois son contenu intégré). Le titre de
+l'idée n°24 (`/pack`) est corrigé : la mention « Monaco/react-pdf » était fausse depuis
+la correction de route du 04/08/2026 elle-même, `/pack` n'utilise ni l'un ni l'autre —
+son contenu est mis à jour avec la mesure désormais confirmée (~2618 ms, facteur
+~1,05), score inchangé (11/20). Les idées n°11 (aperçu PDF de `/`) et n°21 (alléger
+`/`) reçoivent chacune une précision factuelle nouvelle (remesure inchangée pour la
+première, facteur ~1,11 confirmé pour la seconde) sans changement de score, sur
+recommandation explicite de l'Éclaireur. Les 46 idées déjà notées gardent leurs notes
+et justifications à l'identique, seule leur numérotation a changé à partir de la
+position 35 pour accueillir la nouvelle idée en position 34 — voir
+`boucle/journal/2026-08-09-arbitre.md` pour le détail complet et la table de
+correspondance ancienne/nouvelle numérotation.*
+
 ### 1. Poser un choix explicite à l'arrivée sur un document neuf (importer / exemple / zéro) — 14/20
 
 Constat détaillé : `boucle/constats/2026-08-06-parcours-nouvel-arrivant.md` §5 (chantier 3).
@@ -170,7 +186,7 @@ Constat détaillé : `boucle/constats/2026-08-08-securite.md` §1.
 | Facilité | 5 | Le garde-fou existe déjà dans le produit et protège un chemin de fetch en tout point analogue : `/api/extract-job` appelle `validateUrlForScraping` avant son `fetch`, `logos.ts` ne l'appelle nulle part (`grep` : 0 correspondance). Il suffit de répliquer l'appel déjà écrit ailleurs, aucune nouvelle dépendance, aucune décision produit. |
 | Écart | 1 | Non mesurable par nature (le constat le dit explicitement) : une protection SSRF, ou son absence, n'est pas une capacité qu'un concurrent publie sur sa page marketing. |
 | Cohérence | 4 | Aucun seuil de sécurité n'est nommé dans `MISSION.md`, mais le constat argumente que cette brèche revient à « casser la production » au sens de la règle de tranchage (« sauf si le dépassement excède le seuil d'un facteur 2 ou casse la production ») : un accès réseau interne du déploiement, à la demande d'un attaquant non privilégié, engage la disponibilité et la confiance de tout le service. Reste à 4 et pas 5 : lecture par analogie, `MISSION.md` ne nomme aucun seuil sécurité au sens littéral. |
-| **Total** | **14** | Même profil (Apport 4, Facilité 5, Écart 1, Cohérence 4) que l'idée n°2 (labels de formulaire) : aucune des quatre notes ne les différencie. Conservée juste après elle, sans raison objective de l'y faire passer devant — même principe qu'aux idées n°14, n°46 déjà classées ainsi entre elles. Devant l'idée n°4 (LinkedIn) par Apport (4 contre 3) et Cohérence (4 contre 3), au même titre que l'idée n°2 déjà classée devant elle pour cette même raison. |
+| **Total** | **14** | Même profil (Apport 4, Facilité 5, Écart 1, Cohérence 4) que l'idée n°2 (labels de formulaire) : aucune des quatre notes ne les différencie. Conservée juste après elle, sans raison objective de l'y faire passer devant — même principe qu'aux idées n°14, n°47 déjà classées ainsi entre elles. Devant l'idée n°4 (LinkedIn) par Apport (4 contre 3) et Cohérence (4 contre 3), au même titre que l'idée n°2 déjà classée devant elle pour cette même raison. |
 
 ### 4. Optimisation de profil LinkedIn (analyse + suggestions) — 14/20
 
@@ -263,12 +279,15 @@ poids : deux chunks non lazy-loadés (polices PDF 1 443 775 o + moteur PDF.js
 423 075 o, 55 % du poids jusqu'à l'aperçu) chargés automatiquement au montage de
 `PreviewPane.tsx`, sans action de l'utilisateur. Trois pistes possibles, aucune
 tranchée par le constat (aperçu HTML/CSS provisoire, préchargement réordonné,
-réduction du jeu de polices par défaut).
+réduction du jeu de polices par défaut). Remesuré le 09/08/2026
+(`boucle/constats/2026-08-09-performance-2.md`) : **~8977 ms en moyenne (8930, 9025,
+8976)**, écart de 2,6 % avec le 04/08 — dans le bruit de mesure, aucun commit n'ayant
+touché les fichiers concernés depuis. Dépassement de facteur ~3,6 confirmé inchangé.
 
 | Critère | Note | Justification |
 |---|---|---|
 | Apport | 3 | L'éditeur est le premier écran réel du produit (une fois une offre choisie) — 9,2 s avant de voir son propre CV en aperçu, sous des conditions mobiles réalistes, risque de perdre un candidat qui juge le produit avant d'en voir la valeur. Reste à 3 : sans throttling (référence machine), le même aperçu s'affiche en ~1,7 s — la sévérité dépend des conditions réseau/matériel de l'utilisateur, pas un dépassement universel. |
-| Facilité | 3 | Contrairement à une simple remesure, trois pistes sont proposées et aucune tranchée : chacune a un compromis produit différent (afficher un rendu provisoire différent du PDF final, réordonner le chargement, ou réduire les polices embarquées). Nécessite une décision produit avant l'implémentation, pas seulement du code. |
+| Facilité | 3 | Contrairement à une simple remesure, trois pistes sont proposées et aucune tranchée : chacune a un compromis produit différent (afficher un rendu provisoire différent du PDF final, réordonner le chargement, ou réduire les polices embarquées). Nécessite une décision produit avant l'implémentation, pas seulement du code. Précision du 09/08/2026 : le formulaire est saisissable dès ~1078 ms, sous le seuil — la piste (a) (aperçu HTML/CSS provisoire) n'a donc pas besoin de retarder la saisie, seulement l'aperçu, ce qui simplifie son cadrage. |
 | Écart | 1 | Seuil technique interne à `MISSION.md` — l'implémentation de l'aperçu live chez la concurrence reste non vérifiable sans compte (constat § Écart à la concurrence). |
 | Cohérence | 5 | Dépassement du seuil de chargement de l'éditeur — l'un des seuils les plus centraux de `MISSION.md` — d'un facteur supérieur à 2 : la règle de tranchage de `MISSION.md` (« sauf si le dépassement excède le seuil d'un facteur 2 ») fait explicitement primer ce chantier sur un manque fonctionnel. C'est le premier cas mesuré par la boucle où cette règle s'applique aussi nettement. |
 | **Total** | **12** | Égalité avec l'idée n°15 (skill gap) tranchée en faveur de celle-ci par Cohérence (5 contre 4) : la règle de tranchage de `MISSION.md` s'applique ici au sens littéral (facteur ~3,7 mesuré), ce qui n'est le cas d'aucune autre idée du classement à ce jour. Recoupe partiellement l'idée n°21 (« Alléger `/` ») sans la remplacer : celle-ci vise les modales d'import, le dépassement mesuré ici vient des chunks de l'aperçu PDF (police + PDF.js) — deux causes distinctes sur la même route. |
@@ -385,11 +404,11 @@ Constat détaillé : `boucle/constats/2026-08-08-manques-fonctionnels-5.md` §2.
 
 | Critère | Note | Justification |
 |---|---|---|
-| Apport | 2 | `/` reste à ~1,34 Mo (zod compris) mais jamais mesuré contre le seuil de 2,5 s — pas de dépassement confirmé à ce jour, seulement un poids élevé. |
+| Apport | 2 | `/` reste à ~1,34 Mo (zod compris). Mesuré le 09/08/2026 (`boucle/constats/2026-08-09-performance-2.md`) : événement `load` complet à ~2774 ms, soit un facteur ~1,11 du seuil de 2,5 s — dépassement réel mais modeste, sous le facteur 2 de la règle de tranchage de `MISSION.md`. Reste à 2 : le score anticipait déjà ce cas de figure avant la mesure, et un dépassement aussi faible ne change pas l'appréciation du gain. |
 | Facilité | 4 | Même modèle que le plan `/jobs` déjà livré (`import()` dynamique des modales `ImportTextModal`/`TailorModal`/`ImportPdfModal`), terrain connu. |
 | Écart | 1 | Chantier de performance pure, pas de comparaison à la concurrence pertinente. |
 | Cohérence | 4 | Le seuil de chargement de l'éditeur est un des seuils vérifiables les plus centraux de `MISSION.md` — premier écran du produit. |
-| **Total** | **11** | À mesurer d'abord (temps réel sous Slow 4G + CPU x4) avant de décider si le lazy-load est nécessaire — le poids seul ne dit pas si le seuil est dépassé. |
+| **Total** | **11** | Mesuré le 09/08/2026 : facteur ~1,11, confirmé mais modeste — répond à la question ouverte (« à mesurer d'abord ») sans changer le score, voir Apport. |
 
 ### 22. Robustesse du scan face à une offre malformée — 11/20
 
@@ -413,15 +432,27 @@ Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §4.
 | Cohérence | 3 | Filtre de recherche d'offres, terrain central de « postuler mieux, plus vite », mais reste un raffinement de recherche plutôt que le cœur du parcours candidature. |
 | **Total** | **11** | Égalité de total avec l'idée « Robustesse du scan » (n°22) — profil identique sur les quatre critères (Apport 3, Facilité 4, Écart 1, Cohérence 3). Conservée juste après elle : aucune raison objective identifiée de l'y faire passer devant. |
 
-### 24. Performance `/pack` — mesurer le vrai temps d'interactivité (Monaco/react-pdf) — 11/20
+### 24. Performance `/pack` — poids et temps d'interactivité du `VariableEditor` — 11/20
+
+Constat détaillé : `boucle/constats/2026-08-09-performance-2.md`. **Titre corrigé par
+l'Arbitre le 09/08/2026** : la mention « Monaco/react-pdf » était fausse depuis la
+correction de route du 04/08/2026 elle-même — `/pack` (composant `VariableEditor`,
+un simple `<div contentEditable>`) n'utilise ni l'un ni l'autre, confirmé par `grep -rn
+"monaco\|react-pdf" src/components/pack/` → aucune correspondance. Interactif
+(`.var-editor` saisissable) mesuré à **~2618 ms en moyenne (2609-2631 ms)**, Slow 4G +
+CPU x4, 3 relevés — contre le seuil `MISSION.md` de 2,5 s, soit un **dépassement de
+facteur ~1,05**, le plus faible mesuré par la boucle à ce jour. Poids JS/CSS jusqu'à ce
+seuil : 770 985 o sur 12 fichiers, dont trois chunks concentrent 68 % du poids
+(`3j9pm5otqxm82.js` 226 355 o, `373yfygk3klou.js` 138 009 o, `3_qs68yr3bjte.css`
+109 982 o) — leur contenu précis reste à identifier (idée n°34 ci-dessous).
 
 | Critère | Note | Justification |
 |---|---|---|
-| Apport | 2 | Informe si le seuil de 2,5 s (marge actuelle de 120 ms seulement, constat du 31/07) est réellement tenu — ne construit rien par elle-même. |
-| Facilité | 5 | Remesure seule, mais nécessite d'identifier un sélecteur fiable pour « Monaco et react-pdf prêts » (non trouvé lors du premier audit faute de temps) — reste dans l'ordre de quelques heures. |
+| Apport | 2 | Informe si le seuil de 2,5 s est réellement tenu — désormais confirmé : facteur ~1,05, le dépassement le plus modeste mesuré par la boucle. Reste à 2 : mesurer ne corrige rien par elle-même, et l'écart reste sous le facteur 2 de la règle de tranchage de `MISSION.md`. |
+| Facilité | 5 | La remesure elle-même est terminée : contrairement à l'ancien intitulé, aucun sélecteur « Monaco/react-pdf prêts » n'était à trouver — `/pack` ne les utilise pas. Chiffre obtenu en quelques heures, comme anticipé. |
 | Écart | 1 | Seuil technique interne, pas de comparaison à la concurrence disponible (TTFB marketing seul obtenu, non comparable à l'app derrière connexion). |
 | Cohérence | 3 | Seuil explicite de `MISSION.md` pour l'éditeur, le cœur du produit. |
-| **Total** | **11** | La marge de 120 ms mesurée est trop faible pour trancher sans cette remesure — à traiter comme un quasi-échec plutôt qu'une marge confortable tant que non refait. |
+| **Total** | **11** | Titre et contenu corrigés le 09/08/2026 (Arbitre) : la prémisse fausse « Monaco/react-pdf » est retirée et la marge non fiable de 120 ms (constat du 31/07) remplacée par une mesure réelle et confirmée (~2618 ms, facteur ~1,05). Score inchangé (2+5+1+3 = 11) : la remesure demandée est faite, mais le dépassement qu'elle révèle reste modeste, sous le facteur 2 de la règle de tranchage — pas de raison de reclasser. La suite concrète (réduire ce poids) suppose d'abord d'identifier le contenu des trois chunks les plus lourds, proposée séparément en idée n°34 ci-dessous plutôt que d'alourdir celle-ci. |
 
 ### 25. Assombrir `--faint` (texte secondaire) jusqu'au seuil AA dans les deux thèmes — 11/20
 
@@ -510,7 +541,7 @@ Constat détaillé : `boucle/constats/2026-08-08-securite.md` §4.
 | Facilité | 2 | Suppose un jeton aléatoire horodaté et une façon de le vérifier/révoquer indépendamment du mot de passe — au minimum un stockage serveur des sessions valides, une brique qui n'existe pas aujourd'hui pour l'authentification (actuellement un calcul pur sans état, `SHA256(mot de passe)`). Plus qu'un correctif ponctuel comme les idées n°3 et n°5. |
 | Écart | 1 | Non mesurable par nature — un modèle de session n'est pas une capacité qu'un concurrent publie sur sa page marketing. |
 | Cohérence | 3 | Aucun seuil `MISSION.md` nommé, mais l'authentification protège l'ensemble des données du candidat stockées côté serveur, au sens large de la promesse de fiabilité. |
-| **Total** | **9** | Apport 3, égal à l'idée n°32 (relecture humaine) mais Facilité plus favorable ici (2 contre 1) : implémenter un jeton de session est un chantier de code, contrairement à un partenariat ou une ligne de service humaine. Placée devant elle. Devant l'idée n°34 (`DEFAULT_STALE_DAYS`) par Apport (3 contre 1). |
+| **Total** | **9** | Apport 3, égal à l'idée n°32 (relecture humaine) mais Facilité plus favorable ici (2 contre 1) : implémenter un jeton de session est un chantier de code, contrairement à un partenariat ou une ligne de service humaine. Placée devant elle. Devant l'idée n°35 (`DEFAULT_STALE_DAYS`) par Apport (3 contre 1). |
 
 ### 32. Relecture de CV par un humain (service payant) — 9/20 — *sensible : touche
 potentiellement au modèle économique*
@@ -520,10 +551,10 @@ Constat détaillé : `boucle/constats/2026-08-05-manques-fonctionnels-3.md` §3.
 | Critère | Note | Justification |
 |---|---|---|
 | Apport | 3 | Un second avis humain, distinct de l'IA du chat de l'éditeur — la base la plus large des trois manques trouvés par ce constat (3 produits payants sur 8), signal cohérent qu'il est perçu comme une valeur ajoutée réelle et pas redondant avec un correcteur automatique. |
-| Facilité | 1 | Ce n'est pas un chantier de code : suppose soit un partenariat avec des relecteurs externes, soit une nouvelle ligne de service humaine opérée par CVMatchr — hors du modèle « application locale sans opération humaine côté serveur » (`PROJECT_INDEX.md` §9), le changement le plus étranger au produit actuel de tout le classement avec l'idée n°37 (alertes offres). |
+| Facilité | 1 | Ce n'est pas un chantier de code : suppose soit un partenariat avec des relecteurs externes, soit une nouvelle ligne de service humaine opérée par CVMatchr — hors du modèle « application locale sans opération humaine côté serveur » (`PROJECT_INDEX.md` §9), le changement le plus étranger au produit actuel de tout le classement avec l'idée n°38 (alertes offres). |
 | Écart | 3 | Présent chez 3 produits (Careerflow, Rezi, Kickresume), tous payants — la base la plus large des trois manques de ce constat. |
 | Cohérence | 2 | Touche au sujet sensible « modèle économique » nommé dans `MISSION.md` : ce n'est pas un raffinement du produit actuel mais l'ajout d'une ligne de service humaine que CVMatchr n'opère pas aujourd'hui — terrain voisin plutôt que cœur de la promesse « postuler mieux, plus vite » par l'IA et le local. |
-| **Total** | **9** | Égalité de total avec l'idée n°34 (`DEFAULT_STALE_DAYS`) tranchée en sa faveur par Apport (3 contre 1) : celle-ci répond à un vrai manque perçu par 3 concurrents payants, l'autre corrige une désynchronisation interne pas encore réelle. Signalée explicitement sensible : décider d'opérer ou de sous-traiter un service humain payant est un choix de modèle économique, à trancher par le propriétaire en connaissance de cause. |
+| **Total** | **9** | Égalité de total avec l'idée n°35 (`DEFAULT_STALE_DAYS`) tranchée en sa faveur par Apport (3 contre 1) : celle-ci répond à un vrai manque perçu par 3 concurrents payants, l'autre corrige une désynchronisation interne pas encore réelle. Signalée explicitement sensible : décider d'opérer ou de sous-traiter un service humain payant est un choix de modèle économique, à trancher par le propriétaire en connaissance de cause. |
 
 ### 33. Vérifier le rate limiting du login en conditions de déploiement réelles — 9/20 — *estimation Facilité peu fiable*
 
@@ -534,10 +565,27 @@ Constat détaillé : `boucle/constats/2026-08-08-securite.md` §5.
 | Apport | 2 | Si le déploiement s'avère bien multi-instances (signal concordant mais non certifié : `@vercel/analytics` dans `layout.tsx`), le seuil annoncé de 5 tentatives/minute par IP ne s'applique qu'à l'instance qui a reçu la requête — le vrai plafond effectif serait un multiple non maîtrisé de 5/minute. Reste à 2 : hypothèse forte, pas une mesure directe, l'Éclaireur n'a pas accès à l'infra réelle. |
 | Facilité | 3 | Non chiffrable avant confirmation du nombre d'instances réel — si confirmé multi-instance, migrer un compteur en mémoire (`Map` au niveau module) vers un stockage partagé (KV/base) est un pattern connu, mais l'ampleur exacte dépend d'une information non disponible sans accès à l'infra. **Estimation peu fiable** tant que cette confirmation n'est pas faite par le propriétaire. |
 | Écart | 1 | Non mesurable par nature — défaut interne, pas une capacité comparée à la concurrence. |
-| Cohérence | 3 | Un contournement du rate limiting sur le login donnerait accès à tous les appels IA facturés de l'instance visée — touche indirectement le seuil « coût des appels externes » de `MISSION.md`, à l'image de l'idée n°43 déjà classée (compter/plafonner les appels IA). |
-| **Total** | **9** | Apport 2, inférieur à l'idée n°32 (Apport 3) mais supérieur à l'idée n°34 (Apport 1) — placée entre les deux par ce seul critère. À traiter d'abord comme une vérification à faire par le propriétaire (accès infra requis) plutôt qu'un chantier de code prêt à lancer. |
+| Cohérence | 3 | Un contournement du rate limiting sur le login donnerait accès à tous les appels IA facturés de l'instance visée — touche indirectement le seuil « coût des appels externes » de `MISSION.md`, à l'image de l'idée n°44 déjà classée (compter/plafonner les appels IA). |
+| **Total** | **9** | Apport 2, inférieur à l'idée n°32 (Apport 3) mais supérieur à l'idée n°35 (Apport 1) — placée entre les deux par ce seul critère. À traiter d'abord comme une vérification à faire par le propriétaire (accès infra requis) plutôt qu'un chantier de code prêt à lancer. |
 
-### 34. Faire de `DEFAULT_STALE_DAYS` la seule source de vérité du délai de 30 jours — 9/20
+### 34. Identifier le contenu des trois chunks JS/CSS les plus lourds de `/pack` avant tout chantier de réduction — 9/20
+
+Constat détaillé : `boucle/constats/2026-08-09-performance-2.md` § Chantiers proposés,
+point 3. `/pack` dépasse le seuil de 2,5 s de `MISSION.md` d'un facteur ~1,05 (idée
+n°24 ci-dessus) ; trois chunks (`3j9pm5otqxm82.js` 226 355 o, `373yfygk3klou.js`
+138 009 o, `3_qs68yr3bjte.css` 109 982 o) concentrent 68 % des 770 985 o chargés
+jusqu'à interactif, mais leur contenu n'a pas pu être identifié ce réveil faute de
+source maps lisibles depuis un build de production.
+
+| Critère | Note | Justification |
+|---|---|---|
+| Apport | 2 | Rend actionnable la correction du dépassement de l'idée n°24 — sans cette identification, aucune piste de réduction de poids n'est concrète. Reste à 2 : un diagnostic seul, comme l'était l'ancienne version de l'idée n°24, ne réduit rien par lui-même. |
+| Facilité | 3 | Diagnostic seul (lire les source maps d'un build de développement, ou une analyse de bundle type `next build --profile`/`@next/bundle-analyzer`), pas une implémentation — techniques connues et documentées. Reste à 3 et pas 5 comme l'ancienne idée n°24 : une première tentative ce réveil a échoué (source maps absentes du build de production utilisé), signal concret que ce n'est pas immédiat malgré la technique connue. |
+| Écart | 1 | Sans objet : chantier de performance interne, pas une capacité comparée à la concurrence. |
+| Cohérence | 3 | Seuil explicite « Chargement de l'éditeur » de `MISSION.md`, sur une route dont l'interactivité dépasse déjà ce seuil (idée n°24). |
+| **Total** | **9** | Égalité de total et de profil complet (Apport 2, Facilité 3, Écart 1, Cohérence 3) avec l'idée n°33 (rate limiting login) : aucune des quatre notes ne les différencie. Conservée juste après elle, sans raison objective de l'y faire passer devant. Devant l'idée n°35 (`DEFAULT_STALE_DAYS`, Apport 1, Facilité 5, Écart 1, Cohérence 2) par Apport (2 contre 1), qui compte double dans la lecture du barème. |
+
+### 35. Faire de `DEFAULT_STALE_DAYS` la seule source de vérité du délai de 30 jours — 9/20
 
 Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §3.
 
@@ -549,7 +597,7 @@ Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §3.
 | Cohérence | 2 | Touche un seuil nommé de `MISSION.md` (hygiène du dépôt : « aucun fichier ni export sans appelant démontré »), mais sur une valeur qui régit une fonctionnalité secondaire (le calcul du statut « sans suite » du tracker de candidatures), pas un parcours central. |
 | **Total** | **9** | Corrige une désynchronisation silencieuse *potentielle*, pas encore réelle aujourd'hui — à traiter avant qu'un des deux nombres change sans l'autre, pas en urgence. |
 
-### 35. Introduire une échelle `--font-size-*` et remplacer les 20 valeurs de `font-size` en dur — 8/20
+### 36. Introduire une échelle `--font-size-*` et remplacer les 20 valeurs de `font-size` en dur — 8/20
 
 Constat détaillé : `boucle/constats/2026-08-07-coherence-visuelle.md` §2.
 
@@ -559,9 +607,9 @@ Constat détaillé : `boucle/constats/2026-08-07-coherence-visuelle.md` §2.
 | Facilité | 2 | Vingt valeurs à répartir en six paliers, dans un fichier de 2896 lignes — surface plus large que les rayons (idée n°29, 19 valeurs en 4 paliers) et risque plus élevé : une taille de texte modifiée peut casser un retour à la ligne ou un alignement là où un rayon modifié ne change que l'angle d'un coin. Aucune mesure de régression visuelle automatisée dans le dépôt — vérification composant par composant à la main. |
 | Écart | 1 | Aucune comparaison chiffrée obtenue spécifiquement sur l'échelle typographique : la mesure Rezi (47/50 `border-radius` à pas régulier) ne porte que sur les rayons ; Kickresume n'est décrit que qualitativement (« hiérarchie flexible »), un signal plus faible qu'une mesure, le constat le dit lui-même. |
 | Cohérence | 3 | Même raisonnement que l'idée n°29 : relève de la priorité n°1 « Finition professionnelle » de `MISSION.md`, sans toucher un seuil chiffré explicite. |
-| **Total** | **8** | Comparée à l'idée n°36 (import direct du profil LinkedIn, juste après) : même Apport (2) et même Cohérence (3), mais Facilité plus favorable ici (2 contre 1) — ce chantier reste dans le fichier CSS existant, sans dépendre d'une faisabilité technique tierce non validée (le scraping LinkedIn, cf. justification de l'idée n°36). Écart plus faible (1 contre 2) : contrairement à l'import LinkedIn, présent chez 2 produits mesurés, aucune comparaison chiffrée n'a été obtenue ici spécifiquement sur l'échelle typographique. Placée devant malgré cet Écart plus faible, car Apport et Facilité comptent double dans la lecture du barème. |
+| **Total** | **8** | Comparée à l'idée n°37 (import direct du profil LinkedIn, juste après) : même Apport (2) et même Cohérence (3), mais Facilité plus favorable ici (2 contre 1) — ce chantier reste dans le fichier CSS existant, sans dépendre d'une faisabilité technique tierce non validée (le scraping LinkedIn, cf. justification de l'idée n°36). Écart plus faible (1 contre 2) : contrairement à l'import LinkedIn, présent chez 2 produits mesurés, aucune comparaison chiffrée n'a été obtenue ici spécifiquement sur l'échelle typographique. Placée devant malgré cet Écart plus faible, car Apport et Facilité comptent double dans la lecture du barème. |
 
-### 36. Import direct du profil LinkedIn pour préremplir le CV — 8/20
+### 37. Import direct du profil LinkedIn pour préremplir le CV — 8/20
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -571,7 +619,7 @@ Constat détaillé : `boucle/constats/2026-08-07-coherence-visuelle.md` §2.
 | Cohérence | 3 | Touche à l'import CV, terrain connu de la promesse « postuler mieux, plus vite », côté onboarding. |
 | **Total** | **8** | À vérifier en premier, avant toute spec : la faisabilité technique (API officielle LinkedIn payante ? scraping toléré ?), sans quoi le chantier s'arrête avant de commencer. |
 
-### 37. Alertes sur de nouvelles offres correspondant au profil — 8/20 — *sensible : suppose
+### 38. Alertes sur de nouvelles offres correspondant au profil — 8/20 — *sensible : suppose
 un envoi programmé serveur (contact hors navigateur) ou une notification push, hors de
 l'architecture 100 % locale actuelle*
 
@@ -585,7 +633,7 @@ Constat détaillé : `boucle/constats/2026-08-03-manques-fonctionnels-2.md` §2.
 | Cohérence | 2 | Prolonge le chasseur d'offres existant, mais suppose une infrastructure fondamentalement différente (serveur + contact hors navigateur) — touche potentiellement au sujet sensible « comptes et authentification » nommé dans `MISSION.md`, donc un terrain voisin plutôt que le cœur du produit actuel. |
 | **Total** | **8** | Signalée explicitement sensible : contrairement aux autres manques fonctionnels du classement, ce n'est pas un module de calcul pur greffé sur l'existant, c'est un choix d'architecture (sortir du 100 % local) à trancher par le propriétaire avant toute spec. Placée devant les idées d'hygiène du dépôt et de capture d'offre par Apport (3 contre 1 pour chacune). |
 
-### 38. Décider du sort du chargement de Monaco depuis `cdn.jsdelivr.net` — 8/20
+### 39. Décider du sort du chargement de Monaco depuis `cdn.jsdelivr.net` — 8/20
 
 Constat détaillé : `boucle/constats/2026-08-04-performance.md`. Ouvrir l'onglet JSON
 (mode Expert) de l'éditeur déclenche 15 requêtes vers un CDN externe non maîtrisé par
@@ -604,7 +652,7 @@ plutôt qu'une donnée applicative.
 | Cohérence | 2 | Ne touche aucun seuil nommé de `MISSION.md` au sens strict (le constat le dit explicitement) et concerne une fonctionnalité secondaire (mode Expert), pas un parcours principal. |
 | **Total** | **8** | Seul endroit de tout le produit où le navigateur dépend d'un tiers pour du code plutôt qu'une donnée — signalé pour cette raison architecturale, mais sans urgence : aucun seuil `MISSION.md` explicite n'est violé. |
 
-### 39. Étoffer le Content-Security-Policy — 8/20
+### 40. Étoffer le Content-Security-Policy — 8/20
 
 Constat détaillé : `boucle/constats/2026-08-08-securite.md` §6.
 
@@ -614,9 +662,9 @@ Constat détaillé : `boucle/constats/2026-08-08-securite.md` §6.
 | Facilité | 3 | Ajouter `script-src`/`connect-src`/`object-src` suppose d'énumérer précisément toutes les origines déjà légitimement appelées par l'app (jsdelivr pour Monaco, l'API Gemini, les job-boards, Brandfetch, Vercel Analytics…) sans en oublier une seule, sous peine de casser une fonctionnalité existante en production — un travail d'inventaire avant le code, pas une seule ligne. |
 | Écart | 1 | Non mesurable par nature — un CSP n'est pas une capacité qu'un concurrent publie sur sa page marketing. |
 | Cohérence | 2 | Aucun seuil `MISSION.md` nommé et aucune faille active aujourd'hui — standard du secteur à coût de mise en œuvre faible, mais la plus préventive des six idées du constat sécurité. |
-| **Total** | **8** | Même profil (Apport 2, Facilité 3, Écart 1, Cohérence 2) que l'idée n°38 (Monaco CDN jsdelivr) : aucune des quatre notes ne les différencie. Conservée juste après elle, sans raison objective de l'y faire passer devant. |
+| **Total** | **8** | Même profil (Apport 2, Facilité 3, Écart 1, Cohérence 2) que l'idée n°39 (Monaco CDN jsdelivr) : aucune des quatre notes ne les différencie. Conservée juste après elle, sans raison objective de l'y faire passer devant. |
 
-### 40. Supprimer les fonctions mortes de `db.ts` et `completeJson` de `clients.ts` — 8/20
+### 41. Supprimer les fonctions mortes de `db.ts` et `completeJson` de `clients.ts` — 8/20
 
 Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §1-2.
 
@@ -628,7 +676,7 @@ Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §1-2.
 | Cohérence | 2 | Touche le seuil nommé de `MISSION.md` sur l'hygiène du dépôt, mais sur du code de stockage jamais exécuté et invisible pour l'utilisateur — aucun lien avec un parcours candidat. |
 | **Total** | **8** | Corrige la violation la plus nette et la plus large des trois idées du constat (sept exports à zéro appelant, la totalité des cas trouvés par l'audit) — mais reste un chantier d'hygiène pure, sans gain candidat direct. |
 
-### 41. Capture d'offre native dans l'extension navigateur (éviter le copier-coller d'URL) — 8/20 — *estimation Facilité peu fiable*
+### 42. Capture d'offre native dans l'extension navigateur (éviter le copier-coller d'URL) — 8/20 — *estimation Facilité peu fiable*
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -638,7 +686,7 @@ Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §1-2.
 | Cohérence | 2 | Terrain voisin de l'extension déjà construite, mais gain marginal plutôt que central. |
 | **Total** | **8** | Explicitement écartée du premier chantier autofill (spec `2026-08-02-extension-autofill-design.md` §2) faute de gain net démontré face à l'extracteur d'URL existant — à chiffrer une fois Greenhouse/Lever mesurés en usage réel plus large. |
 
-### 42. Générateur de lettre de démission — 8/20
+### 43. Générateur de lettre de démission — 8/20
 
 | Critère | Note | Justification |
 |---|---|---|
@@ -648,7 +696,7 @@ Constat détaillé : `boucle/constats/2026-08-03-hygiene-du-depot.md` §1-2.
 | Cohérence | 1 | Hors du parcours candidature qui est le cœur de la promesse du produit. |
 | **Total** | **8** | Mention pour mémoire seulement dans le constat source lui-même — à ne prioriser que si un chantier lettre s'ouvre pour une autre raison, jamais en tête de liste. |
 
-### 43. Compter/plafonner les appels IA comme les job-boards — 8/20 — *sensible : touche
+### 44. Compter/plafonner les appels IA comme les job-boards — 8/20 — *sensible : touche
 potentiellement à un vrai plafond produit, pas seulement un compteur*
 
 Constat détaillé : `boucle/constats/2026-08-02-cout-appels-externes.md` §4. Aucune des
@@ -669,7 +717,7 @@ personnelle, tous les appels IA retombent sur la clé serveur partagée
 | Cohérence | 2 | Un plafond introduit de la friction sur des parcours IA centraux (adapter la lettre, scorer l'ATS) — en tension avec « postuler mieux, plus vite » plutôt qu'à son service, même si nécessaire à la soutenabilité du produit. |
 | **Total** | **8** | Dernière du classement à égalité de total (8) parmi les autres idées à 8/20 (jetons de taille de texte, Import LinkedIn, Alertes offres, Monaco CDN jsdelivr, Étoffer le CSP, Fonctions mortes de `db.ts`, Capture d'offre native, Lettre de démission) : la seule des neuf où la Cohérence traduit une tension active avec la promesse (une friction ajoutée sur un parcours IA central) plutôt qu'un simple terrain voisin ou un défaut d'hygiène neutre et invisible pour l'utilisateur, comme chez les autres. Placée après elles. Signalée explicitement comme sensible : décider d'un plafond sur la clé serveur partagée est un choix de modèle économique, à trancher par le propriétaire en connaissance de cause. |
 
-### 44. Publier son CV en ligne (site personnel ou lien partageable) — 7/20 — *sensible :
+### 45. Publier son CV en ligne (site personnel ou lien partageable) — 7/20 — *sensible :
 suppose de sortir du 100 % local, terrain voisin de « migration des données hors
 d'IndexedDB »*
 
@@ -681,9 +729,9 @@ Constat détaillé : `boucle/constats/2026-08-05-manques-fonctionnels-3.md` §2.
 | Facilité | 1 | La variante la plus simple (lien de consultation stable, à la Rezi) suppose déjà un minimum de stockage ou de rendu côté serveur — CVMatchr n'a aujourd'hui aucune exposition publique de données utilisateur (`PROJECT_INDEX.md` §9). Premier changement d'architecture nécessaire, pas une fonctionnalité qui s'ajoute au-dessus de l'existant. |
 | Écart | 2 | Présent chez 2 produits, sous deux formes différentes (Kickresume — site personnel complet avec gabarits ; Rezi — simple lien de partage stable), pas une majorité. |
 | Cohérence | 2 | Touche potentiellement au sujet sensible « migration des données hors d'IndexedDB » nommé dans `MISSION.md` — un changement d'architecture plutôt qu'un raffinement du parcours candidature actuel. |
-| **Total** | **7** | Égalité de total avec l'idée n°45 (remplacer les sélecteurs CSS par `@mozilla/readability`) tranchée en sa faveur par Écart (2 contre 1) : celle-ci correspond à une capacité réellement comparée à la concurrence chez 2 produits sur 8, l'autre concerne un détail d'implémentation serveur invisible depuis l'extérieur d'un produit concurrent, le constat le dit lui-même « sans objet pour ce domaine ». Signalée explicitement sensible : sortir du 100 % local est un choix d'architecture, à trancher par le propriétaire. |
+| **Total** | **7** | Égalité de total avec l'idée n°46 (remplacer les sélecteurs CSS par `@mozilla/readability`) tranchée en sa faveur par Écart (2 contre 1) : celle-ci correspond à une capacité réellement comparée à la concurrence chez 2 produits sur 8, l'autre concerne un détail d'implémentation serveur invisible depuis l'extérieur d'un produit concurrent, le constat le dit lui-même « sans objet pour ce domaine ». Signalée explicitement sensible : sortir du 100 % local est un choix d'architecture, à trancher par le propriétaire. |
 
-### 45. Remplacer les sélecteurs CSS faits main de `scrapeJobText` par `@mozilla/readability` — 7/20 — *sensible : ajout d'une dépendance npm importante, feu vert requis ; estimation Facilité peu fiable*
+### 46. Remplacer les sélecteurs CSS faits main de `scrapeJobText` par `@mozilla/readability` — 7/20 — *sensible : ajout d'une dépendance npm importante, feu vert requis ; estimation Facilité peu fiable*
 
 Constat détaillé : `boucle/constats/2026-08-04-briques-externes.md` §1.
 
@@ -693,9 +741,9 @@ Constat détaillé : `boucle/constats/2026-08-04-briques-externes.md` §1.
 | Facilité | 2 | Le remplacement de code proprement dit est ciblé (44 lignes de sélecteurs en moins), mais il fait passer `jsdom` de `devDependencies` à une dépendance de production (7 086 515 o non compressés, 21 dépendances directes) — sujet sensible nommé par `MISSION.md` (« ajout d'une dépendance npm importante »), feu vert du propriétaire requis avant tout code. L'impact sur le cold-start de la fonction serverless n'est pas mesuré. **Estimation peu fiable** tant que ce coût n'est pas chiffré. |
 | Écart | 1 | Le constat le dit explicitement : « sans objet pour ce domaine » — l'extraction de contenu est un détail d'implémentation serveur invisible depuis l'extérieur d'un produit concurrent, aucun des huit produits de référence ne publie sa pile technique d'extraction. |
 | Cohérence | 2 | Lien indirect avec le seuil « coût des appels externes » de `MISSION.md` (Jina AI Reader fonctionne sur le même principe de quota gratuit dépassable) sans le violer au sens strict — le constat précise que Jina n'est pas dans la liste des services facturés nommés. Reste un raffinement de fiabilité du scraper d'offres, pas un parcours central. |
-| **Total** | **7** | Profil proche de l'idée n°41 (Apport modeste, Écart quasi nul faute de comparaison possible avec la concurrence) mais avec un Apport non chiffré en plus d'une Facilité non chiffrée — les deux à mesurer avant de trancher, comme le dit le constat lui-même. Signalée sensible : décision d'ajouter `jsdom` en production à faire trancher par le propriétaire, pas seulement une question de code. |
+| **Total** | **7** | Profil proche de l'idée n°42 (Apport modeste, Écart quasi nul faute de comparaison possible avec la concurrence) mais avec un Apport non chiffré en plus d'une Facilité non chiffrée — les deux à mesurer avant de trancher, comme le dit le constat lui-même. Signalée sensible : décision d'ajouter `jsdom` en production à faire trancher par le propriétaire, pas seulement une question de code. |
 
-### 46. Extraire une classe unique pour le bouton d'action orange (`--cta-grad`), aujourd'hui redéfini dans ~13 sélecteurs séparés — 7/20
+### 47. Extraire une classe unique pour le bouton d'action orange (`--cta-grad`), aujourd'hui redéfini dans ~13 sélecteurs séparés — 7/20
 
 Constat détaillé : `boucle/constats/2026-08-07-coherence-visuelle.md` §4.
 
@@ -705,60 +753,7 @@ Constat détaillé : `boucle/constats/2026-08-07-coherence-visuelle.md` §4.
 | Facilité | 2 | Ne se limite pas au CSS : extraire une classe partagée suppose de vérifier, pour chacun des ~13 sélecteurs (`.logo-icon-inner`, `.tailor-btn`, `.type-badge.type-cv`, `.flt-go`, `.flt-count`, `.scan-progress-fill` ×2, `.diffx-tag--after`, `.job-fresh`, `.job-cta`, `.btn-orange`…), que les autres propriétés qu'ils portent (padding, taille, position) ne divergent pas volontairement avant de les fusionner sous une classe commune — travail non chiffré par le constat, potentiellement risqué visuellement si l'un des ~13 blocs a une raison d'être différent que le CSS actuel ne documente pas. |
 | Écart | 1 | Détail d'implémentation CSS interne à CVMatchr, invisible depuis l'extérieur d'un produit concurrent dont le code n'est pas public. |
 | Cohérence | 2 | Ne corrige aucun défaut perceptible par lui-même — contrairement à l'idée n°8, déjà classée, qui porte le vrai défaut de contraste — mais sert la maintenabilité future de ce correctif plutôt que la promesse « postuler mieux, plus vite » directement. |
-| **Total** | **7** | Même profil (Apport 2, Facilité 2, Écart 1, Cohérence 2) que l'idée n°45 (remplacer les sélecteurs de `scrapeJobText` par `@mozilla/readability`) : aucune des quatre notes ne les différencie. Conservée juste après elle — dernière du classement à ce jour. Ne redouble pas l'idée n°8 : le constat le précise lui-même, celle-ci explique pourquoi le correctif de l'idée n°8 ne s'est pas propagé partout, elle ne porte pas le même défaut. |
-
-## À noter
-
-*Ajouté par l'Éclaireur le 09/08/2026, non noté — c'est l'Arbitre qui note et classe au
-réveil suivant. Constat détaillé : `boucle/constats/2026-08-09-performance-2.md`.*
-
-- **Correction à apporter à l'idée n°24 (« Performance `/pack` — mesurer le vrai temps
-  d'interactivité (Monaco/react-pdf) »)** : son titre porte une prémisse fausse depuis
-  la correction de route du 04/08/2026 elle-même — `/pack` ne contient ni Monaco ni
-  `react-pdf` (confirmé de nouveau ce réveil par lecture de `PackView.tsx` et
-  `VariableEditor.tsx`, et par `grep -rn "monaco\|react-pdf" src/components/pack/` →
-  aucun résultat). La remesure demandée par l'idée est maintenant faite : `/pack`
-  interactif (premier `.var-editor` saisissable) mesuré à **~2618 ms en moyenne (2609-
-  2631 ms), Slow 4G + CPU x4, 3 relevés** — dépassement du seuil de 2,5 s de
-  `MISSION.md` d'un **facteur ~1,05**, poids 770 985 o sur 12 fichiers JS/CSS. Ne
-  redevient pas « estimation Facilité peu fiable » : le chiffre existe maintenant, seul
-  le titre reste à corriger et le contenu des trois chunks les plus lourds
-  (`3j9pm5otqxm82.js` 226 355 o, `373yfygk3klou.js` 138 009 o, `3_qs68yr3bjte.css`
-  109 982 o) reste à identifier avant qu'un chantier concret soit actionnable — proposé
-  comme idée séparée ci-dessous plutôt que d'alourdir la n°24 elle-même.
-- **Nouvelle idée : identifier le contenu des trois chunks JS/CSS les plus lourds de
-  `/pack`** (`3j9pm5otqxm82.js` 226 355 o, `373yfygk3klou.js` 138 009 o,
-  `3_qs68yr3bjte.css` 109 982 o — ensemble 68 % des 770 985 o chargés jusqu'à
-  interactif) avant de proposer un chantier de réduction. Non identifiés ce réveil
-  faute de source maps lisibles depuis le build de production. Apport : rend actionnable
-  la correction du dépassement de facteur ~1,05 de `/pack` — sans cette identification,
-  aucune piste de réduction de poids n'est concrète. Facilité : diagnostic seul (lire
-  les source maps d'un build de dev, ou `next build --profile` / analyse de bundle),
-  pas une implémentation — plus proche d'un travail de mesure que de code, sur le
-  modèle de l'idée n°24 elle-même avant ce réveil. Écart : sans objet, chantier de
-  performance interne, pas une capacité comparée à la concurrence. Cohérence : seuil
-  explicite « Chargement de l'éditeur » de `MISSION.md`, sur une route dont
-  l'interactivité dépasse déjà ce seuil.
-- **Remesure de l'idée n°11 (aperçu PDF de `/` au chargement)** : inchangée. Nouveaux
-  relevés Slow 4G + CPU x4 : **8930, 9025, 8976 ms** (moyenne ~8977 ms) contre 9061,
-  9066, 9512 ms le 04/08/2026 (moyenne ~9213 ms) — écart de 2,6 %, dans le bruit de
-  mesure, aucun commit n'ayant touché les fichiers concernés depuis. Toujours un
-  dépassement de facteur ~3,6 du seuil de 2,5 s. Pas une nouvelle idée : confirme que
-  la n°11 reste d'actualité telle quelle, ses notes n'ont pas à changer.
-- **Précision utile pour une future implémentation de l'idée n°11** (pas une idée
-  séparée) : ce réveil a isolé, pour la première fois, le temps jusqu'au premier champ
-  de formulaire réellement saisissable sur `/` (`input.form-input`) : **~1078 ms en
-  moyenne, sous le seuil de 2,5 s**. Le blocage de l'idée n°11 ne vient donc pas du
-  formulaire lui-même mais spécifiquement du rendu automatique de l'aperçu PDF au
-  montage — une piste d'implémentation (afficher un aperçu HTML/CSS provisoire pendant
-  que le vrai PDF se génère en arrière-plan) n'a donc pas besoin de retarder la saisie,
-  déjà rapide.
-- **Précision utile pour l'idée n°21 (« Alléger `/` — jamais mesuré contre le seuil de
-  2,5 s »)** (pas une idée séparée, une donnée manquante maintenant fournie) : temps
-  jusqu'à l'événement `load` du navigateur sur `/`, Slow 4G + CPU x4 : **2774 ms**
-  (poids 1 336 006 o sur 13 fichiers JS/CSS) — dépassement réel mais modeste, **facteur
-  ~1,11**, sous le facteur 2 de la règle de tranchage de `MISSION.md`. Ne change pas le
-  statut de l'idée n°21, répond seulement à sa question ouverte.
+| **Total** | **7** | Même profil (Apport 2, Facilité 2, Écart 1, Cohérence 2) que l'idée n°46 (remplacer les sélecteurs de `scrapeJobText` par `@mozilla/readability`) : aucune des quatre notes ne les différencie. Conservée juste après elle — dernière du classement à ce jour. Ne redouble pas l'idée n°8 : le constat le précise lui-même, celle-ci explique pourquoi le correctif de l'idée n°8 ne s'est pas propagé partout, elle ne porte pas le même défaut. |
 
 ## Écartées
 
