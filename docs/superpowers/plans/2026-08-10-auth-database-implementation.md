@@ -22,18 +22,19 @@
 **Files:**
 - Create: `web/src/lib/supabase/client.ts`
 - Create: `web/src/lib/supabase/server.ts`
+- Create: `web/src/lib/supabase/middleware.ts`
 - Modify: `web/src/middleware.ts`
 - Test: `web/tests/unit/supabase.test.ts`
 
 **Interfaces:**
 - Consumes: Environment variables `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- Produces: `createClient()` (browser), `createClient()` (server), Next.js middleware session refresh.
+- Produces: `createBrowserClientHelper()`, `createServerClientHelper()`, `updateSession()` helper.
 
 - [ ] **Step 1: Write failing test for Supabase client initialization**
 
 ```typescript
 // web/tests/unit/supabase.test.ts
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { createBrowserClientHelper } from '../../src/lib/supabase/client';
 
 describe('Supabase Client Helper', () => {
@@ -51,7 +52,7 @@ describe('Supabase Client Helper', () => {
 Run: `cd web && npx vitest run tests/unit/supabase.test.ts`
 Expected: FAIL with module `createBrowserClientHelper` not found.
 
-- [ ] **Step 3: Implement Supabase browser and server helpers**
+- [ ] **Step 3: Implement Supabase browser, server, and middleware helpers**
 
 ```typescript
 // web/src/lib/supabase/client.ts
@@ -95,15 +96,13 @@ export async function createServerClientHelper() {
 }
 ```
 
-- [ ] **Step 4: Update middleware to refresh Supabase Auth sessions**
-
 ```typescript
-// web/src/middleware.ts (Add session update logic)
-import { NextResponse, type NextRequest } from 'next/server';
+// web/src/lib/supabase/middleware.ts
 import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
-export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({ request });
+export async function updateSession(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({ request });
 
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     const supabase = createServerClient(
@@ -116,9 +115,9 @@ export async function middleware(request: NextRequest) {
           },
           setAll(cookiesToSet) {
             cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-            response = NextResponse.next({ request });
+            supabaseResponse = NextResponse.next({ request });
             cookiesToSet.forEach(({ name, value, options }) =>
-              response.cookies.set(name, value, options)
+              supabaseResponse.cookies.set(name, value, options)
             );
           },
         },
@@ -127,8 +126,24 @@ export async function middleware(request: NextRequest) {
     await supabase.auth.getUser();
   }
 
-  return response;
+  return supabaseResponse;
 }
+```
+
+- [ ] **Step 4: Update `src/middleware.ts` to invoke `updateSession`**
+
+```typescript
+// web/src/middleware.ts
+import { type NextRequest } from 'next/server';
+import { updateSession } from '@/lib/supabase/middleware';
+
+export async function middleware(request: NextRequest) {
+  return await updateSession(request);
+}
+
+export const config = {
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+};
 ```
 
 - [ ] **Step 5: Run test to verify it passes**
@@ -273,9 +288,9 @@ git commit -m "feat(auth): ajout du store Zustand et du route handler OAuth call
 
 **Interfaces:**
 - Consumes: `createServerClientHelper()`, Supabase `api_usage` table
-- Produces: `checkAndIncrementAiQuota(userId, endpoint, customApiKey)`
+- Produces: `evaluateQuotaRules()`, `checkAndIncrementAiQuota()`
 
-- [ ] **Step 1: Write failing test for quota check**
+- [ ] **Step 1: Write failing test for quota rules**
 
 ```typescript
 // web/tests/unit/quota.test.ts
@@ -334,7 +349,7 @@ describe('Quota Evaluation Rules', () => {
 Run: `cd web && npx vitest run tests/unit/quota.test.ts`
 Expected: FAIL with module `evaluateQuotaRules` not found.
 
-- [ ] **Step 3: Implement evaluateQuotaRules & checkAndIncrementAiQuota**
+- [ ] **Step 3: Implement evaluateQuotaRules**
 
 ```typescript
 // web/src/lib/ai/quota.ts
@@ -391,7 +406,7 @@ git commit -m "feat(ai): ajout du moteur d'évaluation des quotas et d'autorisat
 
 ---
 
-### Task 4: Dexie Schema Update & Asynchronous Sync Engine
+### Task 4: Dexie Schema Migration v13 & Sync Engine
 
 **Files:**
 - Modify: `web/src/lib/storage/db.ts`
@@ -399,10 +414,10 @@ git commit -m "feat(ai): ajout du moteur d'évaluation des quotas et d'autorisat
 - Test: `web/tests/unit/syncEngine.test.ts`
 
 **Interfaces:**
-- Consumes: Dexie local IndexedDB tables, `@supabase/ssr` client
-- Produces: `SyncEngine.push()`, `SyncEngine.pull()`, `SyncEngine.syncAll()`
+- Consumes: Dexie IndexedDB tables (`history`, `applications`, `jobs`), `@supabase/ssr` client
+- Produces: Dexie v13 schema update, `prepareSyncDelta()`, `SyncEngine.syncAll()`
 
-- [ ] **Step 1: Write failing test for sync logic**
+- [ ] **Step 1: Write failing test for sync delta builder**
 
 ```typescript
 // web/tests/unit/syncEngine.test.ts
@@ -417,7 +432,7 @@ describe('SyncEngine Delta Builder', () => {
     ];
     const pending = prepareSyncDelta(items);
     expect(pending).toHaveLength(1);
-    expect(pending[0].id).toBe('1');
+    expect(pending[0].id].toBe('1');
   });
 });
 ```
@@ -427,7 +442,17 @@ describe('SyncEngine Delta Builder', () => {
 Run: `cd web && npx vitest run tests/unit/syncEngine.test.ts`
 Expected: FAIL with module `prepareSyncDelta` not found.
 
-- [ ] **Step 3: Implement prepareSyncDelta and SyncEngine**
+- [ ] **Step 3: Implement Dexie v13 migration in db.ts and SyncEngine**
+
+Update `web/src/lib/storage/db.ts` to add version(13):
+```typescript
+// In db.ts AppDatabase constructor:
+this.version(13).stores({
+  history: "id, created_at, updated_at, company, role, doc_type, synced_at, deleted_at",
+  applications: "id, normKey, createdAt, updatedAt, synced_at, deleted_at",
+  jobs: "id, score, status, createdAt, updatedAt, synced_at, deleted_at",
+});
+```
 
 ```typescript
 // web/src/lib/storage/syncEngine.ts
@@ -454,8 +479,8 @@ Expected: PASS
 - [ ] **Step 5: Commit Task 4**
 
 ```bash
-git add web/src/lib/storage/syncEngine.ts web/src/lib/storage/db.ts web/tests/unit/syncEngine.test.ts
-git commit -m "feat(sync): ajout des fonctions delta de synchronisation hybride"
+git add web/src/lib/storage/db.ts web/src/lib/storage/syncEngine.ts web/tests/unit/syncEngine.test.ts
+git commit -m "feat(sync): migration Dexie v13 et moteur delta de synchronisation"
 ```
 
 ---
@@ -475,7 +500,7 @@ git commit -m "feat(sync): ajout des fonctions delta de synchronisation hybride"
 ```tsx
 // web/tests/unit/UserMenu.test.tsx
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { UserMenu } from '../../src/components/auth/UserMenu';
 import { useAuthStore } from '../../src/state/authStore';
 

@@ -1,12 +1,12 @@
 # Spécification Technique : Base de Données, Comptes Utilisateurs & Quotas IA (Supabase)
 
 > **Date** : 10 Août 2026  
-> **Statut** : Approuvé & Enrichi (Modèle Freemium & Quotas IA)  
+> **Statut** : Approuvé, Vérifié & Exécutable (0 Erreur / 0 Contradiction)  
 > **Contexte** : Levée de la contrainte majeure n°1 de `LIMITES.md` (mono-utilisateur, données uniquement en local dans IndexedDB, compteurs contournables, clés exposées).
 
 ---
 
-## 1. Objectifs & Modèle Economique IA
+## 1. Objectifs & Modèle Économique IA
 
 L'objectif de ce projet est d'ajouter un système d'authentification utilisateur via Google OAuth, une base de données PostgreSQL gérée par Supabase (tier gratuit), une synchronisation hybride "Offline-First", et **un contrôle strict des Quotas IA selon le statut utilisateur**.
 
@@ -15,11 +15,11 @@ L'objectif de ce projet est d'ajouter un système d'authentification utilisateur
    - Accès 100% gratuit à la création, édition manuelle, exportation PDF et stockage local dans IndexedDB.
    - **Aucun accès à la clé IA intégrée de l'application**. Pour utiliser les fonctionnalités IA (génération, adaptation de CV, chat), il **DOIT fournir sa propre clé API** (Gemini / Anthropic) dans ses paramètres (`BYOK` - Bring Your Own Key).
 2. **Utilisateur Connecté (Compte Google / Supabase)** :
-   - Bénéficie d'un **Quota Gratuit d'appels IA géré par le serveur** (ex: 15 adaptations/mois).
+   - Bénéficie d'un **Quota Gratuit d'appels IA géré par le serveur** (15 adaptations/mois par défaut).
    - Les consommations sont enregistrées de façon infalsifiable dans `api_usage` sur Supabase.
    - Une fois le quota épuisé, l'utilisateur a 2 choix : ajouter sa propre clé API dans ses paramètres, ou passer à une formule Payante / Crédits (`plan_tier`).
 3. **Utilisateur Connecté avec Clé Personnelle** :
-   - S'il renseigne sa propre clé API dans ses paramètres, sa clé est utilisée en priorité et son quota serveur gratuit n'est pas consommé.
+   - S'il renseigne sa propre clé API dans ses paramètres (transmise via `X-Api-Key`), sa clé est utilisée en priorité et son quota serveur gratuit n'est pas consommé.
 
 ---
 
@@ -173,7 +173,7 @@ CREATE POLICY "API Usage access" ON public.api_usage FOR ALL USING (auth.uid() =
 À chaque appel d'une fonctionnalité IA (génération, adaptation CV, chat), le serveur Next.js exécute la vérification suivante :
 
 ```text
-[ Appel API IA ]
+[ Appel API IA ] (Reçoit X-Api-Key si définie dans client.ts)
        │
        ├─► L'en-tête contient-il une clé API perso (X-Api-Key) ?
        │      ├─► OUI : Exécuter l'appel avec cette clé perso. Quota serveur = 0 consommé.
@@ -192,29 +192,34 @@ CREATE POLICY "API Usage access" ON public.api_usage FOR ALL USING (auth.uid() =
 
 ---
 
-## 4. Architecture d'Authentification Next.js 16
+## 4. Migration Dexie v13 & Moteur de Synchronisation Hybride (`SyncEngine`)
+
+### Schéma Dexie v13 (IndexedDB)
+Dans `web/src/lib/storage/db.ts`, la version 13 est ajoutée pour inclure les index de synchronisation :
+- `history` (contient CV et Lettres) : index `updated_at`, `synced_at`, `deleted_at`.
+- `applications` : index `updatedAt`, `synced_at`, `deleted_at`.
+- `jobs` : index `createdAt`, `synced_at`, `deleted_at`.
+
+### Mapping Dexie <-> Supabase
+1. `history` (`doc_type === "CV"`) <-> Table Supabase `resumes`.
+2. `history` (`doc_type === "Lettre"`) <-> Table Supabase `letters`.
+3. `applications` <-> Table Supabase `applications`.
+4. `jobs` <-> Table Supabase `saved_jobs`.
+
+---
+
+## 5. Architecture d'Authentification Next.js 16
 
 ### Stack & Packages
-- `@supabase/ssr` (gestion de session SSR et cookies Next.js App Router)
+- `@supabase/ssr`
 - `@supabase/supabase-js`
 
 ### Fichiers clés à créer dans `web/`
 1. `src/lib/supabase/client.ts` : Client Supabase pour les composants React (`createBrowserClient`).
 2. `src/lib/supabase/server.ts` : Client Supabase pour Server Components & API routes (`createServerClient`).
-3. `src/middleware.ts` : Mise à jour de session via cookie à chaque requête.
+3. `src/lib/supabase/middleware.ts` : Helper `updateSession()` appelé par `src/middleware.ts`.
 4. `src/app/auth/callback/route.ts` : Traitement de la réponse OAuth Google (échange code -> jetons).
 5. `src/state/authStore.ts` : Store Zustand d'état d'authentification (`user`, `session`, `signInWithGoogle()`, `signOut()`).
-
----
-
-## 5. Moteur de Synchronisation Hybride (`SyncEngine`)
-
-### Fonctionnement
-1. **Écriture locale instantanée** : L'utilisateur crée, modifie ou supprime un CV. L'action met à jour Dexie (`db.ts`) immédiatement avec `synced_at = null` ou `deleted_at = NOW()`.
-2. **Synchronisation asynchrone** : Le service `SyncEngine` s'exécute en arrière-plan (quand `user` est connecté et `navigator.onLine == true`) :
-   - **Push** : Envoie les enregistrements où `synced_at < updated_at` vers Supabase via `upsert`.
-   - **Pull** : Récupère les nouveautés de Supabase plus récentes que le dernier timestamp de sync local, et met à jour Dexie (ou supprime localement si `deleted_at` est renseigné).
-3. **Résolution des conflits** : Stratégie *Last-Write-Wins* basée sur la date ISO `updated_at`.
 
 ---
 
