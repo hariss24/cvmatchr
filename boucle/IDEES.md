@@ -707,6 +707,59 @@ Constat détaillé : `boucle/constats/2026-08-07-coherence-visuelle.md` §4.
 | Cohérence | 2 | Ne corrige aucun défaut perceptible par lui-même — contrairement à l'idée n°8, déjà classée, qui porte le vrai défaut de contraste — mais sert la maintenabilité future de ce correctif plutôt que la promesse « postuler mieux, plus vite » directement. |
 | **Total** | **7** | Même profil (Apport 2, Facilité 2, Écart 1, Cohérence 2) que l'idée n°45 (remplacer les sélecteurs de `scrapeJobText` par `@mozilla/readability`) : aucune des quatre notes ne les différencie. Conservée juste après elle — dernière du classement à ce jour. Ne redouble pas l'idée n°8 : le constat le précise lui-même, celle-ci explique pourquoi le correctif de l'idée n°8 ne s'est pas propagé partout, elle ne porte pas le même défaut. |
 
+## À noter
+
+*Ajouté par l'Éclaireur le 09/08/2026, non noté — c'est l'Arbitre qui note et classe au
+réveil suivant. Constat détaillé : `boucle/constats/2026-08-09-performance-2.md`.*
+
+- **Correction à apporter à l'idée n°24 (« Performance `/pack` — mesurer le vrai temps
+  d'interactivité (Monaco/react-pdf) »)** : son titre porte une prémisse fausse depuis
+  la correction de route du 04/08/2026 elle-même — `/pack` ne contient ni Monaco ni
+  `react-pdf` (confirmé de nouveau ce réveil par lecture de `PackView.tsx` et
+  `VariableEditor.tsx`, et par `grep -rn "monaco\|react-pdf" src/components/pack/` →
+  aucun résultat). La remesure demandée par l'idée est maintenant faite : `/pack`
+  interactif (premier `.var-editor` saisissable) mesuré à **~2618 ms en moyenne (2609-
+  2631 ms), Slow 4G + CPU x4, 3 relevés** — dépassement du seuil de 2,5 s de
+  `MISSION.md` d'un **facteur ~1,05**, poids 770 985 o sur 12 fichiers JS/CSS. Ne
+  redevient pas « estimation Facilité peu fiable » : le chiffre existe maintenant, seul
+  le titre reste à corriger et le contenu des trois chunks les plus lourds
+  (`3j9pm5otqxm82.js` 226 355 o, `373yfygk3klou.js` 138 009 o, `3_qs68yr3bjte.css`
+  109 982 o) reste à identifier avant qu'un chantier concret soit actionnable — proposé
+  comme idée séparée ci-dessous plutôt que d'alourdir la n°24 elle-même.
+- **Nouvelle idée : identifier le contenu des trois chunks JS/CSS les plus lourds de
+  `/pack`** (`3j9pm5otqxm82.js` 226 355 o, `373yfygk3klou.js` 138 009 o,
+  `3_qs68yr3bjte.css` 109 982 o — ensemble 68 % des 770 985 o chargés jusqu'à
+  interactif) avant de proposer un chantier de réduction. Non identifiés ce réveil
+  faute de source maps lisibles depuis le build de production. Apport : rend actionnable
+  la correction du dépassement de facteur ~1,05 de `/pack` — sans cette identification,
+  aucune piste de réduction de poids n'est concrète. Facilité : diagnostic seul (lire
+  les source maps d'un build de dev, ou `next build --profile` / analyse de bundle),
+  pas une implémentation — plus proche d'un travail de mesure que de code, sur le
+  modèle de l'idée n°24 elle-même avant ce réveil. Écart : sans objet, chantier de
+  performance interne, pas une capacité comparée à la concurrence. Cohérence : seuil
+  explicite « Chargement de l'éditeur » de `MISSION.md`, sur une route dont
+  l'interactivité dépasse déjà ce seuil.
+- **Remesure de l'idée n°11 (aperçu PDF de `/` au chargement)** : inchangée. Nouveaux
+  relevés Slow 4G + CPU x4 : **8930, 9025, 8976 ms** (moyenne ~8977 ms) contre 9061,
+  9066, 9512 ms le 04/08/2026 (moyenne ~9213 ms) — écart de 2,6 %, dans le bruit de
+  mesure, aucun commit n'ayant touché les fichiers concernés depuis. Toujours un
+  dépassement de facteur ~3,6 du seuil de 2,5 s. Pas une nouvelle idée : confirme que
+  la n°11 reste d'actualité telle quelle, ses notes n'ont pas à changer.
+- **Précision utile pour une future implémentation de l'idée n°11** (pas une idée
+  séparée) : ce réveil a isolé, pour la première fois, le temps jusqu'au premier champ
+  de formulaire réellement saisissable sur `/` (`input.form-input`) : **~1078 ms en
+  moyenne, sous le seuil de 2,5 s**. Le blocage de l'idée n°11 ne vient donc pas du
+  formulaire lui-même mais spécifiquement du rendu automatique de l'aperçu PDF au
+  montage — une piste d'implémentation (afficher un aperçu HTML/CSS provisoire pendant
+  que le vrai PDF se génère en arrière-plan) n'a donc pas besoin de retarder la saisie,
+  déjà rapide.
+- **Précision utile pour l'idée n°21 (« Alléger `/` — jamais mesuré contre le seuil de
+  2,5 s »)** (pas une idée séparée, une donnée manquante maintenant fournie) : temps
+  jusqu'à l'événement `load` du navigateur sur `/`, Slow 4G + CPU x4 : **2774 ms**
+  (poids 1 336 006 o sur 13 fichiers JS/CSS) — dépassement réel mais modeste, **facteur
+  ~1,11**, sous le facteur 2 de la règle de tranchage de `MISSION.md`. Ne change pas le
+  statut de l'idée n°21, répond seulement à sa question ouverte.
+
 ## Écartées
 
 - **Préparation d'entretien par IA (mock interview)** — écartée le 02/08/2026. Présente
