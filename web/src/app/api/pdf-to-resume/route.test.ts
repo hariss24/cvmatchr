@@ -15,7 +15,7 @@ const PNG_B64 = Buffer.from([0x89, 0x50, 0x4e, 0x47]).toString("base64");
 function req(body: unknown): Request {
   return new Request("http://localhost/api/pdf-to-resume", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", "x-api-key": "test-key" },
     body: JSON.stringify(body),
   });
 }

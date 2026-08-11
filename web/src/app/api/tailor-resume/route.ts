@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { complete } from "@/lib/ai/clients";
 import { tailorResumeSystem, type TailorLevel } from "@/lib/ai/prompts";
 import { parseAiJson } from "@/lib/ai/json";
-import { aiErrorResponse, readAiHeaders } from "@/lib/ai/http";
+import { guardAiRequest } from "@/lib/ai/guard";
+import { aiErrorResponse } from "@/lib/ai/http";
 import { normalizeResume, mergeTailored, preservePhoto } from "@/lib/resume/normalize";
 
 export const runtime = "nodejs";
@@ -53,7 +54,9 @@ export async function POST(req: Request): Promise<Response> {
   const content =
     "CV (JSON) :\n" + JSON.stringify(clean) + "\n\nOffre d'emploi :\n" + jobDesc;
 
-  const { key: userKey, model: userModel } = readAiHeaders(req);
+  const grant = await guardAiRequest(req, "tailor-resume");
+  if (grant instanceof Response) return grant;
+  const { key: userKey, model: userModel } = grant;
 
   try {
     const raw = await complete([{ role: "user", content }], system, userKey, userModel);

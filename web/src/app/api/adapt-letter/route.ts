@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { complete } from "@/lib/ai/clients";
 import { adaptLetterSystem } from "@/lib/ai/prompts";
 import { parseAiJson } from "@/lib/ai/json";
-import { aiErrorResponse, readAiHeaders } from "@/lib/ai/http";
+import { guardAiRequest } from "@/lib/ai/guard";
+import { aiErrorResponse } from "@/lib/ai/http";
 import { findLetterPlaceholder, isLetterSkeleton } from "@/lib/ai/letterPlaceholders";
 import { parseLetterTone } from "@/lib/letter/tone";
 
@@ -52,7 +53,9 @@ export async function POST(req: Request): Promise<Response> {
   if (body.company?.trim()) content += `\n\nEntreprise visée : ${body.company.trim()}`;
   if (body.role?.trim()) content += `\n\nPoste visé : ${body.role.trim()}`;
 
-  const { key: userKey, model: userModel } = readAiHeaders(req);
+  const grant = await guardAiRequest(req, "adapt-letter");
+  if (grant instanceof Response) return grant;
+  const { key: userKey, model: userModel } = grant;
 
   // Un corps encore fait de consignes entre crochets n'a pas de voix à conserver : l'IA
   // rédige au lieu d'adapter, sinon elle décalque le ton scolaire du squelette d'usine.

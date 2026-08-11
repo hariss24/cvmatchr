@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { complete, type ChatMessage } from "@/lib/ai/clients";
 import { SYSTEM_EDITOR_CHAT } from "@/lib/ai/prompts";
 import { parseAiJson } from "@/lib/ai/json";
-import { aiErrorResponse, readAiHeaders } from "@/lib/ai/http";
+import { guardAiRequest } from "@/lib/ai/guard";
+import { aiErrorResponse } from "@/lib/ai/http";
 import { normalizeResume, normalizeLetter, isEmptyResume, isEmptyLetter } from "@/lib/resume/normalize";
 import type { DocData } from "@/state/docStore";
 
@@ -47,7 +48,9 @@ export async function POST(req: Request): Promise<Response> {
     ...messages,
   ];
 
-  const { key: userKey, model: userModel } = readAiHeaders(req);
+  const grant = await guardAiRequest(req, "editor-chat");
+  if (grant instanceof Response) return grant;
+  const { key: userKey, model: userModel } = grant;
 
   try {
     const raw = await complete(augmented, SYSTEM_EDITOR_CHAT, userKey, userModel);

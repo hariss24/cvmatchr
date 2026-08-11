@@ -27,7 +27,7 @@ const BASE_RESUME = {
 function makeRequest(body: unknown, headers: Record<string, string> = {}): Request {
   return new Request("http://localhost/api/tailor-resume", {
     method: "POST",
-    headers: { "content-type": "application/json", ...headers },
+    headers: { "content-type": "application/json", "x-api-key": "test-key", ...headers },
     body: JSON.stringify(body),
   });
 }

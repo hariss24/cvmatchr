@@ -34,12 +34,10 @@ describe("requireActiveKey", () => {
     expect(res.provider).toBe("anthropic");
   });
 
-  it("retombe sur la clé serveur pour Gemini si pas de clé user", () => {
+  it("exige une clé utilisateur et ne retombe plus silencieusement sur la clé serveur", () => {
     useSettingsStore.setState({ activeModel: "gemini-3.1-flash-lite", geminiKey: "" });
     process.env.GEMINI_API_KEY = "server-key";
-    const res = requireActiveKey();
-    expect(res.key).toBe("server-key");
-    expect(res.provider).toBe("gemini");
+    expect(() => requireActiveKey()).toThrow(/Clé Gemini requise/);
   });
 
   it("lève si aucune clé n'est disponible", () => {

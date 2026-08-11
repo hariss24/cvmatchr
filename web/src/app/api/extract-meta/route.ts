@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { complete } from "@/lib/ai/clients";
 import { SYSTEM_EXTRACT_META } from "@/lib/ai/prompts";
 import { parseAiJson } from "@/lib/ai/json";
-import { aiErrorResponse, readAiHeaders } from "@/lib/ai/http";
+import { guardAiRequest } from "@/lib/ai/guard";
+import { aiErrorResponse } from "@/lib/ai/http";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -21,7 +22,9 @@ export async function POST(req: Request): Promise<Response> {
     return NextResponse.json({ error: "Offre d'emploi requise." }, { status: 400 });
   }
 
-  const { key: userKey, model: userModel } = readAiHeaders(req);
+  const grant = await guardAiRequest(req, "extract-meta");
+  if (grant instanceof Response) return grant;
+  const { key: userKey, model: userModel } = grant;
 
   try {
     const raw = await complete(

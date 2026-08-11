@@ -61,7 +61,10 @@ export function requireActiveKey(
     }
     return { key: deepseekKey, provider, model };
   } else {
-    const key = geminiKey || process.env.GEMINI_API_KEY || "";
+    // Plus de repli sur la clé du serveur ici : c'est `guardAiRequest` qui décide
+    // qui a le droit de l'utiliser, et qui la fournit en `overrideKey`. Sans cette
+    // coupure, tout visiteur anonyme consommerait la clé de l'application.
+    const key = geminiKey || "";
     if (!key) {
       throw new Error("Clé Gemini requise pour utiliser ce modèle. Ajoutez-la dans ⚙️ Paramètres.");
     }

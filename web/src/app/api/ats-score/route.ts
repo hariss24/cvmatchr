@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { complete } from "@/lib/ai/clients";
 import { SYSTEM_ATS_SCORE } from "@/lib/ai/prompts";
 import { parseAiJson } from "@/lib/ai/json";
-import { aiErrorResponse, readAiHeaders } from "@/lib/ai/http";
+import { guardAiRequest } from "@/lib/ai/guard";
+import { aiErrorResponse } from "@/lib/ai/http";
 import type { Requirement, Priority } from "@/lib/ats/engine";
 
 export const runtime = "nodejs";
@@ -69,7 +70,9 @@ export async function POST(req: Request): Promise<Response> {
     return NextResponse.json({ error: "CV et offre d'emploi requis." }, { status: 400 });
   }
 
-  const { key: userKey, model: userModel } = readAiHeaders(req);
+  const grant = await guardAiRequest(req, "ats-score");
+  if (grant instanceof Response) return grant;
+  const { key: userKey, model: userModel } = grant;
   const role = (body.role ?? "").trim();
   const content =
     (role ? `Intitulé du poste visé : ${role}\n\n` : "") +

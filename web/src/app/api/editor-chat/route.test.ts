@@ -9,7 +9,7 @@ const mockComplete = vi.mocked(complete);
 function req(body: unknown): Request {
   return new Request("http://localhost/api/editor-chat", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", "x-api-key": "test-key" },
     body: JSON.stringify(body),
   });
 }
