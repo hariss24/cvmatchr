@@ -1,16 +1,26 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/middleware";
+
+// Rafraîchit la session Supabase, sauf sur /api/* : un aller-retour réseau
+// vers Supabase sur chaque appel IA ralentirait ces routes pour rien.
+// L'authentification des routes API se fait par un guard dédié qui lit la
+// session directement (Task 3 du plan), pas par ce middleware.
+function passThrough(req: NextRequest, path: string) {
+  if (path.startsWith("/api/")) return NextResponse.next();
+  return updateSession(req, NextResponse.next({ request: req }));
+}
 
 export async function middleware(req: NextRequest) {
   const authPassword = process.env.REMOTE_AUTH_PASSWORD || process.env.AUTH_PASSWORD;
-  
+  const path = req.nextUrl.pathname;
+
   // Si pas de mot de passe requis (mode local), on laisse tout passer
   if (!authPassword) {
-    return NextResponse.next();
+    return passThrough(req, path);
   }
 
   // Ne pas bloquer la page de login, les assets statiques et Next.js internals
-  const path = req.nextUrl.pathname;
   if (
     path === "/login" ||
     path.startsWith("/_next/") ||
@@ -18,7 +28,7 @@ export async function middleware(req: NextRequest) {
     path === "/favicon.ico" ||
     path === "/api/login"
   ) {
-    return NextResponse.next();
+    return passThrough(req, path);
   }
 
   const token = req.cookies.get("auth_token")?.value;
@@ -54,7 +64,7 @@ export async function middleware(req: NextRequest) {
     return response;
   }
 
-  return NextResponse.next();
+  return passThrough(req, path);
 }
 
 export const config = {
