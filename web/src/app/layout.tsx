@@ -4,6 +4,7 @@ import "./globals.css";
 import UiHost from "@/components/ui/UiHost";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -39,7 +40,7 @@ export default function RootLayout({
             __html: `try{if(localStorage.getItem("theme")==="dark")document.documentElement.setAttribute("data-theme","dark");}catch{}`,
           }}
         />
-        {children}
+        <AuthProvider>{children}</AuthProvider>
         <UiHost />
         <Analytics />
       </body>
