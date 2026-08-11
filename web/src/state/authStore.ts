@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { User, Session } from '@supabase/supabase-js';
 import { createBrowserClientHelper } from '@/lib/supabase/client';
+import { purgeLocalData, ensureMatchingUser, syncAll } from '@/lib/storage/syncEngine';
 
 interface AuthState {
   user: User | null;
@@ -31,8 +32,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   signOut: async () => {
     const supabase = createBrowserClientHelper();
     if (supabase) await supabase.auth.signOut();
-    // La purge d'IndexedDB est faite par le SyncEngine (Task 5) : ici on ne
-    // touche qu'à l'état d'authentification.
+    await purgeLocalData();
     set({ user: null, session: null, isLoading: false });
   },
 
@@ -44,14 +44,23 @@ export const useAuthStore = create<AuthState>((set) => ({
       return;
     }
     const { data } = await supabase.auth.getSession();
+    const currentUser = data.session?.user ?? null;
+    if (currentUser) {
+      await ensureMatchingUser(currentUser.id);
+      void syncAll();
+    }
     set({
       session: data.session,
-      user: data.session?.user ?? null,
+      user: currentUser,
       isLoading: false,
       isConfigured: true,
     });
     supabase.auth.onAuthStateChange((_event, session) => {
-      set({ session, user: session?.user ?? null, isLoading: false });
+      const newUser = session?.user ?? null;
+      if (newUser) {
+        void ensureMatchingUser(newUser.id).then(() => syncAll());
+      }
+      set({ session, user: newUser, isLoading: false });
     });
   },
 }));
