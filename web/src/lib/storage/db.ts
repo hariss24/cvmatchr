@@ -11,6 +11,7 @@ import { GRADE_ORDER, type Grade } from "@/lib/jobs/grade";
 import { normKey } from "@/lib/applications/normKey";
 import type { Ligne } from "@/lib/jobs/rank/criteria";
 import { normalizeCompany, type AtsProvider } from "@/lib/jobs/ats";
+import { markDeleted } from "./syncFields";
 
 // ---------------------------------------------------------------------------
 // TYPES
@@ -38,6 +39,9 @@ export interface Draft {
 export interface HistoryEntry {
   id: string;
   created_at: string; // ISO string
+  updated_at?: string;
+  synced_at?: string | null;
+  deleted_at?: string | null;
   doc_type: DocType;
   company: string;
   role: string;
@@ -60,6 +64,9 @@ export interface HistoryEntry {
 export interface JobEntry {
   id: string;          // id France Travail (clé primaire, sert au dédoublonnage)
   createdAt: number;   // horodatage d'enregistrement local
+  updatedAt?: number;
+  synced_at?: string | null;
+  deleted_at?: string | null;
   title: string;
   company: string;
   location: string;
@@ -219,6 +226,29 @@ export class AppDatabase extends Dexie {
     this.version(12).stores({}).upgrade(async (tx) => {
       await tx.table("atsDirectory").filter((e) => e.ats === "none").delete();
     });
+
+    // v13 : champs de synchronisation Supabase. `updated_at` (ISO) est ajouté aux
+    // entrées d'historique, qui n'avaient que `created_at`. Les tables applications
+    // et jobs gardent leurs timestamps numériques ; la conversion se fait à la volée
+    // dans le SyncEngine (cf. syncFields.toIso).
+    this.version(13).stores({
+      history:      "id, created_at, updated_at, company, role, doc_type, synced_at, deleted_at",
+      applications: "id, normKey, createdAt, updatedAt, synced_at, deleted_at",
+      jobs:         "id, score, status, createdAt, updatedAt, synced_at, deleted_at",
+    }).upgrade(async (tx) => {
+      await tx.table("history").toCollection().modify((h) => {
+        if (!h.updated_at) h.updated_at = h.created_at;
+        h.synced_at = null;
+      });
+      await tx.table("applications").toCollection().modify((a) => {
+        if (!a.updatedAt) a.updatedAt = a.createdAt ?? Date.now();
+        a.synced_at = null;
+      });
+      await tx.table("jobs").toCollection().modify((j) => {
+        if (!j.updatedAt) j.updatedAt = j.createdAt ?? Date.now();
+        j.synced_at = null;
+      });
+    });
   }
 }
 
@@ -301,6 +331,7 @@ export async function deleteDraft(id: string) {
 
 export async function saveHistoryEntry(entry: HistoryEntry) {
   try {
+    entry.updated_at = entry.updated_at || entry.created_at || new Date().toISOString();
     await db.history.put(entry);
   } catch (e) {
     console.warn("History save error:", e);
@@ -309,7 +340,7 @@ export async function saveHistoryEntry(entry: HistoryEntry) {
 
 export async function listHistoryEntries(): Promise<HistoryEntry[]> {
   try {
-    const all = await db.history.toArray();
+    const all = await db.history.filter((h) => !h.deleted_at).toArray();
     return all.sort((a, b) => b.created_at.localeCompare(a.created_at));
   } catch (e) {
     console.warn("listHistoryEntries error:", e);
@@ -319,7 +350,8 @@ export async function listHistoryEntries(): Promise<HistoryEntry[]> {
 
 export async function getHistoryEntry(id: string): Promise<HistoryEntry | undefined> {
   try {
-    return await db.history.get(id);
+    const entry = await db.history.get(id);
+    return entry && !entry.deleted_at ? entry : undefined;
   } catch (e) {
     console.warn("getHistoryEntry error:", e);
     return undefined;
@@ -328,7 +360,10 @@ export async function getHistoryEntry(id: string): Promise<HistoryEntry | undefi
 
 export async function deleteHistoryEntry(id: string) {
   try {
-    await db.history.delete(id);
+    const entry = await db.history.get(id);
+    if (entry) {
+      await db.history.put(markDeleted(entry));
+    }
   } catch (e) {
     console.warn("deleteHistoryEntry error:", e);
   }
@@ -356,7 +391,8 @@ export async function updateHistoryEntryStat(id: string, field: 'pdf_views' | 'e
 /** True si l'offre est déjà en base (retenue ou masquée) — sert au dédoublonnage du scan. */
 export async function jobExists(id: string): Promise<boolean> {
   try {
-    return (await db.jobs.get(id)) !== undefined;
+    const j = await db.jobs.get(id);
+    return Boolean(j && !j.deleted_at);
   } catch (e) {
     console.warn("jobExists error:", e);
     return false;
@@ -365,6 +401,7 @@ export async function jobExists(id: string): Promise<boolean> {
 
 export async function saveJob(entry: JobEntry) {
   try {
+    entry.updatedAt = entry.updatedAt || Date.now();
     await db.jobs.put(entry);
   } catch (e) {
     console.warn("saveJob error:", e);
@@ -381,7 +418,7 @@ export async function saveJob(entry: JobEntry) {
 export async function jobKeys(): Promise<Set<string>> {
   try {
     const all = await db.jobs.toArray();
-    return new Set(all.map((j) => normKey(j.company, j.title)).filter(Boolean));
+    return new Set(all.filter((j) => !j.deleted_at).map((j) => normKey(j.company, j.title)).filter(Boolean));
   } catch (e) {
     console.warn("jobKeys error:", e);
     return new Set();
@@ -392,7 +429,9 @@ export async function jobKeys(): Promise<Set<string>> {
 export async function listJobs(status: JobEntry["status"] = "new"): Promise<JobEntry[]> {
   try {
     const all = await db.jobs.where("status").equals(status).toArray();
-    return all.sort((a, b) => b.score - a.score || b.createdAt - a.createdAt);
+    return all
+      .filter((j) => !j.deleted_at)
+      .sort((a, b) => b.score - a.score || b.createdAt - a.createdAt);
   } catch (e) {
     console.warn("listJobs error:", e);
     return [];
@@ -401,7 +440,7 @@ export async function listJobs(status: JobEntry["status"] = "new"): Promise<JobE
 
 export async function setJobStatus(id: string, status: JobEntry["status"]) {
   try {
-    await db.jobs.update(id, { status });
+    await db.jobs.update(id, { status, updatedAt: Date.now(), synced_at: null });
   } catch (e) {
     console.warn("setJobStatus error:", e);
   }
@@ -486,12 +525,12 @@ export async function listJobsByGrade(min: Grade): Promise<JobEntry[]> {
  */
 export async function supprimerJobsSousLeSeuil(seuil: number): Promise<number> {
   try {
-    const horsSujet = await db.jobs.filter((j) => (j.score ?? 0) < seuil).toArray();
-    const ids = horsSujet.map((j) => j.id);
-    if (ids.length > 0) {
-      await db.jobs.bulkDelete(ids);
+    const horsSujet = await db.jobs.filter((j) => (j.score ?? 0) < seuil && !j.deleted_at).toArray();
+    const marked = horsSujet.map((j) => markDeleted(j));
+    if (marked.length > 0) {
+      await db.jobs.bulkPut(marked);
     }
-    return ids.length;
+    return marked.length;
   } catch (e) {
     console.warn("supprimerJobsSousLeSeuil error:", e);
     return 0;
@@ -601,7 +640,8 @@ export async function saveJobProfile(profile: JobSearchProfile): Promise<void> {
 
 export async function listApplicationsRaw(): Promise<Application[]> {
   try {
-    return await db.applications.toArray();
+    const all = await db.applications.toArray();
+    return all.filter((a) => !a.deleted_at);
   } catch (e) {
     console.warn("listApplicationsRaw error:", e);
     return [];
@@ -610,7 +650,8 @@ export async function listApplicationsRaw(): Promise<Application[]> {
 
 export async function getApplicationByNormKey(key: string): Promise<Application | undefined> {
   try {
-    return await db.applications.where("normKey").equals(key).first();
+    const app = await db.applications.where("normKey").equals(key).first();
+    return app && !app.deleted_at ? app : undefined;
   } catch (e) {
     console.warn("getApplicationByNormKey error:", e);
     return undefined;
@@ -619,6 +660,8 @@ export async function getApplicationByNormKey(key: string): Promise<Application 
 
 export async function putApplication(app: Application): Promise<void> {
   try {
+    app.updatedAt = app.updatedAt || Date.now();
+    app.synced_at = null;
     await db.applications.put(app);
   } catch (e) {
     console.warn("putApplication error:", e);
@@ -627,7 +670,10 @@ export async function putApplication(app: Application): Promise<void> {
 
 export async function deleteApplicationRecord(id: string): Promise<void> {
   try {
-    await db.applications.delete(id);
+    const app = await db.applications.get(id);
+    if (app) {
+      await db.applications.put(markDeleted(app));
+    }
   } catch (e) {
     console.warn("deleteApplicationRecord error:", e);
   }
@@ -636,7 +682,7 @@ export async function deleteApplicationRecord(id: string): Promise<void> {
 /** Documents d'historique rattachés à une candidature. */
 export async function listHistoryByApplication(applicationId: string): Promise<HistoryEntry[]> {
   try {
-    const all = await db.history.filter((h) => h.applicationId === applicationId).toArray();
+    const all = await db.history.filter((h) => h.applicationId === applicationId && !h.deleted_at).toArray();
     return all.sort((a, b) => a.created_at.localeCompare(b.created_at));
   } catch (e) {
     console.warn("listHistoryByApplication error:", e);
@@ -647,7 +693,7 @@ export async function listHistoryByApplication(applicationId: string): Promise<H
 /** Documents d'historique non rattachés à une candidature (rayon « Mes CV »). */
 export async function listUnattachedHistory(): Promise<HistoryEntry[]> {
   try {
-    const all = await db.history.filter((h) => !h.applicationId).toArray();
+    const all = await db.history.filter((h) => !h.applicationId && !h.deleted_at).toArray();
     return all.sort((a, b) => b.created_at.localeCompare(a.created_at));
   } catch (e) {
     console.warn("listUnattachedHistory error:", e);
@@ -660,7 +706,11 @@ export async function updateHistoryFields(
   fields: Partial<Pick<HistoryEntry, "applicationId" | "label">>,
 ): Promise<void> {
   try {
-    await db.history.update(id, fields);
+    await db.history.update(id, {
+      ...fields,
+      updated_at: new Date().toISOString(),
+      synced_at: null,
+    });
   } catch (e) {
     console.warn("updateHistoryFields error:", e);
   }
@@ -668,7 +718,11 @@ export async function updateHistoryFields(
 
 export async function deleteHistoryEntries(ids: string[]): Promise<void> {
   try {
-    await db.history.bulkDelete(ids);
+    const entries = await db.history.bulkGet(ids);
+    const marked = entries.filter((e): e is HistoryEntry => Boolean(e)).map((e) => markDeleted(e));
+    if (marked.length > 0) {
+      await db.history.bulkPut(marked);
+    }
   } catch (e) {
     console.warn("deleteHistoryEntries error:", e);
   }

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useUiStore, uiAlert } from "@/state/uiStore";
 import { useGlobalUndoRedo } from "@/lib/useGlobalUndoRedo";
 import { useSettingsStore } from "@/state/settingsStore";
-import { db } from "@/lib/storage/db";
+import { listHistoryEntries } from "@/lib/storage/db";
 
 /**
  * Monte les dialogs et toasts applicatifs. À placer une fois dans le layout racine.
@@ -24,7 +24,7 @@ export default function UiHost() {
       try {
         const hasSeen = localStorage.getItem("backup_warning_seen");
         if (!hasSeen) {
-          const count = await db.history.count();
+          const count = (await listHistoryEntries()).length;
           if (count >= 5) {
             await uiAlert(
               "Vous utilisez activement CVMatchr, bravo ! 🎉\n\nN'oubliez pas que toutes vos données (CV, offres, historique) sont stockées UNIQUEMENT sur ce navigateur. Pensez à aller dans les Paramètres pour exporter une sauvegarde de temps en temps.",
