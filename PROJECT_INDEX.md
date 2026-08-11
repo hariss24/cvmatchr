@@ -382,13 +382,37 @@ existant, §7, couvre l'essentiel), tout ATS autre que Greenhouse/Lever.
 
 ---
 
-## 9. Authentification
+## 9. Authentification et Synchronisation Supabase
 
-`src/middleware.ts` : si `REMOTE_AUTH_PASSWORD`/`AUTH_PASSWORD` est défini, toutes
-les routes (sauf `/login`, `/api/login`, assets) exigent un cookie `auth_token`
-égal au SHA-256 du mot de passe (calculé côté Edge, sans librairie externe).
-Sans variable définie → app ouverte (mode local). Rate-limiting basique par IP sur
-`/api/login` (5 tentatives / minute).
+CVMatchr intègre une authentification multi-utilisateurs et une synchronisation cloud via **Supabase** (PostgreSQL + RLS + OAuth Google).
+
+- **Authentification** : OAuth Google géré par `@supabase/ssr` / `@supabase/supabase-js`. Callback géré dans `src/app/auth/callback/route.ts`. Session gérée par `authStore.ts`.
+- **Mode dégradé local** : En l'absence de variables Supabase (`isConfigured === false`), l'application continue de fonctionner à 100% en mode local (IndexedDB pure) sans bug ni blocage UI.
+- **Base PostgreSQL & Sécurité RLS** :
+  - `resumes`, `letters`, `applications`, `saved_jobs` : Tables de données utilisateur étanches isolées par `user_id = auth.uid()` avec clé primaire composite `(user_id, id)`.
+  - `profiles` : Profil utilisateur déclenché à l'inscription (`free` / 15 crédits/mois par défaut).
+  - `api_usage` : Compteur infalsifiable d'appels IA côté serveur. RPC `consume_ai_credit` débitant 1 crédit de manière atomique.
+- **Moteur de Synchronisation (`SyncEngine`)** :
+  - Réplication bidirectionnelle (`src/lib/storage/syncEngine.ts`, `syncMapping.ts`).
+  - `pushAll()` : Envoie les modifications non synchronisées (`pendingPush`) en `upsert`.
+  - `pullAll()` : Récupère les nouveautés serveur postérieures au curseur local (`localStorage`).
+  - Résolution de conflits : *Last-Write-Wins* basé sur `client_updated_at`.
+  - `purgeLocalData()` : Vide automatiquement IndexedDB à la déconnexion ou lors d'un changement de compte pour éviter toute fuite inter-utilisateurs.
+
+### 9.1 Grille des coûts par endpoint IA et gestion des quotas
+
+| Route API (`src/app/api/`) | Description | Coût en crédits |
+|---|---|---|
+| `/api/tailor-resume` | Adaptation sur-mesure de CV | 1 crédit |
+| `/api/adapt-letter` | Génération de lettre de motivation | 1 crédit |
+| `/api/ats-score` | Analyse d'adéquation ATS & recommandations | 1 crédit |
+| `/api/pdf-to-resume` | Extraction & structuration de CV depuis PDF | 1 crédit |
+| `/api/text-to-resume` | Structuration de CV depuis texte brut | 1 crédit |
+| `/api/text-to-letter` | Structuration de lettre depuis texte brut | 1 crédit |
+| `/api/editor-chat` | Assistant d'édition conversationnel | 1 crédit |
+| `/api/extract-meta` | Extraction de métadonnées d'offre | 1 crédit |
+
+*Remarque :* L'ajout d'une clé API personnelle dans l'en-tête (`X-Api-Key`) court-circuite le contrôle de quota serveur et ne consomme aucun crédit du solde mensuel.
 
 ---
 

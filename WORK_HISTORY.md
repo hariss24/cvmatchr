@@ -41,6 +41,40 @@
 
 ## Journal
 
+### 2026-08-11 : Supabase Auth, DB & Quotas — Task 7 : Vérification d'étanchéité & documentation
+- **Quoi :** Rejeu des tests d'étanchéité PostgreSQL / RLS en Docker (`rls_etancheite.sql` -> `TOUS_LES_TESTS_OK`), création de `web/tests/manual/VERIF_BOUT_EN_BOUT.md`, mise à jour de `LIMITES.md` (verrou mono-utilisateur levé, ajouts des contraintes LWW et non-réplication des tables locales), mise à jour de `PROJECT_INDEX.md` (schéma Supabase, SyncEngine, grille tarifaire IA) et clôture du chantier.
+- **Pourquoi :** Task 7 (dernière task) du plan `docs/superpowers/plans/2026-08-10-auth-database-implementation.md`. Valider le comportement bout-en-bout et documenter l'architecture finale.
+- **Fichiers touchés :** `web/tests/manual/VERIF_BOUT_EN_BOUT.md`, `LIMITES.md`, `PROJECT_INDEX.md`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` propre, `npm run lint` vert (0 erreur, 4 warnings), `npx vitest run` (714/714 tests verts), `npm run build` réussi sans erreur (30/30 pages statiques).
+
+### 2026-08-11 : Supabase Auth, DB & Quotas — Task 6 : Intégration UI — connexion et compteur de quota
+- **Quoi :** Enrichissement du composant `UserMenu.tsx` (entrée « Se connecter avec Google » si non connecté, avatar/nom/QuotaBadge/Déconnexion si connecté, masqué si `isConfigured === false`), création du composant `QuotaBadge.tsx` affichant l'utilisation mensuelle des crédits IA via la RPC PostgreSQL `get_user_monthly_ai_usage`, et ajout des tests unitaires `UserMenuAuth.test.tsx`.
+- **Pourquoi :** Task 6 du plan `docs/superpowers/plans/2026-08-10-auth-database-implementation.md`. Permettre aux utilisateurs de se connecter et de suivre visuellement leur quota mensuel de crédits IA.
+- **Fichiers touchés :** `web/src/components/layout/UserMenu.tsx`, `web/src/components/auth/QuotaBadge.tsx`, `web/src/components/layout/UserMenuAuth.test.tsx`.
+- **Résultat vérifs :** `npx tsc --noEmit` propre, `npm run lint` vert (0 erreur, 4 warnings), `npx vitest run` (714/714 tests verts), `npm run build` réussi sans erreur (30/30 pages statiques).
+- **Commit :** `c58296b` (`feat(ui): connexion Google et compteur de quota dans le menu utilisateur`).
+
+### 2026-08-11 : Supabase Auth, DB & Quotas — Task 5 : SyncEngine bidirectionnel & sanitization d'import
+- **Quoi :** Implémentation du moteur de synchronisation bidirectionnel `syncEngine.ts` (`pushAll`, `pullAll`, `syncAll`, `resolveConflict`, `purgeLocalData`), des fonctions de mapping Dexie ↔ Supabase (`syncMapping.ts`), de la réinitialisation des timestamps de synchro lors des imports JSON dans `backup.ts` (`sanitizeImportedItem`), et raccordement de la purge au changement de compte/déconnexion dans `authStore.ts`.
+- **Pourquoi :** Task 5 du plan `docs/superpowers/plans/2026-08-10-auth-database-implementation.md`. Assurer la synchronisation multi-appareils transparente sans fuite de données entre comptes.
+- **Fichiers touchés :** `web/src/lib/storage/syncEngine.ts`, `web/src/lib/storage/syncMapping.ts`, `web/src/lib/storage/syncEngine.test.ts`, `web/src/lib/storage/backup.ts`, `web/src/state/authStore.ts`.
+- **Résultat vérifs :** `npx tsc --noEmit` propre, `npm run lint` vert (0 erreur, 4 warnings), `npx vitest run` (712/712 tests verts), `npm run build` réussi sans erreur (30/30 pages statiques).
+- **Commit :** `160b238` (`feat(sync): moteur bidirectionnel, purge au changement de compte et import sanitise`).
+
+### 2026-08-11 : Supabase Auth, DB & Quotas — Task 4 : Dexie v13 & Soft Deletes
+- **Quoi :** Migration Dexie v13 (index `updated_at`, `synced_at`, `deleted_at` sur `history`, `applications`, et `jobs`), ajout de la couche d'adaptation `syncFields.ts` (`toIso`, `pendingPush`, `touch`, `markDeleted`) et conversion des suppressions dures (`.delete()`) en suppressions douces (`markDeleted` + `.put()`). Application des filtres `deleted_at == null` sur l'ensemble des requêtes de lecture de la base IndexedDB.
+- **Pourquoi :** Task 4 du plan `docs/superpowers/plans/2026-08-10-auth-database-implementation.md`. Préparer la réplication bidirectionnelle sans résurrection de documents supprimés.
+- **Fichiers touchés :** `web/src/lib/storage/syncFields.ts`, `web/src/lib/storage/syncFields.test.ts`, `web/src/lib/storage/db.ts`, `web/src/lib/applications/types.ts`, `web/src/components/ui/UiHost.tsx`.
+- **Résultat vérifs :** `npx tsc --noEmit` propre, `npm run lint` vert (0 erreur, 3 warnings), `npx vitest run` (708/708 tests verts), `npm run build` réussi sans erreur (30/30 pages statiques).
+- **Commit :** `94f2e8e` (`feat(sync): migration Dexie v13, horodatages de synchro et suppressions douces`).
+
+### 2026-08-11 : Supabase Auth, DB & Quotas — Task 3 : Application des quotas IA
+- **Quoi :** Implémentation du garde de quotas serveur et de sécurité `guardAiRequest` (`lib/ai/guard.ts`) et des règles de tarification (`lib/ai/quota.ts`). Suppression du fallback silencieux sur la clé d'environnement serveur `process.env.GEMINI_API_KEY` dans `clients.ts` pour empêcher les visiteurs anonymes de consommer les crédits du serveur. Branchement des 8 routes API IA (`adapt-letter`, `ats-score`, `editor-chat`, `extract-meta`, `pdf-to-resume`, `tailor-resume`, `text-to-letter`, `text-to-resume`).
+- **Pourquoi :** Task 3 du plan `docs/superpowers/plans/2026-08-10-auth-database-implementation.md`. Exiger une authentification Supabase avec quota atomique `consume_ai_credit` ou une clé API personnelle dans les en-têtes pour exécuter un appel IA.
+- **Fichiers touchés :** `web/src/lib/ai/quota.ts`, `web/src/lib/ai/quota.test.ts`, `web/src/lib/ai/guard.ts`, `web/src/lib/ai/clients.ts`, `web/src/lib/ai/clients.test.ts`, `web/src/lib/supabase/middleware.ts`, et les 8 routes IA + leurs tests unitaires dans `web/src/app/api/`.
+- **Résultat vérifs :** `npx tsc --noEmit` propre, `npm run lint` vert (0 erreur, 3 warnings), `npx vitest run` 704/704 tests verts (89 test files), `npm run build` réussi sans erreur (30/30 pages statiques).
+- **Commit :** `14c2c79` (`feat(ai): application effective des quotas serveur et fin du repli sur la cle integree`).
+
 ### 2026-08-07 : Pertinence et géolocalisation de la source « Marché caché »
 
 **Pourquoi.** Une recherche sur la source « Marché caché » rendait des offres hors-sujet et en filtrait à tort d'autres. Quatre causes identifiées et corrigées.

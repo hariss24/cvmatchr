@@ -14,50 +14,22 @@
 > l'est, on la barre en indiquant la date et le commit, on ne la supprime pas —
 > savoir qu'une contrainte a existé évite d'y retomber.
 
-**Dernière mise à jour : 5 août 2026.**
+**Dernière mise à jour : 11 août 2026.**
 
 ---
 
-## 1. Le verrou principal : tout vit dans le navigateur
+## 1. ~~Le verrou principal : tout vit dans le navigateur~~ (Levé le 11/08/2026 — commit `160b238`)
 
-`PROJECT_INDEX.md` §1 : CVMatchr est **mono-utilisateur**. Toutes les données —
-CV, lettres, historique, profil, offres, candidatures, compteurs — sont dans
-IndexedDB via Dexie (`src/lib/storage/db.ts`). Il n'y a **aucune base serveur**.
+`PROJECT_INDEX.md` §1 : CVMatchr intègre désormais Supabase Auth (OAuth Google), une base PostgreSQL distante (RLS, fonctions atomiques de quota `consume_ai_credit`), et un moteur de réplication bidirectionnelle (`SyncEngine`).
 
-L'authentification existante (`src/middleware.ts`, §9) n'est pas un système de
-comptes : c'est **un seul mot de passe partagé** pour fermer l'accès à
-l'instance. Sans variable d'environnement, l'app est ouverte.
-
-C'est ce choix qui bloque tout ce qui suit. Il était délibéré — décision
-post-audit du 17/07/2026, l'auth était différée jusqu'au multi-utilisateur —
-mais son coût s'accumule.
-
-### 1.1 Conséquences subies aujourd'hui
+### 1.1 Nouvelles limites d'architecture d'authentification et de synchronisation
 
 | Limite | Ce qui se passe concrètement |
 |---|---|
-| **Perte totale des données** | Vider le cache du navigateur efface tous les CV, lettres et candidatures. Aucune sauvegarde, aucune corbeille, aucune restauration. |
-| **Aucune synchronisation** | Un CV commencé sur l'ordinateur n'existe pas sur le téléphone. Deux navigateurs = deux applications sans lien. |
-| **Compteur de quota contournable** | Le compteur d'appels API (table Dexie `apiUsage`) est **local et indicatif** (`PROJECT_INDEX.md` §8). Vider le cache le remet à zéro. Faille identifiée dans `TODO.md`, non corrigeable sans compteur serveur. |
-| **Clé API en clair côté navigateur** | La clé IA de l'utilisateur est en `localStorage` (`src/lib/settings.ts`), envoyée en en-tête `X-Api-Key`. Acceptable pour un usage personnel, intenable dès qu'un tiers utilise l'instance. |
-| **Aucune trace d'usage** | Impossible de savoir ce qui sert, ce qui échoue, ce qui fait abandonner. Toutes les décisions produit se prennent à l'aveugle ou sur mesure manuelle. |
-
-### 1.2 Fonctionnalités en attente de cette brique
-
-Aucune de celles-ci n'est difficile en soi ; toutes attendent le même socle.
-
-- **Comptes et connexion** (email, mot de passe ou lien magique, réinitialisation).
-- **Sauvegarde et synchronisation multi-appareils** des CV et candidatures.
-- **Quotas réels et facturation** — donc *toute* offre payante. Le compteur local ne peut pas servir de base à un paiement.
-- **Clés API côté serveur uniquement**, pour ne plus exposer celle de l'utilisateur.
-- **Partage d'un CV par lien** (envoyer un lien plutôt qu'un fichier).
-- **Historique et statistiques de candidatures dans la durée** — taux de réponse par entreprise, par secteur, par modèle de CV. Les données existent déjà localement mais meurent avec le navigateur.
-- **Alertes par email** sur les offres du marché caché (« 3 nouvelles offres correspondant à ton profil ce matin »). Le scan quotidien produit déjà la donnée, il n'y a personne à qui l'envoyer.
-- **Reprise d'une session sur un autre appareil** (commencer sur mobile, finir sur ordinateur).
-
-**Ce qu'il faudrait décider avant de commencer :** l'hébergeur de base (Vercel
-Postgres, Supabase, Neon…), le modèle d'authentification, et surtout la
-migration des données déjà présentes dans IndexedDB chez l'utilisateur actuel.
+| **Conflits hors-ligne (Last-Write-Wins)** | La résolution de conflit utilise `client_updated_at`. En cas d'édition concurrente hors-ligne sur deux appareils, la modification la plus récente écrase la seconde silencieusement. |
+| **Photos de profil en base64 dans JSONB** | Les photos de profil sont stockées encodées en base64 directement dans le champ JSONB `content` (tables `resumes` / `history`). Aucun stockage objet (Supabase Storage) n'est raccordé ; chaque synchronisation transite avec la photo entière. |
+| **Tables Dexie non synchronisées** | Seules 4 tables principales (`history`, `letters`, `applications`, `jobs`) sont répliquées vers Supabase. Les données locales `profile` ("Mes infos"), `templates` et `jobProfile` ("Critères de recherche") restent strictement locales à l'appareil. |
+| **Briques RGPD UI absentes** | Bien que la suppression en cascade PostgreSQL (`ON DELETE CASCADE`) soit configurée, il n'existe pas encore de bouton "Supprimer mon compte" ni d'export RGPD en un clic dans l'interface utilisateur. |
 
 ---
 
