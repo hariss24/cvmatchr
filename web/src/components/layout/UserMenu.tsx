@@ -2,15 +2,18 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useAuthStore } from "@/state/authStore";
+import QuotaBadge from "@/components/auth/QuotaBadge";
 
 /**
- * Bouton "Utilisateur" du topbar : regroupe thème, paramètres et profil
- * dans un menu déroulant pour gagner de la place (le chat IA reste à part,
- * icône visible en permanence).
+ * Bouton "Utilisateur" du topbar : regroupe authentification Supabase, quota IA,
+ * thème, paramètres et profil dans un menu déroulant.
  */
 export default function UserMenu({ onToggleTheme }: { onToggleTheme: () => void }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  const { user, isConfigured, signInWithGoogle, signOut } = useAuthStore();
 
   useEffect(() => {
     if (!open) return;
@@ -38,11 +41,50 @@ export default function UserMenu({ onToggleTheme }: { onToggleTheme: () => void 
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+        {user?.user_metadata?.avatar_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={user.user_metadata.avatar_url}
+            alt={user.email || "Avatar"}
+            style={{ width: 22, height: 22, borderRadius: "50%" }}
+          />
+        ) : (
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        )}
       </button>
 
       {open && (
         <div className="user-menu-dropdown" role="menu">
+          {user ? (
+            <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border, rgba(255,255,255,0.1))" }}>
+              <div style={{ fontWeight: 600, fontSize: "0.9em", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {user.user_metadata?.full_name || user.email}
+              </div>
+              <div style={{ marginTop: 4 }}>
+                <QuotaBadge />
+              </div>
+            </div>
+          ) : isConfigured ? (
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                void signInWithGoogle();
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                <polyline points="10 17 15 12 10 7" />
+                <line x1="15" y1="12" x2="3" y2="12" />
+              </svg>
+              Se connecter avec Google
+            </button>
+          ) : null}
+
           <button
             type="button"
             role="menuitem"
@@ -62,6 +104,25 @@ export default function UserMenu({ onToggleTheme }: { onToggleTheme: () => void 
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><circle cx="9" cy="10" r="2" /><path d="M7 15h4M15 9h2M15 13h2" /></svg>
             Mes infos
           </Link>
+
+          {user && (
+            <button
+              type="button"
+              role="menuitem"
+              style={{ borderTop: "1px solid var(--border, rgba(255,255,255,0.1))" }}
+              onClick={() => {
+                setOpen(false);
+                void signOut();
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              Déconnexion
+            </button>
+          )}
         </div>
       )}
     </div>
