@@ -14,6 +14,29 @@ import {
 
 let isSyncing = false;
 
+/**
+ * Filtre les lignes dont une version distante plus récente existe déjà, pour
+ * éviter qu'un push aveugle (upsert inconditionnel) écrase le travail d'un
+ * autre appareil fait pendant qu'on était hors-ligne. Les lignes écartées ne
+ * sont pas marquées `synced_at` : le `pullAll()` qui suit dans `syncAll()`
+ * rapatriera la version distante gagnante.
+ */
+export async function filterOutStalePush<T extends { id: string; client_updated_at: string }>(
+  supabase: NonNullable<ReturnType<typeof createBrowserClientHelper>>,
+  table: 'resumes' | 'letters' | 'applications' | 'saved_jobs',
+  rows: T[],
+): Promise<T[]> {
+  if (rows.length === 0) return rows;
+  const ids = rows.map((r) => r.id);
+  const { data: remoteRows } = await supabase.from(table).select('id, client_updated_at').in('id', ids);
+  const remoteMap = new Map((remoteRows ?? []).map((r: { id: string; client_updated_at: string }) => [r.id, r.client_updated_at]));
+  return rows.filter((r) => {
+    const remoteTime = remoteMap.get(r.id);
+    if (!remoteTime) return true; // pas encore de ligne distante
+    return new Date(r.client_updated_at).getTime() >= new Date(remoteTime).getTime();
+  });
+}
+
 export function resolveConflict(
   local: { updated_at?: string; updatedAt?: number },
   remote: { client_updated_at: string },
@@ -27,6 +50,31 @@ export function resolveConflict(
   const remoteMs = new Date(remote.client_updated_at).getTime();
 
   return localMs >= remoteMs ? 'local' : 'remote';
+}
+
+/**
+ * Le schéma distant `resumes`/`letters` ne stocke que titre + contenu : les
+ * champs propres à `HistoryEntry` (rattachement à une candidature, notes,
+ * template PDF choisi…) n'y transitent jamais. Un `put()` intégral du mapping
+ * distant les effacerait à chaque pull gagnant — on ne remplace donc que les
+ * champs réellement synchronisés, en conservant le reste de l'entrée locale.
+ */
+export function mergeRemoteHistory(
+  local: import('./db').HistoryEntry | undefined,
+  mapped: import('./db').HistoryEntry,
+): import('./db').HistoryEntry {
+  if (!local) return mapped;
+  return {
+    ...mapped,
+    applicationId: local.applicationId,
+    label: local.label,
+    notes: local.notes,
+    job_desc: local.job_desc,
+    pdf_views: local.pdf_views,
+    editor_reloads: local.editor_reloads,
+    last_viewed_at: local.last_viewed_at,
+    templateId: local.templateId,
+  };
 }
 
 export function sanitizeImportedItem<T extends Record<string, unknown>>(item: T): T {
@@ -112,24 +160,30 @@ export async function pushAll(): Promise<void> {
     const nowIso = new Date().toISOString();
 
     if (resumesToPush.length > 0) {
-      const { error } = await supabase.from('resumes').upsert(resumesToPush);
-      if (!error) {
-        const ids = resumesToPush.map((r) => r.id);
-        await db.history
-          .where('id')
-          .anyOf(ids)
-          .modify({ synced_at: nowIso });
+      const freshResumes = await filterOutStalePush(supabase, 'resumes', resumesToPush);
+      if (freshResumes.length > 0) {
+        const { error } = await supabase.from('resumes').upsert(freshResumes);
+        if (!error) {
+          const ids = freshResumes.map((r) => r.id);
+          await db.history
+            .where('id')
+            .anyOf(ids)
+            .modify({ synced_at: nowIso });
+        }
       }
     }
 
     if (lettersToPush.length > 0) {
-      const { error } = await supabase.from('letters').upsert(lettersToPush);
-      if (!error) {
-        const ids = lettersToPush.map((l) => l.id);
-        await db.history
-          .where('id')
-          .anyOf(ids)
-          .modify({ synced_at: nowIso });
+      const freshLetters = await filterOutStalePush(supabase, 'letters', lettersToPush);
+      if (freshLetters.length > 0) {
+        const { error } = await supabase.from('letters').upsert(freshLetters);
+        if (!error) {
+          const ids = freshLetters.map((l) => l.id);
+          await db.history
+            .where('id')
+            .anyOf(ids)
+            .modify({ synced_at: nowIso });
+        }
       }
     }
   }
@@ -139,14 +193,17 @@ export async function pushAll(): Promise<void> {
   const appsPush = pendingPush(allApps);
   if (appsPush.length > 0) {
     const appsToPush = appsPush.map((a) => applicationToRemoteRow(a, user.id));
-    const { error } = await supabase.from('applications').upsert(appsToPush);
-    if (!error) {
-      const nowIso = new Date().toISOString();
-      const ids = appsToPush.map((a) => a.id);
-      await db.applications
-        .where('id')
-        .anyOf(ids)
-        .modify({ synced_at: nowIso });
+    const freshApps = await filterOutStalePush(supabase, 'applications', appsToPush);
+    if (freshApps.length > 0) {
+      const { error } = await supabase.from('applications').upsert(freshApps);
+      if (!error) {
+        const nowIso = new Date().toISOString();
+        const ids = freshApps.map((a) => a.id);
+        await db.applications
+          .where('id')
+          .anyOf(ids)
+          .modify({ synced_at: nowIso });
+      }
     }
   }
 
@@ -155,14 +212,17 @@ export async function pushAll(): Promise<void> {
   const jobsPush = pendingPush(allJobs);
   if (jobsPush.length > 0) {
     const jobsToPush = jobsPush.map((j) => jobToRemoteSavedJob(j, user.id));
-    const { error } = await supabase.from('saved_jobs').upsert(jobsToPush);
-    if (!error) {
-      const nowIso = new Date().toISOString();
-      const ids = jobsToPush.map((j) => j.id);
-      await db.jobs
-        .where('id')
-        .anyOf(ids)
-        .modify({ synced_at: nowIso });
+    const freshJobs = await filterOutStalePush(supabase, 'saved_jobs', jobsToPush);
+    if (freshJobs.length > 0) {
+      const { error } = await supabase.from('saved_jobs').upsert(freshJobs);
+      if (!error) {
+        const nowIso = new Date().toISOString();
+        const ids = freshJobs.map((j) => j.id);
+        await db.jobs
+          .where('id')
+          .anyOf(ids)
+          .modify({ synced_at: nowIso });
+      }
     }
   }
 }
@@ -197,10 +257,8 @@ export async function pullAll(): Promise<void> {
         maxUpdatedAt = rRow.updated_at;
       }
       const local = await db.history.get(rRow.id);
-      if (!local) {
-        await db.history.put(remoteResumeToHistory(rRow));
-      } else if (resolveConflict(local, rRow) === 'remote') {
-        await db.history.put(remoteResumeToHistory(rRow));
+      if (!local || resolveConflict(local, rRow) === 'remote') {
+        await db.history.put(mergeRemoteHistory(local, remoteResumeToHistory(rRow)));
       }
     }
     setCursor('sync_cursor_resumes', maxUpdatedAt);
@@ -220,10 +278,8 @@ export async function pullAll(): Promise<void> {
         maxUpdatedAt = lRow.updated_at;
       }
       const local = await db.history.get(lRow.id);
-      if (!local) {
-        await db.history.put(remoteLetterToHistory(lRow));
-      } else if (resolveConflict(local, lRow) === 'remote') {
-        await db.history.put(remoteLetterToHistory(lRow));
+      if (!local || resolveConflict(local, lRow) === 'remote') {
+        await db.history.put(mergeRemoteHistory(local, remoteLetterToHistory(lRow)));
       }
     }
     setCursor('sync_cursor_letters', maxUpdatedAt);

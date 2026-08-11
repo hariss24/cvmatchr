@@ -8,8 +8,10 @@ type Body = { model?: string; key?: string };
 
 /**
  * Vérifie qu'un modèle + une clé API (typés à l'instant dans ⚙️ Paramètres, pas forcément
- * enregistrés) répondent réellement — bouton "Tester la connexion". Sans clé fournie pour
- * Gemini, retombe sur la clé serveur (comme les autres routes IA).
+ * enregistrés) répondent réellement — bouton "Tester la connexion". Teste toujours la clé
+ * fournie par l'appelant : jamais de repli sur la clé serveur (route non authentifiée,
+ * un repli permettrait à n'importe quel visiteur de consommer la clé Gemini du serveur
+ * sans passer par le quota).
  */
 export async function POST(req: Request): Promise<Response> {
   let body: Body;
@@ -30,7 +32,7 @@ export async function POST(req: Request): Promise<Response> {
       ? "deepseek"
       : "gemini";
 
-  const key = (body.key ?? "").trim() || (provider === "gemini" ? process.env.GEMINI_API_KEY || "" : "");
+  const key = (body.key ?? "").trim();
   if (!key) {
     return NextResponse.json({ ok: false, error: "Clé API requise pour ce modèle." }, { status: 400 });
   }

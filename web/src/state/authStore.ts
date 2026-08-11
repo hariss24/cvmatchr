@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { User, Session } from '@supabase/supabase-js';
 import { createBrowserClientHelper } from '@/lib/supabase/client';
-import { purgeLocalData, ensureMatchingUser, syncAll } from '@/lib/storage/syncEngine';
+import { purgeLocalData, ensureMatchingUser, syncAll, pushAll } from '@/lib/storage/syncEngine';
 
 interface AuthState {
   user: User | null;
@@ -31,7 +31,18 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   signOut: async () => {
     const supabase = createBrowserClientHelper();
-    if (supabase) await supabase.auth.signOut();
+    if (supabase) {
+      // Pousser les modifications en attente AVANT de couper la session : sans
+      // ça, purgeLocalData() efface irréversiblement des changements jamais
+      // répliqués côté serveur (rien d'autre ne synchronise juste avant une
+      // déconnexion).
+      try {
+        await pushAll();
+      } catch (e) {
+        console.warn('pushAll avant déconnexion a échoué :', e);
+      }
+      await supabase.auth.signOut();
+    }
     await purgeLocalData();
     set({ user: null, session: null, isLoading: false });
   },
