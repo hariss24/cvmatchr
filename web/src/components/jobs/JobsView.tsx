@@ -109,22 +109,32 @@ export default function JobsView() {
     const sansLogo = [...new Set(liste.filter((j) => !j.logoUrl && j.company.trim()).map((j) => j.company))];
     const inconnues = sansLogo.filter((c) => !logosConnus.current.has(c));
 
-    if (inconnues.length > 0) {
-      // Le résultat est mémorisé, échecs compris : sans ça, une entreprise
-      // introuvable serait redemandée à chaque rechargement de la liste.
-      inconnues.forEach((c) => logosConnus.current.set(c, ""));
+    // Par paquets, et non toutes d'un coup : résoudre une entreprise inconnue
+    // demande de visiter sa page d'accueil, soit ~1 s chacune une fois les
+    // vagues du serveur prises en compte. Une liste de scan en compte volontiers
+    // cinquante, ce qui dépassait la minute allouée à la fonction — la requête
+    // mourait alors en 504 et la liste entière restait sans logo. Vingt tiennent
+    // en ~20 s, avec de la marge.
+    for (let i = 0; i < inconnues.length; i += 20) {
+      const paquet = inconnues.slice(i, i + 20);
+      // Marquées avant l'appel, pour qu'un second rechargement lancé pendant
+      // celui-ci ne redemande pas les mêmes entreprises.
+      paquet.forEach((c) => logosConnus.current.set(c, ""));
       try {
         const res = await fetch("/api/jobs/logos", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ companies: inconnues }),
+          body: JSON.stringify({ companies: paquet }),
         });
-        if (res.ok) {
-          const { logos } = (await res.json()) as { logos?: Record<string, string> };
-          for (const [nom, url] of Object.entries(logos ?? {})) logosConnus.current.set(nom, url);
-        }
+        if (!res.ok) throw new Error(String(res.status));
+        const { logos } = (await res.json()) as { logos?: Record<string, string> };
+        for (const [nom, url] of Object.entries(logos ?? {})) logosConnus.current.set(nom, url);
       } catch {
-        // Un logo manquant ne doit jamais remonter comme une panne.
+        // Un logo manquant ne doit jamais remonter comme une panne — mais le
+        // marquage doit être défait : sans réponse, on ne sait pas si ces
+        // entreprises sont introuvables ou si l'appel a simplement échoué, et
+        // les retenir pour introuvables les priverait de logo à jamais.
+        paquet.forEach((c) => logosConnus.current.delete(c));
       }
     }
 
