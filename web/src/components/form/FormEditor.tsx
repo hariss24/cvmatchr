@@ -142,8 +142,12 @@ export default function FormEditor({ onImportPdf }: { onImportPdf?: () => void }
     <div className="pane-body form-editor">
         {onImportPdf ? (
           <div className="form-import-pdf">
-            <span className="form-import-pdf__hint">Préremplis le formulaire depuis un CV PDF</span>
+            <span className="form-import-pdf__hint">
+              <strong>Vous avez déjà un CV ?</strong>{" "}
+              Importez-le, l&apos;IA remplit le formulaire pour vous.
+            </span>
             <button type="button" className="form-btn-add" onClick={onImportPdf} data-testid="form-import-pdf">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
               Importer un PDF
             </button>
           </div>
