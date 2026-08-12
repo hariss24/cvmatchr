@@ -13,7 +13,7 @@ export default function JobExtractor({ onExtracted, disabled }: JobExtractorProp
   const extractUrl = async () => {
     const trimmed = url.trim();
     if (!trimmed) {
-      toast("Colle une URL d'offre d'emploi.", "error");
+      toast("Collez une URL d'offre d'emploi.", "error");
       return;
     }
 

@@ -114,7 +114,7 @@ export default function AtsPanel({ jobDesc }: { jobDesc: string }) {
   const inputs = (): { resume: Resume; desc: string; role: string } | null => {
     const desc = jobDesc.trim();
     if (!desc) {
-      toast("Colle d'abord une offre d'emploi.", "error");
+      toast("Collez d'abord une offre d'emploi.", "error");
       return null;
     }
     if (!isCv) {

@@ -59,7 +59,7 @@ export async function POST(req: Request): Promise<Response> {
   const enabled = (Object.keys(profile.sources) as SourceId[]).filter((s) => profile.sources[s]);
   if (enabled.length === 0) {
     return NextResponse.json(
-      { error: "config", message: "Aucune source sélectionnée. Coche au moins une source dans « Où chercher »." },
+      { error: "config", message: "Aucune source sélectionnée. Cochez au moins une source dans « Où chercher »." },
       { status: 400 },
     );
   }

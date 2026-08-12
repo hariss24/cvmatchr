@@ -101,7 +101,7 @@ export default function PackView() {
     if (!tpl) return;
     const desc = jobDesc.trim();
     if (!desc) {
-      toast("Colle d'abord une offre d'emploi pour adapter la lettre.", "error");
+      toast("Collez d'abord une offre d'emploi pour adapter la lettre.", "error");
       return;
     }
     if (!isCv) {
@@ -169,7 +169,7 @@ export default function PackView() {
 
       <div className="pane pack-page" style={{ overflowY: "auto" }}>
         <p className="pack-hint">
-          Ces champs remplacent automatiquement les variables (les pastilles) dans ta lettre.
+          Ces champs remplacent automatiquement les variables (les pastilles) dans votre lettre.
         </p>
 
         <div className="pack-vars">
@@ -220,7 +220,7 @@ export default function PackView() {
             <textarea
               className="form-textarea"
               rows={4}
-              placeholder="Colle l'offre d'emploi ici — l'IA réécrit le corps de la lettre pour coller au poste."
+              placeholder="Collez l'offre d'emploi ici — l'IA réécrit le corps de la lettre pour coller au poste."
               value={jobDesc}
               onChange={(e) => setJobDesc(e.target.value)}
               onBlur={() => void prefillFromJob(jobDesc)}

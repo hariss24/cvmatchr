@@ -51,7 +51,7 @@ export default function ProfileView() {
 
       <div className="pane pack-page" style={{ overflowY: "auto" }}>
         <p className="pack-hint">
-          Ces informations pré-remplissent automatiquement tes CV et tes lettres de motivation.
+          Ces informations pré-remplissent automatiquement vos CV et vos lettres de motivation.
         </p>
 
         <div className="pack-vars">

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { promptApiKey } from "@/lib/settings";
 import { useState } from "react";
+import BrandBadge from "@/components/layout/BrandBadge";
 
 function FaqAccordion({ question, children }: { question: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -31,12 +32,7 @@ export default function HelpPage() {
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
           Retour
         </Link>
-        <div className="logo-badge">
-          <div className="logo-icon"><div className="logo-icon-inner">T</div></div>
-          <div className="logo-text">
-            <span className="logo-title">CVMatchr</span>
-          </div>
-        </div>
+        <BrandBadge />
         <div style={{ width: 100 }} className="mobile-hidden"></div>
       </header>
 
@@ -44,91 +40,157 @@ export default function HelpPage() {
         <section className="help-section help-section--hero">
           <h1 className="help-title">Comment fonctionne CVMatchr ?</h1>
           <p className="help-desc">
-            CVMatchr est conçu pour être simple, rapide, et <strong>100% privé</strong>. 
-            Contrairement à la majorité des applications web, <strong>aucune de vos données personnelles n&apos;est envoyée sur un serveur distant</strong>.
-            Vos CVs, lettres, et informations de profil sont stockés directement dans le stockage local de votre navigateur (IndexedDB).
+            CVMatchr adapte votre CV et vos lettres de motivation à chaque offre d&apos;emploi,
+            avec l&apos;aide de l&apos;intelligence artificielle. L&apos;objectif : passer les
+            filtres automatiques de recrutement (ATS) sans y passer vos soirées.
           </p>
           <p className="help-desc">
-            C&apos;est pour cette raison que vous n&apos;avez pas besoin de créer de compte ou de vous connecter.
-            Vos données vous appartiennent.
+            <strong>Vous pouvez l&apos;utiliser immédiatement, sans créer de compte.</strong> Dans ce
+            cas, vos documents restent stockés uniquement dans votre navigateur. Créer un compte est
+            optionnel, et sert à retrouver vos documents sur plusieurs appareils.
           </p>
         </section>
 
         <section className="help-section">
-          <h2>Foire Aux Questions (FAQ)</h2>
+          <h2>Foire aux questions</h2>
 
-          <FaqAccordion question="Comment démarrer rapidement en 4 étapes ?">
+          <FaqAccordion question="Comment démarrer en 4 étapes ?">
             <ol className="help-steps">
-              <li>Importe ton CV (PDF ou texte) avec « Importer un PDF », ou pars du modèle par défaut.</li>
-              <li>Complète les champs dans le formulaire.</li>
-              <li>Clique « Adapter à une offre », colle l&apos;annonce : l&apos;IA adapte ton CV.</li>
-              <li>Exporte en PDF (bouton en haut, ou Ctrl+Entrée).</li>
+              <li>Importez votre CV (PDF ou texte) avec « Importer un PDF », ou partez du modèle par défaut.</li>
+              <li>Complétez les champs dans le formulaire.</li>
+              <li>Cliquez « Adapter à une offre » et collez l&apos;annonce : l&apos;IA adapte votre CV.</li>
+              <li>Exportez en PDF (bouton en haut, ou Ctrl+Entrée).</li>
             </ol>
           </FaqAccordion>
 
-          <FaqAccordion question="Qu'est-ce que le « CV Principal » ?">
+          <FaqAccordion question="Ai-je besoin de créer un compte ?">
             <p>
-              C&apos;est ton CV le plus complet (contenant toute ton expérience sans limite de pages).
-              Quand tu adaptes à une offre, l&apos;IA y pioche et élague le superflu pour tenir sur une page.
-              Tu l&apos;actives en cochant « Utiliser le CV Principal » dans la fenêtre d&apos;adaptation.
+              Non. L&apos;édition, l&apos;adaptation à une offre et l&apos;export PDF fonctionnent
+              sans compte. Un compte apporte deux choses : la <strong>synchronisation</strong>{" "}de vos
+              documents entre plusieurs appareils, et l&apos;accès au <strong>quota d&apos;IA
+              offert</strong>{" "}sans avoir à fournir votre propre clé API.
             </p>
           </FaqAccordion>
 
-          <FaqAccordion question="Comment l'IA choisit-elle ce qu'elle garde dans mon CV ?">
+          <FaqAccordion question="Où sont stockées mes données ?">
             <p>
-              Lorsque tu fournis une offre d&apos;emploi, l&apos;IA analyse les mots-clés et les compétences requises. Elle puise ensuite dans ton « CV Principal » pour ne conserver et ne mettre en valeur que les expériences directement pertinentes pour ce poste, tout en s&apos;assurant que le résultat final tienne sur une seule page.
+              <strong>Sans compte :</strong>{" "}tout reste dans le stockage local de votre navigateur
+              (IndexedDB). Rien n&apos;est conservé sur nos serveurs.
             </p>
-          </FaqAccordion>
-
-          <FaqAccordion question="Puis-je modifier la couleur ou le design du CV ?">
             <p>
-              Non, et c&apos;est volontaire. Le design de CVMatchr a été méticuleusement pensé pour être sobre, ultra-lisible, et parfaitement optimisé pour passer les logiciels de tri de CV automatiques (ATS). L&apos;objectif est que tu te concentres à 100% sur ton contenu, sans perdre de temps sur la mise en page.
+              <strong>Avec un compte :</strong>{" "}vos CV, lettres, candidatures et offres sauvegardées
+              sont en plus répliqués sur nos serveurs (Supabase, hébergement dans l&apos;Union
+              européenne) pour être disponibles sur vos autres appareils. Des règles d&apos;accès au
+              niveau de la base garantissent que seul votre compte peut lire vos données.
+            </p>
+            <p>
+              Dans les deux cas, le contenu que vous soumettez à une fonctionnalité IA est transmis au
+              fournisseur d&apos;IA le temps du traitement. Le détail figure dans notre{" "}
+              <Link href="/confidentialite">politique de confidentialité</Link>.
             </p>
           </FaqAccordion>
 
           <FaqAccordion question="Si je change d'ordinateur, est-ce que je retrouve mes CV ?">
             <p>
-              Étant donné que CVMatchr respecte totalement ta vie privée et stocke tout directement dans ton navigateur localement, tes données ne sont pas synchronisées sur un serveur. Si tu changes de machine ou de navigateur, tu devras réimporter ton CV existant (en PDF ou en texte).
+              <strong>Si vous avez un compte</strong>, oui : connectez-vous et vos documents sont
+              retrouvés automatiquement.
+            </p>
+            <p>
+              <strong>Sans compte</strong>, non : vos données vivent dans le navigateur de cette
+              machine uniquement. Changer d&apos;ordinateur, de navigateur, ou vider les données de
+              navigation vous ferait tout perdre. Pensez à exporter une sauvegarde, ou créez un compte.
             </p>
           </FaqAccordion>
 
-          <FaqAccordion question="Où sont enregistrées les offres d'emploi que j'ajoute ?">
+          <FaqAccordion question="Combien de requêtes IA sont incluses ?">
             <p>
-              Toutes les offres sont sauvegardées dans l&apos;onglet « Offres » de l&apos;application (toujours localement sur ta machine). Tu peux t&apos;en servir comme d&apos;un tableau de bord pour suivre l&apos;état de tes candidatures (À postuler, En cours, Refusé...).
+              Chaque compte dispose d&apos;un quota mensuel de requêtes IA offert, qui se
+              réinitialise au début de chaque mois calendaire. Le compteur restant s&apos;affiche dans
+              le menu utilisateur, en haut à droite.
             </p>
-          </FaqAccordion>
-
-          <FaqAccordion question="Puis-je utiliser CVMatchr sur mon téléphone ?">
             <p>
-              Bien que l&apos;application soit accessible sur mobile pour dépanner (lire un document ou consulter ses offres), <strong>nous conseillons fortement de l&apos;utiliser sur un ordinateur (PC/Mac)</strong>. L&apos;édition d&apos;un CV ou d&apos;une lettre et la prévisualisation PDF nécessitent un écran large pour une expérience optimale et un confort visuel maximal.
+              Les actions principales (adapter un CV, générer ou adapter une lettre, importer un CV
+              PDF, discuter avec l&apos;assistant) consomment un crédit. L&apos;analyse ATS et
+              l&apos;extraction d&apos;une offre depuis une URL sont gratuites. Pour un usage
+              illimité, renseignez votre propre clé API.
             </p>
           </FaqAccordion>
 
           <FaqAccordion question="Pourquoi et comment utiliser ma propre clé API (IA) ?">
             <p>
-              Par défaut, l&apos;app utilise une clé serveur partagée. Tu peux renseigner ta propre
-              clé (Gemini ou Anthropic) pour ne pas dépendre du quota commun ni des limites de requêtes. Une clé Gemini gratuite
-              s&apos;obtient sur Google AI Studio.
+              Renseigner votre propre clé (Google Gemini, Anthropic ou DeepSeek) vous affranchit
+              totalement du quota : les requêtes sont facturées sur votre compte fournisseur, pas sur
+              le nôtre. C&apos;est aussi la seule façon d&apos;utiliser l&apos;IA sans créer de compte
+              CVMatchr. Une clé Gemini gratuite s&apos;obtient en quelques clics sur Google AI Studio.
             </p>
             <button type="button" className="go" onClick={() => promptApiKey()} style={{ marginTop: 12 }}>
               Régler ma clé API
             </button>
           </FaqAccordion>
 
-          <FaqAccordion question="Quelle est la différence entre le Formulaire et le mode Expert ?">
+          <FaqAccordion question="Qu'est-ce que le « CV Principal » ?">
             <p>
-              Le <strong>Formulaire</strong> (recommandé) te laisse remplir des champs simples. Le
-              mode <strong>Expert</strong> montre le code : le <strong>JSON</strong> = tes données
-              structurées, le <strong>HTML/CSS</strong> = la mise en page. Réservé aux usages avancés ou à des bidouillages poussés.
+              C&apos;est votre CV le plus complet, contenant toute votre expérience sans limite de
+              pages. Quand vous adaptez votre CV à une offre, l&apos;IA y puise et élague le superflu
+              pour tenir sur une page. Vous l&apos;activez en cochant « Utiliser le CV Principal »
+              dans la fenêtre d&apos;adaptation.
             </p>
           </FaqAccordion>
 
-          <FaqAccordion question="Astuce : comment garder une sauvegarde rapide de mon CV ?">
+          <FaqAccordion question="Comment l'IA choisit-elle ce qu'elle garde dans mon CV ?">
             <p>
-              Sur Windows, le raccourci <strong>Windows + V</strong> ouvre l&apos;historique du presse-papier.
-              Passe en mode <strong>Expert</strong>, clique « Copier » pour copier le JSON de ton CV, puis épingle
-              cette entrée dans l&apos;historique du presse-papier (icône 📌). Tu pourras la retrouver et la recoller
-              plus tard, même après avoir fermé ton navigateur : une sauvegarde de secours simple, sans rien exporter.
+              Lorsque vous fournissez une offre d&apos;emploi, l&apos;IA analyse les mots-clés et les
+              compétences requises. Elle puise ensuite dans votre « CV Principal » pour ne conserver
+              et ne mettre en valeur que les expériences directement pertinentes pour ce poste, tout
+              en s&apos;assurant que le résultat final tienne sur une seule page.
+            </p>
+            <p>
+              Relisez toujours le résultat avant de l&apos;envoyer : l&apos;IA peut se tromper ou
+              reformuler maladroitement.
+            </p>
+          </FaqAccordion>
+
+          <FaqAccordion question="Puis-je modifier la couleur ou le design du CV ?">
+            <p>
+              Le choix se fait parmi quatre modèles éprouvés (Sobre, Graphique, Kakuna, Marine).
+              Il n&apos;y a volontairement pas de personnalisation libre : chaque modèle a été pensé
+              pour rester lisible et pour passer les logiciels de tri automatique de CV (ATS).
+              L&apos;objectif est que vous vous concentriez sur le contenu, pas sur la mise en page.
+            </p>
+          </FaqAccordion>
+
+          <FaqAccordion question="Où sont enregistrées les offres d'emploi que j'ajoute ?">
+            <p>
+              Dans l&apos;onglet « Offres » de l&apos;application. Vous pouvez vous en servir comme
+              d&apos;un tableau de bord pour suivre l&apos;état de vos candidatures. Comme le reste,
+              elles sont synchronisées si vous avez un compte, et locales à votre navigateur sinon.
+            </p>
+          </FaqAccordion>
+
+          <FaqAccordion question="Quelle est la différence entre le Formulaire et le mode Expert ?">
+            <p>
+              Le <strong>Formulaire</strong>{" "}(recommandé) vous laisse remplir des champs simples. Le
+              mode <strong>Expert</strong>{" "}affiche les mêmes données au format <strong>JSON</strong>,
+              et permet de les copier ou de les coller en bloc. Utile pour sauvegarder rapidement un
+              document ou le transférer, sans passer par l&apos;interface.
+            </p>
+          </FaqAccordion>
+
+          <FaqAccordion question="Puis-je utiliser CVMatchr sur mon téléphone ?">
+            <p>
+              L&apos;application est accessible sur mobile pour dépanner (relire un document,
+              consulter vos offres), mais <strong>nous recommandons vivement un ordinateur</strong>.
+              L&apos;édition d&apos;un CV et la prévisualisation PDF nécessitent un écran large pour
+              être confortables.
+            </p>
+          </FaqAccordion>
+
+          <FaqAccordion question="Comment garder une sauvegarde rapide de mon CV ?">
+            <p>
+              Passez en mode <strong>Expert</strong>{" "}et cliquez « Copier » pour copier le JSON de
+              votre CV. Sur Windows, le raccourci <strong>Windows + V</strong>{" "}ouvre l&apos;historique
+              du presse-papier : vous pouvez y épingler cette entrée (icône 📌) et la retrouver plus
+              tard, même après avoir fermé votre navigateur. Une sauvegarde de secours en deux clics.
             </p>
           </FaqAccordion>
 
@@ -139,6 +201,18 @@ export default function HelpPage() {
             </ul>
           </FaqAccordion>
 
+        </section>
+
+        <section className="help-section">
+          <h2>Une question sans réponse ?</h2>
+          <p>
+            Écrivez-nous à <a href="mailto:hafejihariss@gmail.com">hafejihariss@gmail.com</a>.
+          </p>
+          <p style={{ marginTop: 12 }}>
+            <Link href="/confidentialite">Politique de confidentialité</Link>
+            {" · "}
+            <Link href="/conditions-utilisation">Conditions d&apos;utilisation</Link>
+          </p>
         </section>
       </main>
     </div>

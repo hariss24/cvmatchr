@@ -78,7 +78,7 @@ export async function POST(req: Request): Promise<Response> {
       const still = findLetterPlaceholder(adapted);
       if (still) {
         throw new Error(
-          `L'IA a laissé un passage à compléter (« ${still} ») : lettre conservée. Réessaie, ou complète ton CV.`,
+          `L'IA a laissé un passage à compléter (« ${still} ») : lettre conservée. Réessayez, ou complétez votre CV.`,
         );
       }
     }

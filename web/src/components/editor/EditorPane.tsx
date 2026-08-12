@@ -121,7 +121,7 @@ export default function EditorPane() {
   };
 
   const onPasteJson = async () => {
-    const raw = await uiPrompt("Colle le JSON du document :", "", "Coller un JSON");
+    const raw = await uiPrompt("Collez le JSON du document :", "", "Coller un JSON");
     if (raw === null) return;
     try {
       const parsed = JSON.parse(raw);
@@ -249,8 +249,8 @@ export default function EditorPane() {
         <div className="import-pane">
           <p className="import-hint">
             {isResumeType
-              ? "Importe un CV existant : l'IA en extrait les données pour remplir le formulaire."
-              : "Importe une lettre de motivation existante : l'IA en extrait les données pour remplir le formulaire."}
+              ? "Importez un CV existant : l'IA en extrait les données pour remplir le formulaire."
+              : "Importez une lettre de motivation existante : l'IA en extrait les données pour remplir le formulaire."}
           </p>
           <div className="import-pane-actions">
             <button type="button" className="form-btn-add" onClick={() => setImportTextOpen(true)}>

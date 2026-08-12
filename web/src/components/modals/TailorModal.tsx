@@ -268,7 +268,7 @@ export default function TailorModal({
     const { docType, json, setJson } = useDocStore.getState();
     const desc = jobDesc.trim();
     if (!desc) {
-      toast("Colle d'abord une offre d'emploi.", "error");
+      toast("Collez d'abord une offre d'emploi.", "error");
       return;
     }
     if (docType === "Lettre") {
@@ -323,7 +323,7 @@ export default function TailorModal({
 
       toast(
         docType === "Maître"
-          ? "CV adapté — ton CV Principal est resté intact."
+          ? "CV adapté — votre CV Principal est resté intact."
           : master
             ? "CV adapté depuis le CV Principal."
             : useMaster
@@ -361,7 +361,7 @@ export default function TailorModal({
       <textarea
         id="job-desc-input"
         className="form-textarea"
-        placeholder="Colle ici le texte de l'offre d'emploi, ou utilise l'extracteur ci-dessus…"
+        placeholder="Collez ici le texte de l'offre d'emploi, ou utilisez l'extracteur ci-dessus…"
         value={jobDesc}
         onChange={(e) => setJobDesc(e.target.value)}
         disabled={busy}
@@ -403,7 +403,7 @@ export default function TailorModal({
               <h2 className="sheet__title">Adapter à une offre</h2>
               <div className="sheet__sub">
                 {isLetter
-                  ? "L'IA adapte le corps de ta lettre — ta voix reste la tienne."
+                  ? "L'IA adapte le corps de votre lettre — votre voix reste la vôtre."
                   : "Un snapshot du CV est pris avant chaque adaptation."}
               </div>
             </div>

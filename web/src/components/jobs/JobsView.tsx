@@ -315,7 +315,7 @@ export default function JobsView() {
       ].filter((s) => s.francetravail || s.adzuna || s.jsearch || s.boards);
 
       if (groupes.length === 0) {
-        setConfigMsg("Aucune source sélectionnée. Coche au moins une source dans « Où chercher ».");
+        setConfigMsg("Aucune source sélectionnée. Cochez au moins une source dans « Où chercher ».");
         return;
       }
 
@@ -422,7 +422,7 @@ export default function JobsView() {
       <div className="jobs-config" data-testid="jobs-config">
         <p>{configMsg}</p>
         <p className="jobs-config-hint">
-          Renseigne les variables d&apos;environnement des sources que tu as cochées dans
+          Renseignez les variables d&apos;environnement des sources que vous avez cochées dans
           «&nbsp;Où chercher&nbsp;».
         </p>
       </div>
@@ -435,9 +435,9 @@ export default function JobsView() {
         criteria={[
           { label: "Compétences & missions", max: 45, description: "Ce que la description dit vraiment des missions et des compétences attendues." },
           { label: "Métier", max: 20, description: "Code métier officiel de l'offre et intitulé du poste." },
-          { label: "Distance", max: 15, description: "Distance à vol d'oiseau depuis ton adresse." },
+          { label: "Distance", max: 15, description: "Distance à vol d'oiseau depuis votre adresse." },
           { label: "Contrat & salaire", max: 10, description: "Type de contrat voulu et salaire annoncé." },
-          { label: "Expérience", max: 10, description: "Expérience exigée face à ton niveau." },
+          { label: "Expérience", max: 10, description: "Expérience exigée face à votre niveau." },
           { label: "Malus", max: 0, description: "Métier hors-sujet (−20) et signaux négatifs (−15)." },
         ]}
       />
@@ -465,7 +465,7 @@ export default function JobsView() {
 
       {jobs.length === 0 ? (
         <div className="jobs-empty">
-          {scanning ? "Recherche en cours…" : "Aucune offre pour l'instant. Renseigne tes critères puis lance une recherche."}
+          {scanning ? "Recherche en cours…" : "Aucune offre pour l'instant. Renseignez vos critères puis lancez une recherche."}
         </div>
       ) : (
         <div className="jobs-list" data-testid="jobs-list">
