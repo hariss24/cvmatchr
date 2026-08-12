@@ -10,6 +10,9 @@ interface AuthState {
   /** `false` quand les variables Supabase sont absentes : l'UI masque le bouton. */
   isConfigured: boolean;
   signInWithGoogle: () => Promise<void>;
+  /** Flux Google Identity Services : le jeton est obtenu côté navigateur, donc
+   *  Google affiche notre domaine et non celui du projet Supabase. */
+  signInWithGoogleIdToken: (credential: string, nonce: string) => Promise<void>;
   signOut: () => Promise<void>;
   initAuth: () => Promise<void>;
 }
@@ -27,6 +30,19 @@ export const useAuthStore = create<AuthState>((set) => ({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
+  },
+
+  signInWithGoogleIdToken: async (credential: string, nonce: string) => {
+    const supabase = createBrowserClientHelper();
+    if (!supabase) return;
+    // `nonce` est le nonce BRUT : Google a reçu sa version hachée en SHA-256.
+    // Les intervertir fait échouer la vérification côté Supabase.
+    const { error } = await supabase.auth.signInWithIdToken({
+      provider: 'google',
+      token: credential,
+      nonce,
+    });
+    if (error) throw error;
   },
 
   signOut: async () => {
