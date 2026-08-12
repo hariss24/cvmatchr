@@ -3,6 +3,22 @@ import { readAiHeaders } from './http';
 import { createServerClientHelper } from '@/lib/supabase/server';
 import { evaluateQuotaRules, ENDPOINT_COST, type BillableEndpoint } from './quota';
 
+/**
+ * Modèle imposé quand c'est la clé du serveur qui paie.
+ *
+ * Figé ici, et non réglable par variable d'environnement : le réglage
+ * `AI_SERVER_MODEL` pointait sur `gemini-2.5-flash`, que Google a depuis retiré
+ * aux nouveaux projets. Tous les appels IA des comptes sans clé personnelle
+ * échouaient donc en 404 — une panne totale décidée par une valeur oubliée dans
+ * un tableau de bord, invisible depuis le code. Le choix étant de toute façon
+ * imposé (cf. plus bas), le rendre réglable n'offrait rien qu'un moyen de casser
+ * la production.
+ *
+ * `flash-lite` est le plus rapide et le moins cher de la gamme : c'est celui qui
+ * convient quand c'est nous qui payons.
+ */
+export const SERVER_MODEL = 'gemini-3.1-flash-lite';
+
 export interface AiGrant {
   /** Clé à utiliser pour l'appel : celle de l'utilisateur, ou celle du serveur. */
   key: string;
@@ -70,5 +86,5 @@ export async function guardAiRequest(
       { status: 503 },
     );
   }
-  return { key: serverKey, model: process.env.AI_SERVER_MODEL ?? 'gemini-2.5-flash' };
+  return { key: serverKey, model: SERVER_MODEL };
 }
