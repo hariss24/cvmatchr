@@ -135,11 +135,12 @@ test("une offre déjà en base n'est pas dupliquée au rescan, et le badge s'eff
   await expect(page.getByTestId("job-new")).toHaveCount(0);
 });
 
-test("une offre sans recoupement mots-clés est conservée mais classée après la pertinente", async ({ page }) => {
-  // Depuis la notation locale (spec notation-lettres §3.5), `shouldPersist` garde
-  // TOUJOURS l'offre — plus de rejet serveur sous un seuil. La pertinence ne se
-  // traduit plus par une absence de notation, mais par un rang plus bas dans la liste
-  // (`listJobs` trie par score décroissant, cf. storage/db.ts).
+test("une offre sans recoupement mots-clés est écartée du scan", async ({ page }) => {
+  // Le 07/08/2026, `shouldPersist` a cessé de rendre `true` sans condition : elle
+  // n'enregistre plus une offre dont le score passe sous le seuil de la lettre C
+  // (rank/index.ts). Motif : dans la base d'un utilisateur, 44 offres stockées dont
+  // des 18/100 hors-sujet que le classement avait pourtant bien identifiées.
+  // Ce test attendait encore l'ancien comportement — tout garder et trier par score.
   const OFFTOPIC = {
     ...OFFER,
     id: "2",
@@ -156,9 +157,9 @@ test("une offre sans recoupement mots-clés est conservée mais classée après 
   await page.getByTestId("jobs-scan").click();
 
   const cards = page.getByTestId("job-card");
-  await expect(cards).toHaveCount(2);
+  await expect(cards).toHaveCount(1);
   await expect(cards.nth(0)).toContainText("Webmaster SEO");
-  await expect(cards.nth(1)).toContainText("Boulanger");
+  await expect(page.getByText("Boulanger")).toHaveCount(0);
 });
 
 test("l'encart de notation s'ouvre et affiche la grille des critères", async ({ page }) => {
