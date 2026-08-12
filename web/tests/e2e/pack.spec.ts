@@ -63,7 +63,7 @@ test("« Adapter à l'offre (IA) » réécrit le corps via /api/adapt-letter", a
   // L'adaptation IA est repliée par défaut : on la déplie.
   await modal.getByRole("button", { name: /Adapter à une offre \(IA\)/ }).click();
   await modal
-    .getByPlaceholder(/Colle l'offre d'emploi/)
+    .getByPlaceholder(/Collez l'offre d'emploi/)
     .fill("Développeur Full Stack React/Node, télétravail.");
   await modal.getByRole("button", { name: /Adapter le corps à l'offre/ }).click();
 

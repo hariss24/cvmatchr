@@ -12,9 +12,14 @@ test.describe("Page d'aide et FAQ", () => {
     await expect(page).toHaveURL(/.*\/help/);
     await expect(page.locator("h1")).toContainText("Comment fonctionne CVMatchr ?");
     
-    // 4. Vérifier la présence du texte sur le fonctionnement local
-    await expect(page.locator("text=100% privé")).toBeVisible();
-    await expect(page.locator("text=stockés directement dans le stockage local de votre navigateur")).toBeVisible();
+    // 4. Vérifier la présence du texte sur le fonctionnement sans compte
+    // Phrase complète : « sans créer de compte » seul apparaît aussi dans la FAQ (clé API).
+    await expect(
+      page.getByText("Vous pouvez l'utiliser immédiatement, sans créer de compte."),
+    ).toBeVisible();
+    await expect(
+      page.locator("text=vos documents restent stockés uniquement dans votre navigateur"),
+    ).toBeVisible();
   });
 
   test("Les accordéons de la FAQ s'ouvrent et se ferment", async ({ page }) => {
@@ -22,7 +27,7 @@ test.describe("Page d'aide et FAQ", () => {
 
     // Vérifier la présence d'une question (accordéon `<button className="faq-summary">`
     // piloté par state React depuis le commit 5dc0a01, plus un <details>/<summary>).
-    const firstQuestion = page.locator(".faq-summary").filter({ hasText: "Comment démarrer rapidement en 4 étapes ?" });
+    const firstQuestion = page.locator(".faq-summary").filter({ hasText: "Comment démarrer en 4 étapes ?" });
     await expect(firstQuestion).toBeVisible();
 
     // Le contenu est caché par défaut : l'état ouvert/fermé est porté par `aria-expanded`.
