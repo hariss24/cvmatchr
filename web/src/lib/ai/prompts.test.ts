@@ -177,7 +177,13 @@ describe("regroupement des compétences par catégorie", () => {
 
   it("le regroupement ne remplace pas le cloisonnement des trois listes", () => {
     for (const system of [SYSTEM_PDF_TO_RESUME, SYSTEM_TEXT_TO_RESUME]) {
-      expect(system).toContain("ne fusionne JAMAIS");
+      // Assertions propres au bloc REGROUPEMENT lui-même (pas au paragraphe RÉPARTITION
+      // préexistant, qui contient déjà « ne fusionne JAMAIS » sans rapport avec cette tâche) :
+      // le regroupement agit À L'INTÉRIEUR de chaque liste, séparément, sans les fusionner.
+      expect(system).toContain(
+        "REGROUPEMENT PAR CATÉGORIE — dans chacune des trois listes, séparément",
+      );
+      expect(system).toContain("sans en fusionner deux");
     }
   });
 });
