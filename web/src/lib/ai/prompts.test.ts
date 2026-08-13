@@ -5,8 +5,10 @@ import {
   SYSTEM_TEXT_TO_LETTER,
   RESUME_TAILOR_RULES,
   RESUME_SCHEMA_DESC,
+  EXTRACTION_SCHEMA_DESC,
   SYSTEM_PDF_TO_RESUME,
   SYSTEM_TEXT_TO_RESUME,
+  SYSTEM_TAILOR_RESUME_BASE,
   SYSTEM_EDITOR_CHAT,
   HUMAN_TONE_RULE,
   CONCISION_RULE,
@@ -14,7 +16,7 @@ import {
   tailorResumeSystem,
   type TailorLevel,
 } from "./prompts";
-import { resumeSchema, letterSchema } from "@/lib/resume/schema";
+import { resumeSchema, letterSchema, RESUME_TOP_KEYS } from "@/lib/resume/schema";
 import { LETTER_TONES } from "@/lib/letter/tone";
 
 const LEVELS: TailorLevel[] = ["peu", "adapte", "hyper"];
@@ -39,8 +41,10 @@ describe("prompts — invariants métier", () => {
       "hiddenSections", // préférence d'affichage de l'utilisateur, pas du contenu de CV :
       //                   l'IA n'a rien à en dire, et `mergeTailored` la recopie toujours
       //                   depuis la base pour qu'une adaptation ne puisse pas la perdre.
-      "sectionTitles", // titres personnalisés des sections : même statut que hiddenSections
-      //                  (préférence d'affichage, restaurée par `mergeTailored`, hors IA).
+      "sectionTitles", // titres personnalisés : hors de la fiche de TAILORING seulement
+      //                  (préférence d'affichage, restaurée par `mergeTailored`). La fiche
+      //                  d'EXTRACTION le décrit, elle — cf. « fiches de schéma » plus bas :
+      //                  à l'import, l'intitulé du CV source est du contenu.
     ]);
     const keys = Object.keys(resumeSchema.shape).filter((k) => !HORS_FICHE.has(k));
     for (const key of keys) {
@@ -71,6 +75,37 @@ describe("prompts — invariants métier", () => {
     expect(tailorResumeSystem("n'importe quoi" as TailorLevel)).toBe(tailorResumeSystem("adapte"));
   });
 
+});
+
+describe("fiches de schéma — extraction vs tailoring", () => {
+  // `sectionTitles` sépare les deux usages, et cette séparation est la correction d'un
+  // bug réel : sans ce champ à l'extraction, l'IA ne pouvait pas à la fois « utiliser le
+  // champ standard » et « ne jamais renommer une rubrique ». Elle faisait les deux, et
+  // le CV sortait avec une section libre doublonnant un champ déjà rempli.
+  it("la fiche d'extraction décrit sectionTitles", () => {
+    expect(EXTRACTION_SCHEMA_DESC).toContain('"sectionTitles"');
+  });
+
+  it("la fiche de tailoring ne décrit PAS sectionTitles", () => {
+    expect(RESUME_SCHEMA_DESC).not.toContain('"sectionTitles"');
+  });
+
+  it("la fiche d'extraction est un sur-ensemble de la fiche de tailoring", () => {
+    for (const key of RESUME_TOP_KEYS) {
+      if (key === "sectionTitles") continue;
+      if (!RESUME_SCHEMA_DESC.includes(`"${key}"`)) continue;
+      expect(EXTRACTION_SCHEMA_DESC, `champ « ${key} » perdu à l'extraction`).toContain(
+        `"${key}"`,
+      );
+    }
+  });
+
+  it("les deux extractions utilisent la fiche étendue, le tailoring non", () => {
+    for (const system of [SYSTEM_PDF_TO_RESUME, SYSTEM_TEXT_TO_RESUME]) {
+      expect(system).toContain('"sectionTitles"');
+    }
+    expect(SYSTEM_TAILOR_RESUME_BASE).not.toContain('"sectionTitles"');
+  });
 });
 
 describe("prompts — cohérence des niveaux (pas de contradiction base/niveau)", () => {
