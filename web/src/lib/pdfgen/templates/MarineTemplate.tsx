@@ -2,7 +2,7 @@ import React from "react";
 import { Document, Page, View, Text, Image, StyleSheet, Svg, Path } from "@react-pdf/renderer";
 import type { Resume } from "@/lib/resume/schema";
 
-import { px, t, ThemeContext, PdfTheme, SectionContent } from "./primitives";
+import { px, t, ThemeContext, PdfTheme, SectionContent, SkillText } from "./primitives";
 import { ContactIcon, detectContactIcon } from "./contactIcons";
 import { buildSections, buildContacts, contactText, splitColumns, sectionTitle, type ResumeSection } from "@/lib/resume/sections";
 
@@ -186,7 +186,9 @@ function SideList({ items }: { items: string[] }) {
       {items.map((item, i) => (
         <View key={i} style={s.sideBulletRow}>
           <Text style={s.sideBulletGlyph}>•</Text>
-          <Text style={s.sideBulletText}>{item}</Text>
+          <Text style={s.sideBulletText}>
+            <SkillText skill={item} />
+          </Text>
         </View>
       ))}
     </>

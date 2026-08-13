@@ -280,3 +280,18 @@ describe("non-régression des templates non concernés par le rendu compact", ()
     });
   }
 });
+
+describe("Marine — sidebar au format « Catégorie — éléments »", () => {
+  it("conserve l'intégralité du texte d'un outil catégorisé", async () => {
+    const cv = resumeSchema.parse({
+      name: "Jean Test",
+      tools: ["Cloud & DevOps — Docker, Kubernetes, Ansible, AWS, Azure"],
+    });
+    const buf = await renderToBuffer(<ResumeDocument resume={cv} templateId="marine" />);
+    const text = (await extractPdfText(new Uint8Array(buf))).join("\n");
+
+    // SkillText scinde la chaîne en deux <Text> : les deux moitiés doivent survivre.
+    expect(text).toContain("Cloud & DevOps");
+    expect(text).toContain("Docker, Kubernetes, Ansible, AWS, Azure");
+  });
+});
