@@ -117,11 +117,11 @@ describe("prompts — cohérence des niveaux (pas de contradiction base/niveau)"
     expect(sys).toContain("NE modifie RIEN d'autre");
   });
 
-  it("les niveaux JSON 'adapte' et 'hyper' gardent l'élagage 1 page et le format compétences", () => {
+  it("les niveaux JSON 'adapte' et 'hyper' gardent l'élagage 1 page et la règle de regroupement", () => {
     for (const level of ["adapte", "hyper"] as const) {
       const sys = tailorResumeSystem(level);
       expect(sys, level).toContain("1 PAGE");
-      expect(sys, level).toContain("Mot clé — Description");
+      expect(sys, level).toContain("Catégorie — élément, élément");
     }
   });
 
@@ -185,6 +185,19 @@ describe("regroupement des compétences par catégorie", () => {
       );
       expect(system).toContain("sans en fusionner deux");
     }
+  });
+});
+
+describe("le tailoring préserve le regroupement par catégorie", () => {
+  it("interdit d'éclater une catégorie aux niveaux adapte et hyper", () => {
+    for (const level of ["adapte", "hyper"] as const) {
+      expect(RESUME_TAILOR_RULES[level]).toContain("regroupement");
+      expect(RESUME_TAILOR_RULES[level]).not.toContain("Mot clé — Description");
+    }
+  });
+
+  it("le niveau subtil continue de ne toucher à rien", () => {
+    expect(RESUME_TAILOR_RULES.peu).toContain("IDENTIQUES");
   });
 });
 
@@ -335,13 +348,13 @@ describe("prompts — tonalité humaine", () => {
   });
 
   // La règle bannit le tiret cadratin en prose, mais le format des compétences l'impose.
-  // L'exception doit rester ALLUSIVE : citer « Mot clé — Description » ferait fuiter ce
+  // L'exception doit rester ALLUSIVE : citer « Catégorie — élément, élément » ferait fuiter ce
   // format dans le niveau « subtil », qui interdit justement de reformater les compétences.
   it("la règle épargne le tiret cadratin des formats imposés, sans citer lequel", () => {
     expect(HUMAN_TONE_RULE).toContain("SEULE EXCEPTION");
-    expect(HUMAN_TONE_RULE).not.toContain("Mot clé — Description");
-    expect(tailorResumeSystem("peu")).not.toContain("Mot clé — Description");
-    expect(tailorResumeSystem("adapte")).toContain("Mot clé — Description");
+    expect(HUMAN_TONE_RULE).not.toContain("Catégorie — élément, élément");
+    expect(tailorResumeSystem("peu")).not.toContain("Catégorie — élément, élément");
+    expect(tailorResumeSystem("adapte")).toContain("Catégorie — élément, élément");
   });
 });
 

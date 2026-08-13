@@ -240,7 +240,11 @@ export const RESUME_TAILOR_RULES: Record<TailorLevel, string> = {
     "- Réordonne les 'skills' existantes (sans en ajouter ni supprimer).\n" +
     "- Enrichis/reformule les 'bullets' des expériences (max 4 par expérience, " +
     "sans inventer de contenu absent du CV).\n" +
-    "- COMPÉTENCES : chaque élément de 'skills' respecte le format 'Mot clé — Description'.\n" +
+    "- COMPÉTENCES : si les entrées de 'skills', 'softSkills' ou 'tools' sont groupées au " +
+    "format 'Catégorie — élément, élément', CONSERVE ce regroupement. Tu peux réordonner les " +
+    "catégories entre elles, et réordonner les éléments à l'intérieur d'une catégorie, pour " +
+    "faire remonter ce qui sert l'offre. Tu ne dois JAMAIS éclater une catégorie en plusieurs " +
+    "entrées, ni fusionner deux catégories, ni changer le séparateur ' — '.\n" +
     "- LONGUEUR GLOBALE (1 PAGE MAX) : le CV final doit rester concis (idéalement moins de " +
     "2500 caractères au total). Si le CV d'entrée est un CV Maître très long, trie et élague " +
     "ce qui n'est pas pertinent pour l'offre — sans jamais toucher aux résultats chiffrés.\n" +
@@ -250,7 +254,11 @@ export const RESUME_TAILOR_RULES: Record<TailorLevel, string> = {
     "- Ajuste 'title' et réécris entièrement 'summary'.\n" +
     "- Réorganise et reformule les 'skills' existantes (sans en inventer de nouvelles).\n" +
     "- Réécris les 'bullets' des expériences (max 4 par expérience, sans inventer de faits).\n" +
-    "- COMPÉTENCES : chaque élément de 'skills' respecte le format 'Mot clé — Description'.\n" +
+    "- COMPÉTENCES : si les entrées de 'skills', 'softSkills' ou 'tools' sont groupées au " +
+    "format 'Catégorie — élément, élément', CONSERVE ce regroupement. Tu peux réordonner les " +
+    "catégories entre elles, et réordonner les éléments à l'intérieur d'une catégorie, pour " +
+    "faire remonter ce qui sert l'offre. Tu ne dois JAMAIS éclater une catégorie en plusieurs " +
+    "entrées, ni fusionner deux catégories, ni changer le séparateur ' — '.\n" +
     "- LONGUEUR GLOBALE (1 PAGE MAX) : le CV final doit rester concis (idéalement moins de " +
     "2500 caractères au total). Si le CV d'entrée est un CV Maître très long, trie et élague " +
     "ce qui n'est pas pertinent pour l'offre — sans jamais toucher aux résultats chiffrés.\n" +
