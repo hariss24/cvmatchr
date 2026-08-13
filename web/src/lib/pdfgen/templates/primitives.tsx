@@ -185,7 +185,7 @@ export function SectionContent({
       if (compact && shouldRenderCompact(section.items)) {
         return (
           <View style={s.compactWrap}>
-            {section.items.map((item, i) => (
+            {section.items.filter((item) => t(item)).map((item, i) => (
               <Text key={i} style={[s.compactItem, { color: itemColor }]}>
                 {"• "}
                 {item}
