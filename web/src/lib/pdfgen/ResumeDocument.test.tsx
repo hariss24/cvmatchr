@@ -254,3 +254,29 @@ describe("ResumeDocument (template graphique)", () => {
     expect(text).toContain("AVEC PHOTO");
   });
 });
+
+describe("non-régression des templates non concernés par le rendu compact", () => {
+  /** 25 compétences courtes : le cas qui déclenchera le mode tags chez Marine. */
+  const CV_LISTES_COURTES = resumeSchema.parse({
+    name: "Jean Test",
+    skills: ["Git", "AWS", "Azure", "Docker", "Linux", "Python", "SQL", "Shell"],
+    tools: ["2G", "3G", "4G", "5G", "Jira", "CI/CD", "Ansible", "Grafana"],
+  });
+
+  // Sobre, Kakuna et Graphique ont leur propre gestion de largeur : le prop `compact`
+  // ne doit JAMAIS leur être passé. Ce test échoue si quelqu'un l'active par mégarde.
+  for (const templateId of ["sobre", "kakuna", "graphique"] as const) {
+    it(`${templateId} rend toutes les compétences sans changer de mise en page`, async () => {
+      const buf = await renderToBuffer(
+        <ResumeDocument resume={CV_LISTES_COURTES} templateId={templateId} />,
+      );
+      const pages = await extractPdfText(new Uint8Array(buf));
+      const text = pages.join("\n");
+
+      for (const item of [...CV_LISTES_COURTES.skills, ...CV_LISTES_COURTES.tools]) {
+        expect(text, `« ${item} » perdu par ${templateId}`).toContain(item);
+      }
+      expect(pages).toHaveLength(1);
+    });
+  }
+});
