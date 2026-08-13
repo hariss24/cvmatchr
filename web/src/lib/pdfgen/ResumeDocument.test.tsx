@@ -295,3 +295,122 @@ describe("Marine — sidebar au format « Catégorie — éléments »", () => {
     expect(text).toContain("Docker, Kubernetes, Ansible, AWS, Azure");
   });
 });
+
+describe("Marine — listes d'éléments courts", () => {
+  /**
+   * Reproduction du CV réel qui a fait remonter le bug : un ingénieur SRE, sorti en 2
+   * pages dont la seconde ne portait qu'une ligne. Ce n'est pas la liste d'outils seule
+   * qui déborde — c'est l'accumulation d'une colonne principale pleine (expérience,
+   * formation, résumé) ET d'une sidebar déroulée sur 25 lignes qui pousse la dernière
+   * section sur une 2e page quasi vide.
+   */
+  const CV_SRE_COMPLET = resumeSchema.parse({
+    name: "Jean Test",
+    title: "Ingénieur SRE",
+    location: "Paris, France",
+    email: "jean.test@example.com",
+    phone: "06 12 34 56 78",
+    linkedin: "linkedin.com/in/jean-test",
+    summary:
+      "Ingénieur SRE avec plus de 5 ans d'expérience dans la conception et l'exploitation " +
+      "de plateformes critiques à forte disponibilité. Spécialisé dans l'automatisation " +
+      "d'infrastructure, la supervision et la réponse aux incidents pour des systèmes " +
+      "d'alerte publique et des réseaux télécoms. Habitué à travailler en astreinte sur des " +
+      "environnements Kubernetes et cloud multi-fournisseurs.",
+    experience: [
+      {
+        title: "Site Reliability Engineer",
+        company: "Alerting Systems Corp",
+        contract: "CDI",
+        location: "Paris, France",
+        date: "2022 — Présent",
+        bullets: [
+          "Development and integration of backend features for a critical public alerting platform serving millions of users.",
+          "Design and maintenance of CI/CD pipelines using Jenkins and Ansible to automate deployment across staging and production.",
+          "Migration of legacy infrastructure to Kubernetes, reducing deployment time by 40% and improving service resilience.",
+          "On-call rotation covering incident response, root cause analysis and post-mortem documentation for critical outages.",
+          "Implementation of monitoring and alerting dashboards with Grafana and Prometheus to track SLA compliance in real time.",
+          "Collaboration with network engineering teams on 4G/5G infrastructure integration for emergency broadcast systems.",
+          "Automation of infrastructure provisioning on AWS and Azure using Terraform, cutting manual configuration errors significantly.",
+        ],
+      },
+      {
+        title: "DevOps Engineer",
+        company: "TelecomWorks",
+        contract: "CDI",
+        location: "Lyon, France",
+        date: "2019 — 2022",
+        bullets: [
+          "Deployment and configuration of network equipment from Huawei and Ericsson for regional telecom operators.",
+          "Development of internal tooling in Python and Shell to streamline configuration management across data centers.",
+          "Administration of Linux servers and Git-based version control workflows for a team of twelve engineers.",
+          "Support for 2G/3G network upgrades, coordinating with field technicians to minimize service disruption.",
+        ],
+      },
+    ],
+    education: [
+      {
+        title: "Master en Ingénierie Réseaux et Télécommunications",
+        school: "École Centrale de Lyon",
+        location: "Lyon, France",
+        date: "2017 — 2019",
+      },
+      {
+        title: "Licence en Informatique",
+        school: "Université Claude Bernard Lyon 1",
+        location: "Lyon, France",
+        date: "2014 — 2017",
+      },
+    ],
+    softSkills: ["Rigueur", "Communication", "Esprit d'équipe"],
+    tools: [
+      "PyTorch", "Python", "Shell", "SQL", "Git", "Linux", "Jenkins", "Ansible",
+      "CI/CD", "Docker", "Kubernetes", "Jira", "Grafana", "Prometheus", "AWS",
+      "Azure", "2G", "3G", "4G", "5G", "Huawei", "Ericsson", "Terraform",
+      "Vault", "Consul",
+    ],
+    skills: [
+      "Machine Learning", "Data Analysis", "KPI Optimization", "JSON",
+      "version control", "network config", "KPI dashboards", "service debugging",
+      "Incident Response", "Capacity Planning", "Load Testing", "Root Cause Analysis",
+      "Automation Scripting",
+    ],
+    languages: [
+      { name: "Français", level: "Natif" },
+      { name: "Anglais", level: "Courant" },
+      { name: "Espagnol", level: "Intermédiaire" },
+    ],
+  });
+
+  it("tient sur une seule page malgré une sidebar de 25 outils et 13 compétences", async () => {
+    const buf = await renderToBuffer(
+      <ResumeDocument resume={CV_SRE_COMPLET} templateId="marine" />,
+    );
+    const pages = await extractPdfText(new Uint8Array(buf));
+    expect(pages).toHaveLength(1);
+  });
+
+  it("ne perd aucun outil ni aucune compétence en passant en tags", async () => {
+    const buf = await renderToBuffer(
+      <ResumeDocument resume={CV_SRE_COMPLET} templateId="marine" />,
+    );
+    const text = (await extractPdfText(new Uint8Array(buf))).join("\n");
+    for (const item of [...CV_SRE_COMPLET.tools, ...CV_SRE_COMPLET.skills]) {
+      expect(text, `« ${item} » perdu`).toContain(item);
+    }
+  });
+
+  it("ne perd rien quand les compétences sont catégorisées", async () => {
+    const cv = resumeSchema.parse({
+      name: "Jean Test",
+      skills: [
+        "Réseau — TCP/IP, HTTP/HTTPS, DNS, TLS, firewalls, tcpdump",
+        "Cloud & DevOps — Docker, Kubernetes, Ansible, AWS, Azure, CI/CD",
+      ],
+    });
+    const buf = await renderToBuffer(<ResumeDocument resume={cv} templateId="marine" />);
+    const text = (await extractPdfText(new Uint8Array(buf))).join("\n");
+    expect(text).toContain("TCP/IP, HTTP/HTTPS, DNS, TLS, firewalls, tcpdump");
+    expect(text).toContain("Docker, Kubernetes, Ansible, AWS, Azure, CI/CD");
+  });
+});
