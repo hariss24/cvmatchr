@@ -160,6 +160,28 @@ describe("prompts — cohérence des niveaux (pas de contradiction base/niveau)"
 
 });
 
+describe("regroupement des compétences par catégorie", () => {
+  // Le CV source range ses compétences par famille (« Networking : TCP/IP, DNS… »).
+  // Les listes plates du schéma ne peuvent porter ce regroupement qu'en convention
+  // d'écriture : « Catégorie — a, b, c ». Le séparateur DOIT être le tiret cadratin
+  // entouré d'espaces, seul format reconnu par `SkillText` côté PDF.
+  it("les extractions imposent le format « Catégorie — éléments »", () => {
+    for (const system of [SYSTEM_PDF_TO_RESUME, SYSTEM_TEXT_TO_RESUME]) {
+      expect(system).toContain("'Catégorie — élément, élément, élément'");
+      // Le seuil sous lequel on laisse la liste plate. Assertion sur la phrase entière :
+      // un simple toContain("8") passerait sur n'importe quel autre chiffre du prompt.
+      expect(system).toContain("8 ÉLÉMENTS OU MOINS");
+      expect(system).toContain("dépasse 8 éléments");
+    }
+  });
+
+  it("le regroupement ne remplace pas le cloisonnement des trois listes", () => {
+    for (const system of [SYSTEM_PDF_TO_RESUME, SYSTEM_TEXT_TO_RESUME]) {
+      expect(system).toContain("ne fusionne JAMAIS");
+    }
+  });
+});
+
 describe('prompts — text to letter', () => {
   it('SYSTEM_TEXT_TO_LETTER demande un JSON pur avec les cles obligatoires', () => {
     expect(SYSTEM_TEXT_TO_LETTER).toContain('JSON PUR');

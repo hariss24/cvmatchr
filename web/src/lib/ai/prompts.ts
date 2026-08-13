@@ -168,6 +168,22 @@ export const SECTION_ROUTING_RULES =
   "RESPECTE cette séparation : ne fusionne JAMAIS plusieurs rubriques dans une seule liste. " +
   "Si le CV ne propose qu'une rubrique « Compétences » indifférenciée, répartis chaque élément " +
   "dans la liste qui lui correspond selon sa nature.\n\n" +
+  "REGROUPEMENT PAR CATÉGORIE — dans chacune des trois listes, séparément :\n" +
+  "- Format d'un élément groupé : 'Catégorie — élément, élément, élément'. Le séparateur est " +
+  "un tiret cadratin ENTOURÉ D'UN ESPACE de chaque côté (' — '), jamais un deux-points ni un " +
+  "tiret simple.\n" +
+  "- SI LE CV GROUPE DÉJÀ ses compétences (« Systèmes : Linux, systemd… », « Networking : " +
+  "TCP/IP, DNS… »), REPRENDS ses catégories À L'IDENTIQUE, sans les traduire, sans les " +
+  "renommer, sans en fusionner deux.\n" +
+  "- SI LE CV NE GROUPE PAS et que la liste dépasse 8 éléments, REGROUPE-LES toi-même en 3 à 6 " +
+  "familles cohérentes que tu nommes. N'invente aucune compétence : tu ne fais que ranger " +
+  "celles qui sont écrites.\n" +
+  "- SI LA LISTE COMPTE 8 ÉLÉMENTS OU MOINS et que le CV ne la groupe pas, laisse-la PLATE : " +
+  "une catégorie par élément n'apporte rien.\n" +
+  "- Une catégorie tient sur UNE entrée de la liste. Ne crée jamais une entrée par élément " +
+  "d'une catégorie : c'est ce qui fait déborder le CV sur une seconde page.\n" +
+  "- Les catégories que tu nommes suivent la LANGUE DU CV : un CV en anglais reçoit des " +
+  "catégories en anglais.\n\n" +
   "SECTIONS LIBRES ('customSections') — filet de sécurité anti-perte :\n" +
   "- Toute rubrique du CV qui ne correspond à AUCUN champ standard ci-dessus va dans " +
   "'customSections', sous la forme {\"title\": <le titre EXACT tel qu'écrit dans le CV>, " +
