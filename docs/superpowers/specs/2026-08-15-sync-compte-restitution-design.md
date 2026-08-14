@@ -97,7 +97,26 @@ l'arbitrage contre les modèles réels du compte — exactement la course décri
 §8. La répliquer suppose d'abord de distinguer un modèle personnalisé d'un
 modèle par défaut. À traiter dans un chantier séparé.
 
-### 4.4 L'interface se rafraîchit à l'arrivée des données
+### 4.4 L'état d'enregistrement est visible en permanence
+
+Sans cet indicateur, le chantier **crée** une confusion au lieu de la lever :
+l'auto-sauvegarde locale conservée (§3) fait persister le travail d'un
+rechargement à l'autre, ce dont l'utilisateur déduit que tout est à l'abri — il
+ne clique donc jamais sur « Enregistrer », change d'appareil, et ne retrouve
+rien. C'est le bug d'origine reproduit, avec un bouton en plus.
+
+À côté du bouton, un état permanent, jamais à deviner :
+
+- **« Modifications non enregistrées »** dès que le document courant diffère de
+  la dernière version enregistrée ;
+- **« Enregistré sur votre compte »** après un enregistrement répliqué ;
+- **« Enregistré sur cet appareil »** quand l'utilisateur n'est pas connecté, ou
+  quand l'envoi a échoué — ne jamais annoncer une mise à l'abri distante qui n'a
+  pas eu lieu.
+
+Cet indicateur fait partie du chantier. Ce n'est pas une finition.
+
+### 4.5 L'interface se rafraîchit à l'arrivée des données
 
 `syncAll()` émet un signal quand un pull a modifié des données locales. Les
 écrans qui affichent des données répliquées — « Mes candidatures », « Mes CV »
@@ -130,6 +149,10 @@ sortie collée dans le rapport) :
 2. Navigateur B (profil vierge), même compte : se connecter.
 3. **Attendu** : le CV apparaît dans « Mes CV » **sans rechargement de page**, et
    « Mes infos » est pré-rempli.
+4. **Attendu aussi** : en modifiant le CV sur le navigateur B, l'état passe à
+   « Modifications non enregistrées », et repasse à « Enregistré sur votre
+   compte » après un clic sur Enregistrer. Déconnecté, le même clic annonce
+   « Enregistré sur cet appareil ».
 
 Avant ce chantier, l'étape 3 rend un écran vide et un profil vierge — c'est
 le bug d'origine.
