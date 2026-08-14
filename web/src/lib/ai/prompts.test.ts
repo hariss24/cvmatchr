@@ -5,8 +5,10 @@ import {
   SYSTEM_TEXT_TO_LETTER,
   RESUME_TAILOR_RULES,
   RESUME_SCHEMA_DESC,
+  EXTRACTION_SCHEMA_DESC,
   SYSTEM_PDF_TO_RESUME,
   SYSTEM_TEXT_TO_RESUME,
+  SYSTEM_TAILOR_RESUME_BASE,
   SYSTEM_EDITOR_CHAT,
   HUMAN_TONE_RULE,
   CONCISION_RULE,
@@ -14,7 +16,7 @@ import {
   tailorResumeSystem,
   type TailorLevel,
 } from "./prompts";
-import { resumeSchema, letterSchema } from "@/lib/resume/schema";
+import { resumeSchema, letterSchema, RESUME_TOP_KEYS } from "@/lib/resume/schema";
 import { LETTER_TONES } from "@/lib/letter/tone";
 
 const LEVELS: TailorLevel[] = ["peu", "adapte", "hyper"];
@@ -39,8 +41,10 @@ describe("prompts — invariants métier", () => {
       "hiddenSections", // préférence d'affichage de l'utilisateur, pas du contenu de CV :
       //                   l'IA n'a rien à en dire, et `mergeTailored` la recopie toujours
       //                   depuis la base pour qu'une adaptation ne puisse pas la perdre.
-      "sectionTitles", // titres personnalisés des sections : même statut que hiddenSections
-      //                  (préférence d'affichage, restaurée par `mergeTailored`, hors IA).
+      "sectionTitles", // titres personnalisés : hors de la fiche de TAILORING seulement
+      //                  (préférence d'affichage, restaurée par `mergeTailored`). La fiche
+      //                  d'EXTRACTION le décrit, elle — cf. « fiches de schéma » plus bas :
+      //                  à l'import, l'intitulé du CV source est du contenu.
     ]);
     const keys = Object.keys(resumeSchema.shape).filter((k) => !HORS_FICHE.has(k));
     for (const key of keys) {
@@ -73,20 +77,50 @@ describe("prompts — invariants métier", () => {
 
 });
 
+describe("fiches de schéma — extraction vs tailoring", () => {
+  // `sectionTitles` sépare les deux usages, et cette séparation est la correction d'un
+  // bug réel : sans ce champ à l'extraction, l'IA ne pouvait pas à la fois « utiliser le
+  // champ standard » et « ne jamais renommer une rubrique ». Elle faisait les deux, et
+  // le CV sortait avec une section libre doublonnant un champ déjà rempli.
+  it("la fiche d'extraction décrit sectionTitles", () => {
+    expect(EXTRACTION_SCHEMA_DESC).toContain('"sectionTitles"');
+  });
+
+  it("la fiche de tailoring ne décrit PAS sectionTitles", () => {
+    expect(RESUME_SCHEMA_DESC).not.toContain('"sectionTitles"');
+  });
+
+  it("la fiche d'extraction est un sur-ensemble de la fiche de tailoring", () => {
+    for (const key of RESUME_TOP_KEYS) {
+      if (key === "sectionTitles") continue;
+      if (!RESUME_SCHEMA_DESC.includes(`"${key}"`)) continue;
+      expect(EXTRACTION_SCHEMA_DESC, `champ « ${key} » perdu à l'extraction`).toContain(
+        `"${key}"`,
+      );
+    }
+  });
+
+  it("les deux extractions utilisent la fiche étendue, le tailoring non", () => {
+    for (const system of [SYSTEM_PDF_TO_RESUME, SYSTEM_TEXT_TO_RESUME]) {
+      expect(system).toContain('"sectionTitles"');
+    }
+    expect(SYSTEM_TAILOR_RESUME_BASE).not.toContain('"sectionTitles"');
+  });
+});
+
 describe("prompts — cohérence des niveaux (pas de contradiction base/niveau)", () => {
   it("le niveau JSON 'peu' n'ordonne ni élagage ni réécriture des compétences", () => {
     const sys = tailorResumeSystem("peu");
     expect(sys).not.toContain("ÉLAGUER");
     expect(sys).not.toContain("1 PAGE");
-    expect(sys).not.toContain("Mot clé — Description");
     expect(sys).toContain("NE modifie RIEN d'autre");
   });
 
-  it("les niveaux JSON 'adapte' et 'hyper' gardent l'élagage 1 page et le format compétences", () => {
+  it("les niveaux JSON 'adapte' et 'hyper' gardent l'élagage 1 page et la règle de regroupement", () => {
     for (const level of ["adapte", "hyper"] as const) {
       const sys = tailorResumeSystem(level);
       expect(sys, level).toContain("1 PAGE");
-      expect(sys, level).toContain("Mot clé — Description");
+      expect(sys, level).toContain("Catégorie — élément, élément");
     }
   });
 
@@ -123,6 +157,47 @@ describe("prompts — cohérence des niveaux (pas de contradiction base/niveau)"
 
 
 
+});
+
+describe("regroupement des compétences par catégorie", () => {
+  // Le CV source range ses compétences par famille (« Networking : TCP/IP, DNS… »).
+  // Les listes plates du schéma ne peuvent porter ce regroupement qu'en convention
+  // d'écriture : « Catégorie — a, b, c ». Le séparateur DOIT être le tiret cadratin
+  // entouré d'espaces, seul format reconnu par `SkillText` côté PDF.
+  it("les extractions imposent le format « Catégorie — éléments »", () => {
+    for (const system of [SYSTEM_PDF_TO_RESUME, SYSTEM_TEXT_TO_RESUME]) {
+      expect(system).toContain("'Catégorie — élément, élément, élément'");
+      // Le seuil sous lequel on laisse la liste plate. Assertion sur la phrase entière :
+      // un simple toContain("8") passerait sur n'importe quel autre chiffre du prompt.
+      expect(system).toContain("8 ÉLÉMENTS OU MOINS");
+      expect(system).toContain("dépasse 8 éléments");
+    }
+  });
+
+  it("le regroupement ne remplace pas le cloisonnement des trois listes", () => {
+    for (const system of [SYSTEM_PDF_TO_RESUME, SYSTEM_TEXT_TO_RESUME]) {
+      // Assertions propres au bloc REGROUPEMENT lui-même (pas au paragraphe RÉPARTITION
+      // préexistant, qui contient déjà « ne fusionne JAMAIS » sans rapport avec cette tâche) :
+      // le regroupement agit À L'INTÉRIEUR de chaque liste, séparément, sans les fusionner.
+      expect(system).toContain(
+        "REGROUPEMENT PAR CATÉGORIE — dans chacune des trois listes, séparément",
+      );
+      expect(system).toContain("sans en fusionner deux");
+    }
+  });
+});
+
+describe("le tailoring préserve le regroupement par catégorie", () => {
+  it("interdit d'éclater une catégorie aux niveaux adapte et hyper", () => {
+    for (const level of ["adapte", "hyper"] as const) {
+      expect(RESUME_TAILOR_RULES[level]).toContain("regroupement");
+      expect(RESUME_TAILOR_RULES[level]).not.toContain("Mot clé — Description");
+    }
+  });
+
+  it("le niveau subtil continue de ne toucher à rien", () => {
+    expect(RESUME_TAILOR_RULES.peu).toContain("IDENTIQUES");
+  });
 });
 
 describe('prompts — text to letter', () => {
@@ -272,13 +347,13 @@ describe("prompts — tonalité humaine", () => {
   });
 
   // La règle bannit le tiret cadratin en prose, mais le format des compétences l'impose.
-  // L'exception doit rester ALLUSIVE : citer « Mot clé — Description » ferait fuiter ce
+  // L'exception doit rester ALLUSIVE : citer « Catégorie — élément, élément » ferait fuiter ce
   // format dans le niveau « subtil », qui interdit justement de reformater les compétences.
   it("la règle épargne le tiret cadratin des formats imposés, sans citer lequel", () => {
     expect(HUMAN_TONE_RULE).toContain("SEULE EXCEPTION");
-    expect(HUMAN_TONE_RULE).not.toContain("Mot clé — Description");
-    expect(tailorResumeSystem("peu")).not.toContain("Mot clé — Description");
-    expect(tailorResumeSystem("adapte")).toContain("Mot clé — Description");
+    expect(HUMAN_TONE_RULE).not.toContain("Catégorie — élément, élément");
+    expect(tailorResumeSystem("peu")).not.toContain("Catégorie — élément, élément");
+    expect(tailorResumeSystem("adapte")).toContain("Catégorie — élément, élément");
   });
 });
 

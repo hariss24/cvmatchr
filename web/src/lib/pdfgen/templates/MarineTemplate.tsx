@@ -2,7 +2,7 @@ import React from "react";
 import { Document, Page, View, Text, Image, StyleSheet, Svg, Path } from "@react-pdf/renderer";
 import type { Resume } from "@/lib/resume/schema";
 
-import { px, t, ThemeContext, PdfTheme, SectionContent } from "./primitives";
+import { px, t, ThemeContext, PdfTheme, SectionContent, SkillText, shouldRenderCompact } from "./primitives";
 import { ContactIcon, detectContactIcon } from "./contactIcons";
 import { buildSections, buildContacts, contactText, splitColumns, sectionTitle, type ResumeSection } from "@/lib/resume/sections";
 
@@ -85,6 +85,16 @@ const s = StyleSheet.create({
     flex: 1,
     fontSize: 9,
     color: SIDEBAR_INK,
+  },
+  sideCompactWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  sideCompactItem: {
+    fontSize: 9,
+    color: SIDEBAR_INK,
+    marginRight: px(9),
+    marginBottom: px(2),
   },
   langRow: {
     marginBottom: px(6),
@@ -181,12 +191,31 @@ const CONTACT_ICONS: Record<string, React.ComponentType> = {
 };
 
 function SideList({ items }: { items: string[] }) {
+  // Une sidebar de 34 % de large tient très mal 25 puces d'un mot : on replie.
+  if (shouldRenderCompact(items)) {
+    return (
+      <View style={s.sideCompactWrap}>
+        {/* `buildSections` filtre déjà les chaînes vides avant de construire `items`
+            (seul appelant réel de SideList) : ce filtre ne sert donc jamais en pratique.
+            On le garde par symétrie avec SectionContent — même risque de puce orpheline
+            si un futur appelant passait par ici avec des données non filtrées. */}
+        {items.filter((item) => t(item)).map((item, i) => (
+          <Text key={i} style={s.sideCompactItem}>
+            {"• "}
+            <SkillText skill={item} />
+          </Text>
+        ))}
+      </View>
+    );
+  }
   return (
     <>
       {items.map((item, i) => (
         <View key={i} style={s.sideBulletRow}>
           <Text style={s.sideBulletGlyph}>•</Text>
-          <Text style={s.sideBulletText}>{item}</Text>
+          <Text style={s.sideBulletText}>
+            <SkillText skill={item} />
+          </Text>
         </View>
       ))}
     </>
@@ -305,7 +334,9 @@ export function MarineTemplate({
             {mainSections.map((sec, i) => (
               <View key={sec.id} style={i === mainSections.length - 1 ? undefined : s.mainSection}>
                 <Text style={s.mainSectionTitle}>{sectionTitle(d, sec.id, MARINE_TITLES[sec.id] ?? sec.title)}</Text>
-                <SectionContent section={sec} hideGutter subtitle="caps" />
+                {/* `compact` s'applique à TOUTE liste de la colonne principale (certifications,
+                    sections libres…), pas seulement aux compétences. */}
+                <SectionContent section={sec} hideGutter subtitle="caps" compact />
               </View>
             ))}
           </View>

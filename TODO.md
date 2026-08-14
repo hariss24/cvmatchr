@@ -96,6 +96,16 @@ Suivi des fonctionnalités de l'application (version Next.js).
 
 ## 🟡 Priorité moyenne — bonnes idées
 
+- [ ] **Mise en page titre + date + lieu mal équilibrée (ex. FORMATIONS)**
+  Observé le 14/08/2026 lors de la vérification manuelle du groupement des compétences,
+  sur le template Marine, section FORMATIONS : le titre du diplôme, l'établissement et le
+  lieu s'écrasent visuellement contre la date quand le sous-titre est long (ex. « Computer
+  and Telecommunications Engineer » + « ENSIL-ENSCI (École Nationale Supérieure
+  d'Ingénieurs de Limoges) — Limoges »). Composant concerné : `TimelineItem`
+  (`web/src/lib/pdfgen/templates/primitives.tsx`) — titre+date sur une ligne (`tlHead`,
+  `flexDirection: row`), sous-titre+lieu sur la ligne suivante. À compacter/optimiser ;
+  capture d'écran de référence fournie par l'utilisateur (formation ENSIL-ENSCI, PC/PSCI).
+
 - [x] **Raccourcis clavier**
 - [ ] **Preview page-break** — ⏸️ *différé : complexe à simuler avec précision dans React PDF avant rendu final.*
 - [x] **Déplacement dans l'aperçu PDF (outil "main")**

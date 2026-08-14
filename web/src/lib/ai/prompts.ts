@@ -106,7 +106,11 @@ export type TailorLevel = "peu" | "adapte" | "hyper";
 
 // ---- schéma JSON + adaptation JSON (pipeline /api/tailor-resume) -------------
 
-export const RESUME_SCHEMA_DESC =
+/**
+ * Corps commun aux deux fiches de schéma. Ne se termine PAS par l'accolade fermante :
+ * chaque fiche ajoute ses propres champs puis ferme.
+ */
+const SCHEMA_BODY_COMMON =
   "{\n" +
   '  "name": "...", "title": "...", "location": "...", "email": "...", ' +
   '"phone": "...", "linkedin": "...",\n' +
@@ -125,7 +129,26 @@ export const RESUME_SCHEMA_DESC =
   '"date": "...", "bullets": ["...", "..."]}],\n' +
   '  "customSections": [{"title": "...", "items": ["...", "..."]}],\n' +
   '  "customFields": [{"label": "...", "value": "..."}],\n' +
-  '  "sectionOrder": ["...", "..."]\n' +
+  '  "sectionOrder": ["...", "..."]';
+
+/** Fiche envoyée à l'IA pour l'ADAPTATION d'un CV à une offre. Sans `sectionTitles` :
+ *  les titres personnalisés sont une préférence de l'utilisateur, restaurée par
+ *  `mergeTailored`, dont l'IA n'a pas à connaître l'existence. */
+export const RESUME_SCHEMA_DESC = SCHEMA_BODY_COMMON + "\n}";
+
+/**
+ * Fiche envoyée à l'IA pour l'EXTRACTION d'un CV (PDF ou texte). Elle ajoute
+ * `sectionTitles` — et c'est délibérément l'inverse du choix fait pour le tailoring.
+ *
+ * À l'import, l'intitulé d'une rubrique du CV source est du CONTENU, pas une préférence
+ * d'affichage : sans ce champ, l'IA affronte deux règles inconciliables (« utilise le
+ * champ standard » / « ne renomme jamais une rubrique ») et produit les deux sorties à
+ * la fois — le champ standard ET une section libre qui le doublonne.
+ */
+export const EXTRACTION_SCHEMA_DESC =
+  SCHEMA_BODY_COMMON +
+  ",\n" +
+  '  "sectionTitles": {"<id de section>": "<intitulé EXACT tel qu\'écrit dans le CV>"}\n' +
   "}";
 
 /**
@@ -145,6 +168,22 @@ export const SECTION_ROUTING_RULES =
   "RESPECTE cette séparation : ne fusionne JAMAIS plusieurs rubriques dans une seule liste. " +
   "Si le CV ne propose qu'une rubrique « Compétences » indifférenciée, répartis chaque élément " +
   "dans la liste qui lui correspond selon sa nature.\n\n" +
+  "REGROUPEMENT PAR CATÉGORIE — dans chacune des trois listes, séparément :\n" +
+  "- Format d'un élément groupé : 'Catégorie — élément, élément, élément'. Le séparateur est " +
+  "un tiret cadratin ENTOURÉ D'UN ESPACE de chaque côté (' — '), jamais un deux-points ni un " +
+  "tiret simple.\n" +
+  "- SI LE CV GROUPE DÉJÀ ses compétences (« Systèmes : Linux, systemd… », « Networking : " +
+  "TCP/IP, DNS… »), REPRENDS ses catégories À L'IDENTIQUE, sans les traduire, sans les " +
+  "renommer, sans en fusionner deux.\n" +
+  "- SI LE CV NE GROUPE PAS et que la liste dépasse 8 éléments, REGROUPE-LES toi-même en 3 à 6 " +
+  "familles cohérentes que tu nommes. N'invente aucune compétence : tu ne fais que ranger " +
+  "celles qui sont écrites.\n" +
+  "- SI LA LISTE COMPTE 8 ÉLÉMENTS OU MOINS et que le CV ne la groupe pas, laisse-la PLATE : " +
+  "une catégorie par élément n'apporte rien.\n" +
+  "- Une catégorie tient sur UNE entrée de la liste. Ne crée jamais une entrée par élément " +
+  "d'une catégorie : c'est ce qui fait déborder le CV sur une seconde page.\n" +
+  "- Les catégories que tu nommes suivent la LANGUE DU CV : un CV en anglais reçoit des " +
+  "catégories en anglais.\n\n" +
   "SECTIONS LIBRES ('customSections') — filet de sécurité anti-perte :\n" +
   "- Toute rubrique du CV qui ne correspond à AUCUN champ standard ci-dessus va dans " +
   "'customSections', sous la forme {\"title\": <le titre EXACT tel qu'écrit dans le CV>, " +
@@ -158,6 +197,17 @@ export const SECTION_ROUTING_RULES =
   "faire entrer de force dans un champ existant. Si elle ne rentre nulle part, crée-la en section " +
   "libre — c'est précisément à ça que sert 'customSections'. Le CV de l'utilisateur n'a pas à se " +
   "plier au format de l'application : c'est l'application qui s'adapte au CV.\n" +
+  "- INTITULÉS D'ORIGINE ('sectionTitles') : si une rubrique correspond BIEN à un champ standard " +
+  "mais porte un autre intitulé (« Assets » pour les soft skills, « Tech Stack » pour les outils, " +
+  "« Parcours » pour les expériences), place le contenu dans le CHAMP STANDARD et l'intitulé EXACT " +
+  "dans 'sectionTitles', sous la forme {\"softSkills\": \"Assets\"}. Les identifiants valides sont " +
+  "les noms de champs eux-mêmes : summary, experience, education, skills, softSkills, tools, " +
+  "languages, interests, projects, certifications, volunteer.\n" +
+  "- ZÉRO DOUBLON : n'ajoute JAMAIS dans 'customSections' une rubrique dont le contenu figure " +
+  "déjà, même reformulé, dans un champ standard rempli. Un même contenu ne doit apparaître " +
+  "qu'UNE seule fois dans tout le JSON.\n" +
+  "- LANGUE : recopie les intitulés dans la langue du CV source. Un CV en anglais garde " +
+  "des intitulés en anglais.\n" +
   "- Objectif : AUCUNE information du CV d'origine ne doit être perdue à l'extraction.\n\n" +
   "INFOS PERSONNELLES HORS CASES ('customFields') — même filet, pour l'en-tête :\n" +
   "- Les seules coordonnées ayant un champ dédié sont 'location', 'email', 'phone' et 'linkedin'.\n" +
@@ -190,7 +240,11 @@ export const RESUME_TAILOR_RULES: Record<TailorLevel, string> = {
     "- Réordonne les 'skills' existantes (sans en ajouter ni supprimer).\n" +
     "- Enrichis/reformule les 'bullets' des expériences (max 4 par expérience, " +
     "sans inventer de contenu absent du CV).\n" +
-    "- COMPÉTENCES : chaque élément de 'skills' respecte le format 'Mot clé — Description'.\n" +
+    "- COMPÉTENCES : si les entrées de 'skills', 'softSkills' ou 'tools' sont groupées au " +
+    "format 'Catégorie — élément, élément', CONSERVE ce regroupement. Tu peux réordonner les " +
+    "catégories entre elles, et réordonner les éléments à l'intérieur d'une catégorie, pour " +
+    "faire remonter ce qui sert l'offre. Tu ne dois JAMAIS éclater une catégorie en plusieurs " +
+    "entrées, ni la renommer, ni fusionner deux catégories, ni changer le séparateur ' — '.\n" +
     "- LONGUEUR GLOBALE (1 PAGE MAX) : le CV final doit rester concis (idéalement moins de " +
     "2500 caractères au total). Si le CV d'entrée est un CV Maître très long, trie et élague " +
     "ce qui n'est pas pertinent pour l'offre — sans jamais toucher aux résultats chiffrés.\n" +
@@ -200,7 +254,11 @@ export const RESUME_TAILOR_RULES: Record<TailorLevel, string> = {
     "- Ajuste 'title' et réécris entièrement 'summary'.\n" +
     "- Réorganise et reformule les 'skills' existantes (sans en inventer de nouvelles).\n" +
     "- Réécris les 'bullets' des expériences (max 4 par expérience, sans inventer de faits).\n" +
-    "- COMPÉTENCES : chaque élément de 'skills' respecte le format 'Mot clé — Description'.\n" +
+    "- COMPÉTENCES : si les entrées de 'skills', 'softSkills' ou 'tools' sont groupées au " +
+    "format 'Catégorie — élément, élément', CONSERVE ce regroupement. Tu peux réordonner les " +
+    "catégories entre elles, et réordonner les éléments à l'intérieur d'une catégorie, pour " +
+    "faire remonter ce qui sert l'offre. Tu ne dois JAMAIS éclater une catégorie en plusieurs " +
+    "entrées, ni la renommer, ni fusionner deux catégories, ni changer le séparateur ' — '.\n" +
     "- LONGUEUR GLOBALE (1 PAGE MAX) : le CV final doit rester concis (idéalement moins de " +
     "2500 caractères au total). Si le CV d'entrée est un CV Maître très long, trie et élague " +
     "ce qui n'est pas pertinent pour l'offre — sans jamais toucher aux résultats chiffrés.\n" +
@@ -562,7 +620,7 @@ export const SYSTEM_PDF_TO_RESUME =
   "Tu es un moteur d'extraction de CV. Tu reçois les pages d'un CV sous forme d'images. " +
   "Tu produis UNIQUEMENT un objet JSON structuré reprenant TOUTES les informations visibles.\n\n" +
   "SCHÉMA JSON OBLIGATOIRE :\n" +
-  RESUME_SCHEMA_DESC +
+  EXTRACTION_SCHEMA_DESC +
   "\n\n" +
   "RÈGLES :\n" +
   "- N'invente RIEN : n'extrais que ce qui est réellement écrit dans le CV.\n" +
@@ -583,7 +641,7 @@ export const SYSTEM_TEXT_TO_RESUME =
   "(copié depuis un document Word, un PDF, etc.). " +
   "Tu produis UNIQUEMENT un objet JSON structuré reprenant TOUTES les informations présentes.\n\n" +
   "SCHÉMA JSON OBLIGATOIRE :\n" +
-  RESUME_SCHEMA_DESC +
+  EXTRACTION_SCHEMA_DESC +
   "\n\n" +
   "RÈGLES :\n" +
   "- N'invente RIEN : n'extrais que ce qui est réellement écrit dans le texte.\n" +

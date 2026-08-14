@@ -8,6 +8,25 @@ export const t = (v: unknown): string => (v == null ? "" : String(v)).trim();
 /** Gris des informations secondaires (lieu, contrat, niveau de langue). */
 export const MUTED = "#787673";
 
+/**
+ * Longueur au-delà de laquelle un élément de liste mérite sa propre ligne.
+ * Choix de mise en page, sans rapport avec le seuil de regroupement piloté par l'IA.
+ */
+const COMPACT_MAX_CHARS = 20;
+
+/**
+ * Une liste dont TOUS les éléments sont courts (« Git », « AWS », « 4G ») gaspille une
+ * ligne entière par élément : on la rend alors en tags repliés sur la largeur. Dès qu'un
+ * élément est long, la lecture en puces verticales reste préférable.
+ *
+ * Sert de filet pour les CV importés AVANT le regroupement par catégorie : eux seuls
+ * arrivent encore en dizaines d'éléments atomiques.
+ */
+export function shouldRenderCompact(items: string[]): boolean {
+  const kept = items.filter((i) => t(i));
+  return kept.length > 1 && kept.every((i) => i.trim().length <= COMPACT_MAX_CHARS);
+}
+
 // On utilise un contexte de thème pour que les templates puissent facilement personnaliser les couleurs des primitives
 export interface PdfTheme {
   accent: string;
@@ -44,6 +63,10 @@ const s = StyleSheet.create({
   bulletRow: { flexDirection: "row", marginBottom: px(1) },
   bulletGlyph: { width: px(8) },
   bulletText: { flex: 1 },
+
+  // Listes compactes (tags repliés) — cf. shouldRenderCompact
+  compactWrap: { flexDirection: "row", flexWrap: "wrap", paddingLeft: px(15) },
+  compactItem: { marginRight: px(12), marginBottom: px(2) },
 
   // Sections
   sectionTitle: {
@@ -135,12 +158,19 @@ export function SectionContent({
   hideGutter,
   color,
   subtitle = "bold",
+  compact = false,
 }: {
   section: ResumeSection;
   hideGutter?: boolean;
   color?: string;
   /** Rendu du sous-titre d'un parcours (entreprise, école, organisation) : gras, ou capitales grisées. */
   subtitle?: "bold" | "caps";
+  /**
+   * Autorise le rendu en tags repliés pour les listes d'éléments courts (cf.
+   * `shouldRenderCompact`). Opt-in : sans ce prop, le rendu est inchangé. Seul Marine
+   * l'active — les autres modèles gèrent déjà leur largeur.
+   */
+  compact?: boolean;
 }) {
   const theme = React.useContext(ThemeContext);
   const itemColor = color ?? theme.ink;
@@ -152,6 +182,18 @@ export function SectionContent({
       );
 
     case "list":
+      if (compact && shouldRenderCompact(section.items)) {
+        return (
+          <View style={s.compactWrap}>
+            {section.items.filter((item) => t(item)).map((item, i) => (
+              <Text key={i} style={[s.compactItem, { color: itemColor }]}>
+                {"• "}
+                <SkillText skill={item} />
+              </Text>
+            ))}
+          </View>
+        );
+      }
       return (
         <View style={s.bullets}>
           {section.items.map((item, i) => (
