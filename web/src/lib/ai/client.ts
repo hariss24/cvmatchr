@@ -11,14 +11,10 @@
 
 import { useSettingsStore } from "@/state/settingsStore";
 
-/** En-têtes IA : modèle actif + clé API correspondante (Gemini/Anthropic/DeepSeek). */
+/** En-têtes IA : modèle actif + clé API correspondante (Gemini/Anthropic). */
 export function getApiHeaders(): Record<string, string> {
-  const { activeModel, geminiKey, anthropicKey, deepseekKey } = useSettingsStore.getState();
-  const key = activeModel.startsWith("claude-")
-    ? anthropicKey
-    : activeModel.startsWith("deepseek-")
-      ? deepseekKey
-      : geminiKey;
+  const { activeModel, geminiKey, anthropicKey } = useSettingsStore.getState();
+  const key = activeModel.startsWith("claude-") ? anthropicKey : geminiKey;
   const headers: Record<string, string> = { "X-Ai-Model": activeModel };
   if (key) headers["X-Api-Key"] = key;
   return headers;

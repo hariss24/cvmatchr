@@ -41,7 +41,6 @@ export default function SettingsPage() {
     settings.activeModel,
     settings.geminiKey,
     settings.anthropicKey,
-    settings.deepseekKey,
   ].join("|");
   const testState: TestState =
     essai.signature === signature ? essai.etat : { status: "idle" };
@@ -74,16 +73,11 @@ export default function SettingsPage() {
   };
 
   const isAnthropicRequired = settings.activeModel.startsWith("claude-");
-  const isDeepseekRequired = settings.activeModel.startsWith("deepseek-");
 
-  const activeKey = isAnthropicRequired
-    ? settings.anthropicKey
-    : isDeepseekRequired
-      ? settings.deepseekKey
-      : settings.geminiKey;
-  // Sans clé perso, Gemini retombe sur la clé serveur : le test reste possible. Claude et
-  // DeepSeek n'ont pas de clé serveur de secours, donc une clé perso est obligatoire pour eux.
-  const canTest = Boolean(activeKey) || (!isAnthropicRequired && !isDeepseekRequired);
+  const activeKey = isAnthropicRequired ? settings.anthropicKey : settings.geminiKey;
+  // Sans clé perso, Gemini retombe sur la clé serveur : le test reste possible. Claude
+  // n'a pas de clé serveur de secours, donc une clé perso est obligatoire pour lui.
+  const canTest = Boolean(activeKey) || !isAnthropicRequired;
 
   const handleTestConnection = async () => {
     setTestState({ status: "loading" });
@@ -143,9 +137,6 @@ export default function SettingsPage() {
                     { value: "gemini-1.5-pro", label: "Gemini 1.5 Pro (Génération précédente)", group: "Modèles Google (Gemini)" },
                     { value: "claude-3-5-sonnet", label: "Claude 3.5 Sonnet (Très intelligent)", group: "Modèles Anthropic (Claude)" },
                     { value: "claude-haiku-4-5-20251001", label: "Claude 3.5 Haiku (Ultra rapide)", group: "Modèles Anthropic (Claude)" },
-                    { value: "deepseek-v4-flash", label: "DeepSeek V4 Flash (Rapide, contexte 1M)", group: "Modèles DeepSeek" },
-                    { value: "deepseek-chat", label: "DeepSeek V3 Chat (Bon marché)", group: "Modèles DeepSeek" },
-                    { value: "deepseek-reasoner", label: "DeepSeek R1 Reasoner (Raisonnement, pas cher)", group: "Modèles DeepSeek" },
                   ]}
                 />
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "10px" }}>
@@ -194,19 +185,6 @@ export default function SettingsPage() {
                     value={settings.anthropicKey}
                     onChange={(e) => settings.setAnthropicKey(e.target.value)}
                     placeholder="sk-ant-..."
-                    className="form-input"
-                  />
-                </div>
-                <div className="form-field">
-                  <label className="form-label" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    Clé API DeepSeek
-                    {isDeepseekRequired && <span style={{ fontSize: "10px", background: "var(--success)", color: "#fff", padding: "2px 6px", borderRadius: "4px", fontWeight: "bold" }}>REQUISE</span>}
-                  </label>
-                  <input
-                    type="password"
-                    value={settings.deepseekKey}
-                    onChange={(e) => settings.setDeepseekKey(e.target.value)}
-                    placeholder="sk-..."
                     className="form-input"
                   />
                 </div>

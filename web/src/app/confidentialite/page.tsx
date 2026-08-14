@@ -72,7 +72,7 @@ export default function ConfidentialitePage() {
             envoyé au fournisseur d&apos;IA configuré pour être traité, puis la réponse vous est
             retournée. Par défaut ce fournisseur est <strong>Google (modèles Gemini)</strong>. Si vous
             renseignez votre propre clé API dans les paramètres, le contenu est envoyé au fournisseur
-            correspondant à cette clé (Google, Anthropic ou DeepSeek) à la place.
+            correspondant à cette clé (Google ou Anthropic) à la place.
           </p>
           <p>
             Ce contenu n&apos;est pas conservé par CVMatchr au-delà du traitement de la requête. Il

@@ -4,7 +4,7 @@ import { useSettingsStore } from "@/state/settingsStore";
 
 afterEach(() => {
   vi.unstubAllGlobals();
-  useSettingsStore.setState({ activeModel: "gemini-3.5-flash", geminiKey: "", anthropicKey: "", deepseekKey: "" });
+  useSettingsStore.setState({ activeModel: "gemini-3.5-flash", geminiKey: "", anthropicKey: "" });
 });
 
 /** Construit un corps de réponse SSE lisible (ReadableStream) à partir de lignes brutes. */
@@ -39,11 +39,6 @@ describe("getApiHeaders", () => {
   it("bascule sur la clé Anthropic pour un modèle Claude", () => {
     useSettingsStore.setState({ activeModel: "claude-3-5-sonnet", anthropicKey: "sk-ant-perso" });
     expect(getApiHeaders()).toEqual({ "X-Ai-Model": "claude-3-5-sonnet", "X-Api-Key": "sk-ant-perso" });
-  });
-
-  it("bascule sur la clé DeepSeek pour un modèle DeepSeek", () => {
-    useSettingsStore.setState({ activeModel: "deepseek-v4-flash", deepseekKey: "sk-ds-perso" });
-    expect(getApiHeaders()).toEqual({ "X-Ai-Model": "deepseek-v4-flash", "X-Api-Key": "sk-ds-perso" });
   });
 
   it("pas de X-Api-Key si la clé correspondante est vide", () => {

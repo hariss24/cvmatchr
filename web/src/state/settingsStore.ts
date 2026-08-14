@@ -1,16 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type AiProvider = "gemini" | "anthropic" | "deepseek";
+export type AiProvider = "gemini" | "anthropic";
 export type AiModel =
   | "gemini-3.5-flash" // Défaut : voir le commentaire de `activeModel`
   | "gemini-3.1-flash-lite"
   | "gemini-1.5-pro"
   | "claude-haiku-4-5-20251001" // Default for Anthropic
-  | "claude-3-5-sonnet"
-  | "deepseek-v4-flash"
-  | "deepseek-chat"
-  | "deepseek-reasoner";
+  | "claude-3-5-sonnet";
 
 export type AccentColor = "orange" | "blue" | "green" | "purple";
 
@@ -18,7 +15,6 @@ export type SettingsState = {
   // IA
   geminiKey: string;
   anthropicKey: string;
-  deepseekKey: string;
   activeModel: AiModel;
   creativity: number; // 0.0 to 1.0
   globalPrompt: string;
@@ -33,7 +29,6 @@ export type SettingsState = {
 type SettingsActions = {
   setGeminiKey: (key: string) => void;
   setAnthropicKey: (key: string) => void;
-  setDeepseekKey: (key: string) => void;
   setActiveModel: (model: AiModel) => void;
   setCreativity: (val: number) => void;
   setGlobalPrompt: (prompt: string) => void;
@@ -49,7 +44,6 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
     (set) => ({
       geminiKey: "",
       anthropicKey: "",
-      deepseekKey: "",
       // `flash-lite` était le défaut, et il recopiait mot pour mot le modèle de ton
       // du prompt de lettre — jusqu'aux amorces de phrase que ce prompt lui interdit
       // explicitement. Toutes les lettres sortaient identiques. `flash` tient les
@@ -65,7 +59,6 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
 
       setGeminiKey: (geminiKey) => set({ geminiKey }),
       setAnthropicKey: (anthropicKey) => set({ anthropicKey }),
-      setDeepseekKey: (deepseekKey) => set({ deepseekKey }),
       setActiveModel: (activeModel) => set({ activeModel }),
       setCreativity: (creativity) => set({ creativity }),
       setGlobalPrompt: (globalPrompt) => set({ globalPrompt }),
@@ -82,7 +75,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       // toutes identiques — resterait en place indéfiniment. Un choix délibéré pour
       // `flash-lite` est perdu ; il se refait en deux clics, là où l'inverse serait
       // invisible.
-      version: 2,
+      version: 3,
       migrate: (state, version) => {
         const s = state as Omit<Partial<SettingsState>, "activeModel"> & { activeModel?: string };
         // "gemini-3.1-flash" (v1) n'a jamais été un modèle valide côté API (404 generateContent).
@@ -90,6 +83,12 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           (version < 1 && s.activeModel === "gemini-3.1-flash-lite") ||
           (version < 2 && s.activeModel === "gemini-3.1-flash")
         ) {
+          s.activeModel = "gemini-3.5-flash";
+        }
+        // DeepSeek retiré (v3, 14/08/2026) : son API publique ne supporte pas les images,
+        // et l'import PDF en dépend. Un utilisateur qui avait un modèle deepseek-* actif
+        // retombe sur le défaut plutôt que de rester bloqué sur un modèle qui n'existe plus.
+        if (version < 3 && s.activeModel?.startsWith("deepseek-")) {
           s.activeModel = "gemini-3.5-flash";
         }
         return s as SettingsState & SettingsActions;
