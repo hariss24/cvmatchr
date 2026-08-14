@@ -26,11 +26,7 @@ export async function POST(req: Request): Promise<Response> {
     return NextResponse.json({ ok: false, error: "Modèle manquant." }, { status: 400 });
   }
 
-  const provider = model.startsWith("claude-")
-    ? "anthropic"
-    : model.startsWith("deepseek-")
-      ? "deepseek"
-      : "gemini";
+  const provider = model.startsWith("claude-") ? "anthropic" : "gemini";
 
   const key = (body.key ?? "").trim();
   if (!key) {

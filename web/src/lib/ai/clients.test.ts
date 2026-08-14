@@ -49,10 +49,10 @@ describe("requireActiveKey", () => {
     // Le store reflète l'état par défaut côté serveur (jamais hydraté par le client réel) ;
     // le modèle + la clé envoyés via X-Ai-Model/X-Api-Key doivent quand même être utilisés.
     useSettingsStore.setState({ activeModel: "gemini-3.5-flash", geminiKey: "" });
-    const res = requireActiveKey("sk-ds-user", "deepseek-v4-flash");
-    expect(res.key).toBe("sk-ds-user");
-    expect(res.provider).toBe("deepseek");
-    expect(res.model).toBe("deepseek-v4-flash");
+    const res = requireActiveKey("sk-ant-user", "claude-3-5-sonnet");
+    expect(res.key).toBe("sk-ant-user");
+    expect(res.provider).toBe("anthropic");
+    expect(res.model).toBe("claude-3-5-sonnet");
   });
 });
 

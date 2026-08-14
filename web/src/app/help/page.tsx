@@ -118,7 +118,7 @@ export default function HelpPage() {
 
           <FaqAccordion question="Pourquoi et comment utiliser ma propre clé API (IA) ?">
             <p>
-              Renseigner votre propre clé (Google Gemini, Anthropic ou DeepSeek) vous affranchit
+              Renseigner votre propre clé (Google Gemini ou Anthropic) vous affranchit
               totalement du quota : les requêtes sont facturées sur votre compte fournisseur, pas sur
               le nôtre. C&apos;est aussi la seule façon d&apos;utiliser l&apos;IA sans créer de compte
               CVMatchr. Une clé Gemini gratuite s&apos;obtient en quelques clics sur Google AI Studio.
