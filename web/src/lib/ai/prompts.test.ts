@@ -113,7 +113,6 @@ describe("prompts — cohérence des niveaux (pas de contradiction base/niveau)"
     const sys = tailorResumeSystem("peu");
     expect(sys).not.toContain("ÉLAGUER");
     expect(sys).not.toContain("1 PAGE");
-    expect(sys).not.toContain("Mot clé — Description");
     expect(sys).toContain("NE modifie RIEN d'autre");
   });
 

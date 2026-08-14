@@ -188,7 +188,7 @@ export function SectionContent({
             {section.items.filter((item) => t(item)).map((item, i) => (
               <Text key={i} style={[s.compactItem, { color: itemColor }]}>
                 {"• "}
-                {item}
+                <SkillText skill={item} />
               </Text>
             ))}
           </View>

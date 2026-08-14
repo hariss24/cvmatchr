@@ -202,7 +202,7 @@ function SideList({ items }: { items: string[] }) {
         {items.filter((item) => t(item)).map((item, i) => (
           <Text key={i} style={s.sideCompactItem}>
             {"• "}
-            {item}
+            <SkillText skill={item} />
           </Text>
         ))}
       </View>
@@ -334,6 +334,8 @@ export function MarineTemplate({
             {mainSections.map((sec, i) => (
               <View key={sec.id} style={i === mainSections.length - 1 ? undefined : s.mainSection}>
                 <Text style={s.mainSectionTitle}>{sectionTitle(d, sec.id, MARINE_TITLES[sec.id] ?? sec.title)}</Text>
+                {/* `compact` s'applique à TOUTE liste de la colonne principale (certifications,
+                    sections libres…), pas seulement aux compétences. */}
                 <SectionContent section={sec} hideGutter subtitle="caps" compact />
               </View>
             ))}

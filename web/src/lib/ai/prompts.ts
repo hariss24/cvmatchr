@@ -244,7 +244,7 @@ export const RESUME_TAILOR_RULES: Record<TailorLevel, string> = {
     "format 'Catégorie — élément, élément', CONSERVE ce regroupement. Tu peux réordonner les " +
     "catégories entre elles, et réordonner les éléments à l'intérieur d'une catégorie, pour " +
     "faire remonter ce qui sert l'offre. Tu ne dois JAMAIS éclater une catégorie en plusieurs " +
-    "entrées, ni fusionner deux catégories, ni changer le séparateur ' — '.\n" +
+    "entrées, ni la renommer, ni fusionner deux catégories, ni changer le séparateur ' — '.\n" +
     "- LONGUEUR GLOBALE (1 PAGE MAX) : le CV final doit rester concis (idéalement moins de " +
     "2500 caractères au total). Si le CV d'entrée est un CV Maître très long, trie et élague " +
     "ce qui n'est pas pertinent pour l'offre — sans jamais toucher aux résultats chiffrés.\n" +
@@ -258,7 +258,7 @@ export const RESUME_TAILOR_RULES: Record<TailorLevel, string> = {
     "format 'Catégorie — élément, élément', CONSERVE ce regroupement. Tu peux réordonner les " +
     "catégories entre elles, et réordonner les éléments à l'intérieur d'une catégorie, pour " +
     "faire remonter ce qui sert l'offre. Tu ne dois JAMAIS éclater une catégorie en plusieurs " +
-    "entrées, ni fusionner deux catégories, ni changer le séparateur ' — '.\n" +
+    "entrées, ni la renommer, ni fusionner deux catégories, ni changer le séparateur ' — '.\n" +
     "- LONGUEUR GLOBALE (1 PAGE MAX) : le CV final doit rester concis (idéalement moins de " +
     "2500 caractères au total). Si le CV d'entrée est un CV Maître très long, trie et élague " +
     "ce qui n'est pas pertinent pour l'offre — sans jamais toucher aux résultats chiffrés.\n" +
