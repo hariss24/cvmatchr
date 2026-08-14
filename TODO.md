@@ -67,6 +67,21 @@ Suivi des fonctionnalités de l'application (version Next.js).
 
 ## 🔵 Priorité haute — à faire
 
+- [ ] **Onboarding SaaS : le compte comme seule porte d'entrée (la clé API n'est plus une réponse)**
+  *(constat du 14/08/2026)* Un nouveau visiteur ne peut rien faire : la première action IA
+  renvoie « Connectez-vous avec Google, ou ajoutez votre propre clé API dans les Paramètres »
+  (`web/src/lib/ai/quota.ts`, `evaluateQuotaRules`). Le back-end est déjà correct — auth **ou**
+  clé perso — mais l'UI met les deux options sur le même plan, or « clé API » ne parle qu'aux
+  développeurs. À faire :
+  - Le message et l'écran de blocage ne proposent **que** « Créer un compte gratuit — N crédits
+    offerts ». Un lien discret « J'ai ma propre clé API » renvoie vers les Paramètres.
+  - Déplacer la clé API dans une section **Avancé** des Paramètres, repliée par défaut.
+  - Gate au bon moment : laisser remplir/importer un CV sans compte, demander le compte à la
+    première action IA (adapter, lettre, import PDF, chat), pas à l'arrivée.
+  - Afficher le solde de crédits en permanence (TopBar) une fois connecté.
+  - Prérequis manquant : **connexion hors Google** (email + mot de passe, ou lien magique
+    Supabase). Aujourd'hui `GoogleSignInButton` est le seul chemin — chantier séparé.
+
 - [ ] Faille détectée : Le quota de requete peut etre facilement reset si l'utilisateur vide son cache navigateur. Réfléchir à une solution intelligente et efficace.
 
 - [ ] Trouver une solution pour que l'app enregistres automatiquement les offres d'emploi qu'il a trouvé via le chercheur d'offre ou bien ceux que l'utilisateur à enregistré manuellement. Peut etre dans un nouvel onglet "Mes Candidatures"
