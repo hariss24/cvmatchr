@@ -9,6 +9,7 @@ import { buildPdfFilename } from "@/lib/pdfgen/filename";
 // import removed
 import { toast, uiAlert, uiConfirm } from "@/state/uiStore";
 import { saveCurrentDocument } from "@/lib/storage/saveDocument";
+import { useSaveStateStore } from "@/state/saveStateStore";
 import { startNewResume } from "@/lib/storage/newResume";
 import { takeSnapshot } from "@/lib/storage/snapshots";
 import ChatPanel from "@/components/modals/ChatPanel";
@@ -31,6 +32,34 @@ export default function TopBar() {
   const isConverting = useRef(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const saveState = useSaveStateStore((s) => s.state);
+  const [saving, setSaving] = useState(false);
+
+  // Toute modification du document repasse l'état à « non enregistré ».
+  useEffect(() => {
+    const { markDirty } = useSaveStateStore.getState();
+    return useDocStore.subscribe((s, prev) => {
+      if (s.json !== prev.json || s.templateId !== prev.templateId
+        || s.company !== prev.company || s.role !== prev.role) {
+        markDirty();
+      }
+    });
+  }, []);
+
+  const onSave = useCallback(async () => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const where = await saveCurrentDocument();
+      useSaveStateStore.getState().markSaved(where);
+      toast(where === "account" ? "Enregistré sur votre compte." : "Enregistré sur cet appareil.", "success");
+    } catch {
+      await uiAlert("Impossible d'enregistrer ce document.", "Enregistrement");
+    } finally {
+      setSaving(false);
+    }
+  }, [saving]);
 
   const filename = buildPdfFilename(docType, role, includeDate);
 
@@ -78,7 +107,7 @@ export default function TopBar() {
 
       // Le téléchargement enregistre toujours, comme avant — il n'en est
       // simplement plus le seul moyen (bouton « Enregistrer », task 6).
-      await saveCurrentDocument();
+      useSaveStateStore.getState().markSaved(await saveCurrentDocument());
     } catch {
       await uiAlert("Impossible de générer le PDF.", "Conversion PDF");
     } finally {
@@ -141,6 +170,17 @@ export default function TopBar() {
         <button type="button" className="btn-nav mobile-hidden" onClick={onNewCv} title="Nouveau CV">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
           Nouveau CV
+        </button>
+
+        <span className="save-state" data-state={saveState} title="État d'enregistrement">
+          {saveState === "dirty" && "Modifications non enregistrées"}
+          {saveState === "device" && "Enregistré sur cet appareil"}
+          {saveState === "account" && "Enregistré sur votre compte"}
+        </span>
+
+        <button type="button" className="btn-nav mobile-hidden" onClick={onSave} disabled={saving}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
+          {saving ? "Enregistrement…" : "Enregistrer"}
         </button>
 
         <button className="go go-top" type="button" onClick={onConvert} disabled={busy}>

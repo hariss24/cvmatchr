@@ -197,6 +197,18 @@ a:hover { text-decoration: underline; }
 }
 @media (max-width: 1180px) { .topbar-pill { display: none; } }
 
+/* État d'enregistrement, à côté du bouton « Enregistrer ». Discret quand tout
+   va bien, lisible quand il reste du travail non enregistré. */
+.save-state {
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--muted);
+}
+.save-state[data-state="dirty"] {
+  color: var(--text);
+  font-weight: 600;
+}
+
 .logo-badge { display: flex; align-items: center; gap: 12px; }
 .logo-icon {
   width: 40px; height: 40px; border-radius: 12px;
