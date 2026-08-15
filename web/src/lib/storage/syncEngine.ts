@@ -139,15 +139,27 @@ export async function ensureMatchingUser(currentUserId: string): Promise<void> {
   localStorage.setItem('sync_user_id', currentUserId);
 }
 
-export async function pushAll(): Promise<void> {
+/**
+ * Envoie les données locales en attente. Rend `true` seulement si TOUT est
+ * effectivement arrivé côté serveur.
+ *
+ * Supabase ne lève pas d'exception quand il refuse une écriture (table absente,
+ * RLS, réseau) : il renvoie un objet `error` que le code doit lire. Sans cette
+ * valeur de retour, l'appelant confondait « le serveur a répondu » avec « le
+ * serveur a rangé », et l'interface annonçait « Enregistré sur votre compte »
+ * alors que rien n'était parti.
+ */
+export async function pushAll(): Promise<boolean> {
   const supabase = createBrowserClientHelper();
-  if (!supabase) return;
+  if (!supabase) return false;
 
   const { data: sessionData } = await supabase.auth.getSession();
   const user = sessionData?.session?.user;
-  if (!user) return;
+  if (!user) return false;
 
   await ensureMatchingUser(user.id);
+
+  let toutEstParti = true;
 
   // 1. History (CVs & Letters)
   const allHistory = await db.history.toArray();
@@ -178,6 +190,8 @@ export async function pushAll(): Promise<void> {
             .where('id')
             .anyOf(ids)
             .modify({ synced_at: nowIso });
+        } else {
+          toutEstParti = false;
         }
       }
     }
@@ -192,6 +206,8 @@ export async function pushAll(): Promise<void> {
             .where('id')
             .anyOf(ids)
             .modify({ synced_at: nowIso });
+        } else {
+          toutEstParti = false;
         }
       }
     }
@@ -212,6 +228,8 @@ export async function pushAll(): Promise<void> {
           .where('id')
           .anyOf(ids)
           .modify({ synced_at: nowIso });
+      } else {
+        toutEstParti = false;
       }
     }
   }
@@ -231,6 +249,8 @@ export async function pushAll(): Promise<void> {
           .where('id')
           .anyOf(ids)
           .modify({ synced_at: nowIso });
+      } else {
+        toutEstParti = false;
       }
     }
   }
@@ -259,9 +279,13 @@ export async function pushAll(): Promise<void> {
           if (row.id === 'profile') await db.profile.update('me', { synced_at: nowIso });
           else await db.jobProfile.update('me', { synced_at: nowIso });
         }
+      } else {
+        toutEstParti = false;
       }
     }
   }
+
+  return toutEstParti;
 }
 
 export async function pullAll(): Promise<void> {

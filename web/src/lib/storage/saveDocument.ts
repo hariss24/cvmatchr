@@ -47,8 +47,11 @@ export async function saveCurrentDocument(): Promise<'account' | 'device'> {
 
   if (!useAuthStore.getState().user) return 'device';
   try {
-    await pushAll();
-    return 'account';
+    // On lit la réponse du serveur, on ne se contente pas d'en recevoir une :
+    // Supabase refuse une écriture (table absente, RLS, réseau) sans lever
+    // d'exception. Sans ce test, l'interface annonçait « sur votre compte »
+    // alors que le serveur venait de répondre « je n'y arrive pas ».
+    return (await pushAll()) ? 'account' : 'device';
   } catch (e) {
     console.warn("Envoi vers le compte impossible :", e);
     return 'device';

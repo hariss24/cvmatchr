@@ -8,7 +8,9 @@ vi.mock('@/lib/applications/store', () => ({
   upsertApplicationForDocument: vi.fn(async () => 'app-1'),
   pruneAnonymousShelf: vi.fn(async () => {}),
 }));
-vi.mock('@/lib/storage/syncEngine', () => ({ pushAll: vi.fn(async () => {}) }));
+// `pushAll` rend désormais un booléen : `true` seulement si le serveur a
+// confirmé l'écriture. Un `undefined` (ancien contrat) vaudrait « refusé ».
+vi.mock('@/lib/storage/syncEngine', () => ({ pushAll: vi.fn(async () => true) }));
 vi.mock('@/state/authStore', () => ({
   useAuthStore: { getState: () => ({ user: { id: 'user-1' } }) },
 }));
@@ -47,6 +49,15 @@ describe('saveCurrentDocument', () => {
 
   it('rend "device" quand l\'envoi échoue, sans faire échouer l\'enregistrement', async () => {
     vi.mocked(pushAll).mockRejectedValueOnce(new Error('offline'));
+    expect(await saveCurrentDocument()).toBe('device');
+    expect(vi.mocked(saveHistoryEntry)).toHaveBeenCalledTimes(1);
+  });
+
+  it('n\'annonce pas le compte quand le serveur refuse l\'écriture', async () => {
+    // Cas réel : la table `user_settings` n'existe pas encore côté Supabase.
+    // Le serveur répond — donc aucune exception — mais il refuse. Sans lecture
+    // de la réponse, l'interface promettait « Enregistré sur votre compte ».
+    vi.mocked(pushAll).mockResolvedValueOnce(false);
     expect(await saveCurrentDocument()).toBe('device');
     expect(vi.mocked(saveHistoryEntry)).toHaveBeenCalledTimes(1);
   });
