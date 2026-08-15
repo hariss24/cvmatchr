@@ -41,6 +41,19 @@
 
 ## Journal
 
+### 2026-08-15 : Synchronisation compte et restitution des données — Tasks 1 à 7
+- **Quoi :** 
+  1. Migration Supabase SQL `0002_user_settings.sql` pour répliquer `profile` et `jobProfile` (table `user_settings` avec contrainte check, trigger `touch_updated_at` et RLS).
+  2. Mappings et synchronisation `user_settings` : types `RemoteUserSettingRow`, fonctions de conversion `profileToRemoteSetting`, `remoteSettingToProfile`, `jobProfileToRemoteSetting`, `remoteSettingToJobProfile`, adaptation Dexie `JobProfileRow`, intégration dans `syncEngine.ts` (push/pull/purge bidirectionnel LWW).
+  3. Signal de synchronisation `syncEvents.ts` (`onSyncChange`, `emitSyncChange`) et réactivité temps réel sans F5 dans `ApplicationsScreen.tsx` et `ResumeShelf.tsx`.
+  4. Découplage de l'enregistrement et de l'export PDF : création de `saveDocument.ts` (`saveCurrentDocument(): Promise<'account' | 'device'>`), propagation `pushAll` sur les mutations de candidatures et suppressions.
+  5. Bouton « Enregistrer » et état d'enregistrement visible dans `TopBar.tsx` et `globals.css` via le store `saveStateStore.ts` (états `dirty`, `device`, `account`).
+  6. Suite de tests e2e Playwright `save-sync.spec.ts` validant le cycle d'enregistrement local, l'affichage de l'état, et le rattachement de candidatures.
+- **Pourquoi :** Exécution du plan `docs/superpowers/plans/2026-08-15-sync-compte-restitution.md`. Rendre la restitution des données immédiate, explicite et multi-supports, tout en intégrant les profils utilisateur dans la synchronisation Supabase.
+- **Fichiers touchés :** `web/supabase/migrations/0002_user_settings.sql`, `web/src/lib/profile/profile.ts`, `web/src/lib/storage/db.ts`, `web/src/lib/storage/syncMapping.ts`, `web/src/lib/storage/syncMapping.test.ts`, `web/src/lib/storage/syncEngine.ts`, `web/src/lib/storage/syncEngine.test.ts`, `web/src/lib/storage/syncEvents.ts`, `web/src/lib/storage/syncEvents.test.ts`, `web/src/components/applications/ApplicationsScreen.tsx`, `web/src/components/applications/ResumeShelf.tsx`, `web/src/lib/storage/saveDocument.ts`, `web/src/lib/storage/saveDocument.test.ts`, `web/src/lib/applications/store.ts`, `web/src/state/saveStateStore.ts`, `web/src/state/saveStateStore.test.ts`, `web/src/components/layout/TopBar.tsx`, `web/src/app/globals.css`, `web/tests/e2e/save-sync.spec.ts`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` OK, `npm run lint` OK, `npx vitest run` (761/761 tests verts), `npm run build` réussi (32/32 pages statiques), `npx playwright test` (40/40 tests e2e verts).
+- **Commits :** `c8cc97b`, `1cbb411`, `e435a27`, `1fa09cf`, `630e6a8`, `917c143`.
+
 ### 2026-08-11 : Supabase Auth, DB & Quotas — Task 7 : Vérification d'étanchéité & documentation
 - **Quoi :** Rejeu des tests d'étanchéité PostgreSQL / RLS en Docker (`rls_etancheite.sql` -> `TOUS_LES_TESTS_OK`), création de `web/tests/manual/VERIF_BOUT_EN_BOUT.md`, mise à jour de `LIMITES.md` (verrou mono-utilisateur levé, ajouts des contraintes LWW et non-réplication des tables locales), mise à jour de `PROJECT_INDEX.md` (schéma Supabase, SyncEngine, grille tarifaire IA) et clôture du chantier.
 - **Pourquoi :** Task 7 (dernière task) du plan `docs/superpowers/plans/2026-08-10-auth-database-implementation.md`. Valider le comportement bout-en-bout et documenter l'architecture finale.
