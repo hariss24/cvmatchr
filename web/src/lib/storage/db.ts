@@ -68,8 +68,6 @@ export interface JobEntry {
   id: string;          // id France Travail (clé primaire, sert au dédoublonnage)
   createdAt: number;   // horodatage d'enregistrement local
   updatedAt?: number;
-  synced_at?: string | null;
-  deleted_at?: string | null;
   title: string;
   company: string;
   location: string;
@@ -472,24 +470,55 @@ export async function updateHistoryEntryStat(
 // JOBS API (feature « Offres »)
 // ---------------------------------------------------------------------------
 
+export interface RemoteSavedJobRow {
+  user_id: string;
+  id: string;
+  job_data: Record<string, unknown>;
+  client_updated_at: string;
+}
+
+export function jobToRemoteSavedJob(job: JobEntry, userId: string): RemoteSavedJobRow {
+  const isoUpdate = new Date(job.updatedAt || job.createdAt || Date.now()).toISOString();
+  return {
+    user_id: userId,
+    id: job.id,
+    job_data: job as unknown as Record<string, unknown>,
+    client_updated_at: isoUpdate,
+  };
+}
+
+export function remoteSavedJobToJob(row: Record<string, unknown>): JobEntry {
+  const job = (row.job_data || {}) as unknown as JobEntry;
+  return {
+    ...job,
+    id: row.id as string,
+  };
+}
+
 /** True si l'offre est déjà en base (retenue ou masquée) — sert au dédoublonnage du scan. */
 export async function jobExists(id: string): Promise<boolean> {
   try {
-    const j = await db.jobs.get(id);
-    return Boolean(j && !j.deleted_at);
-  } catch (e) {
-    console.warn("jobExists error:", e);
+    const { supabase, userId } = await requireRemote();
+    const { data, error } = await supabase
+      .from('saved_jobs')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('id', id)
+      .single();
+    if (error) return false;
+    return Boolean(data);
+  } catch {
     return false;
   }
 }
 
-export async function saveJob(entry: JobEntry) {
-  try {
-    entry.updatedAt = entry.updatedAt || Date.now();
-    await db.jobs.put(entry);
-  } catch (e) {
-    console.warn("saveJob error:", e);
-  }
+export async function saveJob(entry: JobEntry): Promise<void> {
+  const { supabase, userId } = await requireRemote();
+  entry.updatedAt = entry.updatedAt || Date.now();
+  const row = jobToRemoteSavedJob(entry, userId);
+  const { error } = await supabase.from('saved_jobs').upsert(row);
+  if (error) throw new RemoteError("Impossible d'enregistrer l'offre.", error);
+  cacheInvalidate('jobs:');
 }
 
 /**
@@ -500,64 +529,106 @@ export async function saveJob(entry: JobEntry) {
  * source.
  */
 export async function jobKeys(): Promise<Set<string>> {
-  try {
-    const all = await db.jobs.toArray();
-    return new Set(all.filter((j) => !j.deleted_at).map((j) => normKey(j.company, j.title)).filter(Boolean));
-  } catch (e) {
-    console.warn("jobKeys error:", e);
-    return new Set();
+  const enMemoire = cacheGet<Set<string>>('jobs:keys');
+  if (enMemoire) return enMemoire;
+
+  const { supabase, userId } = await requireRemote();
+  const { data, error } = await supabase
+    .from('saved_jobs')
+    .select('id, job_data')
+    .eq('user_id', userId);
+  if (error) throw new RemoteError('Impossible de charger les clés des offres.', error);
+
+  const set = new Set<string>();
+  for (const row of (data ?? []) as Array<{ id: string; job_data?: { company?: string; title?: string } }>) {
+    const c = row.job_data?.company || '';
+    const t = row.job_data?.title || '';
+    const key = normKey(c, t);
+    if (key) set.add(key);
+    if (row.id) set.add(row.id);
   }
+  cacheSet('jobs:keys', set);
+  return set;
 }
 
 /** Offres d'un statut donné, triées par score décroissant (puis plus récentes d'abord). */
 export async function listJobs(status: JobEntry["status"] = "new"): Promise<JobEntry[]> {
-  try {
-    const all = await db.jobs.where("status").equals(status).toArray();
-    return all
-      .filter((j) => !j.deleted_at)
-      .sort((a, b) => b.score - a.score || b.createdAt - a.createdAt);
-  } catch (e) {
-    console.warn("listJobs error:", e);
-    return [];
-  }
+  const cacheKey = `jobs:list:${status}`;
+  const enMemoire = cacheGet<JobEntry[]>(cacheKey);
+  if (enMemoire) return enMemoire;
+
+  const { supabase, userId } = await requireRemote();
+  const { data, error } = await supabase
+    .from('saved_jobs')
+    .select('*')
+    .eq('user_id', userId);
+  if (error) throw new RemoteError('Impossible de charger les offres enregistrées.', error);
+
+  const all = ((data ?? []) as Array<Record<string, unknown>>).map(remoteSavedJobToJob);
+  const filtered = all
+    .filter((j) => j.status === status)
+    .sort((a, b) => (b.score ?? 0) - (a.score ?? 0) || (b.createdAt ?? 0) - (a.createdAt ?? 0));
+
+  cacheSet(cacheKey, filtered);
+  return filtered;
 }
 
-export async function setJobStatus(id: string, status: JobEntry["status"]) {
-  try {
-    await db.jobs.update(id, { status, updatedAt: Date.now(), synced_at: null });
-  } catch (e) {
-    console.warn("setJobStatus error:", e);
-  }
+export async function setJobStatus(id: string, status: JobEntry["status"]): Promise<void> {
+  const { supabase, userId } = await requireRemote();
+  const { data, error: getErr } = await supabase
+    .from('saved_jobs')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('id', id)
+    .single();
+  if (getErr) throw new RemoteError("Impossible de trouver l'offre à modifier.", getErr);
+  if (!data) return;
+
+  const job = remoteSavedJobToJob(data as Record<string, unknown>);
+  job.status = status;
+  job.updatedAt = Date.now();
+  const row = jobToRemoteSavedJob(job, userId);
+  const { error } = await supabase.from('saved_jobs').upsert(row);
+  if (error) throw new RemoteError("Impossible de modifier le statut de l'offre.", error);
+  cacheInvalidate('jobs:');
 }
 
 /** Mémorise une offre explorée mais sous le seuil (marqueur minimal) pour ne jamais la re-noter. */
-export async function saveExplored(id: string, score: number) {
-  try {
-    await db.jobs.put({
-      id,
-      createdAt: Date.now(),
-      title: "",
-      company: "",
-      location: "",
-      commute: "",
-      score,
-      url: "",
-      jobText: "",
-      status: "hidden",
-      seen: true,
-    });
-  } catch (e) {
-    console.warn("saveExplored error:", e);
-  }
+export async function saveExplored(id: string, score: number): Promise<void> {
+  const entry: JobEntry = {
+    id,
+    createdAt: Date.now(),
+    title: "",
+    company: "",
+    location: "",
+    commute: "",
+    score,
+    url: "",
+    jobText: "",
+    status: "hidden",
+    seen: true,
+  };
+  await saveJob(entry);
 }
 
 /** Marque une offre comme consultée (retire le badge « Nouveau »). */
-export async function markJobSeen(id: string) {
-  try {
-    await db.jobs.update(id, { seen: true });
-  } catch (e) {
-    console.warn("markJobSeen error:", e);
-  }
+export async function markJobSeen(id: string): Promise<void> {
+  const { supabase, userId } = await requireRemote();
+  const { data, error: getErr } = await supabase
+    .from('saved_jobs')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('id', id)
+    .single();
+  if (getErr || !data) return;
+
+  const job = remoteSavedJobToJob(data as Record<string, unknown>);
+  if (job.seen) return;
+  job.seen = true;
+  job.updatedAt = Date.now();
+  const row = jobToRemoteSavedJob(job, userId);
+  await supabase.from('saved_jobs').upsert(row);
+  cacheInvalidate('jobs:');
 }
 
 /** Durée de validité du cache : un trajet entre deux points fixes ne bouge pas. */
@@ -608,17 +679,28 @@ export async function listJobsByGrade(min: Grade): Promise<JobEntry[]> {
  * Rend le nombre d'offres supprimées.
  */
 export async function supprimerJobsSousLeSeuil(seuil: number): Promise<number> {
-  try {
-    const horsSujet = await db.jobs.filter((j) => (j.score ?? 0) < seuil && !j.deleted_at).toArray();
-    const marked = horsSujet.map((j) => markDeleted(j));
-    if (marked.length > 0) {
-      await db.jobs.bulkPut(marked);
-    }
-    return marked.length;
-  } catch (e) {
-    console.warn("supprimerJobsSousLeSeuil error:", e);
-    return 0;
-  }
+  const { supabase, userId } = await requireRemote();
+  const { data, error: getErr } = await supabase
+    .from('saved_jobs')
+    .select('id, job_data')
+    .eq('user_id', userId);
+  if (getErr) throw new RemoteError('Impossible de charger les offres pour nettoyage.', getErr);
+
+  const horsSujet = ((data ?? []) as Array<{ id: string; job_data?: { score?: number } }>)
+    .filter((r) => (r.job_data?.score ?? 0) < seuil);
+
+  if (horsSujet.length === 0) return 0;
+
+  const ids = horsSujet.map((r) => r.id);
+  const { error } = await supabase
+    .from('saved_jobs')
+    .delete()
+    .eq('user_id', userId)
+    .in('id', ids);
+  if (error) throw new RemoteError('Impossible de supprimer les offres sous le seuil.', error);
+
+  cacheInvalidate('jobs:');
+  return ids.length;
 }
 
 // ---------------------------------------------------------------------------
@@ -722,45 +804,101 @@ export async function saveJobProfile(profile: JobSearchProfile): Promise<void> {
 // APPLICATIONS API (tracker « Mes candidatures »)
 // ---------------------------------------------------------------------------
 
+export interface RemoteApplicationRow {
+  user_id: string;
+  id: string;
+  company: string;
+  job_title: string;
+  url: string;
+  status: string;
+  notes: string;
+  payload: Record<string, unknown>;
+  applied_at: string | null;
+  client_updated_at: string;
+}
+
+export function applicationToRemoteRow(app: Application, userId: string): RemoteApplicationRow {
+  const isoUpdate = new Date(app.updatedAt || app.createdAt || Date.now()).toISOString();
+  const appliedEvent = app.events?.find((e) => e.type === 'applied');
+  const appliedAt = appliedEvent ? new Date(appliedEvent.date).toISOString() : null;
+  return {
+    user_id: userId,
+    id: app.id,
+    company: app.company,
+    job_title: app.role,
+    url: app.jobUrl || '',
+    status: 'draft',
+    notes: app.notes || '',
+    payload: {
+      events: app.events || [],
+      normKey: app.normKey,
+      jobText: app.jobText,
+      source: app.source,
+    },
+    applied_at: appliedAt,
+    client_updated_at: isoUpdate,
+  };
+}
+
+export function remoteRowToApplication(row: Record<string, unknown>): Application {
+  const payload = (row.payload || {}) as Record<string, unknown>;
+  const events = Array.isArray(payload.events) ? (payload.events as unknown as Application['events']) : [];
+  const ts = row.client_updated_at ? new Date(row.client_updated_at as string).getTime() : Date.now();
+  return {
+    id: row.id as string,
+    createdAt: ts,
+    updatedAt: ts,
+    company: (row.company as string) || '',
+    role: (row.job_title as string) || '',
+    normKey: (payload.normKey as string) || '',
+    jobText: (payload.jobText as string) || '',
+    jobUrl: (row.url as string) || '',
+    source: (payload.source as Application['source']) || 'manual',
+    events,
+    notes: (row.notes as string) || '',
+  };
+}
+
 export async function listApplicationsRaw(): Promise<Application[]> {
-  try {
-    const all = await db.applications.toArray();
-    return all.filter((a) => !a.deleted_at);
-  } catch (e) {
-    console.warn("listApplicationsRaw error:", e);
-    return [];
-  }
+  const enMemoire = cacheGet<Application[]>('applications:list');
+  if (enMemoire) return enMemoire;
+
+  const { supabase, userId } = await requireRemote();
+  const { data, error } = await supabase
+    .from('applications')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  if (error) throw new RemoteError('Impossible de charger vos candidatures.', error);
+
+  const liste = ((data ?? []) as Array<Record<string, unknown>>).map(remoteRowToApplication);
+  cacheSet('applications:list', liste);
+  return liste;
 }
 
 export async function getApplicationByNormKey(key: string): Promise<Application | undefined> {
-  try {
-    const app = await db.applications.where("normKey").equals(key).first();
-    return app && !app.deleted_at ? app : undefined;
-  } catch (e) {
-    console.warn("getApplicationByNormKey error:", e);
-    return undefined;
-  }
+  const all = await listApplicationsRaw();
+  return all.find((a) => a.normKey === key);
 }
 
 export async function putApplication(app: Application): Promise<void> {
-  try {
-    app.updatedAt = app.updatedAt || Date.now();
-    app.synced_at = null;
-    await db.applications.put(app);
-  } catch (e) {
-    console.warn("putApplication error:", e);
-  }
+  const { supabase, userId } = await requireRemote();
+  app.updatedAt = app.updatedAt || Date.now();
+  const row = applicationToRemoteRow(app, userId);
+  const { error } = await supabase.from('applications').upsert(row);
+  if (error) throw new RemoteError("Impossible d'enregistrer la candidature.", error);
+  cacheInvalidate('applications:');
 }
 
 export async function deleteApplicationRecord(id: string): Promise<void> {
-  try {
-    const app = await db.applications.get(id);
-    if (app) {
-      await db.applications.put(markDeleted(app));
-    }
-  } catch (e) {
-    console.warn("deleteApplicationRecord error:", e);
-  }
+  const { supabase, userId } = await requireRemote();
+  const { error } = await supabase
+    .from('applications')
+    .delete()
+    .eq('user_id', userId)
+    .eq('id', id);
+  if (error) throw new RemoteError('Impossible de supprimer la candidature.', error);
+  cacheInvalidate('applications:');
 }
 
 /** Documents d'historique rattachés à une candidature. */

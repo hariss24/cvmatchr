@@ -220,9 +220,7 @@ export async function pushAll(): Promise<boolean> {
       if (!error) {
         const nowIso = new Date().toISOString();
         const ids = freshApps.map((a) => a.id);
-        await db.applications
-          .where('id')
-          .anyOf(ids)
+        await (db.applications.where('id').anyOf(ids) as unknown as { modify: (c: Record<string, unknown>) => Promise<number> })
           .modify({ synced_at: nowIso });
       } else {
         toutEstParti = false;
@@ -241,9 +239,7 @@ export async function pushAll(): Promise<boolean> {
       if (!error) {
         const nowIso = new Date().toISOString();
         const ids = freshJobs.map((j) => j.id);
-        await db.jobs
-          .where('id')
-          .anyOf(ids)
+        await (db.jobs.where('id').anyOf(ids) as unknown as { modify: (c: Record<string, unknown>) => Promise<number> })
           .modify({ synced_at: nowIso });
       } else {
         toutEstParti = false;

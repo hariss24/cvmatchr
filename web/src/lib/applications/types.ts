@@ -23,8 +23,6 @@ export interface Application {
   events: ApplicationEvent[];
   notes: string;
   updatedAt: number;
-  synced_at?: string | null;
-  deleted_at?: string | null;
 }
 
 /** `stale` n'est jamais saisi : il est calculé à partir du silence. */

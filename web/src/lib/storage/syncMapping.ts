@@ -114,71 +114,12 @@ export function remoteLetterToHistory(row: RemoteLetterRow): HistoryEntry {
   };
 }
 
-export function applicationToRemoteRow(app: Application, userId: string): RemoteApplicationRow {
-  const isoUpdate = toIso(app.updatedAt || app.createdAt);
-  const appliedEvent = app.events?.find((e) => e.type === 'applied');
-  const appliedAt = appliedEvent ? new Date(appliedEvent.date).toISOString() : null;
-  return {
-    user_id: userId,
-    id: app.id,
-    company: app.company,
-    job_title: app.role,
-    url: app.jobUrl || '',
-    status: 'draft',
-    notes: app.notes || '',
-    payload: {
-      events: app.events || [],
-      normKey: app.normKey,
-      jobText: app.jobText,
-      source: app.source,
-    },
-    applied_at: appliedAt,
-    deleted_at: app.deleted_at ?? null,
-    client_updated_at: isoUpdate,
-  };
-}
-
-export function remoteRowToApplication(row: RemoteApplicationRow): Application {
-  const payload = (row.payload || {}) as Record<string, unknown>;
-  const events = Array.isArray(payload.events) ? (payload.events as unknown as ApplicationEvent[]) : [];
-  const ts = new Date(row.client_updated_at).getTime();
-  return {
-    id: row.id,
-    createdAt: ts,
-    updatedAt: ts,
-    company: row.company || '',
-    role: row.job_title || '',
-    normKey: (payload.normKey as string) || '',
-    jobText: (payload.jobText as string) || '',
-    jobUrl: row.url || '',
-    source: (payload.source as Application['source']) || 'manual',
-    events,
-    notes: row.notes || '',
-    deleted_at: row.deleted_at ?? null,
-    synced_at: row.updated_at || new Date().toISOString(),
-  };
-}
-
-export function jobToRemoteSavedJob(job: JobEntry, userId: string): RemoteSavedJobRow {
-  const isoUpdate = toIso(job.updatedAt || job.createdAt);
-  return {
-    user_id: userId,
-    id: job.id,
-    job_data: job as unknown as Record<string, unknown>,
-    deleted_at: job.deleted_at ?? null,
-    client_updated_at: isoUpdate,
-  };
-}
-
-export function remoteSavedJobToJob(row: RemoteSavedJobRow): JobEntry {
-  const job = (row.job_data || {}) as unknown as JobEntry;
-  return {
-    ...job,
-    id: row.id,
-    deleted_at: row.deleted_at ?? null,
-    synced_at: row.updated_at || new Date().toISOString(),
-  };
-}
+export {
+  applicationToRemoteRow,
+  remoteRowToApplication,
+  jobToRemoteSavedJob,
+  remoteSavedJobToJob,
+} from './db';
 
 /**
  * Réglages répliqués. `id` porte la clé du réglage ('profile' | 'jobProfile')
