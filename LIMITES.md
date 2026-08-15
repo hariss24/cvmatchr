@@ -26,9 +26,9 @@
 
 | Limite | Ce qui se passe concrètement |
 |---|---|
-| **Conflits hors-ligne (Last-Write-Wins)** | La résolution de conflit utilise `client_updated_at`. En cas d'édition concurrente hors-ligne sur deux appareils, la modification la plus récente écrase la seconde silencieusement. |
-| **Photos de profil en base64 dans JSONB** | Les photos de profil sont stockées encodées en base64 directement dans le champ JSONB `content` (tables `resumes` / `history`). Aucun stockage objet (Supabase Storage) n'est raccordé ; chaque synchronisation transite avec la photo entière. |
-| **Tables Dexie non synchronisées** | Seules 4 tables principales (`history`, `letters`, `applications`, `jobs`) sont répliquées vers Supabase. Les données locales `profile` ("Mes infos"), `templates` et `jobProfile` ("Critères de recherche") restent strictement locales à l'appareil. |
+| ~~**Conflits hors-ligne (Last-Write-Wins)**~~ | **Levé le 15/08/2026** (chantier *Le serveur devient la source unique*) : la double copie et le moteur de réplication bidirectionnelle ont été supprimés. Le serveur Supabase est désormais la source unique de vérité. |
+| **Photos de profil en base64 dans JSONB** | Les photos de profil sont stockées encodées en base64 directement dans le champ JSONB `content` (table `documents`). Le catalogue des documents sépare désormais les résumés légers du contenu complet, limitant le transit de la photo à l'ouverture dans l'éditeur. Aucun stockage objet (Supabase Storage) n'est raccordé. |
+| ~~**Tables Dexie non synchronisées**~~ | **Levé le 15/08/2026** : `profile` (« Mes infos »), `jobProfile` (« Critères de recherche ») et `templates` (« Modèles de lettre ») sont désormais persistés sur le serveur dans les tables `user_settings` et `templates`. |
 | **Briques RGPD UI absentes** | Bien que la suppression en cascade PostgreSQL (`ON DELETE CASCADE`) soit configurée, il n'existe pas encore de bouton "Supprimer mon compte" ni d'export RGPD en un clic dans l'interface utilisateur. |
 
 ---

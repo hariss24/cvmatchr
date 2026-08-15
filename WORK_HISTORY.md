@@ -41,6 +41,77 @@
 
 ## Journal
 
+### 2026-08-15 : Le serveur devient la source unique — Task 9 : Vérification globale et finalisation
+- **Quoi :** Vérification globale de la chaîne d'exécution, exécution de l'intégralité de la suite de tests Playwright (39/39 passés), tests unitaires Vitest (761/761 passés), validation statique TypeScript et build de production ; levée formelle des limites d'architecture dans `LIMITES.md` (§1.1 : conflits Last-Write-Wins barrés et tables Dexie non synchronisées barrées).
+- **Pourquoi :** Task 9 du plan `docs/superpowers/plans/2026-08-15-serveur-source-unique.md`. Clôturer le chantier de migration avec validation complète et documentation à jour.
+- **Fichiers touchés :** `LIMITES.md`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` OK, `npm run lint` OK, `npx vitest run` (761/761 tests verts), `npm run build` réussi (32/32 pages statiques), `npx playwright test` (39/39 tests e2e verts).
+
+
+### 2026-08-15 : Le serveur devient la source unique — Task 8 : Gestion des pannes réseau et messages honnêtes
+- **Quoi :** Création du composant réutilisable `EtatErreur.tsx` (avec message d'erreur clair et bouton « Réessayer ») et son test unitaire `EtatErreur.test.tsx` ; branchement de la gestion des erreurs réseau / indisponibilité serveur avec affichage de `EtatErreur` dans `ApplicationsScreen.tsx`, `ResumeShelf.tsx`, `JobsView.tsx`, `ProfileView.tsx`, `PackView.tsx` et capture d'erreur honnête dans `TopBar.tsx` (maintien de l'état non enregistré sans fausse confirmation de succès) ; ajout des styles `.etat-erreur` dans `globals.css` (variables de thème) ; création de la fixture `session.ts` pour simuler une session connectée et PostgREST dans les tests e2e Playwright (`jobs.spec.ts`, `profile.spec.ts`).
+- **Pourquoi :** Task 8 du plan `docs/superpowers/plans/2026-08-15-serveur-source-unique.md`. Rendre les pannes réseau et refus serveur visibles et récupérables par l'utilisateur avec un bouton « Réessayer », tout en garantissant des tests e2e fiables et étanches.
+- **Fichiers touchés :** `web/src/components/ui/EtatErreur.tsx`, `web/src/components/ui/EtatErreur.test.tsx`, `web/src/app/globals.css`, `web/src/components/applications/ApplicationsScreen.tsx`, `web/src/components/applications/ResumeShelf.tsx`, `web/src/components/jobs/JobsView.tsx`, `web/src/components/profile/ProfileView.tsx`, `web/src/components/pack/PackView.tsx`, `web/src/components/layout/TopBar.tsx`, `web/src/lib/storage/db.ts`, `web/tests/e2e/fixtures/session.ts`, `web/tests/e2e/jobs.spec.ts`, `web/tests/e2e/profile.spec.ts`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` OK, `npm run lint` OK, `npx vitest run` (761/761 tests verts), `npm run build` réussi (32/32 pages statiques), `npx playwright test` (39/39 tests e2e passés avec succès).
+- **Commit :** `c8b5122` (`feat(serveur): message honnete et bouton Reessayer quand le serveur ne repond pas`).
+
+
+### 2026-08-15 : Le serveur devient la source unique — Task 7 : Reprise des données locales et suppression de la réplication
+- **Quoi :** Création du module de reprise `reprise.ts` (`reprendreDonneesLocales`, drapeau `reprise_locale_faite`) et tests `reprise.test.ts` ; branchement de la reprise sur `initAuth` et `onAuthStateChange` dans `authStore.ts` ; suppression complète du moteur de réplication (`syncEngine`, `syncMapping`, `syncFields`, `syncEvents` et leurs tests) ; suppression des abonnements `onSyncChange` et des appels `pushAll` ; mise à niveau du schéma Dexie (v14 retirant les tables migrées) ; adaptation de `backup.ts` ; vérification qu'aucune référence aux anciens termes de synchronisation ne subsiste.
+- **Pourquoi :** Task 7 du plan `docs/superpowers/plans/2026-08-15-serveur-source-unique.md`. Achever la transition vers le serveur comme source unique en garantissant la préservation des données existantes et en allégeant le code client de plus de 1000 lignes obsolètes.
+- **Fichiers touchés :** `web/src/lib/storage/reprise.ts`, `web/src/lib/storage/reprise.test.ts`, `web/src/state/authStore.ts`, `web/src/state/authStore.test.ts`, `web/src/lib/storage/db.ts`, `web/src/lib/storage/backup.ts`, `web/src/lib/applications/store.ts`, `web/src/components/applications/ApplicationsScreen.tsx`, `web/src/components/applications/ResumeShelf.tsx`, suppression des 8 fichiers `sync*`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` OK, `npm run lint` OK, `npx vitest run` (760/760 tests verts), `npm run build` réussi (32/32 pages statiques).
+- **Commit :** `df686e4` (`feat(serveur): reprise des donnees locales puis suppression du moteur de replication`).
+
+
+### 2026-08-15 : Le serveur devient la source unique — Task 6 : Le CV Maître devient un document
+- **Quoi :** Réécriture de `master.ts` (`loadMasterResume`, `saveMasterResume`, `clearMasterResume`, alias `getMasterResume`/`setMasterResume`) pour persister et relire le CV Maître dans la table `documents` de Supabase avec `doc_type = 'CV'`, `label = 'master'` et `id = 'master-cv'` ; invalidation de sessionCache `documents:` et `documents:master` ; ajout des tests unitaires `masterRemote.test.ts`.
+- **Pourquoi :** Task 6 du plan `docs/superpowers/plans/2026-08-15-serveur-source-unique.md`. Harmoniser la gestion du CV Maître avec les documents du serveur et supprimer sa dépendance aux brouillons locaux IndexedDB.
+- **Fichiers touchés :** `web/src/lib/storage/master.ts`, `web/src/lib/storage/masterRemote.test.ts`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` OK, `npm run lint` OK, `npx vitest run` (780/780 tests verts), `npm run build` réussi (32/32 pages statiques).
+- **Commit :** `ba44319` (`feat(serveur): le CV Maitre devient un document avec label master`).
+
+
+### 2026-08-15 : Le serveur devient la source unique — Task 5 : Réglages et modèles de lettre
+- **Quoi :** Réécriture de TEMPLATES API (`ensureDefaultTemplates`, `listTemplates`, `saveTemplate`, `deleteTemplate`), PROFILE API (`loadProfile`, `saveProfile`), et JOB PROFILE API (`getJobProfile`, `saveJobProfile`) dans `db.ts` sur Supabase distant via `requireRemote`, `currentUserId` et `sessionCache` ; suppression des champs obsolètes `synced_at` ; support du mode hors-compte (renvoi de `DEFAULT_TEMPLATES` et profil `null`) ; ajout des tests unitaires `settingsRemote.test.ts`.
+- **Pourquoi :** Task 5 du plan `docs/superpowers/plans/2026-08-15-serveur-source-unique.md`. Centraliser les réglages et modèles sur le compte distant tout en préservant le fonctionnement immédiat hors connexion.
+- **Fichiers touchés :** `web/src/lib/storage/db.ts`, `web/src/lib/storage/settingsRemote.test.ts`, `web/src/lib/profile/profile.ts`, `web/src/lib/storage/syncEngine.ts`, `web/src/lib/storage/syncMapping.ts`, `web/src/lib/storage/syncMapping.test.ts`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` OK, `npm run lint` OK, `npx vitest run` (777/777 tests verts), `npm run build` réussi (32/32 pages statiques).
+- **Commit :** `95193e8` (`feat(serveur): reglages et modeles de lettre sur le serveur`).
+
+
+### 2026-08-15 : Le serveur devient la source unique — Task 4 : Candidatures et offres enregistrées
+- **Quoi :** Réécriture de JOBS API (`jobExists`, `saveJob`, `jobKeys`, `listJobs`, `setJobStatus`, `saveExplored`, `markJobSeen`, `listJobsByGrade`, `supprimerJobsSousLeSeuil`) et APPLICATIONS API (`listApplicationsRaw`, `getApplicationByNormKey`, `putApplication`, `deleteApplicationRecord`) dans `db.ts` sur Supabase distant via `requireRemote` et `sessionCache` ; suppression des champs obsolètes `synced_at` et `deleted_at` de `JobEntry` et `Application` ; ajout du test de cache et invalidation `applicationsRemote.test.ts`.
+- **Pourquoi :** Task 4 du plan `docs/superpowers/plans/2026-08-15-serveur-source-unique.md`. Centraliser les candidatures et offres enregistrées sur le compte Supabase sans réplication locale Dexie intermédiaire.
+- **Fichiers touchés :** `web/src/lib/storage/db.ts`, `web/src/lib/applications/types.ts`, `web/src/lib/storage/applicationsRemote.test.ts`, `web/src/lib/storage/syncEngine.ts`, `web/src/lib/storage/syncMapping.ts`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` OK, `npm run lint` OK, `npx vitest run` (774/774 tests verts), `npm run build` réussi (32/32 pages statiques).
+- **Commit :** `3789d0c` (`feat(serveur): candidatures et offres enregistrees sur le serveur`).
+
+
+### 2026-08-15 : Le serveur devient la source unique — Task 3 : Documents sur le serveur
+- **Quoi :** Réécriture de l'API documents dans `db.ts` (`listHistoryEntries`, `getHistoryEntry`, `saveHistoryEntry`, `deleteHistoryEntry`, `updateHistoryEntryStat`, `listHistoryByApplication`, `listUnattachedHistory`, `updateHistoryFields`, `deleteHistoryEntries`) via Supabase distant et mémoire de session `sessionCache.ts` ; dissociation catalogue (`DocumentSummary` sans `json` ni `content`) et détail (`HistoryEntry` avec `json`) ; suppression de `synced_at` et `deleted_at` de `HistoryEntry` ; mise à jour de `saveDocument.ts` exigeant une session pour persister.
+- **Pourquoi :** Task 3 du plan `docs/superpowers/plans/2026-08-15-serveur-source-unique.md`. Rendre les documents accessibles et synchronisés immédiatement sur le compte Supabase sans dépendre d'une réplication concurrente locale lourde.
+- **Fichiers touchés :** `web/src/lib/storage/db.ts`, `web/src/lib/storage/documents.test.ts`, `web/src/lib/storage/saveDocument.ts`, `web/src/lib/storage/saveDocument.test.ts`, `web/src/lib/storage/syncEngine.ts`, `web/src/lib/storage/syncMapping.ts`, `web/src/lib/applications/store.ts`, `web/src/components/applications/ResumeShelf.tsx`, `web/src/components/applications/ApplicationCard.tsx`, `web/src/components/ui/UiHost.tsx`, `web/tests/e2e/save-sync.spec.ts`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` OK, `npm run lint` OK, `npx vitest run` (772/772 tests verts), `npm run build` réussi (32/32 pages statiques), `npx playwright test` (39/39 tests e2e verts).
+- **Commit :** `b9daeee` (`feat(serveur): les documents vivent sur le serveur, catalogue et detail separes`).
+
+
+### 2026-08-15 : Le serveur devient la source unique — Task 2 : Accès distant et mémoire de session
+- **Quoi :** Création des modules `remote.ts` (classe `RemoteError`, fonctions `requireRemote` et `currentUserId`) et `sessionCache.ts` (`cacheGet`, `cacheSet`, `cacheInvalidate`, `cacheClear`) avec leurs suites de tests unitaires Vitest.
+- **Pourquoi :** Task 2 du plan `docs/superpowers/plans/2026-08-15-serveur-source-unique.md`. Fournir un accès distant typé qui lève des erreurs explicites en cas de panne réseau/absence de session, et une mémoire de session en Map éphémère (sans persistance disque) pour éviter les requêtes réseau répétitives.
+- **Fichiers touchés :** `web/src/lib/storage/remote.ts`, `web/src/lib/storage/remote.test.ts`, `web/src/lib/storage/sessionCache.ts`, `web/src/lib/storage/sessionCache.test.ts`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` OK, `npm run lint` OK, `npx vitest run` (769/769 tests verts), `npm run build` réussi (32/32 pages statiques).
+- **Commit :** `6e7de87` (`feat(serveur): acces distant typé et memoire de session`).
+
+
+### 2026-08-15 : Le serveur devient la source unique — Task 1 : Schéma serveur
+- **Quoi :** Création du fichier de migration Supabase SQL `0003_documents_templates.sql` définissant les tables `public.documents` et `public.templates`, les index, triggers `touch_updated_at`, politiques RLS et l'instruction de reprise depuis `resumes` et `letters`.
+- **Pourquoi :** Task 1 du plan `docs/superpowers/plans/2026-08-15-serveur-source-unique.md`. Préparer le schéma serveur pour la transition vers le serveur comme source unique de vérité.
+- **Fichiers touchés :** `web/supabase/migrations/0003_documents_templates.sql`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` OK, `npm run lint` OK, `npx vitest run` (762/762 tests verts), `npm run build` réussi (32/32 pages statiques).
+- **Commit :** `48bcc57` (`feat(serveur): tables documents et templates, reprise des lignes existantes`).
+
+
 ### 2026-08-15 : Synchronisation compte et restitution des données — Tasks 1 à 7
 - **Quoi :** 
   1. Migration Supabase SQL `0002_user_settings.sql` pour répliquer `profile` et `jobProfile` (table `user_settings` avec contrainte check, trigger `touch_updated_at` et RLS).
