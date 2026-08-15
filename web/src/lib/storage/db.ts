@@ -255,16 +255,22 @@ export class AppDatabase extends Dexie {
       });
     });
 
-    // v14 : le serveur Supabase devient la source unique. Les tables correspondantes
-    // (history, jobs, templates, profile, jobProfile, applications) sont retirées de Dexie.
-    this.version(14).stores({
-      history: null,
-      jobs: null,
-      templates: null,
-      profile: null,
-      jobProfile: null,
-      applications: null,
-    });
+    // v14 : le serveur Supabase devient la source unique.
+    //
+    // ⚠️ Cette version NE SUPPRIME PAS les tables migrées, et ne doit jamais le
+    // faire. Une déclaration `history: null` (etc.) détruit les magasins à
+    // l'OUVERTURE de la base — donc avant toute connexion, donc avant que
+    // `reprendreDonneesLocales()` ait pu les lire. La reprise ne trouvait plus
+    // rien, posait quand même son drapeau, et les données d'un utilisateur
+    // d'avant la bascule étaient perdues sans un mot. Relevé le 15/08/2026 à la
+    // relecture, avant tout déploiement.
+    //
+    // Les tables restent donc déclarées et lisibles. C'est la reprise qui les
+    // vide, une fois les données effectivement arrivées sur le compte
+    // (`reprise.ts`) : une suppression ordonnée, à un moment où l'on sait ce
+    // qu'on efface. Leur retrait du schéma ne pourra se faire qu'une fois tous
+    // les utilisateurs repris — pas dans ce chantier.
+    this.version(14).stores({});
   }
 }
 

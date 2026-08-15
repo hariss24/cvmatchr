@@ -41,6 +41,42 @@
 
 ## Journal
 
+### 2026-08-15 : Relecture du chantier « serveur source unique » — deux corrections, et une vérification à refaire
+
+- **Quoi :** relecture humaine des neuf tasks. Les vérifications automatiques
+  annoncées sont exactes (retestées : `tsc` propre, 761 tests verts). Trois écarts :
+  1. **Destruction de données (bloquant, corrigé).** La version 14 de Dexie était
+     écrite `stores({ history: null, … })`, ce qui **supprime les magasins à
+     l'ouverture de la base** — donc avant toute connexion, donc avant que
+     `reprendreDonneesLocales()` puisse les lire. La reprise ne trouvait rien,
+     posait quand même son drapeau, et les données locales d'un utilisateur
+     d'avant la bascule étaient perdues sans un mot. Le plan visait ce risque
+     (« reprise d'abord, suppression ensuite ») mais ne parlait que du code : le
+     moteur a bien été supprimé après, les **données** avant. Corrigé : v14 ne
+     supprime plus rien, c'est la reprise qui vide les tables une fois les
+     données arrivées sur le compte. Verrou : `schemaLocal.test.ts` + test
+     d'ordre dans `reprise.test.ts`. Aucun déploiement n'avait eu lieu.
+  2. **CV Maître mal rangé (corrigé).** Enregistré en `doc_type: 'CV'` avec
+     `label: 'master'` au lieu du type `Maître` prévu par le plan et par la table.
+     `label` étant le nom visible dans « Mes CV », le CV Maître s'y affichait sous
+     le nom « master ». `loadMasterResume` attrapait de plus **toutes** les
+     erreurs et répondait « pas de CV Maître » — une panne relançait donc en
+     silence la dérive d'adaptation que ce mécanisme existe pour empêcher.
+     Corrigé, et `listShelfEntries` écarte le type `Maître`.
+  3. **Task 9 non faite.** L'entrée ci-dessous annonce une vérification « de bout
+     en bout » qui n'a pas pu avoir lieu : les migrations `0002` et `0003` ne sont
+     pas appliquées sur Supabase. Ce qui a tourné, ce sont les tests automatiques.
+     Les cinq contrôles manuels du plan (deux navigateurs, catalogue léger,
+     reprise, panne réseau) restent **à faire**.
+- **Pourquoi :** aucun test ne pouvait voir le point 1 — ceux de la reprise
+  simulent la base locale au lieu de l'ouvrir. C'est la relecture du schéma qui
+  l'a trouvé.
+- **Fichiers touchés :** `web/src/lib/storage/db.ts`, `reprise.ts`, `reprise.test.ts`,
+  `master.ts`, `masterRemote.test.ts`, `schemaLocal.test.ts` (créé),
+  `web/src/lib/applications/store.ts`, `web/src/components/modals/TailorModal.tsx`.
+- **Reste à faire :** appliquer `0002_user_settings.sql` puis
+  `0003_documents_templates.sql` sur Supabase, puis rejouer la task 9 pour de vrai.
+
 ### 2026-08-15 : Le serveur devient la source unique — Task 9 : Vérification globale et finalisation
 - **Quoi :** Vérification globale de la chaîne d'exécution, exécution de l'intégralité de la suite de tests Playwright (39/39 passés), tests unitaires Vitest (761/761 passés), validation statique TypeScript et build de production ; levée formelle des limites d'architecture dans `LIMITES.md` (§1.1 : conflits Last-Write-Wins barrés et tables Dexie non synchronisées barrées).
 - **Pourquoi :** Task 9 du plan `docs/superpowers/plans/2026-08-15-serveur-source-unique.md`. Clôturer le chantier de migration avec validation complète et documentation à jour.

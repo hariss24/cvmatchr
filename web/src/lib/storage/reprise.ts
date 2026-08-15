@@ -86,6 +86,19 @@ export async function reprendreDonneesLocales(): Promise<number> {
     count++;
   }
 
+  // Les données sont arrivées sur le compte : on vide les tables locales, et
+  // seulement maintenant. Un vidage au chargement du schéma (Dexie `stores({x:
+  // null})`) s'exécuterait avant cette fonction et détruirait ce qu'elle vient
+  // de sauver — voir le commentaire de la version 14 dans `db.ts`.
+  await Promise.all([
+    db.history?.clear(),
+    db.applications?.clear(),
+    db.jobs?.clear(),
+    db.profile?.clear(),
+    db.jobProfile?.clear(),
+    db.templates?.clear(),
+  ]);
+
   if (typeof localStorage !== "undefined") {
     localStorage.setItem(REPRISE_DONE_KEY, "1");
   }

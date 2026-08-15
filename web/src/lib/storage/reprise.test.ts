@@ -10,13 +10,15 @@ vi.mock('@/lib/storage/db', () => ({
   saveJobProfile: vi.fn(async () => {}),
   saveTemplate: vi.fn(async () => {}),
   loadDraft: vi.fn(async () => null),
+  // `clear` fait partie du contrat depuis le 15/08/2026 : la reprise vide les
+  // tables locales elle-même, une fois les données arrivées sur le compte.
   db: {
-    history: { toArray: vi.fn(async () => []) },
-    applications: { toArray: vi.fn(async () => []) },
-    jobs: { toArray: vi.fn(async () => []) },
-    profile: { get: vi.fn(async () => null) },
-    jobProfile: { get: vi.fn(async () => null) },
-    templates: { toArray: vi.fn(async () => []) },
+    history: { toArray: vi.fn(async () => []), clear: vi.fn(async () => {}) },
+    applications: { toArray: vi.fn(async () => []), clear: vi.fn(async () => {}) },
+    jobs: { toArray: vi.fn(async () => []), clear: vi.fn(async () => {}) },
+    profile: { get: vi.fn(async () => null), clear: vi.fn(async () => {}) },
+    jobProfile: { get: vi.fn(async () => null), clear: vi.fn(async () => {}) },
+    templates: { toArray: vi.fn(async () => []), clear: vi.fn(async () => {}) },
   },
 }));
 
@@ -33,6 +35,20 @@ beforeEach(() => {
 });
 
 describe('reprise des données locales', () => {
+  it("vide les tables locales seulement APRÈS les avoir envoyées", async () => {
+    // L'ordre est tout : un vidage antérieur (Dexie `stores({history: null})`)
+    // s'exécute à l'ouverture de la base et détruit ce que la reprise devait
+    // sauver. Incident du 15/08/2026.
+    vi.mocked(db.history!.toArray).mockResolvedValueOnce([
+      { id: 'doc-1', doc_type: 'CV' } as never,
+    ]);
+    await reprendreDonneesLocales();
+    expect(vi.mocked(saveHistoryEntry)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(db.history!.clear)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(saveHistoryEntry).mock.invocationCallOrder[0])
+      .toBeLessThan(vi.mocked(db.history!.clear).mock.invocationCallOrder[0]);
+  });
+
   it("ne reprend qu'une seule fois", async () => {
     localStorage.setItem('reprise_locale_faite', '1');
     expect(await reprendreDonneesLocales()).toBe(0);

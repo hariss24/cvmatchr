@@ -146,7 +146,11 @@ async function doBackfill(): Promise<void> {
 }
 
 export async function listShelfEntries(): Promise<DocumentSummary[]> {
-  return listUnattachedHistory();
+  // Le CV Maître n'est pas un document du rayon : c'est la base de référence des
+  // adaptations, gérée depuis la modale d'adaptation. Il n'a ni candidature ni
+  // nom, donc rien ne l'écarterait sans ce filtre.
+  const entries = await listUnattachedHistory();
+  return entries.filter((e) => e.doc_type !== "Maître");
 }
 
 export async function setShelfLabel(id: string, label: string): Promise<void> {

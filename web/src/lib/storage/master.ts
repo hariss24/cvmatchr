@@ -1,100 +1,58 @@
-import { requireRemote, currentUserId, RemoteError } from "@/lib/storage/remote";
-import { cacheGet, cacheSet, cacheInvalidate } from "@/lib/storage/sessionCache";
+import { getHistoryEntry, saveHistoryEntry } from "@/lib/storage/db";
+import { currentUserId } from "@/lib/storage/remote";
 import { normalizeResume, isEmptyResume } from "@/lib/resume/normalize";
 import type { Resume } from "@/lib/resume/schema";
 import type { TemplateId } from "@/lib/resume/templates";
 
-const MASTER_CACHE_KEY = "documents:master";
-const MASTER_DOC_ID = "master-cv";
+/**
+ * Le CV Maître est un document du compte, de type `Maître`, d'identifiant fixe.
+ *
+ * Il n'est PAS rangé en type `CV` avec une étiquette : `label` est le nom
+ * visible d'un document dans le rayon « Mes CV », et le détourner y afficherait
+ * le CV Maître sous le nom « master ». Le type `Maître` existe dans `DocType`
+ * comme dans la table `documents` — c'est lui qui doit servir.
+ */
+const MASTER_DOC_ID = "master";
 
 /**
- * Retourne le CV Maître stocké sur le compte distant, ou null s'il n'existe pas / est vide / pas de compte.
+ * Retourne le CV Maître du compte, ou null s'il n'existe pas ou qu'il est vide.
+ *
+ * Sans compte, la réponse est `null` : ne pas être connecté est un état connu,
+ * pas un incident, et l'éditeur reste utilisable sans compte (spec §4.5). En
+ * revanche, une panne alors qu'une session existe est levée — la confondre avec
+ * une absence relancerait la dérive d'adaptation en silence.
  */
 export async function loadMasterResume(): Promise<Resume | null> {
-  const enMemoire = cacheGet<Resume | null>(MASTER_CACHE_KEY);
-  if (enMemoire !== undefined) return enMemoire;
-
-  const userId = await currentUserId();
-  if (!userId) return null;
-
-  try {
-    const { supabase } = await requireRemote();
-    const { data, error } = await supabase
-      .from("documents")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("doc_type", "CV")
-      .eq("label", "master")
-      .single();
-
-    if (error) {
-      if ((error as { code?: string }).code === "PGRST116") {
-        cacheSet(MASTER_CACHE_KEY, null);
-        return null;
-      }
-      throw new RemoteError("Impossible de charger le CV Maître.", error);
-    }
-    if (!data || !data.content) {
-      cacheSet(MASTER_CACHE_KEY, null);
-      return null;
-    }
-
-    const resume = normalizeResume(data.content as Resume);
-    const result = isEmptyResume(resume) ? null : resume;
-    cacheSet(MASTER_CACHE_KEY, result);
-    return result;
-  } catch {
-    return null;
-  }
+  if (!(await currentUserId())) return null;
+  const entry = await getHistoryEntry(MASTER_DOC_ID);
+  if (!entry?.json) return null;
+  const resume = normalizeResume(entry.json as Resume);
+  return isEmptyResume(resume) ? null : resume;
 }
 
 /**
- * Enregistre un CV comme CV Maître sur le compte Supabase.
+ * Enregistre un CV comme CV Maître.
+ *
+ * Sans lui, l'adaptation retombe sur le CV affiché : chaque offre part du CV
+ * réécrit pour l'offre précédente, et le texte dérive d'adaptation en adaptation.
+ *
+ * Les erreurs ne sont pas attrapées, ici ni dans `loadMasterResume` : une panne
+ * qui se ferait passer pour « pas de CV Maître » relancerait silencieusement
+ * cette dérive, exactement ce que ce mécanisme existe pour empêcher.
  */
-export async function saveMasterResume(resume: Resume, templateId: TemplateId | null = null): Promise<void> {
-  const { supabase, userId } = await requireRemote();
-  const cleanResume = normalizeResume(structuredClone(resume));
-  const row = {
-    user_id: userId,
+export async function saveMasterResume(resume: Resume, templateId: TemplateId | null) {
+  await saveHistoryEntry({
     id: MASTER_DOC_ID,
-    doc_type: "CV",
-    title: "CV Maître",
+    created_at: new Date().toISOString(),
+    doc_type: "Maître",
     company: "",
     role: "",
-    label: "master",
-    content: cleanResume,
-    template_id: templateId,
-    application_id: null,
-    notes: "",
     job_desc: "",
+    filename: "CV Maître",
+    notes: "",
     pdf_views: 0,
     editor_reloads: 0,
-    created_at: new Date().toISOString(),
-  };
-
-  const { error } = await supabase.from("documents").upsert(row);
-  if (error) throw new RemoteError("Impossible d'enregistrer le CV Maître.", error);
-
-  cacheInvalidate("documents:");
-  cacheSet(MASTER_CACHE_KEY, cleanResume);
+    json: structuredClone(resume),
+    templateId,
+  });
 }
-
-/**
- * Supprime le CV Maître du compte distant.
- */
-export async function clearMasterResume(): Promise<void> {
-  const { supabase, userId } = await requireRemote();
-  const { error } = await supabase
-    .from("documents")
-    .delete()
-    .eq("user_id", userId)
-    .eq("label", "master");
-
-  if (error) throw new RemoteError("Impossible de supprimer le CV Maître.", error);
-
-  cacheInvalidate("documents:");
-  cacheSet(MASTER_CACHE_KEY, null);
-}
-
-export const getMasterResume = loadMasterResume;
-export const setMasterResume = saveMasterResume;

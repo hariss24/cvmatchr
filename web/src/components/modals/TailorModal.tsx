@@ -72,7 +72,13 @@ export default function TailorModal({
   useEffect(() => {
     if (!open) return;
     let vivant = true;
-    void loadMasterResume().then((m) => { if (vivant) setMasterExists(!!m); });
+    // Le pictogramme seulement : si le serveur ne répond pas, on n'affiche pas
+    // le raccourci, on ne prétend pas non plus qu'il n'y a pas de CV Maître —
+    // les deux appels qui s'en servent vraiment (adaptation CV et lettre)
+    // laissent, eux, l'erreur remonter.
+    void loadMasterResume()
+      .then((m) => { if (vivant) setMasterExists(!!m); })
+      .catch(() => { if (vivant) setMasterExists(false); });
     return () => { vivant = false; };
   }, [open]);
 
@@ -346,7 +352,12 @@ export default function TailorModal({
    */
   const enregistrerMaitre = async () => {
     const { json, templateId } = useDocStore.getState();
-    await saveMasterResume(json as Resume, templateId);
+    try {
+      await saveMasterResume(json as Resume, templateId);
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Impossible d'enregistrer le CV Principal.", "error");
+      return;
+    }
     setMasterExists(true);
     toast("CV Principal enregistré — les prochaines adaptations partiront de lui.", "success");
   };
