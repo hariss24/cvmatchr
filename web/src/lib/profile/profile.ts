@@ -17,8 +17,6 @@ export interface UserProfile {
   // Optionnels
   linkedin: string;
   updatedAt: number;
-  /** Dernière réplication réussie vers le compte. `null` = jamais envoyé. */
-  synced_at?: string | null;
 }
 
 export const EMPTY_PROFILE: UserProfile = {

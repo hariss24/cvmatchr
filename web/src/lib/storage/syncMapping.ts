@@ -155,7 +155,6 @@ export function remoteSettingToProfile(row: RemoteUserSettingRow): UserProfile {
     ville: c.ville ?? '',
     linkedin: c.linkedin ?? '',
     updatedAt: c.updatedAt ?? new Date(row.client_updated_at).getTime(),
-    synced_at: null,
   };
 }
 

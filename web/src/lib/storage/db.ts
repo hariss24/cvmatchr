@@ -12,7 +12,7 @@ import { normKey } from "@/lib/applications/normKey";
 import type { Ligne } from "@/lib/jobs/rank/criteria";
 import { normalizeCompany, type AtsProvider } from "@/lib/jobs/ats";
 import { markDeleted } from "./syncFields";
-import { requireRemote, RemoteError } from "./remote";
+import { requireRemote, currentUserId, RemoteError } from "./remote";
 import { cacheGet, cacheSet, cacheInvalidate } from "./sessionCache";
 
 // ---------------------------------------------------------------------------
@@ -708,54 +708,97 @@ export async function supprimerJobsSousLeSeuil(seuil: number): Promise<number> {
 // ---------------------------------------------------------------------------
 
 /**
- * Seed le modèle de départ. Migration unique `pack-templates-v4` (v2 : refonte
- * « lettre seule » ; v3 : lettre personnelle « couteau suisse du web » ; v4 :
- * lettre spontanée courte orientée savoir-être) : chaque bump remplace les
- * modèles une fois, puis on préserve les éditions de l'utilisateur (on ne
- * réécrase plus ensuite).
+ * Seed le modèle de départ pour l'utilisateur connecté s'il n'en a pas encore.
  */
-export async function ensureDefaultTemplates() {
-  try {
-    const KEY = "pack-templates-v4";
-    const migrated = typeof localStorage !== "undefined" && localStorage.getItem(KEY);
-    if (!migrated) {
-      await db.templates.clear();
-      await db.templates.bulkPut(DEFAULT_TEMPLATES.map((t) => ({ ...t, updatedAt: Date.now() })));
-      if (typeof localStorage !== "undefined") localStorage.setItem(KEY, "1");
-      return;
-    }
-    if ((await db.templates.count()) === 0) {
-      await db.templates.bulkPut(DEFAULT_TEMPLATES.map((t) => ({ ...t, updatedAt: Date.now() })));
-    }
-  } catch (e) {
-    console.warn("ensureDefaultTemplates error:", e);
+export async function ensureDefaultTemplates(): Promise<void> {
+  const userId = await currentUserId();
+  if (!userId) return;
+
+  const { supabase } = await requireRemote();
+  const { data, error } = await supabase
+    .from('templates')
+    .select('id')
+    .eq('user_id', userId);
+  if (error) return;
+
+  if (!data || data.length === 0) {
+    const rows = DEFAULT_TEMPLATES.map((t) => ({
+      user_id: userId,
+      id: t.id,
+      name: t.name,
+      subject: t.letterSubject,
+      body: t.letterBody,
+      is_default: false,
+    }));
+    await supabase.from('templates').upsert(rows);
+    cacheInvalidate('templates:');
   }
 }
 
 export async function listTemplates(): Promise<MailTemplate[]> {
-  try {
-    const all = await db.templates.toArray();
-    return all.sort((a, b) => a.name.localeCompare(b.name));
-  } catch (e) {
-    console.warn("listTemplates error:", e);
-    return [];
+  const enMemoire = cacheGet<MailTemplate[]>('templates:list');
+  if (enMemoire) return enMemoire;
+
+  const userId = await currentUserId();
+  if (!userId) {
+    return DEFAULT_TEMPLATES;
   }
+
+  const { supabase } = await requireRemote();
+  const { data, error } = await supabase
+    .from('templates')
+    .select('*')
+    .eq('user_id', userId)
+    .order('name', { ascending: true });
+  if (error) throw new RemoteError('Impossible de charger vos modèles.', error);
+
+  if (!data || data.length === 0) {
+    return DEFAULT_TEMPLATES;
+  }
+
+  const liste: MailTemplate[] = (data as Array<{
+    id: string;
+    name: string;
+    subject: string;
+    body: string;
+    is_default?: boolean;
+    updated_at?: string;
+  }>).map((r) => ({
+    id: r.id,
+    name: r.name,
+    letterSubject: r.subject,
+    letterBody: r.body,
+    updatedAt: r.updated_at ? new Date(r.updated_at).getTime() : Date.now(),
+  }));
+
+  cacheSet('templates:list', liste);
+  return liste;
 }
 
-export async function saveTemplate(tpl: MailTemplate) {
-  try {
-    await db.templates.put({ ...tpl, updatedAt: Date.now() });
-  } catch (e) {
-    console.warn("saveTemplate error:", e);
-  }
+export async function saveTemplate(tpl: MailTemplate): Promise<void> {
+  const { supabase, userId } = await requireRemote();
+  const row = {
+    user_id: userId,
+    id: tpl.id,
+    name: tpl.name,
+    subject: tpl.letterSubject,
+    body: tpl.letterBody,
+    is_default: false,
+  };
+  const { error } = await supabase.from('templates').upsert(row);
+  if (error) throw new RemoteError("Impossible d'enregistrer le modèle.", error);
+  cacheInvalidate('templates:');
 }
 
-export async function deleteTemplate(id: string) {
-  try {
-    await db.templates.delete(id);
-  } catch (e) {
-    console.warn("deleteTemplate error:", e);
-  }
+export async function deleteTemplate(id: string): Promise<void> {
+  const { supabase, userId } = await requireRemote();
+  const { error } = await supabase
+    .from('templates')
+    .delete()
+    .eq('user_id', userId)
+    .eq('id', id);
+  if (error) throw new RemoteError('Impossible de supprimer le modèle.', error);
+  cacheInvalidate('templates:');
 }
 
 // ---------------------------------------------------------------------------
@@ -763,20 +806,60 @@ export async function deleteTemplate(id: string) {
 // ---------------------------------------------------------------------------
 
 export async function loadProfile(): Promise<UserProfile | null> {
-  try {
-    return (await db.profile.get("me")) ?? null;
-  } catch (e) {
-    console.warn("loadProfile error:", e);
-    return null;
+  const enMemoire = cacheGet<UserProfile>('settings:profile');
+  if (enMemoire) return enMemoire;
+
+  const userId = await currentUserId();
+  if (!userId) return null;
+
+  const { supabase } = await requireRemote();
+  const { data, error } = await supabase
+    .from('user_settings')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('id', 'profile')
+    .single();
+
+  if (error) {
+    if ((error as { code?: string }).code === 'PGRST116') return null;
+    throw new RemoteError('Impossible de charger votre profil.', error);
   }
+  if (!data) return null;
+
+  const row = data as { content?: Record<string, unknown>; client_updated_at?: string };
+  const c = (row.content || {}) as Partial<UserProfile>;
+  const profile: UserProfile = {
+    id: 'me',
+    prenom: c.prenom ?? '',
+    nom: c.nom ?? '',
+    email: c.email ?? '',
+    telephone: c.telephone ?? '',
+    ville: c.ville ?? '',
+    linkedin: c.linkedin ?? '',
+    updatedAt: c.updatedAt ?? (row.client_updated_at ? new Date(row.client_updated_at).getTime() : Date.now()),
+  };
+
+  cacheSet('settings:profile', profile);
+  return profile;
 }
 
 export async function saveProfile(p: UserProfile): Promise<void> {
-  try {
-    await db.profile.put({ ...p, id: "me", updatedAt: Date.now(), synced_at: null });
-  } catch (e) {
-    console.warn("saveProfile error:", e);
-  }
+  const { supabase, userId } = await requireRemote();
+  const nowIso = new Date().toISOString();
+  const cleanProfile: UserProfile = {
+    ...p,
+    id: 'me',
+    updatedAt: p.updatedAt || Date.now(),
+  };
+  const row = {
+    user_id: userId,
+    id: 'profile',
+    content: cleanProfile as unknown as Record<string, unknown>,
+    client_updated_at: nowIso,
+  };
+  const { error } = await supabase.from('user_settings').upsert(row);
+  if (error) throw new RemoteError("Impossible d'enregistrer votre profil.", error);
+  cacheInvalidate('settings:');
 }
 
 // ---------------------------------------------------------------------------
@@ -784,20 +867,46 @@ export async function saveProfile(p: UserProfile): Promise<void> {
 // ---------------------------------------------------------------------------
 
 export async function getJobProfile(): Promise<JobSearchProfile | null> {
-  try {
-    return (await db.jobProfile.get("me"))?.profile ?? null;
-  } catch (e) {
-    console.warn("getJobProfile error:", e);
-    return null;
+  const enMemoire = cacheGet<JobSearchProfile>('settings:jobProfile');
+  if (enMemoire) return enMemoire;
+
+  const userId = await currentUserId();
+  if (!userId) return null;
+
+  const { supabase } = await requireRemote();
+  const { data, error } = await supabase
+    .from('user_settings')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('id', 'jobProfile')
+    .single();
+
+  if (error) {
+    if ((error as { code?: string }).code === 'PGRST116') return null;
+    throw new RemoteError('Impossible de charger vos critères de recherche.', error);
   }
+  if (!data) return null;
+
+  const row = data as { content?: { profile?: JobSearchProfile } };
+  const profile = row.content?.profile ?? null;
+  if (profile) {
+    cacheSet('settings:jobProfile', profile);
+  }
+  return profile;
 }
 
 export async function saveJobProfile(profile: JobSearchProfile): Promise<void> {
-  try {
-    await db.jobProfile.put({ id: "me", profile, updatedAt: Date.now(), synced_at: null });
-  } catch (e) {
-    console.warn("saveJobProfile error:", e);
-  }
+  const { supabase, userId } = await requireRemote();
+  const nowIso = new Date().toISOString();
+  const row = {
+    user_id: userId,
+    id: 'jobProfile',
+    content: { profile } as Record<string, unknown>,
+    client_updated_at: nowIso,
+  };
+  const { error } = await supabase.from('user_settings').upsert(row);
+  if (error) throw new RemoteError("Impossible d'enregistrer vos critères de recherche.", error);
+  cacheInvalidate('settings:');
 }
 
 // ---------------------------------------------------------------------------

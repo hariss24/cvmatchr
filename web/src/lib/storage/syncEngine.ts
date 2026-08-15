@@ -268,8 +268,8 @@ export async function pushAll(): Promise<boolean> {
       if (!error) {
         const nowIso = new Date().toISOString();
         for (const row of freshSettings) {
-          if (row.id === 'profile') await db.profile.update('me', { synced_at: nowIso });
-          else await db.jobProfile.update('me', { synced_at: nowIso });
+          if (row.id === 'profile') await (db.profile.update as unknown as (k: string, v: Record<string, unknown>) => Promise<number>)('me', { synced_at: nowIso });
+          else await (db.jobProfile.update as unknown as (k: string, v: Record<string, unknown>) => Promise<number>)('me', { synced_at: nowIso });
         }
       } else {
         toutEstParti = false;
@@ -410,7 +410,7 @@ export async function pullAll(): Promise<void> {
       if (sRow.id === 'profile') {
         const local = await db.profile.get('me');
         if (!local || resolveConflict(local, sRow) === 'remote') {
-          await db.profile.put({ ...remoteSettingToProfile(sRow), synced_at: nowIso });
+          await db.profile.put(remoteSettingToProfile(sRow));
           aEcrit = true;
         }
       } else if (sRow.id === 'jobProfile') {

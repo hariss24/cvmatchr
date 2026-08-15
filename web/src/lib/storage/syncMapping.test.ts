@@ -30,7 +30,7 @@ describe('mapping des réglages', () => {
 
   it('le profil fait l\'aller-retour sans perdre de champ', () => {
     const back = remoteSettingToProfile(profileToRemoteSetting(PROFIL, 'user-1'));
-    expect(back).toEqual({ ...PROFIL, synced_at: null });
+    expect(back).toEqual(PROFIL);
   });
 
   it('un profil distant sans horodatage lisible ne casse pas le retour', () => {
