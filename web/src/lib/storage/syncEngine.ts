@@ -10,6 +10,11 @@ import {
   remoteRowToApplication,
   jobToRemoteSavedJob,
   remoteSavedJobToJob,
+  profileToRemoteSetting,
+  remoteSettingToProfile,
+  jobProfileToRemoteSetting,
+  remoteSettingToJobProfile,
+  type RemoteUserSettingRow,
 } from './syncMapping';
 
 let isSyncing = false;
@@ -23,7 +28,7 @@ let isSyncing = false;
  */
 export async function filterOutStalePush<T extends { id: string; client_updated_at: string }>(
   supabase: NonNullable<ReturnType<typeof createBrowserClientHelper>>,
-  table: 'resumes' | 'letters' | 'applications' | 'saved_jobs',
+  table: 'resumes' | 'letters' | 'applications' | 'saved_jobs' | 'user_settings',
   rows: T[],
 ): Promise<T[]> {
   if (rows.length === 0) return rows;
@@ -101,12 +106,14 @@ export function sanitizeImportedItem<T extends Record<string, unknown>>(item: T)
 
 export async function purgeLocalData(): Promise<void> {
   try {
-    await db.transaction('rw', [db.history, db.jobs, db.applications, db.snapshots, db.drafts], async () => {
+    await db.transaction('rw', [db.history, db.jobs, db.applications, db.snapshots, db.drafts, db.profile, db.jobProfile], async () => {
       await db.history.clear();
       await db.jobs.clear();
       await db.applications.clear();
       await db.snapshots.clear();
       await db.drafts.clear();
+      await db.profile.clear();
+      await db.jobProfile.clear();
     });
 
     if (typeof localStorage !== 'undefined') {
@@ -115,6 +122,7 @@ export async function purgeLocalData(): Promise<void> {
       localStorage.removeItem('sync_cursor_letters');
       localStorage.removeItem('sync_cursor_applications');
       localStorage.removeItem('sync_cursor_saved_jobs');
+      localStorage.removeItem('sync_cursor_user_settings');
     }
   } catch (e) {
     console.warn('purgeLocalData error:', e);
@@ -225,6 +233,34 @@ export async function pushAll(): Promise<void> {
       }
     }
   }
+
+  // 4. Réglages (profil « Mes infos », critères de recherche d'offres).
+  //    Deux singletons : une ligne distante chacun, arbitrée comme le reste.
+  const settingsToPush: RemoteUserSettingRow[] = [];
+
+  const localProfile = await db.profile.get('me');
+  if (localProfile && pendingPush([localProfile]).length > 0) {
+    settingsToPush.push(profileToRemoteSetting(localProfile, user.id));
+  }
+
+  const localJobProfile = await db.jobProfile.get('me');
+  if (localJobProfile && pendingPush([localJobProfile]).length > 0) {
+    settingsToPush.push(jobProfileToRemoteSetting(localJobProfile, user.id));
+  }
+
+  if (settingsToPush.length > 0) {
+    const freshSettings = await filterOutStalePush(supabase, 'user_settings', settingsToPush);
+    if (freshSettings.length > 0) {
+      const { error } = await supabase.from('user_settings').upsert(freshSettings);
+      if (!error) {
+        const nowIso = new Date().toISOString();
+        for (const row of freshSettings) {
+          if (row.id === 'profile') await db.profile.update('me', { synced_at: nowIso });
+          else await db.jobProfile.update('me', { synced_at: nowIso });
+        }
+      }
+    }
+  }
 }
 
 export async function pullAll(): Promise<void> {
@@ -329,6 +365,36 @@ export async function pullAll(): Promise<void> {
       }
     }
     setCursor('sync_cursor_saved_jobs', maxUpdatedAt);
+  }
+
+  // 5. Pull Réglages. `synced_at` est posé à maintenant : une valeur qui vient
+  //    d'arriver ne doit pas repartir au push suivant.
+  const settingsCursor = getCursor('sync_cursor_user_settings');
+  const { data: remoteSettings } = await supabase
+    .from('user_settings')
+    .select('*')
+    .gt('updated_at', settingsCursor);
+
+  if (remoteSettings && remoteSettings.length > 0) {
+    let maxUpdatedAt = settingsCursor;
+    const nowIso = new Date().toISOString();
+    for (const sRow of remoteSettings as RemoteUserSettingRow[]) {
+      if (sRow.updated_at && sRow.updated_at > maxUpdatedAt) {
+        maxUpdatedAt = sRow.updated_at;
+      }
+      if (sRow.id === 'profile') {
+        const local = await db.profile.get('me');
+        if (!local || resolveConflict(local, sRow) === 'remote') {
+          await db.profile.put({ ...remoteSettingToProfile(sRow), synced_at: nowIso });
+        }
+      } else if (sRow.id === 'jobProfile') {
+        const local = await db.jobProfile.get('me');
+        if (!local || resolveConflict(local, sRow) === 'remote') {
+          await db.jobProfile.put({ ...remoteSettingToJobProfile(sRow), synced_at: nowIso });
+        }
+      }
+    }
+    setCursor('sync_cursor_user_settings', maxUpdatedAt);
   }
 }
 

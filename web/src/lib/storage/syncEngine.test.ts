@@ -121,4 +121,20 @@ describe('SyncEngine', () => {
     const result = await filterOutStalePush(supabase, 'resumes', rows);
     expect(result).toEqual(rows);
   });
+
+  it('un réglage jamais synchronisé est candidat au push', async () => {
+    const { pendingPush } = await import('./syncFields');
+    const profil = { id: 'me', updatedAt: Date.parse('2026-08-15T10:00:00Z'), synced_at: null };
+    expect(pendingPush([profil])).toHaveLength(1);
+  });
+
+  it('un réglage déjà synchronisé et non modifié ne repart pas', async () => {
+    const { pendingPush } = await import('./syncFields');
+    const profil = {
+      id: 'me',
+      updatedAt: Date.parse('2026-08-15T10:00:00Z'),
+      synced_at: '2026-08-15T10:00:01.000Z',
+    };
+    expect(pendingPush([profil])).toHaveLength(0);
+  });
 });
