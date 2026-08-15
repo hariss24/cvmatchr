@@ -4,19 +4,19 @@ import { EMPTY_PROFILE } from "./profile";
 
 vi.mock("./data/boards-offres.json", () => ({
   default: [
-    { ats: "greenhouse", slug: "onrunning", entreprise: "On Running", id: "1", titre: "Ingénieur Logiciel Backend", lieu: "Paris", url: "https://boards.greenhouse.io/onrunning/jobs/1", publieLe: new Date().toISOString(), decouverteLe: "2026-08-04" },
-    { ats: "lever", slug: "contentsquare", entreprise: "Contentsquare", id: "2", titre: "Alternance Marketing", lieu: "Paris", url: "https://jobs.lever.co/contentsquare/2", publieLe: new Date().toISOString(), decouverteLe: "2026-08-04" },
-    { ats: "ashby", slug: "alan", entreprise: "Alan", id: "3", titre: "Comptable", lieu: "Paris", url: "https://jobs.ashbyhq.com/alan/3", publieLe: "2020-01-01T00:00:00.000Z", decouverteLe: "2026-08-04" },
-    { ats: "greenhouse", slug: "onrunning", entreprise: "On Running", id: "4", titre: "Chargé de Communication", lieu: "Paris", url: "https://boards.greenhouse.io/onrunning/jobs/4", publieLe: new Date().toISOString(), decouverteLe: "2026-08-04" },
+    { ats: "greenhouse", slug: "onrunning", entreprise: "On Running", id: "1", titre: "Ingénieur Logiciel Backend", lieu: "Paris", url: "https://boards.greenhouse.io/onrunning/jobs/1", publieLe: new Date().toISOString(), decouverteLe: new Date().toISOString().slice(0, 10) },
+    { ats: "lever", slug: "contentsquare", entreprise: "Contentsquare", id: "2", titre: "Alternance Marketing", lieu: "Paris", url: "https://jobs.lever.co/contentsquare/2", publieLe: new Date().toISOString(), decouverteLe: new Date().toISOString().slice(0, 10) },
+    { ats: "ashby", slug: "alan", entreprise: "Alan", id: "3", titre: "Comptable", lieu: "Paris", url: "https://jobs.ashbyhq.com/alan/3", publieLe: "2020-01-01T00:00:00.000Z", decouverteLe: new Date().toISOString().slice(0, 10) },
+    { ats: "greenhouse", slug: "onrunning", entreprise: "On Running", id: "4", titre: "Chargé de Communication", lieu: "Paris", url: "https://boards.greenhouse.io/onrunning/jobs/4", publieLe: new Date().toISOString(), decouverteLe: new Date().toISOString().slice(0, 10) },
     // Les deux « Data » servent au tri par fraîcheur : la plus ancienne vient
     // avant dans l'ordre naturel de l'index (id 5 < id 6), donc si le tri
     // manque, elle sort en tête.
-    { ats: "ashby", slug: "alan", entreprise: "Alan", id: "5", titre: "Data Analyst", lieu: "Paris", url: "https://jobs.ashbyhq.com/alan/5", publieLe: new Date(Date.now() - 10 * 86_400_000).toISOString(), decouverteLe: "2026-07-25" },
-    { ats: "ashby", slug: "alan", entreprise: "Alan", id: "6", titre: "Data Engineer", lieu: "Paris", url: "https://jobs.ashbyhq.com/alan/6", publieLe: new Date().toISOString(), decouverteLe: "2026-08-04" },
+    { ats: "ashby", slug: "alan", entreprise: "Alan", id: "5", titre: "Data Analyst", lieu: "Paris", url: "https://jobs.ashbyhq.com/alan/5", publieLe: new Date(Date.now() - 10 * 86_400_000).toISOString(), decouverteLe: new Date(Date.now() - 10 * 86_400_000).toISOString().slice(0, 10) },
+    { ats: "ashby", slug: "alan", entreprise: "Alan", id: "6", titre: "Data Engineer", lieu: "Paris", url: "https://jobs.ashbyhq.com/alan/6", publieLe: new Date().toISOString(), decouverteLe: new Date().toISOString().slice(0, 10) },
     // Publiée « aujourd'hui » selon l'ATS, connue de nous depuis six mois.
-    { ats: "greenhouse", slug: "onrunning", entreprise: "On Running", id: "7", titre: "Chargé de retouche", lieu: "Paris", url: "https://boards.greenhouse.io/onrunning/jobs/7", publieLe: new Date().toISOString(), decouverteLe: "2026-02-01" },
-    { ats: "greenhouse", slug: "onrunning", entreprise: "On Running", id: "8", titre: "Développeur PHP", lieu: "Paris", url: "https://boards.greenhouse.io/onrunning/jobs/8", publieLe: new Date(Date.now() - 20 * 86_400_000).toISOString(), decouverteLe: "2026-07-15" },
-    { ats: "greenhouse", slug: "onrunning", entreprise: "On Running", id: "9", titre: "Software Engineer", lieu: "Paris", url: "https://boards.greenhouse.io/onrunning/jobs/9", publieLe: new Date().toISOString(), decouverteLe: "2026-08-04" },
+    { ats: "greenhouse", slug: "onrunning", entreprise: "On Running", id: "7", titre: "Chargé de retouche", lieu: "Paris", url: "https://boards.greenhouse.io/onrunning/jobs/7", publieLe: new Date().toISOString(), decouverteLe: "2020-01-01" },
+    { ats: "greenhouse", slug: "onrunning", entreprise: "On Running", id: "8", titre: "Développeur PHP", lieu: "Paris", url: "https://boards.greenhouse.io/onrunning/jobs/8", publieLe: new Date(Date.now() - 20 * 86_400_000).toISOString(), decouverteLe: new Date(Date.now() - 20 * 86_400_000).toISOString().slice(0, 10) },
+    { ats: "greenhouse", slug: "onrunning", entreprise: "On Running", id: "9", titre: "Software Engineer", lieu: "Paris", url: "https://boards.greenhouse.io/onrunning/jobs/9", publieLe: new Date().toISOString(), decouverteLe: new Date().toISOString().slice(0, 10) },
   ],
 }));
 
