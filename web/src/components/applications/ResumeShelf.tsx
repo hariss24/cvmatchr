@@ -7,6 +7,7 @@ import { ANONYMOUS_LABELS, isAnonymous } from "@/lib/applications/shelf";
 import { deleteHistoryEntry, saveDraft, updateHistoryEntryStat, type HistoryEntry } from "@/lib/storage/db";
 import { useDocStore } from "@/state/docStore";
 import { toast, uiConfirm } from "@/state/uiStore";
+import { onSyncChange } from "@/lib/storage/syncEvents";
 
 /**
  * Rayon « Mes CV » : les documents non rattachés à une candidature.
@@ -25,6 +26,8 @@ export default function ResumeShelf() {
   // Chargement initial : la liste arrive via `.then(setEntries)` plutôt que par un
   // appel direct dans l'effet, seule forme que react-hooks/set-state-in-effect accepte.
   useEffect(() => { void listShelfEntries().then(setEntries); }, []);
+
+  useEffect(() => onSyncChange(() => { void load(); }), [load]);
 
   async function commitLabel(id: string) {
     await setShelfLabel(id, draftLabel);

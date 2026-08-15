@@ -1,6 +1,7 @@
 import { db } from './db';
 import { createBrowserClientHelper } from '@/lib/supabase/client';
 import { pendingPush, toIso } from './syncFields';
+import { emitSyncChange } from './syncEvents';
 import {
   historyToRemoteResume,
   historyToRemoteLetter,
@@ -273,6 +274,8 @@ export async function pullAll(): Promise<void> {
 
   await ensureMatchingUser(user.id);
 
+  let aEcrit = false;
+
   const getCursor = (key: string) =>
     typeof localStorage !== 'undefined' ? localStorage.getItem(key) || '1970-01-01T00:00:00.000Z' : '1970-01-01T00:00:00.000Z';
   const setCursor = (key: string, val: string) => {
@@ -295,6 +298,7 @@ export async function pullAll(): Promise<void> {
       const local = await db.history.get(rRow.id);
       if (!local || resolveConflict(local, rRow) === 'remote') {
         await db.history.put(mergeRemoteHistory(local, remoteResumeToHistory(rRow)));
+        aEcrit = true;
       }
     }
     setCursor('sync_cursor_resumes', maxUpdatedAt);
@@ -316,6 +320,7 @@ export async function pullAll(): Promise<void> {
       const local = await db.history.get(lRow.id);
       if (!local || resolveConflict(local, lRow) === 'remote') {
         await db.history.put(mergeRemoteHistory(local, remoteLetterToHistory(lRow)));
+        aEcrit = true;
       }
     }
     setCursor('sync_cursor_letters', maxUpdatedAt);
@@ -337,8 +342,10 @@ export async function pullAll(): Promise<void> {
       const local = await db.applications.get(aRow.id);
       if (!local) {
         await db.applications.put(remoteRowToApplication(aRow));
+        aEcrit = true;
       } else if (resolveConflict(local, aRow) === 'remote') {
         await db.applications.put(remoteRowToApplication(aRow));
+        aEcrit = true;
       }
     }
     setCursor('sync_cursor_applications', maxUpdatedAt);
@@ -360,8 +367,10 @@ export async function pullAll(): Promise<void> {
       const local = await db.jobs.get(jRow.id);
       if (!local) {
         await db.jobs.put(remoteSavedJobToJob(jRow));
+        aEcrit = true;
       } else if (resolveConflict(local, jRow) === 'remote') {
         await db.jobs.put(remoteSavedJobToJob(jRow));
+        aEcrit = true;
       }
     }
     setCursor('sync_cursor_saved_jobs', maxUpdatedAt);
@@ -386,16 +395,20 @@ export async function pullAll(): Promise<void> {
         const local = await db.profile.get('me');
         if (!local || resolveConflict(local, sRow) === 'remote') {
           await db.profile.put({ ...remoteSettingToProfile(sRow), synced_at: nowIso });
+          aEcrit = true;
         }
       } else if (sRow.id === 'jobProfile') {
         const local = await db.jobProfile.get('me');
         if (!local || resolveConflict(local, sRow) === 'remote') {
           await db.jobProfile.put({ ...remoteSettingToJobProfile(sRow), synced_at: nowIso });
+          aEcrit = true;
         }
       }
     }
     setCursor('sync_cursor_user_settings', maxUpdatedAt);
   }
+
+  if (aEcrit) emitSyncChange();
 }
 
 export async function syncAll(): Promise<void> {

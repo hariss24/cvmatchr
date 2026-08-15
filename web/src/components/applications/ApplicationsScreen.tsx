@@ -12,6 +12,7 @@ import { listApplications, runBackfillOnce } from "@/lib/applications/store";
 import { daysSince, deriveStatus } from "@/lib/applications/status";
 import type { Application } from "@/lib/applications/types";
 import { useSettingsStore } from "@/state/settingsStore";
+import { onSyncChange } from "@/lib/storage/syncEvents";
 
 export default function ApplicationsScreen() {
   const [apps, setApps] = useState<Application[]>([]);
@@ -34,6 +35,10 @@ export default function ApplicationsScreen() {
   useEffect(() => {
     void runBackfillOnce().then(listApplications).then(setApps);
   }, []);
+
+  // La synchronisation écrit dans IndexedDB en tâche de fond : sans cet
+  // abonnement, les données rapatriées n'apparaissent qu'après un F5.
+  useEffect(() => onSyncChange(() => { void load(); }), [load]);
 
   const rows = useMemo(
     () => apps.map((app) => ({
