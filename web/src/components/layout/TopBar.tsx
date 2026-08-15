@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useState, useRef } from "react";
 import { useDocStore } from "@/state/docStore";
-import { type Resume, type Letter, type DocType } from "@/lib/resume/schema";
-import type { DocData } from "@/state/docStore";
+import { type Resume, type Letter } from "@/lib/resume/schema";
 import { generateResumePdfBlob, generateLetterPdfBlob } from "@/lib/pdfgen/generatePdf";
 import { buildPdfFilename } from "@/lib/pdfgen/filename";
 // import removed
@@ -25,7 +24,6 @@ import UserMenu from "@/components/layout/UserMenu";
 export default function TopBar() {
   const docType = useDocStore((s) => s.docType);
   const templateId = useDocStore((s) => s.templateId);
-  const json = useDocStore((s) => s.json);
   const role = useDocStore((s) => s.role);
   const includeDate = useDocStore((s) => s.includeDate);
   const [busy, setBusy] = useState(false);
@@ -53,9 +51,10 @@ export default function TopBar() {
     try {
       const where = await saveCurrentDocument();
       useSaveStateStore.getState().markSaved(where);
-      toast(where === "account" ? "Enregistré sur votre compte." : "Enregistré sur cet appareil.", "success");
-    } catch {
-      await uiAlert("Impossible d'enregistrer ce document.", "Enregistrement");
+      toast("Enregistré sur votre compte.", "success");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Impossible d'enregistrer ce document.";
+      await uiAlert(message, "Enregistrement");
     } finally {
       setSaving(false);
     }
@@ -107,7 +106,12 @@ export default function TopBar() {
 
       // Le téléchargement enregistre toujours, comme avant — il n'en est
       // simplement plus le seul moyen (bouton « Enregistrer », task 6).
-      useSaveStateStore.getState().markSaved(await saveCurrentDocument());
+      try {
+        useSaveStateStore.getState().markSaved(await saveCurrentDocument());
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Impossible d'enregistrer ce document.";
+        toast(message, "error");
+      }
     } catch {
       await uiAlert("Impossible de générer le PDF.", "Conversion PDF");
     } finally {

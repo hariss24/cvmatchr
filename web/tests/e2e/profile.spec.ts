@@ -1,7 +1,10 @@
 import { test, expect } from "@playwright/test";
+import { connecte } from "./fixtures/session";
 
 test.describe("Profil - Mes informations", () => {
   test("sauvegarde les informations et pré-remplit les nouveaux CV", async ({ page }) => {
+    await connecte(page);
+
     // 1. Aller sur l'accueil puis la page profil (le lien /profil vit désormais
     // dans le menu utilisateur de la TopBar, ouvert au clic sur l'avatar — commit b9a84e3).
     await page.goto("/");

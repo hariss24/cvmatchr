@@ -20,6 +20,8 @@ import { FilterBar } from "./FilterBar";
 import ScanProgress from "./ScanProgress";
 import JobCard from "./JobCard";
 import ScoringInfo from "./ScoringInfo";
+import { RemoteError } from "@/lib/storage/remote";
+import EtatErreur from "@/components/ui/EtatErreur";
 
 /**
  * Orchestrateur du scan d'offres : `POST /api/jobs/search` → écarte les offres
@@ -46,6 +48,7 @@ export default function JobsView() {
   const [configMsg, setConfigMsg] = useState<string | null>(null);
   const [usage, setUsage] = useState<Record<SourceId, number>>({ francetravail: 0, adzuna: 0, jsearch: 0, boards: 0 });
   const [atsParEntreprise, setAtsParEntreprise] = useState<Record<string, { ats: AtsProvider; slug: string }>>({});
+  const [erreur, setErreur] = useState<string | null>(null);
   const setPendingJobDesc = useDocStore((s) => s.setPendingJobDesc);
   const setCompany = useDocStore((s) => s.setCompany);
   const setRole = useDocStore((s) => s.setRole);
@@ -69,7 +72,7 @@ export default function JobsView() {
         setProfile(parseProfile(p));
       }
       setProfileLoaded(true);
-    });
+    }).catch(() => {});
     // Au montage seulement. `reload` est redéfinie à chaque rendu ; la mettre en
     // dépendance relancerait la liste — et la résolution des logos — sans fin.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -87,10 +90,15 @@ export default function JobsView() {
   const canScan = profile.keywords.length >= 1;
 
   async function reload() {
-    const liste = await listJobs("new");
-    setJobs(liste);
-    void completerLogos(liste);
-    void completerAts(liste);
+    try {
+      setErreur(null);
+      const liste = await listJobs("new");
+      setJobs(liste);
+      void completerLogos(liste);
+      void completerAts(liste);
+    } catch (e) {
+      setErreur(e instanceof RemoteError ? e.message : "Impossible de charger les offres.");
+    }
   }
 
   /**
@@ -473,7 +481,9 @@ export default function JobsView() {
         {scanning ? <ScanProgress {...progress} /> : null}
       </div>
 
-      {jobs.length === 0 ? (
+      {erreur ? (
+        <EtatErreur message={erreur} onRetry={() => void reload()} />
+      ) : jobs.length === 0 ? (
         <div className="jobs-empty">
           {scanning ? "Recherche en cours…" : "Aucune offre pour l'instant. Renseignez vos critères puis lancez une recherche."}
         </div>

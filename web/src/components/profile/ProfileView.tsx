@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { loadProfile, saveProfile } from "@/lib/storage/db";
 import { EMPTY_PROFILE, type UserProfile } from "@/lib/profile/profile";
+import { RemoteError } from "@/lib/storage/remote";
+import EtatErreur from "@/components/ui/EtatErreur";
 
 /**
  * Page « Mes informations » (/profil) : identité saisie une fois, autosave
@@ -15,19 +17,36 @@ export default function ProfileView() {
   const [p, setP] = useState<UserProfile>(EMPTY_PROFILE);
   const [showMore, setShowMore] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
 
-  useEffect(() => {
-    (async () => {
+  const load = useCallback(async () => {
+    try {
+      setErreur(null);
       const existing = await loadProfile();
       if (existing) setP(existing);
       setLoaded(true);
-    })();
+    } catch (e) {
+      setErreur(e instanceof RemoteError ? e.message : "Impossible de charger vos informations.");
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadProfile()
+      .then((existing) => {
+        if (existing) setP(existing);
+        setLoaded(true);
+      })
+      .catch((e) => {
+        setErreur(e instanceof RemoteError ? e.message : "Impossible de charger vos informations.");
+      });
   }, []);
 
   // Autosave débouncé (800 ms) une fois le profil chargé — pas de bouton.
   useEffect(() => {
     if (!loaded) return;
-    const t = setTimeout(() => void saveProfile(p), 800);
+    const t = setTimeout(() => {
+      saveProfile(p).catch(() => {});
+    }, 800);
     return () => clearTimeout(t);
   }, [p, loaded]);
 
@@ -50,11 +69,15 @@ export default function ProfileView() {
       </header>
 
       <div className="pane pack-page" style={{ overflowY: "auto" }}>
-        <p className="pack-hint">
-          Ces informations pré-remplissent automatiquement vos CV et vos lettres de motivation.
-        </p>
+        {erreur ? (
+          <EtatErreur message={erreur} onRetry={() => void load()} />
+        ) : (
+          <>
+            <p className="pack-hint">
+              Ces informations pré-remplissent automatiquement vos CV et vos lettres de motivation.
+            </p>
 
-        <div className="pack-vars">
+            <div className="pack-vars">
           <input className="form-input" placeholder="Prénom *" autoComplete="given-name"
             value={p.prenom} onChange={(e) => set({ prenom: e.target.value })} />
           <input className="form-input" placeholder="Nom *" autoComplete="family-name"
@@ -81,6 +104,8 @@ export default function ProfileView() {
               value={p.linkedin} onChange={(e) => set({ linkedin: e.target.value })} />
           </div>
         ) : null}
+          </>
+        )}
       </div>
     </div>
   );

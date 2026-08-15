@@ -7,6 +7,8 @@ import { ANONYMOUS_LABELS, isAnonymous } from "@/lib/applications/shelf";
 import { deleteHistoryEntry, getHistoryEntry, saveDraft, updateHistoryEntryStat, type DocumentSummary } from "@/lib/storage/db";
 import { useDocStore } from "@/state/docStore";
 import { toast, uiConfirm } from "@/state/uiStore";
+import { RemoteError } from "@/lib/storage/remote";
+import EtatErreur from "@/components/ui/EtatErreur";
 
 /**
  * Rayon « Mes CV » : les documents non rattachés à une candidature.
@@ -16,15 +18,28 @@ export default function ResumeShelf() {
   const [entries, setEntries] = useState<DocumentSummary[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
   const [draftLabel, setDraftLabel] = useState("");
+  const [erreur, setErreur] = useState<string | null>(null);
   const router = useRouter();
   const setDocType = useDocStore((s) => s.setDocType);
   const setJson = useDocStore((s) => s.setJson);
   const setPreviewOverride = useDocStore((s) => s.setPreviewOverride);
 
-  const load = useCallback(async () => { setEntries(await listShelfEntries()); }, []);
-  // Chargement initial : la liste arrive via `.then(setEntries)` plutôt que par un
-  // appel direct dans l'effet, seule forme que react-hooks/set-state-in-effect accepte.
-  useEffect(() => { void listShelfEntries().then(setEntries); }, []);
+  const load = useCallback(async () => {
+    try {
+      setErreur(null);
+      setEntries(await listShelfEntries());
+    } catch (e) {
+      setErreur(e instanceof RemoteError ? e.message : "Impossible de charger le rayon de documents.");
+    }
+  }, []);
+
+  useEffect(() => {
+    void listShelfEntries()
+      .then(setEntries)
+      .catch((e) => {
+        setErreur(e instanceof RemoteError ? e.message : "Impossible de charger le rayon de documents.");
+      });
+  }, []);
 
   async function commitLabel(id: string) {
     await setShelfLabel(id, draftLabel);
@@ -51,6 +66,14 @@ export default function ResumeShelf() {
     if (!(await uiConfirm("Supprimer ce document ? Action irréversible.", "Supprimer"))) return;
     await deleteHistoryEntry(doc.id);
     await load();
+  }
+
+  if (erreur) {
+    return (
+      <section className="app-shelf">
+        <EtatErreur message={erreur} onRetry={() => void load()} />
+      </section>
+    );
   }
 
   if (entries.length === 0) return null;

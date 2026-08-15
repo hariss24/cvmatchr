@@ -2939,3 +2939,28 @@ button.go:disabled {
 /* Le choix des sources vit maintenant dans un menu de pastille (.flt-opt) et
    le résumé de critères a disparu avec le panneau : leurs règles sont
    supprimées, pas laissées mortes derrière la nouvelle barre. */
+
+/* --- État d'erreur / indisponibilité serveur (Task 8) --- */
+.etat-erreur {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 48px 24px;
+  text-align: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--neu-raised-sm);
+  margin: 24px auto;
+  max-width: 520px;
+}
+.etat-erreur p {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--error);
+  margin: 0;
+  line-height: 1.5;
+}
+

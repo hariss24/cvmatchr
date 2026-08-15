@@ -12,6 +12,8 @@ import { listApplications, runBackfillOnce } from "@/lib/applications/store";
 import { daysSince, deriveStatus } from "@/lib/applications/status";
 import type { Application } from "@/lib/applications/types";
 import { useSettingsStore } from "@/state/settingsStore";
+import { RemoteError } from "@/lib/storage/remote";
+import EtatErreur from "@/components/ui/EtatErreur";
 
 export default function ApplicationsScreen() {
   const [apps, setApps] = useState<Application[]>([]);
@@ -19,21 +21,28 @@ export default function ApplicationsScreen() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [adding, setAdding] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  const [erreur, setErreur] = useState<string | null>(null);
   const staleDays = useSettingsStore((s) => s.staleDays);
 
   // Rechargement après une action de l'utilisateur : `now` est rafraîchi pour que
   // l'ancienneté affichée suive le temps réel sans recharger la page.
   const load = useCallback(async () => {
-    setApps(await listApplications());
-    setNow(Date.now());
+    try {
+      setErreur(null);
+      setApps(await listApplications());
+      setNow(Date.now());
+    } catch (e) {
+      setErreur(e instanceof RemoteError ? e.message : "Impossible de charger vos candidatures.");
+    }
   }, []);
 
   // Chargement initial : le rattachement rétroactif peuple le tracker depuis
-  // l'historique existant, une seule fois. Les setters passent par `.then()`,
-  // seule forme acceptée par react-hooks/set-state-in-effect.
+  // l'historique existant, une seule fois.
   useEffect(() => {
-    void runBackfillOnce().then(listApplications).then(setApps);
-  }, []);
+    void runBackfillOnce().then(() => load()).catch((e) => {
+      setErreur(e instanceof RemoteError ? e.message : "Impossible de charger vos candidatures.");
+    });
+  }, [load]);
 
   const rows = useMemo(
     () => apps.map((app) => ({
@@ -80,24 +89,30 @@ export default function ApplicationsScreen() {
 
       <div className="pane" style={{ overflowY: "auto" }}>
         <div className="hist-content">
-          <ApplicationsDashboard apps={apps} staleDays={staleDays} now={now} />
-          <ApplicationsFilters query={query} onQuery={setQuery} filter={filter} onFilter={setFilter} counts={counts} />
-
-          {shown.length === 0 ? (
-            <div className="hist-empty">
-              {apps.length === 0
-                ? "Aucune candidature pour l'instant. Exportez un CV en renseignant entreprise et poste, ou ajoutez-en une à la main."
-                : "Aucune candidature ne correspond."}
-            </div>
+          {erreur ? (
+            <EtatErreur message={erreur} onRetry={() => void load()} />
           ) : (
-            <div className="card-list">
-              {shown.map((r) => (
-                <ApplicationCard key={r.app.id} app={r.app} status={r.status} days={r.days} onChanged={() => void load()} />
-              ))}
-            </div>
-          )}
+            <>
+              <ApplicationsDashboard apps={apps} staleDays={staleDays} now={now} />
+              <ApplicationsFilters query={query} onQuery={setQuery} filter={filter} onFilter={setFilter} counts={counts} />
 
-          <ResumeShelf />
+              {shown.length === 0 ? (
+                <div className="hist-empty">
+                  {apps.length === 0
+                    ? "Aucune candidature pour l'instant. Exportez un CV en renseignant entreprise et poste, ou ajoutez-en une à la main."
+                    : "Aucune candidature ne correspond."}
+                </div>
+              ) : (
+                <div className="card-list">
+                  {shown.map((r) => (
+                    <ApplicationCard key={r.app.id} app={r.app} status={r.status} days={r.days} onChanged={() => void load()} />
+                  ))}
+                </div>
+              )}
+
+              <ResumeShelf />
+            </>
+          )}
         </div>
       </div>
 

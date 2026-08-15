@@ -1,4 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { connecte } from "./fixtures/session";
+
+test.beforeEach(async ({ page }) => {
+  await connecte(page);
+});
 
 /**
  * Onglet « Offres » (backend `/api/jobs/*` mocké via `page.route`). Vérifie : le scan affiche une

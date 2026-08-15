@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useDocStore } from "@/state/docStore";
 import { postJson } from "@/lib/ai/client";
@@ -15,6 +15,8 @@ import { buildLetterFromTemplate } from "@/lib/templates/build";
 import { ensureDefaultTemplates, listTemplates, saveTemplate, saveDraft, loadProfile } from "@/lib/storage/db";
 import { resolveLetterIdentity, type UserProfile } from "@/lib/profile/profile";
 import { toast } from "@/state/uiStore";
+import { RemoteError } from "@/lib/storage/remote";
+import EtatErreur from "@/components/ui/EtatErreur";
 import JobExtractor from "../modals/JobExtractor";
 import ExtensionExportButton from "./ExtensionExportButton";
 
@@ -28,6 +30,7 @@ export default function PackView() {
   const router = useRouter();
   const [tpl, setTpl] = useState<MailTemplate | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [erreur, setErreur] = useState<string | null>(null);
   const [company, setCompanyLocal] = useState(() => useDocStore.getState().company);
   const [role, setRoleLocal] = useState(() => useDocStore.getState().role);
   const [contact, setContact] = useState("");
@@ -48,14 +51,29 @@ export default function PackView() {
     if (useDocStore.getState().pendingJobDesc) useDocStore.getState().setPendingJobDesc(null);
   }, []);
 
-  // Charge le modèle unique (seed/migration au premier lancement).
-  useEffect(() => {
-    (async () => {
+  const loadData = useCallback(async () => {
+    try {
+      setErreur(null);
       await ensureDefaultTemplates();
       const [all, p] = await Promise.all([listTemplates(), loadProfile()]);
       setTpl((cur) => cur ?? all[0] ?? null);
       setProfile(p || null);
-    })();
+    } catch (e) {
+      setErreur(e instanceof RemoteError ? e.message : "Impossible de charger vos modèles.");
+    }
+  }, []);
+
+  // Charge le modèle unique (seed/migration au premier lancement).
+  useEffect(() => {
+    void ensureDefaultTemplates()
+      .then(() => Promise.all([listTemplates(), loadProfile()]))
+      .then(([all, p]) => {
+        setTpl((cur) => cur ?? all[0] ?? null);
+        setProfile(p || null);
+      })
+      .catch((e) => {
+        setErreur(e instanceof RemoteError ? e.message : "Impossible de charger vos modèles.");
+      });
   }, []);
 
   const cvRaw = useDocStore((s) => s.json) as Resume;
@@ -168,105 +186,111 @@ export default function PackView() {
       </header>
 
       <div className="pane pack-page" style={{ overflowY: "auto" }}>
-        <p className="pack-hint">
-          Ces champs remplacent automatiquement les variables (les pastilles) dans votre lettre.
-        </p>
-
-        <div className="pack-vars">
-          <input className="form-input" placeholder="Entreprise" value={company}
-            onChange={(e) => setCompanyLocal(e.target.value)} disabled={busy} />
-          <input className="form-input" placeholder="Poste visé" value={role}
-            onChange={(e) => setRoleLocal(e.target.value)} disabled={busy} />
-          <input className="form-input" placeholder="Contact — ex. Madame Dupont (optionnel)" value={contact}
-            onChange={(e) => setContact(e.target.value)} disabled={busy} />
-        </div>
-
-        {tpl ? (
+        {erreur ? (
+          <EtatErreur message={erreur} onRetry={() => void loadData()} />
+        ) : (
           <>
-            <label className="form-label">Objet</label>
-            <VariableEditor
-              value={tpl.letterSubject}
-              onChange={(v) => patchTpl({ letterSubject: v })}
-              disabled={busy}
-              ariaLabel="Objet de la lettre"
-              showPalette={false}
-              singleLine
-              minHeightPx={0}
-            />
+            <p className="pack-hint">
+              Ces champs remplacent automatiquement les variables (les pastilles) dans votre lettre.
+            </p>
 
-            <label className="form-label">Corps de la lettre</label>
-            <VariableEditor
-              value={tpl.letterBody}
-              onChange={(v) => patchTpl({ letterBody: v })}
-              variables={TEMPLATE_VARIABLES}
-              disabled={busy}
-              ariaLabel="Corps de la lettre"
-              minHeightPx={340}
-            />
-          </>
-        ) : null}
-
-        <button
-          type="button"
-          className="form-btn-mini pack-advanced-toggle"
-          aria-expanded={showAdapt}
-          onClick={() => setShowAdapt((v) => !v)}
-        >
-          {showAdapt ? "▾ Adapter à une offre (IA)" : "▸ Adapter à une offre (IA)"}
-        </button>
-        {showAdapt ? (
-          <div className="pack-advanced">
-            <JobExtractor onExtracted={(text) => { setJobDesc(text); void prefillFromJob(text); }} disabled={busy} />
-            <textarea
-              className="form-textarea"
-              rows={4}
-              placeholder="Collez l'offre d'emploi ici — l'IA réécrit le corps de la lettre pour coller au poste."
-              value={jobDesc}
-              onChange={(e) => setJobDesc(e.target.value)}
-              onBlur={() => void prefillFromJob(jobDesc)}
-              disabled={busy}
-            />
-            <div className="sheet-levels" role="radiogroup" aria-label="Ton de la lettre">
-              {LETTER_TONES.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  role="radio"
-                  aria-checked={tone === t.id}
-                  className={`sheet-level${tone === t.id ? " active" : ""}`}
-                  onClick={() => { setTone(t.id); saveLetterTone(t.id); }}
-                  disabled={busy}
-                >
-                  <span className="sheet-level__head">
-                    <span className="sheet-level__radio"><span className="sheet-level__dot" /></span>
-                    <span className="sheet-level__title">{t.label}</span>
-                  </span>
-                  <span className="sheet-level__desc">{t.hint}</span>
-                </button>
-              ))}
+            <div className="pack-vars">
+              <input className="form-input" placeholder="Entreprise" value={company}
+                onChange={(e) => setCompanyLocal(e.target.value)} disabled={busy} />
+              <input className="form-input" placeholder="Poste visé" value={role}
+                onChange={(e) => setRoleLocal(e.target.value)} disabled={busy} />
+              <input className="form-input" placeholder="Contact — ex. Madame Dupont (optionnel)" value={contact}
+                onChange={(e) => setContact(e.target.value)} disabled={busy} />
             </div>
-            <button type="button" className="go" onClick={adaptWithAi} disabled={busy || !tpl}>
-              {busy ? "Adaptation…" : "✨ Adapter le corps à l'offre"}
-            </button>
-          </div>
-        ) : null}
 
-        <div className="pack-actions">
-          <button type="button" className="go" onClick={loadLetter} disabled={busy || !letter}>
-            Créer ma lettre (ouvrir dans l&apos;éditeur)
-          </button>
-          {isCv && identity ? (
-            <ExtensionExportButton
-              identity={identity}
-              company={company}
-              role={role}
-              coverLetterText={letter?.body ?? ""}
-            />
-          ) : null}
-          {!isCv ? (
-            <p className="pack-hint">Charge d&apos;abord un CV dans l&apos;éditeur pour générer la lettre.</p>
-          ) : null}
-        </div>
+            {tpl ? (
+              <>
+                <label className="form-label">Objet</label>
+                <VariableEditor
+                  value={tpl.letterSubject}
+                  onChange={(v) => patchTpl({ letterSubject: v })}
+                  disabled={busy}
+                  ariaLabel="Objet de la lettre"
+                  showPalette={false}
+                  singleLine
+                  minHeightPx={0}
+                />
+
+                <label className="form-label">Corps de la lettre</label>
+                <VariableEditor
+                  value={tpl.letterBody}
+                  onChange={(v) => patchTpl({ letterBody: v })}
+                  variables={TEMPLATE_VARIABLES}
+                  disabled={busy}
+                  ariaLabel="Corps de la lettre"
+                  minHeightPx={340}
+                />
+              </>
+            ) : null}
+
+            <button
+              type="button"
+              className="form-btn-mini pack-advanced-toggle"
+              aria-expanded={showAdapt}
+              onClick={() => setShowAdapt((v) => !v)}
+            >
+              {showAdapt ? "▾ Adapter à une offre (IA)" : "▸ Adapter à une offre (IA)"}
+            </button>
+            {showAdapt ? (
+              <div className="pack-advanced">
+                <JobExtractor onExtracted={(text) => { setJobDesc(text); void prefillFromJob(text); }} disabled={busy} />
+                <textarea
+                  className="form-textarea"
+                  rows={4}
+                  placeholder="Collez l'offre d'emploi ici — l'IA réécrit le corps de la lettre pour coller au poste."
+                  value={jobDesc}
+                  onChange={(e) => setJobDesc(e.target.value)}
+                  onBlur={() => void prefillFromJob(jobDesc)}
+                  disabled={busy}
+                />
+                <div className="sheet-levels" role="radiogroup" aria-label="Ton de la lettre">
+                  {LETTER_TONES.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={tone === t.id}
+                      className={`sheet-level${tone === t.id ? " active" : ""}`}
+                      onClick={() => { setTone(t.id); saveLetterTone(t.id); }}
+                      disabled={busy}
+                    >
+                      <span className="sheet-level__head">
+                        <span className="sheet-level__radio"><span className="sheet-level__dot" /></span>
+                        <span className="sheet-level__title">{t.label}</span>
+                      </span>
+                      <span className="sheet-level__desc">{t.hint}</span>
+                    </button>
+                  ))}
+                </div>
+                <button type="button" className="go" onClick={adaptWithAi} disabled={busy || !tpl}>
+                  {busy ? "Adaptation…" : "✨ Adapter le corps à l'offre"}
+                </button>
+              </div>
+            ) : null}
+
+            <div className="pack-actions">
+              <button type="button" className="go" onClick={loadLetter} disabled={busy || !letter}>
+                Créer ma lettre (ouvrir dans l&apos;éditeur)
+              </button>
+              {isCv && identity ? (
+                <ExtensionExportButton
+                  identity={identity}
+                  company={company}
+                  role={role}
+                  coverLetterText={letter?.body ?? ""}
+                />
+              ) : null}
+              {!isCv ? (
+                <p className="pack-hint">Charge d&apos;abord un CV dans l&apos;éditeur pour générer la lettre.</p>
+              ) : null}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
