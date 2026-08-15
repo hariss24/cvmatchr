@@ -12,6 +12,8 @@ import { normKey } from "@/lib/applications/normKey";
 import type { Ligne } from "@/lib/jobs/rank/criteria";
 import { normalizeCompany, type AtsProvider } from "@/lib/jobs/ats";
 import { markDeleted } from "./syncFields";
+import { requireRemote, RemoteError } from "./remote";
+import { cacheGet, cacheSet, cacheInvalidate } from "./sessionCache";
 
 // ---------------------------------------------------------------------------
 // TYPES
@@ -40,8 +42,6 @@ export interface HistoryEntry {
   id: string;
   created_at: string; // ISO string
   updated_at?: string;
-  synced_at?: string | null;
-  deleted_at?: string | null;
   doc_type: DocType;
   company: string;
   role: string;
@@ -59,6 +59,9 @@ export interface HistoryEntry {
   json: DocData;
   templateId: TemplateId | null;
 }
+
+/** Résumé de liste : tout SAUF `json`. C'est le catalogue. */
+export type DocumentSummary = Omit<HistoryEntry, 'json'>;
 
 /** Offre d'emploi retenue (feature « Offres »). Stockée localement, comme les CV. */
 export interface JobEntry {
@@ -337,59 +340,132 @@ export async function deleteDraft(id: string) {
 // HISTORY API
 // ---------------------------------------------------------------------------
 
-export async function saveHistoryEntry(entry: HistoryEntry) {
-  try {
-    entry.updated_at = entry.updated_at || entry.created_at || new Date().toISOString();
-    await db.history.put(entry);
-  } catch (e) {
-    console.warn("History save error:", e);
-  }
+/** Colonnes du catalogue : tout sauf `content`. Voir spec §4.2. */
+const DOC_LIST_COLS =
+  'id,doc_type,title,company,role,label,notes,job_desc,template_id,application_id,pdf_views,editor_reloads,last_viewed_at,created_at,updated_at';
+
+function rowToSummary(r: Record<string, unknown>): DocumentSummary {
+  return {
+    id: r.id as string,
+    created_at: r.created_at as string,
+    updated_at: (r.updated_at as string) || undefined,
+    doc_type: r.doc_type as DocType,
+    company: (r.company as string) ?? '',
+    role: (r.role as string) ?? '',
+    job_desc: (r.job_desc as string) ?? '',
+    filename: (r.title as string) ?? '',
+    notes: (r.notes as string) ?? '',
+    pdf_views: (r.pdf_views as number) ?? 0,
+    editor_reloads: (r.editor_reloads as number) ?? 0,
+    last_viewed_at: (r.last_viewed_at as string) || undefined,
+    applicationId: (r.application_id as string) || undefined,
+    label: (r.label as string) || undefined,
+    templateId: (r.template_id as TemplateId | null) ?? null,
+  };
 }
 
-export async function listHistoryEntries(): Promise<HistoryEntry[]> {
-  try {
-    const all = await db.history.filter((h) => !h.deleted_at).toArray();
-    return all.sort((a, b) => b.created_at.localeCompare(a.created_at));
-  } catch (e) {
-    console.warn("listHistoryEntries error:", e);
-    return [];
-  }
+export async function listHistoryEntries(): Promise<DocumentSummary[]> {
+  const enMemoire = cacheGet<DocumentSummary[]>('documents:list');
+  if (enMemoire) return enMemoire;
+
+  const { supabase, userId } = await requireRemote();
+  const { data, error } = await supabase
+    .from('documents')
+    .select(DOC_LIST_COLS)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  if (error) throw new RemoteError('Impossible de charger vos documents.', error);
+
+  const liste = (data ?? []).map(rowToSummary);
+  cacheSet('documents:list', liste);
+  return liste;
 }
 
 export async function getHistoryEntry(id: string): Promise<HistoryEntry | undefined> {
-  try {
-    const entry = await db.history.get(id);
-    return entry && !entry.deleted_at ? entry : undefined;
-  } catch (e) {
-    console.warn("getHistoryEntry error:", e);
-    return undefined;
+  const cle = `documents:detail:${id}`;
+  const enMemoire = cacheGet<HistoryEntry>(cle);
+  if (enMemoire) return enMemoire;
+
+  const { supabase, userId } = await requireRemote();
+  const { data, error } = await supabase
+    .from('documents')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('id', id)
+    .single();
+  if (error) {
+    // PGRST116 = aucune ligne : c'est un fait, pas une panne.
+    if ((error as { code?: string }).code === 'PGRST116') return undefined;
+    throw new RemoteError('Impossible de charger ce document.', error);
   }
+  if (!data) return undefined;
+  const entree = { ...rowToSummary(data), json: data.content as DocData } as HistoryEntry;
+  cacheSet(cle, entree);
+  return entree;
 }
 
-export async function deleteHistoryEntry(id: string) {
-  try {
-    const entry = await db.history.get(id);
-    if (entry) {
-      await db.history.put(markDeleted(entry));
-    }
-  } catch (e) {
-    console.warn("deleteHistoryEntry error:", e);
-  }
+export async function saveHistoryEntry(entry: HistoryEntry): Promise<void> {
+  const { supabase, userId } = await requireRemote();
+  const { error } = await supabase.from('documents').upsert({
+    user_id: userId,
+    id: entry.id,
+    doc_type: entry.doc_type,
+    title: entry.filename,
+    company: entry.company,
+    role: entry.role,
+    label: entry.label ?? null,
+    content: entry.json,
+    template_id: entry.templateId,
+    application_id: entry.applicationId ?? null,
+    notes: entry.notes,
+    job_desc: entry.job_desc,
+    pdf_views: entry.pdf_views,
+    editor_reloads: entry.editor_reloads,
+    last_viewed_at: entry.last_viewed_at ?? null,
+    created_at: entry.created_at,
+  });
+  if (error) throw new RemoteError("Impossible d'enregistrer ce document.", error);
+  cacheInvalidate('documents:');
 }
 
-export async function updateHistoryEntryStat(id: string, field: 'pdf_views' | 'editor_reloads') {
-  try {
-    const entry = await db.history.get(id);
-    if (entry) {
-      entry[field] = (entry[field] || 0) + 1;
-      if (field === 'pdf_views') {
-        entry.last_viewed_at = new Date().toISOString();
-      }
-      await db.history.put(entry);
-    }
-  } catch (e) {
-    console.warn("History update error:", e);
+export async function deleteHistoryEntry(id: string): Promise<void> {
+  const { supabase, userId } = await requireRemote();
+  const { error } = await supabase
+    .from('documents')
+    .delete()
+    .eq('user_id', userId)
+    .eq('id', id);
+  if (error) throw new RemoteError('Impossible de supprimer ce document.', error);
+  cacheInvalidate('documents:');
+}
+
+export async function updateHistoryEntryStat(
+  id: string,
+  field: 'pdf_views' | 'editor_reloads',
+): Promise<void> {
+  const { supabase, userId } = await requireRemote();
+  const { data: current, error: getErr } = await supabase
+    .from('documents')
+    .select(field)
+    .eq('user_id', userId)
+    .eq('id', id)
+    .single();
+  if (getErr) throw new RemoteError('Impossible de lire les statistiques du document.', getErr);
+
+  const rowData = current as Record<string, unknown> | null;
+  const nextVal = (((rowData?.[field] as number) || 0)) + 1;
+  const updates: Record<string, unknown> = { [field]: nextVal };
+  if (field === 'pdf_views') {
+    updates.last_viewed_at = new Date().toISOString();
   }
+
+  const { error: updateErr } = await supabase
+    .from('documents')
+    .update(updates)
+    .eq('user_id', userId)
+    .eq('id', id);
+  if (updateErr) throw new RemoteError('Impossible de mettre à jour les statistiques du document.', updateErr);
+  cacheInvalidate('documents:');
 }
 
 // ---------------------------------------------------------------------------
@@ -688,52 +764,81 @@ export async function deleteApplicationRecord(id: string): Promise<void> {
 }
 
 /** Documents d'historique rattachés à une candidature. */
-export async function listHistoryByApplication(applicationId: string): Promise<HistoryEntry[]> {
-  try {
-    const all = await db.history.filter((h) => h.applicationId === applicationId && !h.deleted_at).toArray();
-    return all.sort((a, b) => a.created_at.localeCompare(b.created_at));
-  } catch (e) {
-    console.warn("listHistoryByApplication error:", e);
-    return [];
-  }
+export async function listHistoryByApplication(applicationId: string): Promise<DocumentSummary[]> {
+  const cacheKey = `documents:byApp:${applicationId}`;
+  const enMemoire = cacheGet<DocumentSummary[]>(cacheKey);
+  if (enMemoire) return enMemoire;
+
+  const { supabase, userId } = await requireRemote();
+  const { data, error } = await supabase
+    .from('documents')
+    .select(DOC_LIST_COLS)
+    .eq('user_id', userId)
+    .eq('application_id', applicationId)
+    .order('created_at', { ascending: true });
+  if (error) throw new RemoteError('Impossible de charger les documents de cette candidature.', error);
+
+  const liste = (data ?? []).map(rowToSummary);
+  cacheSet(cacheKey, liste);
+  return liste;
 }
 
 /** Documents d'historique non rattachés à une candidature (rayon « Mes CV »). */
-export async function listUnattachedHistory(): Promise<HistoryEntry[]> {
-  try {
-    const all = await db.history.filter((h) => !h.applicationId && !h.deleted_at).toArray();
-    return all.sort((a, b) => b.created_at.localeCompare(a.created_at));
-  } catch (e) {
-    console.warn("listUnattachedHistory error:", e);
-    return [];
-  }
+export async function listUnattachedHistory(): Promise<DocumentSummary[]> {
+  const cacheKey = 'documents:unattached';
+  const enMemoire = cacheGet<DocumentSummary[]>(cacheKey);
+  if (enMemoire) return enMemoire;
+
+  const { supabase, userId } = await requireRemote();
+  const { data, error } = await supabase
+    .from('documents')
+    .select(DOC_LIST_COLS)
+    .eq('user_id', userId)
+    .is('application_id', null)
+    .order('created_at', { ascending: false });
+  if (error) throw new RemoteError('Impossible de charger vos CV.', error);
+
+  const liste = (data ?? []).map(rowToSummary);
+  cacheSet(cacheKey, liste);
+  return liste;
 }
 
 export async function updateHistoryFields(
   id: string,
-  fields: Partial<Pick<HistoryEntry, "applicationId" | "label">>,
+  fields: Partial<HistoryEntry>,
 ): Promise<void> {
-  try {
-    await db.history.update(id, {
-      ...fields,
-      updated_at: new Date().toISOString(),
-      synced_at: null,
-    });
-  } catch (e) {
-    console.warn("updateHistoryFields error:", e);
-  }
+  const { supabase, userId } = await requireRemote();
+  const rowUpdates: Record<string, unknown> = {};
+  if (fields.filename !== undefined) rowUpdates.title = fields.filename;
+  if (fields.company !== undefined) rowUpdates.company = fields.company;
+  if (fields.role !== undefined) rowUpdates.role = fields.role;
+  if (fields.label !== undefined) rowUpdates.label = fields.label ?? null;
+  if (fields.notes !== undefined) rowUpdates.notes = fields.notes;
+  if (fields.job_desc !== undefined) rowUpdates.job_desc = fields.job_desc;
+  if (fields.templateId !== undefined) rowUpdates.template_id = fields.templateId;
+  if (fields.applicationId !== undefined) rowUpdates.application_id = fields.applicationId ?? null;
+  if (fields.json !== undefined) rowUpdates.content = fields.json;
+  if (fields.last_viewed_at !== undefined) rowUpdates.last_viewed_at = fields.last_viewed_at ?? null;
+
+  const { error } = await supabase
+    .from('documents')
+    .update(rowUpdates)
+    .eq('user_id', userId)
+    .eq('id', id);
+  if (error) throw new RemoteError('Impossible de mettre à jour ce document.', error);
+  cacheInvalidate('documents:');
 }
 
 export async function deleteHistoryEntries(ids: string[]): Promise<void> {
-  try {
-    const entries = await db.history.bulkGet(ids);
-    const marked = entries.filter((e): e is HistoryEntry => Boolean(e)).map((e) => markDeleted(e));
-    if (marked.length > 0) {
-      await db.history.bulkPut(marked);
-    }
-  } catch (e) {
-    console.warn("deleteHistoryEntries error:", e);
-  }
+  if (ids.length === 0) return;
+  const { supabase, userId } = await requireRemote();
+  const { error } = await supabase
+    .from('documents')
+    .delete()
+    .eq('user_id', userId)
+    .in('id', ids);
+  if (error) throw new RemoteError('Impossible de supprimer ces documents.', error);
+  cacheInvalidate('documents:');
 }
 
 // ---------------------------------------------------------------------------

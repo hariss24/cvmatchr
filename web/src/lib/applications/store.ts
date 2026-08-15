@@ -7,7 +7,7 @@ import {
   listUnattachedHistory,
   updateHistoryFields,
   deleteHistoryEntries,
-  type HistoryEntry,
+  type DocumentSummary,
 } from "@/lib/storage/db";
 import { pushAll } from "@/lib/storage/syncEngine";
 import { normKey } from "./normKey";
@@ -25,7 +25,7 @@ export async function listApplications(): Promise<Application[]> {
   return all.sort((x, y) => at(y) - at(x));
 }
 
-export async function listApplicationDocuments(applicationId: string): Promise<HistoryEntry[]> {
+export async function listApplicationDocuments(applicationId: string): Promise<DocumentSummary[]> {
   return listHistoryByApplication(applicationId);
 }
 
@@ -149,7 +149,7 @@ async function doBackfill(): Promise<void> {
   if (typeof localStorage !== "undefined") localStorage.setItem(BACKFILL_KEY, "1");
 }
 
-export async function listShelfEntries(): Promise<HistoryEntry[]> {
+export async function listShelfEntries(): Promise<DocumentSummary[]> {
   return listUnattachedHistory();
 }
 

@@ -59,7 +59,7 @@ export function historyToRemoteResume(entry: HistoryEntry, userId: string): Remo
     title: entry.label || entry.filename || entry.company || 'CV',
     content: entry.json as unknown as Record<string, unknown>,
     is_primary: false,
-    deleted_at: entry.deleted_at ?? null,
+    deleted_at: null,
     client_updated_at: isoUpdate,
   };
 }
@@ -77,8 +77,6 @@ export function remoteResumeToHistory(row: RemoteResumeRow): HistoryEntry {
     notes: '',
     pdf_views: 0,
     editor_reloads: 0,
-    deleted_at: row.deleted_at ?? null,
-    synced_at: row.updated_at || new Date().toISOString(),
     json: row.content as unknown as DocData,
     templateId: null,
   };
@@ -93,7 +91,7 @@ export function historyToRemoteLetter(entry: HistoryEntry, userId: string): Remo
     company: entry.company || '',
     job_title: entry.role || '',
     content: entry.json as unknown as Record<string, unknown>,
-    deleted_at: entry.deleted_at ?? null,
+    deleted_at: null,
     client_updated_at: isoUpdate,
   };
 }
@@ -111,8 +109,6 @@ export function remoteLetterToHistory(row: RemoteLetterRow): HistoryEntry {
     notes: '',
     pdf_views: 0,
     editor_reloads: 0,
-    deleted_at: row.deleted_at ?? null,
-    synced_at: row.updated_at || new Date().toISOString(),
     json: row.content as unknown as DocData,
     templateId: null,
   };

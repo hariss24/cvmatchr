@@ -8,7 +8,7 @@ import {
   addApplicationEvent, undoLastStatusEvent, saveApplicationNotes,
   deleteApplication, listApplicationDocuments,
 } from "@/lib/applications/store";
-import { saveDraft, updateHistoryEntryStat, type HistoryEntry } from "@/lib/storage/db";
+import { getHistoryEntry, saveDraft, updateHistoryEntryStat, type DocumentSummary } from "@/lib/storage/db";
 import { useDocStore } from "@/state/docStore";
 import { toast, uiConfirm } from "@/state/uiStore";
 
@@ -31,7 +31,7 @@ export default function ApplicationCard({
   app, status, days, onChanged,
 }: { app: Application; status: ApplicationStatus; days: number; onChanged: () => void }) {
   const [open, setOpen] = useState(false);
-  const [docs, setDocs] = useState<HistoryEntry[]>([]);
+  const [docs, setDocs] = useState<DocumentSummary[]>([]);
   const [notes, setNotes] = useState(app.notes);
   const router = useRouter();
   const setDocType = useDocStore((s) => s.setDocType);
@@ -74,16 +74,19 @@ export default function ApplicationCard({
     toast("Candidature supprimée.", "success");
     onChanged();
   }
-  async function reload(doc: HistoryEntry) {
+  async function reload(doc: DocumentSummary) {
     if (!(await uiConfirm("Recharger ce document dans l'éditeur ? Votre travail actuel sera remplacé.", "Recharger"))) return;
     await updateHistoryEntryStat(doc.id, "editor_reloads");
-    // eslint-disable-next-line react-hooks/purity -- appel confiné à un gestionnaire de clic derrière une confirmation, inatteignable pendant le render.
-    await saveDraft({ id: `draft-${doc.doc_type}`, json: doc.json, templateId: doc.templateId, updatedAt: Date.now() });
-    setDocType(doc.doc_type);
-    if (doc.json) setJson(doc.json);
-    setPreviewOverride(null);
-    toast("Document rechargé.", "success");
-    router.push("/");
+    const full = await getHistoryEntry(doc.id);
+    if (full?.json) {
+      // eslint-disable-next-line react-hooks/purity -- appel confiné à un gestionnaire de clic derrière une confirmation, inatteignable pendant le render.
+      await saveDraft({ id: `draft-${doc.doc_type}`, json: full.json, templateId: doc.templateId, updatedAt: Date.now() });
+      setDocType(doc.doc_type);
+      setJson(full.json);
+      setPreviewOverride(null);
+      toast("Document rechargé.", "success");
+      router.push("/");
+    }
   }
 
   return (

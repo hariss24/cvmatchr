@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Enregistrement explicite et état d'enregistrement", () => {
-  test("le bouton Enregistrer persiste le document localement et met à jour l'indicateur d'état", async ({ page }) => {
+  test("le bouton Enregistrer invite à se connecter si non connecté et l'état reste dirty", async ({ page }) => {
     await page.goto("/");
 
     // 1. État initial
@@ -18,46 +18,20 @@ test.describe("Enregistrement explicite et état d'enregistrement", () => {
     await expect(saveState).toHaveAttribute("data-state", "dirty");
     await expect(saveState).toHaveText("Modifications non enregistrées");
 
-    // 3. Clic sur le bouton Enregistrer
+    // 3. Clic sur le bouton Enregistrer sans être connecté -> dialogue d'information
     const saveBtn = page.getByRole("button", { name: "Enregistrer" });
     await expect(saveBtn).toBeVisible();
     await saveBtn.click();
 
-    // 4. L'indicateur passe à « Enregistré sur cet appareil » (car non connecté)
-    await expect(saveState).toHaveAttribute("data-state", "device");
-    await expect(saveState).toHaveText("Enregistré sur cet appareil");
+    // La modale d'alerte s'affiche
+    await expect(page.locator(".ui-dialog")).toBeVisible();
+    await expect(page.locator(".ui-dialog__message")).toBeVisible();
 
-    // 5. Modification suivante -> repasse immédiatement à dirty
-    await nameInput.fill("Camille Martin-Dupont");
+    // Fermer le dialogue
+    await page.locator(".ui-dialog__ok").click();
+    await expect(page.locator(".ui-dialog")).toBeHidden();
+
+    // L'état reste dirty car non enregistré sans compte
     await expect(saveState).toHaveAttribute("data-state", "dirty");
-    await expect(saveState).toHaveText("Modifications non enregistrées");
-
-    // 6. Enregistrement à nouveau
-    await saveBtn.click();
-    await expect(saveState).toHaveAttribute("data-state", "device");
-
-    // 7. Navigation vers « Mes candidatures » (/candidatures) -> présent dans « Mes CV »
-    await page.goto("/candidatures");
-    await expect(page.getByText("Mes CV")).toBeVisible();
-    await expect(page.getByText("Dernier CV exporté")).toBeVisible();
-  });
-
-  test("enregistrer avec entreprise et poste rattache la candidature automatiquement", async ({ page }) => {
-    await page.goto("/");
-
-    // Renseigner entreprise et poste dans la MetaBar
-    await page.locator("#company").fill("Doctolib");
-    await page.locator("#role").fill("Frontend Engineer");
-
-    const saveBtn = page.getByRole("button", { name: "Enregistrer" });
-    await saveBtn.click();
-
-    const saveState = page.locator(".save-state");
-    await expect(saveState).toHaveAttribute("data-state", "device");
-
-    await page.goto("/candidatures");
-    await expect(page.getByText("Doctolib")).toBeVisible();
-    await expect(page.getByText("Frontend Engineer")).toBeVisible();
   });
 });
-

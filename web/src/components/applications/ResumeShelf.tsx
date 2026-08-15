@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { listShelfEntries, setShelfLabel } from "@/lib/applications/store";
 import { ANONYMOUS_LABELS, isAnonymous } from "@/lib/applications/shelf";
-import { deleteHistoryEntry, saveDraft, updateHistoryEntryStat, type HistoryEntry } from "@/lib/storage/db";
+import { deleteHistoryEntry, getHistoryEntry, saveDraft, updateHistoryEntryStat, type DocumentSummary } from "@/lib/storage/db";
 import { useDocStore } from "@/state/docStore";
 import { toast, uiConfirm } from "@/state/uiStore";
 import { onSyncChange } from "@/lib/storage/syncEvents";
@@ -15,7 +15,7 @@ import { pushAll } from "@/lib/storage/syncEngine";
  * Un seul document anonyme par type — nommer un document, c'est le garder.
  */
 export default function ResumeShelf() {
-  const [entries, setEntries] = useState<HistoryEntry[]>([]);
+  const [entries, setEntries] = useState<DocumentSummary[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
   const [draftLabel, setDraftLabel] = useState("");
   const router = useRouter();
@@ -37,18 +37,21 @@ export default function ResumeShelf() {
     await load();
   }
 
-  async function reload(doc: HistoryEntry) {
+  async function reload(doc: DocumentSummary) {
     if (!(await uiConfirm("Recharger ce document dans l'éditeur ? Votre travail actuel sera remplacé.", "Recharger"))) return;
     await updateHistoryEntryStat(doc.id, "editor_reloads");
-    await saveDraft({ id: `draft-${doc.doc_type}`, json: doc.json, templateId: doc.templateId, updatedAt: Date.now() });
-    setDocType(doc.doc_type);
-    if (doc.json) setJson(doc.json);
-    setPreviewOverride(null);
-    toast("Document rechargé.", "success");
-    router.push("/");
+    const full = await getHistoryEntry(doc.id);
+    if (full?.json) {
+      await saveDraft({ id: `draft-${doc.doc_type}`, json: full.json, templateId: doc.templateId, updatedAt: Date.now() });
+      setDocType(doc.doc_type);
+      setJson(full.json);
+      setPreviewOverride(null);
+      toast("Document rechargé.", "success");
+      router.push("/");
+    }
   }
 
-  async function remove(doc: HistoryEntry) {
+  async function remove(doc: DocumentSummary) {
     if (!(await uiConfirm("Supprimer ce document ? Action irréversible.", "Supprimer"))) return;
     await deleteHistoryEntry(doc.id);
     void pushAll();

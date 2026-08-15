@@ -2,7 +2,7 @@ import { useDocStore, type DocData } from "@/state/docStore";
 import { useAuthStore } from "@/state/authStore";
 import { saveHistoryEntry } from "@/lib/storage/db";
 import { upsertApplicationForDocument, pruneAnonymousShelf } from "@/lib/applications/store";
-import { pushAll } from "@/lib/storage/syncEngine";
+import { RemoteError } from "@/lib/storage/remote";
 import type { Resume, Letter, DocType } from "@/lib/resume/schema";
 
 /** Nom de la personne selon le type : `sender_name` pour une lettre, `name` pour un CV. */
@@ -12,16 +12,15 @@ function personNameFor(docType: DocType, json: DocData): string {
 }
 
 /**
- * Enregistre le document courant dans « Mes candidatures » / « Mes CV », puis
- * tente de l'envoyer sur le compte.
+ * Enregistre le document courant sur le compte utilisateur.
  *
- * Extrait de `TopBar.onConvert`, où il n'était atteignable qu'en téléchargeant
- * un PDF — un CV jamais exporté n'existait donc nulle part (spec §2, constat 1).
- *
- * L'envoi ne peut jamais faire échouer l'enregistrement local : on rend
- * `'device'` et l'interface l'annonce honnêtement.
+ * L'ordre change : le contrôle de connexion passe avant l'écriture.
+ * Sans compte, l'éditeur reste utilisable mais « Enregistrer » invite à se connecter.
  */
-export async function saveCurrentDocument(): Promise<'account' | 'device'> {
+export async function saveCurrentDocument(): Promise<'account'> {
+  if (!useAuthStore.getState().user) {
+    throw new RemoteError('Connectez-vous pour enregistrer ce document.');
+  }
   const { company, role, docType, json, templateId } = useDocStore.getState();
   const name = personNameFor(docType, json);
 
@@ -45,15 +44,5 @@ export async function saveCurrentDocument(): Promise<'account' | 'device'> {
   });
   if (!applicationId) await pruneAnonymousShelf(docType, entryId);
 
-  if (!useAuthStore.getState().user) return 'device';
-  try {
-    // On lit la réponse du serveur, on ne se contente pas d'en recevoir une :
-    // Supabase refuse une écriture (table absente, RLS, réseau) sans lever
-    // d'exception. Sans ce test, l'interface annonçait « sur votre compte »
-    // alors que le serveur venait de répondre « je n'y arrive pas ».
-    return (await pushAll()) ? 'account' : 'device';
-  } catch (e) {
-    console.warn("Envoi vers le compte impossible :", e);
-    return 'device';
-  }
+  return 'account';
 }

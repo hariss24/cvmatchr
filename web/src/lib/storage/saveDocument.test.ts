@@ -8,21 +8,20 @@ vi.mock('@/lib/applications/store', () => ({
   upsertApplicationForDocument: vi.fn(async () => 'app-1'),
   pruneAnonymousShelf: vi.fn(async () => {}),
 }));
-// `pushAll` rend désormais un booléen : `true` seulement si le serveur a
-// confirmé l'écriture. Un `undefined` (ancien contrat) vaudrait « refusé ».
-vi.mock('@/lib/storage/syncEngine', () => ({ pushAll: vi.fn(async () => true) }));
 vi.mock('@/state/authStore', () => ({
-  useAuthStore: { getState: () => ({ user: { id: 'user-1' } }) },
+  useAuthStore: { getState: vi.fn(() => ({ user: { id: 'user-1' } })) },
 }));
 
 import { saveHistoryEntry } from '@/lib/storage/db';
-import { pushAll } from '@/lib/storage/syncEngine';
 import { useDocStore } from '@/state/docStore';
+import { useAuthStore } from '@/state/authStore';
 import { DEFAULT_RESUME } from '@/lib/resume/defaults';
 import { saveCurrentDocument } from './saveDocument';
+import { RemoteError } from './remote';
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(useAuthStore.getState).mockReturnValue({ user: { id: 'user-1' } } as never);
   useDocStore.setState({
     docType: 'CV',
     json: { ...DEFAULT_RESUME, name: 'Hariss' },
@@ -44,21 +43,15 @@ describe('saveCurrentDocument', () => {
 
   it('rend "account" quand l\'envoi aboutit', async () => {
     expect(await saveCurrentDocument()).toBe('account');
-    expect(vi.mocked(pushAll)).toHaveBeenCalledTimes(1);
   });
 
-  it('rend "device" quand l\'envoi échoue, sans faire échouer l\'enregistrement', async () => {
-    vi.mocked(pushAll).mockRejectedValueOnce(new Error('offline'));
-    expect(await saveCurrentDocument()).toBe('device');
-    expect(vi.mocked(saveHistoryEntry)).toHaveBeenCalledTimes(1);
+  it('lève une RemoteError quand l\'utilisateur n\'est pas connecté', async () => {
+    vi.mocked(useAuthStore.getState).mockReturnValue({ user: null } as never);
+    await expect(saveCurrentDocument()).rejects.toBeInstanceOf(RemoteError);
   });
 
-  it('n\'annonce pas le compte quand le serveur refuse l\'écriture', async () => {
-    // Cas réel : la table `user_settings` n'existe pas encore côté Supabase.
-    // Le serveur répond — donc aucune exception — mais il refuse. Sans lecture
-    // de la réponse, l'interface promettait « Enregistré sur votre compte ».
-    vi.mocked(pushAll).mockResolvedValueOnce(false);
-    expect(await saveCurrentDocument()).toBe('device');
-    expect(vi.mocked(saveHistoryEntry)).toHaveBeenCalledTimes(1);
+  it('laisse remonter l\'erreur si saveHistoryEntry lève', async () => {
+    vi.mocked(saveHistoryEntry).mockRejectedValueOnce(new RemoteError('Panne serveur'));
+    await expect(saveCurrentDocument()).rejects.toThrow('Panne serveur');
   });
 });

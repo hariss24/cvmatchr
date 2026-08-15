@@ -186,9 +186,7 @@ export async function pushAll(): Promise<boolean> {
         const { error } = await supabase.from('resumes').upsert(freshResumes);
         if (!error) {
           const ids = freshResumes.map((r) => r.id);
-          await db.history
-            .where('id')
-            .anyOf(ids)
+          await (db.history.where('id').anyOf(ids) as unknown as { modify: (changes: Record<string, unknown>) => Promise<number> })
             .modify({ synced_at: nowIso });
         } else {
           toutEstParti = false;
@@ -202,9 +200,7 @@ export async function pushAll(): Promise<boolean> {
         const { error } = await supabase.from('letters').upsert(freshLetters);
         if (!error) {
           const ids = freshLetters.map((l) => l.id);
-          await db.history
-            .where('id')
-            .anyOf(ids)
+          await (db.history.where('id').anyOf(ids) as unknown as { modify: (changes: Record<string, unknown>) => Promise<number> })
             .modify({ synced_at: nowIso });
         } else {
           toutEstParti = false;

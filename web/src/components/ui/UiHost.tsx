@@ -6,6 +6,8 @@ import { useGlobalUndoRedo } from "@/lib/useGlobalUndoRedo";
 import { useSettingsStore } from "@/state/settingsStore";
 import { listHistoryEntries } from "@/lib/storage/db";
 
+import { currentUserId } from "@/lib/storage/remote";
+
 /**
  * Monte les dialogs et toasts applicatifs. À placer une fois dans le layout racine.
  * Remplace les `alert/confirm/prompt` natifs par des modales accessibles (Échap, focus, fermeture).
@@ -24,17 +26,19 @@ export default function UiHost() {
       try {
         const hasSeen = localStorage.getItem("backup_warning_seen");
         if (!hasSeen) {
+          const userId = await currentUserId();
+          if (!userId) return;
           const count = (await listHistoryEntries()).length;
           if (count >= 5) {
             await uiAlert(
-              "Vous utilisez activement CVMatchr, bravo ! 🎉\n\nN'oubliez pas que toutes vos données (CV, offres, historique) sont stockées UNIQUEMENT sur ce navigateur. Pensez à aller dans les Paramètres pour exporter une sauvegarde de temps en temps.",
+              "Vous utilisez activement CVMatchr, bravo ! 🎉\n\nN'oubliez pas que toutes vos données (CV, offres, historique) sont stockées sur votre compte. Pensez à aller dans les Paramètres pour exporter une sauvegarde de temps en temps.",
               "Sauvegarde Recommandée"
             );
             localStorage.setItem("backup_warning_seen", "true");
           }
         }
-      } catch (e) {
-        console.error("Erreur checkProactiveWarning:", e);
+      } catch {
+        // Silencieux si non connecté ou réseau indisponible
       }
     };
     void checkProactiveWarning();
