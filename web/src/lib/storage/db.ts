@@ -123,6 +123,14 @@ export interface AtsDirectoryEntry {
 // DB DEFINITION
 // ---------------------------------------------------------------------------
 
+/** Ligne locale des critères de recherche (singleton "me"), avec ses champs de sync. */
+export type JobProfileRow = {
+  id: "me";
+  profile: JobSearchProfile;
+  updatedAt?: number;
+  synced_at?: string | null;
+};
+
 export class AppDatabase extends Dexie {
   snapshots!: Table<Snapshot, number>; // Primary key: ts
   drafts!: Table<Draft, string>;       // Primary key: id
@@ -130,7 +138,7 @@ export class AppDatabase extends Dexie {
   jobs!: Table<JobEntry, string>;      // Primary key: id
   templates!: Table<MailTemplate, string>; // Primary key: id
   profile!: Table<UserProfile, string>; // Primary key: id (singleton "me")
-  jobProfile!: Table<{ id: string; profile: JobSearchProfile }, string>; // Primary key: id (singleton "me")
+  jobProfile!: Table<JobProfileRow, string>; // Primary key: id (singleton "me")
   applications!: Table<Application, string>; // Primary key: id
   apiUsage!: Table<{ key: string; count: number }, string>; // Primary key: key
   commuteCache!: Table<{ key: string; text: string; at: number }, string>;
@@ -607,7 +615,7 @@ export async function loadProfile(): Promise<UserProfile | null> {
 
 export async function saveProfile(p: UserProfile): Promise<void> {
   try {
-    await db.profile.put({ ...p, id: "me", updatedAt: Date.now() });
+    await db.profile.put({ ...p, id: "me", updatedAt: Date.now(), synced_at: null });
   } catch (e) {
     console.warn("saveProfile error:", e);
   }
@@ -628,7 +636,7 @@ export async function getJobProfile(): Promise<JobSearchProfile | null> {
 
 export async function saveJobProfile(profile: JobSearchProfile): Promise<void> {
   try {
-    await db.jobProfile.put({ id: "me", profile });
+    await db.jobProfile.put({ id: "me", profile, updatedAt: Date.now(), synced_at: null });
   } catch (e) {
     console.warn("saveJobProfile error:", e);
   }

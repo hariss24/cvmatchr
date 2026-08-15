@@ -1,6 +1,7 @@
-import type { HistoryEntry, JobEntry } from './db';
+import type { HistoryEntry, JobEntry, JobProfileRow } from './db';
 import type { Application, ApplicationEvent } from '@/lib/applications/types';
 import type { DocData } from '@/state/docStore';
+import type { UserProfile } from '@/lib/profile/profile';
 import { toIso } from './syncFields';
 
 export interface RemoteResumeRow {
@@ -180,5 +181,62 @@ export function remoteSavedJobToJob(row: RemoteSavedJobRow): JobEntry {
     id: row.id,
     deleted_at: row.deleted_at ?? null,
     synced_at: row.updated_at || new Date().toISOString(),
+  };
+}
+
+/**
+ * Réglages répliqués. `id` porte la clé du réglage ('profile' | 'jobProfile')
+ * et non un UUID : ce sont des singletons par utilisateur, et la colonne
+ * s'appelle `id` pour rester compatible avec `filterOutStalePush()`.
+ */
+export interface RemoteUserSettingRow {
+  user_id?: string;
+  id: 'profile' | 'jobProfile';
+  content: Record<string, unknown>;
+  deleted_at?: string | null;
+  client_updated_at: string;
+  updated_at?: string;
+}
+
+export function profileToRemoteSetting(p: UserProfile, userId: string): RemoteUserSettingRow {
+  return {
+    user_id: userId,
+    id: 'profile',
+    content: { ...p } as unknown as Record<string, unknown>,
+    client_updated_at: toIso(p.updatedAt || Date.now()),
+  };
+}
+
+export function remoteSettingToProfile(row: RemoteUserSettingRow): UserProfile {
+  const c = row.content as Partial<UserProfile>;
+  return {
+    id: 'me',
+    prenom: c.prenom ?? '',
+    nom: c.nom ?? '',
+    email: c.email ?? '',
+    telephone: c.telephone ?? '',
+    ville: c.ville ?? '',
+    linkedin: c.linkedin ?? '',
+    updatedAt: c.updatedAt ?? new Date(row.client_updated_at).getTime(),
+    synced_at: null,
+  };
+}
+
+export function jobProfileToRemoteSetting(row: JobProfileRow, userId: string): RemoteUserSettingRow {
+  return {
+    user_id: userId,
+    id: 'jobProfile',
+    content: { profile: row.profile } as unknown as Record<string, unknown>,
+    client_updated_at: toIso(row.updatedAt || Date.now()),
+  };
+}
+
+export function remoteSettingToJobProfile(row: RemoteUserSettingRow): JobProfileRow {
+  const c = row.content as { profile?: JobProfileRow['profile'] };
+  return {
+    id: 'me',
+    profile: c.profile as JobProfileRow['profile'],
+    updatedAt: new Date(row.client_updated_at).getTime(),
+    synced_at: null,
   };
 }
