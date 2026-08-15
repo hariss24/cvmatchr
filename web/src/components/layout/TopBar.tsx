@@ -8,20 +8,13 @@ import { generateResumePdfBlob, generateLetterPdfBlob } from "@/lib/pdfgen/gener
 import { buildPdfFilename } from "@/lib/pdfgen/filename";
 // import removed
 import { toast, uiAlert, uiConfirm } from "@/state/uiStore";
-import { saveHistoryEntry } from "@/lib/storage/db";
+import { saveCurrentDocument } from "@/lib/storage/saveDocument";
 import { startNewResume } from "@/lib/storage/newResume";
-import { upsertApplicationForDocument, pruneAnonymousShelf } from "@/lib/applications/store";
 import { takeSnapshot } from "@/lib/storage/snapshots";
 import ChatPanel from "@/components/modals/ChatPanel";
 import MobileMenu from "@/components/layout/MobileMenu";
 import SegmentedNav from "@/components/layout/SegmentedNav";
 import UserMenu from "@/components/layout/UserMenu";
-
-/** Nom de la personne selon le type : `sender_name` pour une lettre, `name` pour un CV (M3). */
-function personNameFor(docType: DocType, json: DocData): string {
-  const name = docType === "Lettre" ? (json as Letter).sender_name : (json as Resume).name;
-  return name?.trim() || docType;
-}
 
 /**
  * Barre du haut : logo, nom du fichier PDF, et actions globales
@@ -58,8 +51,7 @@ export default function TopBar() {
 
   const onConvert = useCallback(async () => {
     if (isConverting.current) return;
-    const { company, role, includeDate, docType: currentDocType, json: currentJson } = useDocStore.getState();
-    const name = personNameFor(currentDocType, currentJson);
+    const { role, includeDate, docType: currentDocType, json: currentJson } = useDocStore.getState();
 
     // L'entreprise reste dans le store (suivi de candidature, historique) mais ne
     // rentre plus dans le nom du fichier, qui devenait interminable.
@@ -84,37 +76,16 @@ export default function TopBar() {
       URL.revokeObjectURL(url);
       toast("PDF téléchargé.", "success");
 
-      // Une candidature naît de l'export dès qu'entreprise et poste sont connus.
-      // Sinon le document part au rayon « Mes CV », où un seul anonyme par type est
-      // conservé : l'ancien est remplacé silencieusement (le libellé l'annonce).
-      const applicationId = await upsertApplicationForDocument({
-        company, role, source: "generated",
-      });
-      const entryId = crypto.randomUUID();
-      await saveHistoryEntry({
-        id: entryId,
-        created_at: new Date().toISOString(),
-        doc_type: currentDocType,
-        company,
-        role,
-        job_desc: "",
-        filename: `${name} - ${docType}.pdf`,
-        notes: "",
-        pdf_views: 1,
-        editor_reloads: 0,
-        last_viewed_at: new Date().toISOString(),
-        json: structuredClone(json),
-        templateId,
-        applicationId,
-      });
-      if (!applicationId) await pruneAnonymousShelf(currentDocType, entryId);
+      // Le téléchargement enregistre toujours, comme avant — il n'en est
+      // simplement plus le seul moyen (bouton « Enregistrer », task 6).
+      await saveCurrentDocument();
     } catch {
       await uiAlert("Impossible de générer le PDF.", "Conversion PDF");
     } finally {
       isConverting.current = false;
       setBusy(false);
     }
-  }, [docType, json, templateId]);
+  }, [templateId]);
 
   useEffect(() => {
     const handleConvert = () => {

@@ -8,6 +8,7 @@ import { deleteHistoryEntry, saveDraft, updateHistoryEntryStat, type HistoryEntr
 import { useDocStore } from "@/state/docStore";
 import { toast, uiConfirm } from "@/state/uiStore";
 import { onSyncChange } from "@/lib/storage/syncEvents";
+import { pushAll } from "@/lib/storage/syncEngine";
 
 /**
  * Rayon « Mes CV » : les documents non rattachés à une candidature.
@@ -50,6 +51,7 @@ export default function ResumeShelf() {
   async function remove(doc: HistoryEntry) {
     if (!(await uiConfirm("Supprimer ce document ? Action irréversible.", "Supprimer"))) return;
     await deleteHistoryEntry(doc.id);
+    void pushAll();
     await load();
   }
 

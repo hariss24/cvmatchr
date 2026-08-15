@@ -9,6 +9,7 @@ import {
   deleteHistoryEntries,
   type HistoryEntry,
 } from "@/lib/storage/db";
+import { pushAll } from "@/lib/storage/syncEngine";
 import { normKey } from "./normKey";
 import { anonymousIdsToDelete } from "./shelf";
 import { planBackfill } from "./backfill";
@@ -78,6 +79,7 @@ export async function addApplicationEvent(
   app.events = [...app.events, { date: at, type, source: "manual" }];
   app.updatedAt = at;
   await putApplication(app);
+  void pushAll();
 }
 
 /** Annule le dernier événement de statut saisi à la main (entretien ou refus). */
@@ -90,6 +92,7 @@ export async function undoLastStatusEvent(id: string): Promise<void> {
   app.events = app.events.filter((_, i) => i !== idx);
   app.updatedAt = Date.now();
   await putApplication(app);
+  void pushAll();
 }
 
 export async function saveApplicationNotes(id: string, notes: string): Promise<void> {
@@ -114,6 +117,7 @@ export async function deleteApplication(id: string): Promise<void> {
   const docs = await listHistoryByApplication(id);
   for (const doc of docs) await updateHistoryFields(doc.id, { applicationId: undefined });
   await deleteApplicationRecord(id);
+  void pushAll();
 }
 
 /**
@@ -151,6 +155,7 @@ export async function listShelfEntries(): Promise<HistoryEntry[]> {
 
 export async function setShelfLabel(id: string, label: string): Promise<void> {
   await updateHistoryFields(id, { label: label.trim() });
+  void pushAll();
 }
 
 /** Applique la règle du CV anonyme unique après un export sans entreprise ni poste. */
