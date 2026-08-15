@@ -21,10 +21,9 @@ describe('AuthStore', () => {
   });
 });
 
-describe('AuthStore.signOut — ordre push puis purge', () => {
+describe('AuthStore.signOut — déconnexion et vidage du cache de session', () => {
   const signOutMock = vi.fn().mockResolvedValue({ error: null });
-  const pushAllMock = vi.fn().mockResolvedValue(undefined);
-  const purgeLocalDataMock = vi.fn().mockResolvedValue(undefined);
+  const cacheClearMock = vi.fn();
   const callOrder: string[] = [];
 
   beforeEach(() => {
@@ -34,35 +33,24 @@ describe('AuthStore.signOut — ordre push puis purge', () => {
       callOrder.push('auth.signOut');
       return { error: null };
     });
-    pushAllMock.mockClear().mockImplementation(async () => {
-      callOrder.push('pushAll');
-    });
-    purgeLocalDataMock.mockClear().mockImplementation(async () => {
-      callOrder.push('purgeLocalData');
+    cacheClearMock.mockClear().mockImplementation(() => {
+      callOrder.push('cacheClear');
     });
 
     vi.doMock('@/lib/supabase/client', () => ({
       createBrowserClientHelper: () => ({ auth: { signOut: signOutMock } }),
     }));
-    vi.doMock('@/lib/storage/syncEngine', () => ({
-      purgeLocalData: purgeLocalDataMock,
-      ensureMatchingUser: vi.fn(),
-      syncAll: vi.fn(),
-      pushAll: pushAllMock,
+    vi.doMock('@/lib/storage/sessionCache', () => ({
+      cacheClear: cacheClearMock,
+    }));
+    vi.doMock('@/lib/storage/reprise', () => ({
+      reprendreDonneesLocales: vi.fn(),
     }));
   });
 
-  it("pousse les changements en attente AVANT de couper la session et purger le local", async () => {
+  it('appelle auth.signOut puis vide la mémoire de session', async () => {
     const { useAuthStore } = await import('./authStore');
     await useAuthStore.getState().signOut();
-    expect(callOrder).toEqual(['pushAll', 'auth.signOut', 'purgeLocalData']);
-  });
-
-  it('purge quand même le local si pushAll échoue (ne bloque pas la déconnexion)', async () => {
-    pushAllMock.mockRejectedValueOnce(new Error('offline'));
-    const { useAuthStore } = await import('./authStore');
-    await useAuthStore.getState().signOut();
-    expect(purgeLocalDataMock).toHaveBeenCalled();
-    expect(signOutMock).toHaveBeenCalled();
+    expect(callOrder).toEqual(['auth.signOut', 'cacheClear']);
   });
 });

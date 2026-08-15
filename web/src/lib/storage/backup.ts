@@ -1,23 +1,40 @@
-import { db, allAtsEntries } from "./db";
+import {
+  db,
+  allAtsEntries,
+  listHistoryEntries,
+  getHistoryEntry,
+  saveHistoryEntry,
+  listJobs,
+  saveJob,
+  listApplicationsRaw,
+  putApplication,
+  listTemplates,
+  saveTemplate,
+  loadProfile,
+  saveProfile,
+} from "./db";
+import { cacheClear } from "./sessionCache";
 import { toast, uiConfirm } from "@/state/uiStore";
-import { sanitizeImportedItem } from "./syncEngine";
 
 export async function exportDatabase(): Promise<void> {
   try {
-    const rawHistory = await db.history.toArray();
-    const rawJobs = await db.jobs.toArray();
-    const rawApps = await db.applications.toArray();
-
-    const stripSynced = <T extends Record<string, unknown>>({ synced_at: _, ...rest }: T) => rest;
+    const historySummaries = await listHistoryEntries().catch(() => []);
+    const fullHistory = await Promise.all(
+      historySummaries.map(async (s) => (await getHistoryEntry(s.id)) ?? s)
+    );
+    const jobs = await listJobs().catch(() => []);
+    const applications = await listApplicationsRaw().catch(() => []);
+    const templates = await listTemplates().catch(() => []);
+    const profile = await loadProfile().catch(() => null);
 
     const data = {
       snapshots: await db.snapshots.toArray(),
       drafts: await db.drafts.toArray(),
-      history: rawHistory.map((h) => stripSynced(h as unknown as Record<string, unknown>)),
-      jobs: rawJobs.map((j) => stripSynced(j as unknown as Record<string, unknown>)),
-      applications: rawApps.map((a) => stripSynced(a as unknown as Record<string, unknown>)),
-      templates: await db.templates.toArray(),
-      profile: await db.profile.toArray(),
+      history: fullHistory,
+      jobs,
+      applications,
+      templates,
+      profile: profile ? [profile] : [],
     };
 
     const jsonString = JSON.stringify(data, null, 2);
@@ -39,35 +56,59 @@ export async function exportDatabase(): Promise<void> {
 
 export async function importDatabase(jsonString: string): Promise<boolean> {
   const confirmed = await uiConfirm(
-    "Voulez-vous vraiment importer ces données ? Cela remplacera toutes les données actuelles de l'application (Historique, Offres, Profil, etc.). Si vous êtes connecté, le contenu importé sera également répliqué sur votre compte. Cette action est irréversible.",
+    "Voulez-vous vraiment importer ces données ? Cela mettra à jour vos documents, offres et candidatures. Cette action est irréversible.",
     "Importer les données"
   );
-  
+
   if (!confirmed) return false;
 
   try {
     const data = JSON.parse(jsonString);
 
-    await db.transaction("rw", [db.snapshots, db.drafts, db.history, db.jobs, db.applications, db.templates, db.profile], async () => {
-      // Clear existing data
-      await db.snapshots.clear();
-      await db.drafts.clear();
-      await db.history.clear();
-      await db.jobs.clear();
-      await db.applications.clear();
-      await db.templates.clear();
-      await db.profile.clear();
+    // Clear local snapshots & drafts
+    await db.snapshots.clear();
+    await db.drafts.clear();
 
-      // Bulk add new data if present
-      if (data.snapshots && data.snapshots.length > 0) await db.snapshots.bulkAdd(data.snapshots);
-      if (data.drafts && data.drafts.length > 0) await db.drafts.bulkAdd(data.drafts);
-      if (data.history && data.history.length > 0) await db.history.bulkAdd(data.history.map(sanitizeImportedItem));
-      if (data.jobs && data.jobs.length > 0) await db.jobs.bulkAdd(data.jobs.map(sanitizeImportedItem));
-      if (data.applications && data.applications.length > 0) await db.applications.bulkAdd(data.applications.map(sanitizeImportedItem));
-      if (data.templates && data.templates.length > 0) await db.templates.bulkAdd(data.templates);
-      if (data.profile && data.profile.length > 0) await db.profile.bulkAdd(data.profile);
-    });
+    if (data.snapshots && data.snapshots.length > 0) await db.snapshots.bulkAdd(data.snapshots);
+    if (data.drafts && data.drafts.length > 0) await db.drafts.bulkAdd(data.drafts);
 
+    if (data.history && Array.isArray(data.history)) {
+      for (const h of data.history) {
+        if (h && h.id && h.doc_type) {
+          await saveHistoryEntry(h).catch(() => {});
+        }
+      }
+    }
+
+    if (data.jobs && Array.isArray(data.jobs)) {
+      for (const j of data.jobs) {
+        if (j && j.id) {
+          await saveJob(j).catch(() => {});
+        }
+      }
+    }
+
+    if (data.applications && Array.isArray(data.applications)) {
+      for (const a of data.applications) {
+        if (a && a.id) {
+          await putApplication(a).catch(() => {});
+        }
+      }
+    }
+
+    if (data.templates && Array.isArray(data.templates)) {
+      for (const t of data.templates) {
+        if (t && t.id) {
+          await saveTemplate(t).catch(() => {});
+        }
+      }
+    }
+
+    if (data.profile && Array.isArray(data.profile) && data.profile[0]) {
+      await saveProfile(data.profile[0]).catch(() => {});
+    }
+
+    cacheClear();
     toast("Importation réussie. L'application va se recharger.", "success");
     setTimeout(() => window.location.reload(), 1500);
     return true;
@@ -80,23 +121,18 @@ export async function importDatabase(jsonString: string): Promise<boolean> {
 
 export async function resetDatabase(): Promise<void> {
   const confirmed = await uiConfirm(
-    "Voulez-vous vraiment effacer TOUTES les données ? L'historique, les offres, et les profils seront supprimés. Cette action est irréversible.",
+    "Voulez-vous vraiment effacer les brouillons et instantanés locaux ? Cette action est irréversible.",
     "Réinitialiser"
   );
 
   if (!confirmed) return;
 
   try {
-    await db.transaction("rw", [db.snapshots, db.drafts, db.history, db.jobs, db.templates, db.profile], async () => {
-      await db.snapshots.clear();
-      await db.drafts.clear();
-      await db.history.clear();
-      await db.jobs.clear();
-      await db.templates.clear();
-      await db.profile.clear();
-    });
-    
-    toast("Données effacées. L'application va se recharger.", "success");
+    await db.snapshots.clear();
+    await db.drafts.clear();
+    cacheClear();
+
+    toast("Données locales effacées. L'application va se recharger.", "success");
     setTimeout(() => window.location.reload(), 1500);
   } catch (error) {
     console.error("Reset failed:", error);
@@ -104,16 +140,6 @@ export async function resetDatabase(): Promise<void> {
   }
 }
 
-/**
- * Annuaire entreprise → ATS, seul, au format plat.
- *
- * Distinct d'`exportDatabase` : celui-ci est une sauvegarde personnelle, celui-là
- * un extrait destiné à être agrégé ailleurs.
- *
- * Tableau et non dictionnaire, `resolvedAt` conservé : c'est ce qui permettra de
- * fusionner plusieurs exports en gardant l'entrée la plus fraîche, et de périmer
- * un jour les « none ». Un dictionnaire sans date rendrait les deux impossibles.
- */
 export async function exportAtsDirectory(): Promise<void> {
   try {
     const entries = await allAtsEntries();

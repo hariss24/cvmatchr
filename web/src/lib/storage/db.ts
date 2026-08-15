@@ -11,7 +11,6 @@ import { GRADE_ORDER, type Grade } from "@/lib/jobs/grade";
 import { normKey } from "@/lib/applications/normKey";
 import type { Ligne } from "@/lib/jobs/rank/criteria";
 import { normalizeCompany, type AtsProvider } from "@/lib/jobs/ats";
-import { markDeleted } from "./syncFields";
 import { requireRemote, currentUserId, RemoteError } from "./remote";
 import { cacheGet, cacheSet, cacheInvalidate } from "./sessionCache";
 
@@ -112,7 +111,6 @@ export interface JobEntry {
  * a déjà été essayée sans succès évite de la retester à chaque affichage.
  */
 export interface AtsDirectoryEntry {
-  /** Nom d'entreprise normalisé — voir `atsKey`. Clé primaire. */
   companyKey: string;
   ats: AtsProvider | "none";
   /** Identifiant du board chez l'ATS ; "" quand `ats === "none"`. */
@@ -120,30 +118,28 @@ export interface AtsDirectoryEntry {
   resolvedAt: number;
 }
 
-// ---------------------------------------------------------------------------
-// DB DEFINITION
-// ---------------------------------------------------------------------------
-
-/** Ligne locale des critères de recherche (singleton "me"), avec ses champs de sync. */
 export type JobProfileRow = {
   id: "me";
   profile: JobSearchProfile;
   updatedAt?: number;
-  synced_at?: string | null;
 };
+
+// ---------------------------------------------------------------------------
+// DB DEFINITION
+// ---------------------------------------------------------------------------
 
 export class AppDatabase extends Dexie {
   snapshots!: Table<Snapshot, number>; // Primary key: ts
   drafts!: Table<Draft, string>;       // Primary key: id
-  history!: Table<HistoryEntry, string>; // Primary key: id
-  jobs!: Table<JobEntry, string>;      // Primary key: id
-  templates!: Table<MailTemplate, string>; // Primary key: id
-  profile!: Table<UserProfile, string>; // Primary key: id (singleton "me")
-  jobProfile!: Table<JobProfileRow, string>; // Primary key: id (singleton "me")
-  applications!: Table<Application, string>; // Primary key: id
   apiUsage!: Table<{ key: string; count: number }, string>; // Primary key: key
   commuteCache!: Table<{ key: string; text: string; at: number }, string>;
   atsDirectory!: Table<AtsDirectoryEntry, string>; // Primary key: companyKey
+  history?: Table<HistoryEntry, string>;
+  jobs?: Table<JobEntry, string>;
+  templates?: Table<MailTemplate, string>;
+  profile?: Table<UserProfile, string>;
+  jobProfile?: Table<JobProfileRow, string>;
+  applications?: Table<Application, string>;
 
   constructor() {
     // Nouveau nom pour éviter les collisions si on lance sur le même port que Flask
@@ -257,6 +253,17 @@ export class AppDatabase extends Dexie {
         if (!j.updatedAt) j.updatedAt = j.createdAt ?? Date.now();
         j.synced_at = null;
       });
+    });
+
+    // v14 : le serveur Supabase devient la source unique. Les tables correspondantes
+    // (history, jobs, templates, profile, jobProfile, applications) sont retirées de Dexie.
+    this.version(14).stores({
+      history: null,
+      jobs: null,
+      templates: null,
+      profile: null,
+      jobProfile: null,
+      applications: null,
     });
   }
 }

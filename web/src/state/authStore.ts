@@ -1,7 +1,9 @@
 import { create } from 'zustand';
 import type { User, Session } from '@supabase/supabase-js';
 import { createBrowserClientHelper } from '@/lib/supabase/client';
-import { purgeLocalData, ensureMatchingUser, syncAll, pushAll } from '@/lib/storage/syncEngine';
+import { reprendreDonneesLocales } from '@/lib/storage/reprise';
+import { cacheClear } from '@/lib/storage/sessionCache';
+import { db } from '@/lib/storage/db';
 
 interface AuthState {
   user: User | null;
@@ -48,18 +50,15 @@ export const useAuthStore = create<AuthState>((set) => ({
   signOut: async () => {
     const supabase = createBrowserClientHelper();
     if (supabase) {
-      // Pousser les modifications en attente AVANT de couper la session : sans
-      // ça, purgeLocalData() efface irréversiblement des changements jamais
-      // répliqués côté serveur (rien d'autre ne synchronise juste avant une
-      // déconnexion).
-      try {
-        await pushAll();
-      } catch (e) {
-        console.warn('pushAll avant déconnexion a échoué :', e);
-      }
       await supabase.auth.signOut();
     }
-    await purgeLocalData();
+    cacheClear();
+    try {
+      if (db.drafts) await db.drafts.clear();
+      if (db.snapshots) await db.snapshots.clear();
+    } catch {
+      // Nettoyage au mieux
+    }
     set({ user: null, session: null, isLoading: false });
   },
 
@@ -73,8 +72,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     const { data } = await supabase.auth.getSession();
     const currentUser = data.session?.user ?? null;
     if (currentUser) {
-      await ensureMatchingUser(currentUser.id);
-      void syncAll();
+      void reprendreDonneesLocales();
     }
     set({
       session: data.session,
@@ -85,7 +83,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     supabase.auth.onAuthStateChange((_event, session) => {
       const newUser = session?.user ?? null;
       if (newUser) {
-        void ensureMatchingUser(newUser.id).then(() => syncAll());
+        void reprendreDonneesLocales();
       }
       set({ session, user: newUser, isLoading: false });
     });
