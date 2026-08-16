@@ -9,6 +9,7 @@ import { useDocStore } from "@/state/docStore";
 import { toast, uiConfirm } from "@/state/uiStore";
 import { RemoteError } from "@/lib/storage/remote";
 import EtatErreur from "@/components/ui/EtatErreur";
+import { executerAction } from "@/lib/ui/executerAction";
 
 /**
  * Rayon « Mes CV » : les documents non rattachés à une candidature.
@@ -42,7 +43,11 @@ export default function ResumeShelf() {
   }, []);
 
   async function commitLabel(id: string) {
-    await setShelfLabel(id, draftLabel);
+    const ok = await executerAction(
+      () => setShelfLabel(id, draftLabel),
+      "Impossible de renommer ce document.",
+    );
+    if (!ok) return;
     setEditing(null);
     setDraftLabel("");
     await load();
@@ -50,8 +55,17 @@ export default function ResumeShelf() {
 
   async function reload(doc: DocumentSummary) {
     if (!(await uiConfirm("Recharger ce document dans l'éditeur ? Votre travail actuel sera remplacé.", "Recharger"))) return;
-    await updateHistoryEntryStat(doc.id, "editor_reloads");
-    const full = await getHistoryEntry(doc.id);
+    // Compteur de rechargements : une statistique d'usage. Son échec est le seul
+    // qu'on tait volontairement ici — l'annoncer ferait passer un compteur raté
+    // pour un document inaccessible. La lecture qui suit, elle, doit parler.
+    await updateHistoryEntryStat(doc.id, "editor_reloads").catch(() => {});
+    let full;
+    try {
+      full = await getHistoryEntry(doc.id);
+    } catch (e) {
+      toast(e instanceof RemoteError ? e.message : "Impossible d'ouvrir ce document.", "error");
+      return;
+    }
     if (full?.json) {
       await saveDraft({ id: `draft-${doc.doc_type}`, json: full.json, templateId: doc.templateId, updatedAt: Date.now() });
       setDocType(doc.doc_type);
@@ -64,8 +78,11 @@ export default function ResumeShelf() {
 
   async function remove(doc: DocumentSummary) {
     if (!(await uiConfirm("Supprimer ce document ? Action irréversible.", "Supprimer"))) return;
-    await deleteHistoryEntry(doc.id);
-    await load();
+    const ok = await executerAction(
+      () => deleteHistoryEntry(doc.id),
+      "Impossible de supprimer ce document.",
+    );
+    if (ok) await load();
   }
 
   if (erreur) {

@@ -739,11 +739,11 @@ export async function ensureDefaultTemplates(): Promise<void> {
       user_id: userId,
       id: t.id,
       name: t.name,
-      subject: t.letterSubject,
-      body: t.letterBody,
-      is_default: false,
+      letter_subject: t.letterSubject,
+      letter_body: t.letterBody,
     }));
-    await supabase.from('templates').upsert(rows);
+    const { error: seedErr } = await supabase.from('templates').upsert(rows);
+    if (seedErr) throw new RemoteError("Impossible d'installer les modèles de départ.", seedErr);
     cacheInvalidate('templates:');
   }
 }
@@ -772,15 +772,14 @@ export async function listTemplates(): Promise<MailTemplate[]> {
   const liste: MailTemplate[] = (data as Array<{
     id: string;
     name: string;
-    subject: string;
-    body: string;
-    is_default?: boolean;
+    letter_subject: string;
+    letter_body: string;
     updated_at?: string;
   }>).map((r) => ({
     id: r.id,
     name: r.name,
-    letterSubject: r.subject,
-    letterBody: r.body,
+    letterSubject: r.letter_subject,
+    letterBody: r.letter_body,
     updatedAt: r.updated_at ? new Date(r.updated_at).getTime() : Date.now(),
   }));
 
@@ -790,13 +789,18 @@ export async function listTemplates(): Promise<MailTemplate[]> {
 
 export async function saveTemplate(tpl: MailTemplate): Promise<void> {
   const { supabase, userId } = await requireRemote();
+  // Noms de colonnes : `letter_subject` / `letter_body`, et pas de `is_default`.
+  // Écrits `subject` / `body` / `is_default`, ils ne correspondaient à aucune
+  // colonne de `0003_documents_templates.sql` : PostgreSQL refusait chaque
+  // écriture, et l'installation des modèles de départ échouait en silence
+  // (relevé le 15/08/2026, aucune migration n'ayant encore été appliquée, le
+  // défaut n'avait jamais pu se manifester).
   const row = {
     user_id: userId,
     id: tpl.id,
     name: tpl.name,
-    subject: tpl.letterSubject,
-    body: tpl.letterBody,
-    is_default: false,
+    letter_subject: tpl.letterSubject,
+    letter_body: tpl.letterBody,
   };
   const { error } = await supabase.from('templates').upsert(row);
   if (error) throw new RemoteError("Impossible d'enregistrer le modèle.", error);
@@ -956,6 +960,12 @@ export function applicationToRemoteRow(app: Application, userId: string): Remote
       normKey: app.normKey,
       jobText: app.jobText,
       source: app.source,
+      // La date de création est portée par le payload, faute de colonne dédiée.
+      // Reconstruite depuis `client_updated_at`, elle se rajeunissait à chaque
+      // modification : une candidature de trois semaines redevenait « récente »
+      // après une simple retouche de note, et ne passait donc jamais en
+      // « sans réponse » (`status.ts`, repli sur `createdAt`).
+      createdAt: app.createdAt,
     },
     applied_at: appliedAt,
     client_updated_at: isoUpdate,
@@ -968,7 +978,7 @@ export function remoteRowToApplication(row: Record<string, unknown>): Applicatio
   const ts = row.client_updated_at ? new Date(row.client_updated_at as string).getTime() : Date.now();
   return {
     id: row.id as string,
-    createdAt: ts,
+    createdAt: (payload.createdAt as number) || ts,
     updatedAt: ts,
     company: (row.company as string) || '',
     role: (row.job_title as string) || '',

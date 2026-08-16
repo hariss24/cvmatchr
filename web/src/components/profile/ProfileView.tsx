@@ -6,6 +6,7 @@ import { loadProfile, saveProfile } from "@/lib/storage/db";
 import { EMPTY_PROFILE, type UserProfile } from "@/lib/profile/profile";
 import { RemoteError } from "@/lib/storage/remote";
 import EtatErreur from "@/components/ui/EtatErreur";
+import { toast } from "@/state/uiStore";
 
 /**
  * Page « Mes informations » (/profil) : identité saisie une fois, autosave
@@ -45,7 +46,17 @@ export default function ProfileView() {
   useEffect(() => {
     if (!loaded) return;
     const t = setTimeout(() => {
-      saveProfile(p).catch(() => {});
+      // Un échec d'enregistrement doit se voir : ces informations vivent sur le
+      // compte, et l'écran n'a pas de bouton « Enregistrer » qui pourrait le
+      // signaler. Avalé, l'échec laissait croire à une saisie conservée.
+      // On prévient par un toast plutôt que par `setErreur` : celui-ci remplace
+      // le formulaire, ce qui ferait disparaître la saisie en cours.
+      saveProfile(p).catch((e) => {
+        toast(
+          e instanceof RemoteError ? e.message : "Vos informations n'ont pas pu être enregistrées.",
+          "error",
+        );
+      });
     }, 800);
     return () => clearTimeout(t);
   }, [p, loaded]);

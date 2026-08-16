@@ -11,6 +11,7 @@ import {
 import { getHistoryEntry, saveDraft, updateHistoryEntryStat, type DocumentSummary } from "@/lib/storage/db";
 import { useDocStore } from "@/state/docStore";
 import { toast, uiConfirm } from "@/state/uiStore";
+import { executerAction } from "@/lib/ui/executerAction";
 
 const MONTHS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
 const frDate = (ts: number) => `${new Date(ts).getDate()} ${MONTHS[new Date(ts).getMonth()]}`;
@@ -40,13 +41,19 @@ export default function ApplicationCard({
 
   useEffect(() => {
     if (!open) return;
-    void listApplicationDocuments(app.id).then(setDocs);
+    void listApplicationDocuments(app.id)
+      .then(setDocs)
+      .catch((e) => toast(e instanceof Error ? e.message : "Impossible de charger les documents.", "error"));
   }, [open, app.id]);
 
   // Autosave de la note, même délai perçu que l'éditeur.
   useEffect(() => {
     if (notes === app.notes) return;
-    const t = setTimeout(() => { void saveApplicationNotes(app.id, notes); }, 800);
+    const t = setTimeout(() => {
+      // Les notes vivent sur le compte : un échec doit se voir. `void` laissait
+      // la note perdue et l'écran inchangé.
+      void executerAction(() => saveApplicationNotes(app.id, notes), "Votre note n'a pas pu être enregistrée.");
+    }, 800);
     return () => clearTimeout(t);
   }, [notes, app.id, app.notes]);
 
@@ -61,23 +68,33 @@ export default function ApplicationCard({
   if (status === "stale") meta.push("Aucune réponse");
 
   async function mark(type: "interview" | "rejected") {
-    await addApplicationEvent(app.id, type);
-    onChanged();
+    if (await executerAction(() => addApplicationEvent(app.id, type), "Impossible de mettre à jour cette candidature.")) {
+      onChanged();
+    }
   }
   async function undo() {
-    await undoLastStatusEvent(app.id);
-    onChanged();
+    if (await executerAction(() => undoLastStatusEvent(app.id), "Impossible d'annuler ce changement.")) {
+      onChanged();
+    }
   }
   async function remove() {
     if (!(await uiConfirm(`Supprimer la candidature ${app.company} ? Les documents générés sont conservés.`, "Supprimer"))) return;
-    await deleteApplication(app.id);
+    if (!(await executerAction(() => deleteApplication(app.id), "Impossible de supprimer cette candidature."))) return;
     toast("Candidature supprimée.", "success");
     onChanged();
   }
   async function reload(doc: DocumentSummary) {
     if (!(await uiConfirm("Recharger ce document dans l'éditeur ? Votre travail actuel sera remplacé.", "Recharger"))) return;
-    await updateHistoryEntryStat(doc.id, "editor_reloads");
-    const full = await getHistoryEntry(doc.id);
+    // Compteur d'usage : le seul échec passé sous silence ici — l'annoncer ferait
+    // passer une statistique ratée pour un document inaccessible.
+    await updateHistoryEntryStat(doc.id, "editor_reloads").catch(() => {});
+    let full;
+    try {
+      full = await getHistoryEntry(doc.id);
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Impossible d'ouvrir ce document.", "error");
+      return;
+    }
     if (full?.json) {
       // eslint-disable-next-line react-hooks/purity -- appel confiné à un gestionnaire de clic derrière une confirmation, inatteignable pendant le render.
       await saveDraft({ id: `draft-${doc.doc_type}`, json: full.json, templateId: doc.templateId, updatedAt: Date.now() });

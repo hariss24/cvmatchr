@@ -22,6 +22,7 @@ import JobCard from "./JobCard";
 import ScoringInfo from "./ScoringInfo";
 import { RemoteError } from "@/lib/storage/remote";
 import EtatErreur from "@/components/ui/EtatErreur";
+import { executerAction } from "@/lib/ui/executerAction";
 
 /**
  * Orchestrateur du scan d'offres : `POST /api/jobs/search` → écarte les offres
@@ -72,7 +73,13 @@ export default function JobsView() {
         setProfile(parseProfile(p));
       }
       setProfileLoaded(true);
-    }).catch(() => {});
+    }).catch((e) => {
+      // Les critères de recherche vivent sur le compte : leur chargement peut
+      // échouer comme n'importe quelle lecture. Avalée, l'erreur laissait le
+      // formulaire de critères invisible (`profileLoaded` restait faux) sans
+      // rien expliquer — l'écran paraissait simplement incomplet.
+      setErreur(e instanceof Error ? e.message : "Impossible de charger vos critères de recherche.");
+    });
     // Au montage seulement. `reload` est redéfinie à chaque rendu ; la mettre en
     // dépendance relancerait la liste — et la résolution des logos — sans fin.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -82,7 +89,11 @@ export default function JobsView() {
   function updateProfile(p: JobSearchProfile) {
     setProfile(p);
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => { void saveJobProfile(p); }, 400);
+    saveTimer.current = setTimeout(() => {
+      // Les critères vivent sur le compte : un échec doit se voir, sinon la
+      // recherche suivante repart de critères que l'utilisateur croit modifiés.
+      void executerAction(() => saveJobProfile(p), "Vos critères n'ont pas pu être enregistrés.");
+    }, 400);
   }
 
   // Un lieu n'est pas requis : sans lieu, la recherche France Travail est nationale
