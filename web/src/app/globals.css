@@ -204,10 +204,9 @@ a:hover { text-decoration: underline; }
   white-space: nowrap;
   color: var(--muted);
 }
-.save-state[data-state="dirty"] {
-  color: var(--text);
-  font-weight: 600;
-}
+/* `idle` ne dit rien et ne prend pas de place : le calme n'a rien à annoncer. */
+.save-state[data-state="anonymous"] { color: var(--text); font-weight: 600; }
+.save-state[data-state="error"] { color: var(--red); font-weight: 600; }
 
 .logo-badge { display: flex; align-items: center; gap: 12px; }
 .logo-icon {

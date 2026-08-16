@@ -34,6 +34,16 @@ export interface Draft {
   company?: string;
   role?: string;
 
+  /**
+   * Identifiant du document du compte que ce brouillon est en train de modifier.
+   *
+   * Il voyage avec le brouillon, et non seulement en mémoire, parce qu'un simple
+   * rafraîchissement de page perdrait l'identité : l'enregistrement automatique
+   * suivant créerait alors un second document au lieu de mettre à jour le
+   * premier. `null` = document jamais enregistré sur le compte.
+   */
+  documentId?: string | null;
+
   updatedAt: number;
 }
 
@@ -434,6 +444,47 @@ export async function saveHistoryEntry(entry: HistoryEntry): Promise<void> {
     editor_reloads: entry.editor_reloads,
     last_viewed_at: entry.last_viewed_at ?? null,
     created_at: entry.created_at,
+  });
+  if (error) throw new RemoteError("Impossible d'enregistrer ce document.", error);
+  cacheInvalidate('documents:');
+}
+
+/**
+ * Écrit le CONTENU d'un document, et rien d'autre.
+ *
+ * `saveHistoryEntry` réécrit la ligne entière : parfait pour une création,
+ * destructeur pour une mise à jour répétée. L'enregistrement automatique, qui
+ * repart du document en cours d'édition, y remettrait à chaque pause de frappe
+ * `notes: ""`, `pdf_views: 0`, `editor_reloads: 0` et une `created_at` toute
+ * fraîche — soit les notes de l'utilisateur effacées, les compteurs d'usage
+ * remis à zéro et une date de création qui rajeunit sans cesse (le même piège
+ * que le `createdAt` des candidatures, corrigé le 15/08).
+ *
+ * Cette écriture ne nomme que les colonnes réellement éditées. À la création,
+ * les autres prennent leur valeur par défaut ; à la mise à jour, PostgREST ne
+ * touche pas aux colonnes absentes, donc elles survivent.
+ */
+export async function saveDocumentContent(doc: {
+  id: string;
+  doc_type: DocType;
+  company: string;
+  role: string;
+  filename: string;
+  json: DocData;
+  templateId: TemplateId | null;
+  applicationId?: string;
+}): Promise<void> {
+  const { supabase, userId } = await requireRemote();
+  const { error } = await supabase.from('documents').upsert({
+    user_id: userId,
+    id: doc.id,
+    doc_type: doc.doc_type,
+    title: doc.filename,
+    company: doc.company,
+    role: doc.role,
+    content: doc.json,
+    template_id: doc.templateId,
+    application_id: doc.applicationId ?? null,
   });
   if (error) throw new RemoteError("Impossible d'enregistrer ce document.", error);
   cacheInvalidate('documents:');

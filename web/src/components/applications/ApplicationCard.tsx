@@ -96,10 +96,13 @@ export default function ApplicationCard({
       return;
     }
     if (full?.json) {
+      // L'identité suit le document rouvert : l'enregistrement automatique le
+      // met à jour au lieu d'en déposer une copie.
       // eslint-disable-next-line react-hooks/purity -- appel confiné à un gestionnaire de clic derrière une confirmation, inatteignable pendant le render.
-      await saveDraft({ id: `draft-${doc.doc_type}`, json: full.json, templateId: doc.templateId, updatedAt: Date.now() });
+      await saveDraft({ id: `draft-${doc.doc_type}`, json: full.json, templateId: doc.templateId, documentId: doc.id, updatedAt: Date.now() });
       setDocType(doc.doc_type);
       setJson(full.json);
+      useDocStore.setState({ documentId: doc.id });
       setPreviewOverride(null);
       toast("Document rechargé.", "success");
       router.push("/");

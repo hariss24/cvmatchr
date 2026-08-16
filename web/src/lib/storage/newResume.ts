@@ -29,13 +29,18 @@ export async function startNewResume(): Promise<void> {
     templateId,
     company: "",
     role: "",
+    // Un CV vierge n'est le brouillon d'aucun document du compte : sans cette
+    // remise à zéro, le premier enregistrement automatique écraserait le CV
+    // précédent avec la page blanche.
+    documentId: null,
     updatedAt: Date.now(),
   });
 
   if (docType === "CV") {
     setJson(vierge);
+    useDocStore.setState({ documentId: null });
   } else {
-    useDocStore.setState({ docType: "CV" });
+    useDocStore.setState({ docType: "CV", documentId: null });
   }
   setCompany("");
   setRole("");

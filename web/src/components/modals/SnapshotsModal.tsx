@@ -36,15 +36,24 @@ export default function SnapshotsModal({ open, onClose }: SnapshotsModalProps) {
       return;
     }
 
+    // Restaurer un instantané, c'est revenir en arrière DANS le document courant,
+    // pas en ouvrir un autre : son identité est conservée tant qu'on reste sur le
+    // même type, pour que l'enregistrement automatique le corrige au lieu d'en
+    // créer un jumeau à l'ancienne version.
+    const { docType: typeCourant, documentId } = useDocStore.getState();
+    const identiteConservee = snap.doc_type === typeCourant ? documentId : null;
+
     await saveDraft({
       id: `draft-${snap.doc_type}`,
       json: snap.json,
       templateId: null,
+      documentId: identiteConservee,
       updatedAt: snap.ts,
     });
 
     setDocType(snap.doc_type);
     setJson(snap.json);
+    useDocStore.setState({ documentId: identiteConservee });
     setCompany(snap.company);
     setRole(snap.role);
     setPreviewOverride(null);

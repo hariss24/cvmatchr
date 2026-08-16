@@ -2,17 +2,20 @@
 
 import { useEffect, useRef } from "react";
 import { useAutoDraft } from "@/lib/storage/useAutoDraft";
+import { useAutoSaveCompte } from "@/lib/storage/useAutoSaveCompte";
 import { takeSnapshot } from "@/lib/storage/snapshots";
 import { useDocStore } from "@/state/docStore";
 
 /**
  * Effets globaux de l'application (sans rendu) :
  * - chargement/sauvegarde automatique du brouillon par type de document ;
+ * - enregistrement automatique sur le compte (remplace le bouton « Enregistrer ») ;
  * - snapshot automatique toutes les 5 minutes.
  * Extrait de l'ancien `Toolbar` lors de la refonte UI.
  */
 export default function DraftManager() {
   useAutoDraft();
+  useAutoSaveCompte();
   const snapshotFingerprint = (s: ReturnType<typeof useDocStore.getState>) =>
     JSON.stringify(s.json);
   const lastAutoSnapshot = useRef<string>(snapshotFingerprint(useDocStore.getState()));

@@ -67,9 +67,13 @@ export default function ResumeShelf() {
       return;
     }
     if (full?.json) {
-      await saveDraft({ id: `draft-${doc.doc_type}`, json: full.json, templateId: doc.templateId, updatedAt: Date.now() });
+      // Ouvrir un document, c'est le reprendre — pas en repartir. L'identité
+      // suit, donc l'enregistrement automatique met CELUI-CI à jour au lieu
+      // d'en déposer une copie de plus dans « Mes CV ».
+      await saveDraft({ id: `draft-${doc.doc_type}`, json: full.json, templateId: doc.templateId, documentId: doc.id, updatedAt: Date.now() });
       setDocType(doc.doc_type);
       setJson(full.json);
+      useDocStore.setState({ documentId: doc.id });
       setPreviewOverride(null);
       toast("Document rechargé.", "success");
       router.push("/");

@@ -194,18 +194,17 @@ export default function EditorPane() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14, marginRight: 4, display: "inline-block", verticalAlign: "middle" }}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
             <span style={{ verticalAlign: "middle" }}>{saveLabel} (Sauver)</span>
           </button>
-        ) : (
-          <span className="autosave" title={saveLabel.replace("✓ ", "")}>
-            {saveLabel.startsWith("✓") ? (
-              <>
-                <span className="autosave-dot" aria-hidden="true" />
-                <span className="autosave-label">Enregistré</span>
-              </>
-            ) : (
-              saveLabel
-            )}
-          </span>
-        )}
+        ) : null}
+        {/*
+          La pastille « Enregistré » a disparu d'ici. Elle parlait du brouillon
+          local, mais n'en disait rien à l'écran : l'utilisateur la lisait à côté
+          du « Modifications non enregistrées » de la barre du haut, qui parlait
+          du compte, et concluait — logiquement — que les deux se contredisaient.
+          Le brouillon local reste, silencieux : c'est un filet contre le crash
+          du navigateur, pas une promesse. Un seul état parle désormais, dans la
+          barre du haut. Le bouton ci-dessus, lui, survit : quand l'utilisateur
+          coupe l'auto-sauvegarde dans les réglages, il faut bien un moyen.
+        */}
 
         <div className="actions-mini">
           <button type="button" className="form-btn-mini" title="Coller/Importer un document au format JSON" onClick={onPasteJson}>

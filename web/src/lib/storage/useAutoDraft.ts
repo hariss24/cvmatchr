@@ -4,6 +4,7 @@ import { saveDraft, loadDraft, loadProfile } from "@/lib/storage/db";
 import { applyProfileToResume } from "@/lib/profile/profile";
 import type { Resume } from "@/lib/resume/schema";
 import { useSettingsStore } from "@/state/settingsStore";
+import { pendantRestauration } from "@/lib/storage/restaurationBrouillon";
 
 export function useAutoDraft() {
   const isLoaded = useRef(false);
@@ -36,20 +37,23 @@ export function useAutoDraft() {
           if (useDocStore.getState().docType !== docType) continue;
 
           if (draft) {
-            useDocStore.setState({
+            pendantRestauration(() => useDocStore.setState({
               json: draft.json,
               templateId: draft.templateId || "sobre",
+              // Rend au document l'identité qu'il avait avant le rafraîchissement :
+              // sans elle, l'enregistrement automatique en créerait un second.
+              documentId: draft.documentId ?? null,
               ...(draft.company !== undefined && !garderMeta.company ? { company: draft.company } : {}),
               ...(draft.role !== undefined && !garderMeta.role ? { role: draft.role } : {}),
-            });
+            }));
           } else if (docType === "CV" || docType === "Maître") {
             const profile = await loadProfile();
             // Le profil s'applique au document AFFICHÉ : si le type a changé
             // entre-temps, ce n'est plus un CV et le greffer dessus le corromprait.
             if (profile && useDocStore.getState().docType === docType) {
-              useDocStore.setState({
+              pendantRestauration(() => useDocStore.setState({
                 json: applyProfileToResume(useDocStore.getState().json as Resume, profile),
-              });
+              }));
             }
           }
           break;
@@ -73,12 +77,13 @@ export function useAutoDraft() {
         loadDraft(`draft-${state.docType}`).then((draft) => {
           if (loadingDocType.current !== state.docType) return; // changed again
           if (draft) {
-            useDocStore.setState({
+            pendantRestauration(() => useDocStore.setState({
               json: draft.json,
               templateId: draft.templateId || "sobre",
+              documentId: draft.documentId ?? null,
               ...(draft.company !== undefined ? { company: draft.company } : {}),
               ...(draft.role !== undefined ? { role: draft.role } : {}),
-            });
+            }));
 
           } else {
             // New draft, just keep current state or clear it. The old app cleared it or applied default template.
@@ -100,6 +105,9 @@ export function useAutoDraft() {
           templateId: state.templateId,
           company: state.company,
           role: state.role,
+          // Relu à l'instant de l'écriture, pas au moment de la frappe : le
+          // premier enregistrement sur le compte pose l'identité entre les deux.
+          documentId: useDocStore.getState().documentId,
           updatedAt: Date.now(),
         }).catch((e) => console.warn("Failed to save draft:", e));
       }, delay);

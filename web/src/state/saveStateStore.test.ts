@@ -1,28 +1,28 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useSaveStateStore } from './saveStateStore';
 
+/**
+ * `markDirty` / `markSaved('device' | 'account')` ont disparu avec le bouton
+ * « Enregistrer » : plus personne ne clique, donc plus rien n'est « modifié mais
+ * pas encore envoyé » à annoncer, et plus rien n'est « enregistré sur cet
+ * appareil ». Ce que ces tests protégeaient — ne jamais annoncer le compte quand
+ * l'envoi a échoué — est désormais vérifié là où la décision se prend :
+ * `lib/storage/useAutoSaveCompte.test.ts`.
+ */
 beforeEach(() => {
-  useSaveStateStore.setState({ state: 'dirty' });
+  useSaveStateStore.setState({ state: 'idle' });
 });
 
 describe('saveStateStore', () => {
-  it('part de "non enregistré"', () => {
-    expect(useSaveStateStore.getState().state).toBe('dirty');
+  it('part silencieux : rien à dire tant que rien n\'a bougé', () => {
+    expect(useSaveStateStore.getState().state).toBe('idle');
   });
 
-  it('passe à "compte" après un enregistrement répliqué', () => {
-    useSaveStateStore.getState().markSaved('account');
-    expect(useSaveStateStore.getState().state).toBe('account');
-  });
-
-  it('n\'annonce jamais le compte quand l\'envoi a échoué', () => {
-    useSaveStateStore.getState().markSaved('device');
-    expect(useSaveStateStore.getState().state).toBe('device');
-  });
-
-  it('repasse à "non enregistré" à la première modification', () => {
-    useSaveStateStore.getState().markSaved('account');
-    useSaveStateStore.getState().markDirty();
-    expect(useSaveStateStore.getState().state).toBe('dirty');
+  it('distingue les cinq situations sans les confondre', () => {
+    const { setState } = useSaveStateStore.getState();
+    for (const etat of ['saving', 'saved', 'anonymous', 'error', 'idle'] as const) {
+      setState(etat);
+      expect(useSaveStateStore.getState().state).toBe(etat);
+    }
   });
 });

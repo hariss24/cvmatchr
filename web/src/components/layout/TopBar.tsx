@@ -8,7 +8,7 @@ import { buildPdfFilename } from "@/lib/pdfgen/filename";
 // import removed
 import { toast, uiAlert, uiConfirm } from "@/state/uiStore";
 import { saveCurrentDocument } from "@/lib/storage/saveDocument";
-import { useSaveStateStore } from "@/state/saveStateStore";
+import { useSaveStateStore, type SaveState } from "@/state/saveStateStore";
 import { startNewResume } from "@/lib/storage/newResume";
 import { takeSnapshot } from "@/lib/storage/snapshots";
 import ChatPanel from "@/components/modals/ChatPanel";
@@ -21,6 +21,19 @@ import UserMenu from "@/components/layout/UserMenu";
  * (Nouveau CV, Historique, thème, paramètres API, conversion PDF).
  * Porté du design original Flask (templates/index.html + static/css/main.css).
  */
+/**
+ * L'explication complète va dans l'infobulle : la barre reste courte, mais
+ * l'utilisateur qui s'interroge obtient une réponse entière — en particulier
+ * dans les deux cas où son document n'est PAS sur son compte.
+ */
+const SAVE_TITLES: Record<SaveState, string> = {
+  idle: "Enregistrement automatique",
+  saving: "Envoi vers votre compte…",
+  saved: "Enregistré sur votre compte",
+  anonymous: "Connectez-vous pour enregistrer ce document sur votre compte",
+  error: "L'enregistrement a échoué. Il repartira à votre prochaine modification.",
+};
+
 export default function TopBar() {
   const docType = useDocStore((s) => s.docType);
   const templateId = useDocStore((s) => s.templateId);
@@ -31,34 +44,9 @@ export default function TopBar() {
   const [chatOpen, setChatOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // L'état est posé par `useAutoSaveCompte` (monté dans `DraftManager`) : la
+  // barre l'affiche, elle ne le calcule plus.
   const saveState = useSaveStateStore((s) => s.state);
-  const [saving, setSaving] = useState(false);
-
-  // Toute modification du document repasse l'état à « non enregistré ».
-  useEffect(() => {
-    const { markDirty } = useSaveStateStore.getState();
-    return useDocStore.subscribe((s, prev) => {
-      if (s.json !== prev.json || s.templateId !== prev.templateId
-        || s.company !== prev.company || s.role !== prev.role) {
-        markDirty();
-      }
-    });
-  }, []);
-
-  const onSave = useCallback(async () => {
-    if (saving) return;
-    setSaving(true);
-    try {
-      const where = await saveCurrentDocument();
-      useSaveStateStore.getState().markSaved(where);
-      toast("Enregistré sur votre compte.", "success");
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Impossible d'enregistrer ce document.";
-      await uiAlert(message, "Enregistrement");
-    } finally {
-      setSaving(false);
-    }
-  }, [saving]);
 
   const filename = buildPdfFilename(docType, role, includeDate);
 
@@ -104,11 +92,15 @@ export default function TopBar() {
       URL.revokeObjectURL(url);
       toast("PDF téléchargé.", "success");
 
-      // Le téléchargement enregistre toujours, comme avant — il n'en est
-      // simplement plus le seul moyen (bouton « Enregistrer », task 6).
+      // Télécharger enregistre aussi, sans attendre la pause de frappe : on
+      // veut que la version imprimée soit celle du compte. C'est désormais une
+      // mise à jour du document courant, plus une copie de plus.
+      const { setState } = useSaveStateStore.getState();
       try {
-        useSaveStateStore.getState().markSaved(await saveCurrentDocument());
+        await saveCurrentDocument();
+        setState("saved");
       } catch (err) {
+        setState("error");
         const message = err instanceof Error ? err.message : "Impossible d'enregistrer ce document.";
         toast(message, "error");
       }
@@ -176,16 +168,19 @@ export default function TopBar() {
           Nouveau CV
         </button>
 
-        <span className="save-state" data-state={saveState} title="État d'enregistrement">
-          {saveState === "dirty" && "Modifications non enregistrées"}
-          {saveState === "device" && "Enregistré sur cet appareil"}
-          {saveState === "account" && "Enregistré sur votre compte"}
+        {/*
+          Un seul état, court, et rien du tout quand il n'y a rien à dire. La
+          phrase entière (« Modifications non enregistrées ») mangeait la moitié
+          de la barre pour annoncer ce que l'utilisateur n'a plus à faire.
+          Les cinq états restent distincts : ne pas être connecté n'est pas une
+          panne, et une panne n'est pas un enregistrement réussi.
+        */}
+        <span className="save-state" data-state={saveState} title={SAVE_TITLES[saveState]}>
+          {saveState === "saving" && "Enregistrement…"}
+          {saveState === "saved" && "Enregistré"}
+          {saveState === "anonymous" && "Non enregistré"}
+          {saveState === "error" && "Échec"}
         </span>
-
-        <button type="button" className="btn-nav mobile-hidden" onClick={onSave} disabled={saving}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
-          {saving ? "Enregistrement…" : "Enregistrer"}
-        </button>
 
         <button className="go go-top" type="button" onClick={onConvert} disabled={busy}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>

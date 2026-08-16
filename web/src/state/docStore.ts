@@ -32,6 +32,17 @@ export type Doc = {
 
   /** Option : inclure la date dans le nom du fichier PDF. */
   includeDate: boolean;
+
+  /**
+   * Document du compte que l'on est en train de modifier.
+   *
+   * L'enregistrement automatique met CE document à jour. `null` signifie « pas
+   * encore enregistré sur le compte » : le premier envoi en crée un et pose son
+   * identifiant ici. Sans cette identité, chaque envoi créerait une copie de
+   * plus — invisible avec un bouton cliqué trois fois par jour, ruineux en
+   * automatique.
+   */
+  documentId: string | null;
 };
 
 
@@ -55,6 +66,7 @@ export type DocStore = Doc & {
   setPendingJobDesc: (v: string | null) => void;
 
   setIncludeDate: (v: boolean) => void;
+  setDocumentId: (documentId: string | null) => void;
 };
 
 const INITIAL_TEMPLATE: TemplateId = "marine";
@@ -71,6 +83,9 @@ export const useDocStore = create<DocStore>((set) => ({
   pendingJobDesc: null,
 
   includeDate: false,
+  documentId: null,
+
+  setDocumentId: (documentId) => set({ documentId }),
 
   setJson: (json) => {
     set({ json });
@@ -87,9 +102,12 @@ export const useDocStore = create<DocStore>((set) => ({
     set({ includeDate });
   },
 
+  // Changer de type, c'est changer de document : l'identité de l'ancien ne doit
+  // surtout pas suivre, sinon la lettre irait écraser le CV. `useAutoDraft`
+  // repose celle du brouillon du nouveau type juste après.
   setDocType: (docType) => {
     const json = defaultJsonFor(docType);
-    set({ docType, json });
+    set({ docType, json, documentId: null });
   },
 
   setTemplate: (templateId) => set({ templateId }),

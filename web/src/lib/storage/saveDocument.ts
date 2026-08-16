@@ -1,6 +1,6 @@
 import { useDocStore, type DocData } from "@/state/docStore";
 import { useAuthStore } from "@/state/authStore";
-import { saveHistoryEntry } from "@/lib/storage/db";
+import { saveDocumentContent } from "@/lib/storage/db";
 import { upsertApplicationForDocument, pruneAnonymousShelf } from "@/lib/applications/store";
 import { RemoteError } from "@/lib/storage/remote";
 import type { Resume, Letter, DocType } from "@/lib/resume/schema";
@@ -14,35 +14,45 @@ function personNameFor(docType: DocType, json: DocData): string {
 /**
  * Enregistre le document courant sur le compte utilisateur.
  *
- * L'ordre change : le contrôle de connexion passe avant l'écriture.
- * Sans compte, l'éditeur reste utilisable mais « Enregistrer » invite à se connecter.
+ * Met à jour le document en cours d'édition, ou en crée un s'il n'en existe pas
+ * encore. Cette distinction est tout le chantier : la version précédente
+ * appelait `crypto.randomUUID()` à chaque envoi, donc elle n'enregistrait pas,
+ * elle archivait. Trois clics par jour : invisible. En automatique : une copie
+ * du même CV par pause de frappe.
+ *
+ * Le contrôle de connexion passe avant l'écriture. Sans compte, l'éditeur reste
+ * utilisable : une absence de compte n'est pas une panne, et se dit autrement.
  */
 export async function saveCurrentDocument(): Promise<'account'> {
   if (!useAuthStore.getState().user) {
     throw new RemoteError('Connectez-vous pour enregistrer ce document.');
   }
-  const { company, role, docType, json, templateId } = useDocStore.getState();
+  const { company, role, docType, json, templateId, documentId } = useDocStore.getState();
   const name = personNameFor(docType, json);
 
   const applicationId = await upsertApplicationForDocument({ company, role, source: "generated" });
-  const entryId = crypto.randomUUID();
-  await saveHistoryEntry({
+  const estNouveau = !documentId;
+  const entryId = documentId ?? crypto.randomUUID();
+
+  await saveDocumentContent({
     id: entryId,
-    created_at: new Date().toISOString(),
     doc_type: docType,
     company,
     role,
-    job_desc: "",
     filename: `${name} - ${docType}.pdf`,
-    notes: "",
-    pdf_views: 0,
-    editor_reloads: 0,
-    last_viewed_at: new Date().toISOString(),
     json: structuredClone(json),
     templateId,
     applicationId,
   });
-  if (!applicationId) await pruneAnonymousShelf(docType, entryId);
+
+  // Posée seulement après une écriture réussie : une identité posée à l'avance
+  // survivrait à un échec et ferait croire, au prochain essai, qu'on met à jour
+  // un document qui n'existe pas.
+  if (estNouveau) useDocStore.getState().setDocumentId(entryId);
+
+  // Le rangement du rayon anonyme ne concerne que les documents fraîchement
+  // créés : le refaire à chaque mise à jour serait un appel réseau pour rien.
+  if (estNouveau && !applicationId) await pruneAnonymousShelf(docType, entryId);
 
   return 'account';
 }
