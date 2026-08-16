@@ -41,6 +41,50 @@
 
 ## Journal
 
+### 2026-08-16 : Deuxième passage d'audit — quatre défauts de plus, et ce qu'aucun test ne pouvait voir
+
+- **Quoi :** relecture ligne à ligne de `db.ts` et des cinq écrans principaux.
+  1. **Modèles de lettre morts.** Le code écrivait `subject` / `body` /
+     `is_default` ; la table `templates` déclare `letter_subject` /
+     `letter_body` et pas de `is_default`. Chaque écriture aurait été refusée,
+     et `ensureDefaultTemplates` ne regardait pas la réponse : un compte neuf
+     se serait retrouvé sans aucun modèle. **Invisible par construction** — le
+     faux client Supabase des tests accepte n'importe quelle colonne, et aucune
+     migration n'ayant été appliquée, le défaut n'avait jamais pu se manifester.
+  2. **Candidatures rajeunies.** `createdAt` était reconstruite depuis
+     `client_updated_at` : une retouche de note remettait le compteur à zéro et
+     le statut « sans réponse » ne se déclenchait jamais. Portée par le payload.
+  3. **Critères de recherche muets.** Leur chargement avalait son erreur ; le
+     formulaire restait simplement invisible, sans explication.
+  4. **Huit écritures muettes.** La règle « une écriture qui échoue le dit »
+     avait été appliquée aux lectures (`EtatErreur`) et oubliée sur les
+     écritures : renommer, supprimer, marquer un entretien, annuler, notes,
+     critères, profil. Helper `executerAction`. Exception assumée et commentée :
+     les compteurs d'usage (`pdf_views`, `editor_reloads`) restent silencieux.
+- **Verrou :** `colonnes.test.ts` **lit la migration SQL** et compare les
+  colonnes écrites au schéma réel. C'est la seule forme de test capable de voir
+  le point 1 ; les tests ordinaires simulent le serveur, et un faux serveur
+  n'a pas de schéma.
+- **Fichiers touchés :** `db.ts`, `colonnes.test.ts` (créé),
+  `lib/ui/executerAction.ts` (créé), `ApplicationCard.tsx`, `ResumeShelf.tsx`,
+  `JobsView.tsx`, `ProfileView.tsx`.
+- **Résultat vérifs :** `tsc` propre, lint 0 erreur, **770/770 tests verts**,
+  build réussi, 39/39 e2e.
+- **⚠️ Piège d'outillage, sans rapport avec ce chantier :** `npm test` lance
+  Vitest avec son délai par défaut de 5 s. Les tests de rendu PDF et de gros
+  fichiers de données le dépassent dès que la machine est chargée — 7 faux
+  échecs mesurés, **reproduits à l'identique sur le code d'avant les
+  corrections** (`git stash`), donc antérieurs. Ils passent tous seuls, ou avec
+  `--testTimeout=30000`. À trancher : relever le délai dans `vitest.config.ts`,
+  ou n'exécuter la suite que machine au repos.
+- **Reste à faire, inchangé :** appliquer `0002_user_settings.sql` puis
+  `0003_documents_templates.sql` sur Supabase, puis la vérification manuelle
+  (task 9), jamais faite.
+- **Dette relevée, non corrigée :** l'onglet « Offres » charge toutes les offres
+  en entier (texte des annonces compris) à chaque ouverture. Le principe
+  catalogue/détail appliqué aux documents ne l'a pas été aux offres. Invisible
+  aujourd'hui, sensible à quelques centaines d'offres.
+
 ### 2026-08-15 : Relecture du chantier « serveur source unique » — deux corrections, et une vérification à refaire
 
 - **Quoi :** relecture humaine des neuf tasks. Les vérifications automatiques
