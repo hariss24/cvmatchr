@@ -189,7 +189,65 @@ describe("rankOffer", () => {
     expect(r.score).toBeGreaterThanOrEqual(40);
     expect(shouldPersist(r, profilMarketing)).toBe(true);
   });
+
+  it("calcule une enveloppe honnête pour une offre ATS sans données secondaires (T5)", async () => {
+    // ⚠️ Mesuré le 18/08/2026 (T5) : ce que la source ne sait pas dire ne doit ni rapporter
+    // ni coûter. Une offre dont le métier et les compétences sont parfaits mais sans coordonnée,
+    // sans contrat/salaire et sans exigence d'expérience doit obtenir 100/100 (grade S).
+    const profilWebMaster: JobSearchProfile = {
+      ...EMPTY_PROFILE,
+      keywords: ["webmaster"],
+      prefilterKeywords: ["seo", "wordpress"],
+    };
+    const ctxWeb = await buildRankContext(profilWebMaster, { lat: 48.85, lng: 2.35 });
+
+    const offreATSParfaite = offre({
+      title: "Webmaster SEO",
+      jobText: "Profil recherché : maîtrise de SEO et WordPress pour refonte de sites.",
+      // Aucune donnée secondaire (distance inconnue, contrat/salaire vides, pas d'exigence d'expérience)
+      contractLabel: "",
+      salaryLabel: "",
+      experienceExige: "",
+      lat: undefined,
+      lng: undefined,
+    });
+
+    const r = rankOffer(offreATSParfaite, profilWebMaster, ctxWeb, T0);
+    expect(r.score).toBe(100);
+    expect(r.grade).toBe("S");
+
+
+    // Vérifier que distance, contrat et experience sont bien sortis de l'enveloppe (max: 0)
+    expect(r.breakdown.find((l) => l.key === "distance")?.max).toBe(0);
+    expect(r.breakdown.find((l) => l.key === "contrat")?.max).toBe(0);
+    expect(r.breakdown.find((l) => l.key === "experience")?.max).toBe(0);
+  });
+
+  it("rend 0/100 sans points gratuits pour une offre ATS hors-sujet (T5)", async () => {
+    const profilWebMaster: JobSearchProfile = {
+      ...EMPTY_PROFILE,
+      keywords: ["webmaster"],
+      prefilterKeywords: ["seo", "wordpress"],
+    };
+    const ctxWeb = await buildRankContext(profilWebMaster, { lat: 48.85, lng: 2.35 });
+
+    const offreATSHorsSujet = offre({
+      title: "Comptable Unique",
+      jobText: "Gestion de la comptabilité générale et paie.",
+      contractLabel: "",
+      salaryLabel: "",
+      experienceExige: "",
+      lat: undefined,
+      lng: undefined,
+    });
+
+    const r = rankOffer(offreATSHorsSujet, profilWebMaster, ctxWeb, T0);
+    expect(r.score).toBe(0);
+    expect(r.grade).toBe("D");
+    expect(shouldPersist(r, profilWebMaster)).toBe(false);
+  });
 });
+
 
 
 describe("shouldPersist", () => {

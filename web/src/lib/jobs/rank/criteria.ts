@@ -264,9 +264,22 @@ export function experiencePoints(offer: JobOffer, profile: JobSearchProfile): Li
   const label = "Expérience";
   const max = MAX.experience;
 
+  // Si l'offre ne précise pas d'exigence ET que le profil est indifférent :
+  // l'information manque des deux côtés, le critère sort de l'enveloppe (max: 0).
+  if (!offer.experienceExige && profile.experienceLevel === "") {
+    return { key, label, points: 0, max: 0, reason: "" };
+  }
+
   if (profile.experienceLevel === "") {
+    if (offer.experienceExige === "D") {
+      return { key, label, points: max, max, reason: "débutant accepté" };
+    }
+    if (offer.experienceExige === "S") {
+      return { key, label, points: Math.round(max * 0.8), max, reason: "expérience souhaitée" };
+    }
     return { key, label, points: max, max, reason: "niveau indifférent" };
   }
+
   if (offer.experienceExige === "D") {
     return { key, label, points: max, max, reason: "débutant accepté" };
   }
@@ -278,6 +291,7 @@ export function experiencePoints(offer: JobOffer, profile: JobSearchProfile): Li
   }
 
   const demande = offer.experienceYears ?? 0;
+
   const couvert = PLAFOND_NIVEAU[profile.experienceLevel];
   return demande <= couvert
     ? { key, label, points: max, max, reason: `${demande} an(s) exigé(s), dans ton niveau` }

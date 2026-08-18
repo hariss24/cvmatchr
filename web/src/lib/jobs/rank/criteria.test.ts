@@ -157,18 +157,26 @@ describe("contratSalairePoints", () => {
 
 
 describe("experiencePoints", () => {
-  it("donne le maximum si le niveau demandé est indifférent", () => {
-    expect(experiencePoints(offre(), { ...EMPTY_PROFILE, experienceLevel: "" }).points)
-      .toBe(MAX.experience);
+  it("sort de l'enveloppe (max: 0) si l'exigence est absente et le profil indifférent", () => {
+    const l = experiencePoints(offre(), { ...EMPTY_PROFILE, experienceLevel: "" });
+    expect(l.points).toBe(0);
+    expect(l.max).toBe(0);
   });
 
-  it("donne le maximum quand les débutants sont acceptés", () => {
+  it("donne le maximum si le profil est indifférent et l'offre précise débutant accepté", () => {
+    const l = experiencePoints(offre({ experienceExige: "D" }), { ...EMPTY_PROFILE, experienceLevel: "" });
+    expect(l.points).toBe(MAX.experience);
+    expect(l.max).toBe(MAX.experience);
+  });
+
+  it("donne le maximum quand les débutants sont acceptés avec un niveau 1", () => {
     const l = experiencePoints(
       offre({ experienceExige: "D" }),
       { ...EMPTY_PROFILE, experienceLevel: "1" },
     );
     expect(l.points).toBe(MAX.experience);
   });
+
 
   it("pénalise une exigence supérieure au niveau du candidat", () => {
     const l = experiencePoints(
