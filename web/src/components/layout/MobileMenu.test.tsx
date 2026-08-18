@@ -11,7 +11,10 @@ const auth = {
   signOut: vi.fn(),
 };
 vi.mock("@/state/authStore", () => ({ useAuthStore: () => auth }));
-vi.mock("@/components/auth/QuotaBadge", () => ({ default: () => null }));
+vi.mock("@/components/auth/QuotaBadge", () => ({
+  QuotaGauge: () => <div>jauge</div>,
+}));
+vi.mock("next/navigation", () => ({ usePathname: () => "/jobs" }));
 vi.mock("@/components/auth/GoogleSignInButton", () => ({
   default: () => <div>Bouton Google</div>,
 }));
@@ -62,5 +65,37 @@ describe("MobileMenu — accès au compte", () => {
     afficher();
     expect(screen.queryByText("Se connecter avec Google")).toBeNull();
     auth.isConfigured = true;
+  });
+});
+
+/**
+ * Sur mobile, la navigation du haut est masquée : le menu est le seul endroit
+ * où l'utilisateur peut savoir sur quelle page il se trouve.
+ */
+describe("MobileMenu — repères", () => {
+  it("marque la page courante, et elle seule", () => {
+    const { container } = afficher();
+    const courants = [...container.querySelectorAll(".mm-item.is-current")];
+    expect(courants).toHaveLength(1);
+    expect(courants[0].textContent).toContain("Offres");
+  });
+
+  it("distingue l'action principale des destinations", () => {
+    const { container } = afficher();
+    // « Nouveau CV » remplace le document en cours : ce n'est pas un lien.
+    const primaire = container.querySelector(".mm-primary");
+    expect(primaire?.textContent).toContain("Nouveau CV");
+    expect(container.querySelector(".mm-item.mm-primary")).toBeNull();
+  });
+
+  it("montre l'état du thème au lieu de basculer en aveugle", () => {
+    document.documentElement.setAttribute("data-theme", "dark");
+    const { container } = afficher();
+    expect(container.querySelector(".mm-switch.is-on")).not.toBeNull();
+
+    document.documentElement.setAttribute("data-theme", "light");
+    cleanup();
+    const clair = afficher();
+    expect(clair.container.querySelector(".mm-switch.is-on")).toBeNull();
   });
 });

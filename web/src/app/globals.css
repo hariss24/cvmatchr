@@ -942,16 +942,127 @@ button.ghost:active { box-shadow: var(--neu-inset); transform: translateY(1px); 
 }
 .mobile-menu__item:hover { box-shadow: var(--neu-raised); text-decoration: none; color: var(--text); }
 .mobile-menu__item:active { box-shadow: var(--neu-inset); }
-.mobile-menu__compte {
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  padding: 12px 8px; margin-bottom: 6px;
-  border-bottom: 1px solid var(--border, rgba(128,128,128,0.2));
+
+/* ---- Menu ☰ refondu : trois étages, trois rôles ----
+   Le menu était une pile de neuf boutons identiques — « Nouveau CV », qui
+   remplace le document en cours, y pesait autant que « Thème clair / sombre ».
+   Étage 1 : qui je suis. Étage 2 : où je vais. Étage 3 : ce que je règle.
+   Sur mobile, ce panneau est la seule porte vers le compte (le menu
+   utilisateur de la barre du haut porte `mobile-hidden`). */
+
+.mm-account {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  padding: 13px 14px; margin-bottom: 14px;
 }
-.mobile-menu__identite {
-  font-size: 14px; font-weight: 700; color: var(--text);
-  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+.mm-account__row { display: flex; align-items: center; gap: 11px; }
+.mm-avatar {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  background: var(--cta-grad); box-shadow: var(--cta-shadow);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 800; font-size: 15px;
 }
-.mobile-menu__item--sortie { margin-top: 6px; color: var(--muted); }
+.mm-avatar--photo { object-fit: cover; background: none; box-shadow: var(--neu-raised-sm); }
+.mm-account__id { min-width: 0; flex: 1; }
+.mm-account__name {
+  display: block; font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.3;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mm-account__mail {
+  display: block; font-size: 11.5px; color: var(--muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* Jauge de crédits : hauteur RÉSERVÉE dès le premier rendu. Le compteur
+   n'affichait rien tant que le chiffre n'était pas revenu du serveur, puis
+   apparaissait — tout le menu sautait d'une ligne sous le doigt. */
+.mm-credits { margin-top: 12px; min-height: 34px; }
+.mm-credits__top {
+  display: flex; align-items: baseline; justify-content: space-between;
+  font-size: 11.5px; color: var(--muted); margin-bottom: 5px;
+}
+.mm-credits__num { font-weight: 800; color: var(--text); font-family: var(--font-code); font-size: 12px; }
+.mm-credits__bar {
+  height: 6px; border-radius: 999px; background: var(--field);
+  box-shadow: var(--neu-inset); overflow: hidden;
+}
+.mm-credits__fill { height: 100%; border-radius: 999px; background: var(--cta-grad); }
+.mm-credits__fill--low { background: var(--error); }
+.mm-credits.is-loading .mm-credits__num,
+.mm-credits.is-loading .mm-credits__label { color: var(--faint); }
+
+/* Pas de compte : une invitation, pas un vide. Depuis que l'enregistrement est
+   automatique, sans connexion rien n'est conservé. */
+.mm-signin { display: flex; flex-direction: column; gap: 9px; align-items: stretch; text-align: center; }
+.mm-signin__pitch { font-size: 12px; color: var(--muted); line-height: 1.55; margin: 0; }
+.mm-google {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  min-height: 44px; border-radius: 999px; border: none; cursor: pointer;
+  background: var(--field); color: var(--text); box-shadow: var(--neu-raised-sm);
+  font-family: var(--font-ui); font-size: 13.5px; font-weight: 600;
+}
+
+.mm-section { margin-bottom: 14px; }
+.mm-section__label {
+  font-size: 9.5px; color: var(--faint); letter-spacing: 0.9px;
+  text-transform: uppercase; font-weight: 700; padding: 0 4px 7px;
+}
+.mm-item {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  background: var(--bg); color: var(--text); border: none; text-align: left;
+  border-radius: 12px; padding: 0 14px; min-height: 48px;
+  font-family: var(--font-ui); font-size: 14px; font-weight: 600;
+  cursor: pointer; box-shadow: var(--neu-raised-sm); text-decoration: none;
+  margin-bottom: 6px;
+}
+.mm-item:hover { box-shadow: var(--neu-raised); text-decoration: none; color: var(--text); }
+.mm-item:active { box-shadow: var(--neu-inset); }
+.mm-item svg { color: var(--faint); flex-shrink: 0; }
+/* Page courante : sur mobile, la navigation du haut est masquée — c'est le
+   seul repère dont dispose l'utilisateur. */
+.mm-item.is-current { box-shadow: var(--neu-raised-sm), 0 0 0 1.5px var(--orange2); }
+.mm-item.is-current svg { color: var(--orange-text); }
+
+.mm-primary {
+  display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%;
+  background: var(--cta-grad); color: #fff; border: none;
+  border-radius: 12px; min-height: 48px; cursor: pointer;
+  font-family: var(--font-ui); font-size: 14px; font-weight: 700;
+  box-shadow: var(--cta-shadow); margin-bottom: 14px;
+}
+
+/* Réglages : plus discrets, ce ne sont pas des destinations quotidiennes. */
+.mm-quiet {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  background: none; border: none; text-align: left; box-shadow: none;
+  color: var(--muted); border-radius: 12px; padding: 0 14px; min-height: 46px;
+  font-family: var(--font-ui); font-size: 13.5px; font-weight: 600;
+  cursor: pointer; text-decoration: none;
+}
+.mm-quiet svg { color: var(--faint); flex-shrink: 0; }
+.mm-quiet:hover { background: var(--card); color: var(--text); text-decoration: none; }
+
+/* L'interrupteur montre l'état du thème, au lieu de basculer en aveugle. */
+.mm-switch {
+  margin-left: auto; width: 40px; height: 23px; border-radius: 999px; flex-shrink: 0;
+  background: var(--field); box-shadow: var(--neu-inset); position: relative;
+}
+.mm-switch::after {
+  content: ""; position: absolute; top: 3px; left: 3px;
+  width: 17px; height: 17px; border-radius: 50%;
+  background: var(--bg); box-shadow: var(--neu-raised-sm);
+  transition: left 140ms;
+}
+.mm-switch.is-on { background: var(--cta-grad); box-shadow: var(--cta-shadow); }
+.mm-switch.is-on::after { left: 20px; background: #fff; }
+
+.mm__spacer { flex: 1 1 auto; min-height: 8px; }
+.mm-signout {
+  display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%;
+  background: none; border: none; cursor: pointer;
+  color: var(--faint); font-family: var(--font-ui); font-size: 13px; font-weight: 600;
+  min-height: 44px; border-top: 1px solid var(--border); padding-top: 4px;
+}
+.mm-signout:hover { color: var(--error); }
 .mobile-only { display: none !important; }
 
 /* ---- EditorDrawer ---- */

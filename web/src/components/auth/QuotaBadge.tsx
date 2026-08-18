@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 import { createBrowserClientHelper } from "@/lib/supabase/client";
 import { useAuthStore } from "@/state/authStore";
 
-export default function QuotaBadge() {
+/**
+ * Lit le solde de crédits du mois. `used === null` = pas encore connu.
+ *
+ * Extrait du badge parce que deux écrans l'affichent différemment : une phrase
+ * dans le menu du haut, une jauge dans le menu ☰ mobile — où c'est le seul
+ * endroit où l'utilisateur peut consulter son solde.
+ */
+export function useQuota() {
   const user = useAuthStore((s) => s.user);
   const [used, setUsed] = useState<number | null>(null);
   const [limit, setLimit] = useState<number>(15);
@@ -39,6 +46,12 @@ export default function QuotaBadge() {
     };
   }, [user]);
 
+  return { used, limit };
+}
+
+export default function QuotaBadge() {
+  const { used, limit } = useQuota();
+
   // Le compteur occupe sa place AVANT de connaître son chiffre. Il rendait
   // `null` pendant l'aller-retour serveur, puis apparaissait : sur mobile, où
   // il ouvre le menu ☰, tout le menu sautait d'une ligne sous le doigt de
@@ -52,7 +65,37 @@ export default function QuotaBadge() {
       className="quota-badge"
       style={{ fontSize: "0.85em", opacity: 0.8, minHeight: "1.2em", display: "inline-block" }}
     >
-      {used === null ? " " : `${used} / ${limit} crédits ce mois-ci`}
+      {used === null ? " " : `${used} / ${limit} crédits ce mois-ci`}
     </span>
+  );
+}
+
+/**
+ * Le même solde, en jauge — pour le menu ☰ mobile.
+ *
+ * Une barre se lit sans être lue : elle dit « il t'en reste beaucoup » ou
+ * « tu y es presque » avant que l'œil n'atteigne le chiffre. Elle tient sa
+ * place dès le premier rendu, vide, plutôt que d'afficher un solde inventé.
+ */
+export function QuotaGauge() {
+  const { used, limit } = useQuota();
+  const connu = used !== null;
+  const part = connu && limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 0;
+
+  return (
+    <div className={`mm-credits${connu ? "" : " is-loading"}`}>
+      <div className="mm-credits__top">
+        <span className="mm-credits__label">Crédits ce mois-ci</span>
+        <span className="mm-credits__num">{connu ? `${used} / ${limit}` : "—"}</span>
+      </div>
+      <div className="mm-credits__bar">
+        {connu && (
+          <div
+            className={`mm-credits__fill${part >= 85 ? " mm-credits__fill--low" : ""}`}
+            style={{ width: `${part}%` }}
+          />
+        )}
+      </div>
+    </div>
   );
 }

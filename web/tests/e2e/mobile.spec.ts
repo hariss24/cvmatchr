@@ -21,7 +21,18 @@ test.describe("mobile", () => {
     // « Historique » a été absorbée par « Candidatures » (commit d0d9082, 25/07).
     await expect(menu.getByRole("link", { name: "Candidatures" })).toBeVisible();
     await expect(menu.getByRole("button", { name: "Nouveau CV" })).toBeVisible();
-    await expect(menu.getByRole("link", { name: "Paramètres & Dashboard" })).toBeVisible();
+    // « Paramètres & Dashboard » raccourci en « Paramètres » (refonte du 18/08) :
+    // le menu desktop l'appelle déjà ainsi, et la ligne tenait mal sur 375 px.
+    await expect(menu.getByRole("link", { name: "Paramètres" })).toBeVisible();
+
+    // Le compte vit ICI sur mobile : le menu utilisateur de la barre du haut
+    // porte `mobile-hidden`. Sans ces lignes, la seule porte vers la connexion
+    // pouvait disparaître sans qu'aucun test ne s'en aperçoive.
+    await expect(menu.locator(".mm-account")).toBeVisible();
+
+    // La page courante est marquée — seul repère quand la navigation du haut
+    // est masquée.
+    await expect(menu.locator(".mm-item.is-current")).toHaveText(/Éditeur/);
 
     // Navigation réelle depuis le menu.
     await menu.getByRole("link", { name: "Offres" }).click();
