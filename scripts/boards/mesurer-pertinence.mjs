@@ -122,6 +122,34 @@ const MOTS_VIDES = new Set([
   "sur",
 ]);
 
+// Positions, jamais des métiers : écartées du reste comme les mots vides.
+// ⚠️ Doit rester identique à MOTS_FONCTION dans web/src/lib/jobs/synonymes.ts —
+// la synchronisation des deux listes est vérifiée par mesurer-pertinence.test.mjs.
+const MOTS_FONCTION = new Set([
+  "charge",
+  "chargee",
+  "responsable",
+  "assistant",
+  "assistante",
+  "consultant",
+  "consultante",
+  "chef",
+  "cheffe",
+  "directeur",
+  "directrice",
+  "manager",
+  "adjoint",
+  "adjointe",
+  "coordinateur",
+  "coordinatrice",
+  "lead",
+  "head",
+  "senior",
+  "junior",
+  "expert",
+  "experte",
+]);
+
 export function construireCriteres(keywords) {
   const sortie = [];
   const vus = new Set();
@@ -153,7 +181,9 @@ export function construireCriteres(keywords) {
 
         const motsK = K.split(/\s+/).filter(Boolean);
         const motsT = new Set(terme.split(/\s+/).filter(Boolean));
-        const reste = motsK.filter((w) => !motsT.has(w) && !MOTS_VIDES.has(w));
+        const reste = motsK.filter(
+          (w) => !motsT.has(w) && !MOTS_VIDES.has(w) && !MOTS_FONCTION.has(w),
+        );
 
         if (reste.length === 0) {
           for (const s of groupe) {

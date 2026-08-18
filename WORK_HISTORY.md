@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Au 18/08/2026 — Chantier Mots-clés conjonctifs en cours.** Exécution du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md` pour éliminer le bruit sur les mots-clés composés dans le marché caché et le classement. Tasks T0 à T5 terminées. **Prochaine étape en cours :** Task T6 — Affichage du critère d'entrée (`JobCard.tsx`, `globals.css`).
+**Au 18/08/2026 — Chantier Mots-clés conjonctifs terminé, plus un correctif de vérification.** Exécution complète du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md` (T0 à T6), suivie d'une relecture qui a trouvé une régression : les mots de fonction (« chargé ») étaient exigés dans les titres anglais, faisant tomber la recherche réelle du candidat de 9 offres pertinentes à 1. Corrigé et mesuré. **Prochaine étape suggérée :** décider du sort du critère « compétences » quand le candidat n'a saisi aucune compétence — il pèse aujourd'hui 45 des 65 points de l'enveloppe du marché caché et peut faire tomber à 31/100 une offre dont le titre est exactement le métier cherché.
 
 ---
 
@@ -40,6 +40,23 @@
 ---
 
 ## Journal
+
+### 2026-08-18 : Mots-clés conjonctifs — correctif : un mot de fonction n'est pas une exigence
+
+- **Quoi :** Ajout de `MOTS_FONCTION` dans `synonymes.ts` (« chargé », « responsable », « assistant », « chef », « senior »…), écartés du reste d'un mot-clé au même titre que les mots vides. Liste répliquée dans `scripts/boards/mesurer-pertinence.mjs`, avec un test qui compare les tables des deux fichiers terme à terme.
+- **Pourquoi :** La règle conjonctive posée en T1 se retournait contre le candidat. « Chargé marketing digital » produisait le critère « digital marketing + chargé » : aucun titre anglais ne contient « chargé », et 4 581 des 19 555 offres de l'index sont intitulées en anglais **pour des postes en France** (Doctolib, Deliveroo, Deloitte, tous à Paris). Mesuré : la recherche réelle du candidat tombait de 9 offres pertinentes à 1. C'est le pendant de la règle déjà écrite pour les GROUPES — un niveau hiérarchique ne désigne pas un métier — qui n'avait pas été appliquée au reste du mot-clé.
+- **Second défaut corrigé :** l'outil de mesure T0 réimplémente la sélection (Node pur, ne peut pas importer du TypeScript) et n'avait pas été synchronisé : il annonçait 1 offre là où le code réel en rendait 9. Un outil de mesure qui ment est pire que pas d'outil — d'où le test de synchronisation.
+- **Fichiers touchés :** `web/src/lib/jobs/synonymes.ts`, `web/src/lib/jobs/synonymes.test.ts`, `scripts/boards/mesurer-pertinence.mjs`, `scripts/boards/mesurer-pertinence.test.mjs`, `WORK_HISTORY.md`.
+- **Mesures (18/08/2026, index de 19 555 offres) :** les 5 mots-clés réels du candidat 1 → **9 offres**, identiques à l'avant-chantier ; « chef de projet marketing » **2** (contre 60 avant le chantier, dont 0 pertinente) ; « chef de projet web » **0** ; « développeur » inchangé.
+- **Résultat vérifs :** `npx tsc --noEmit` OK, `npm run lint` 0 erreur (3 warnings préexistants), `npx vitest run` 818/818, `node --test scripts/boards/` 143/143, `npm run build` OK.
+
+### 2026-08-18 : Mots-clés conjonctifs — Task T6 : Affichage du critère d'entrée
+
+- **Quoi :** Ajout de la mention discrète « Trouvée via : « <critereEntree> » » sous l'intitulé de poste dans `JobCard.tsx` (avec style `.job-critere` dans `globals.css`) lorsque `critereEntree` est présent et diffère du titre de l'offre. Champ ajouté dans `JobEntry` (`db.ts`) et relayé dans `JobsView.tsx`. Tests unitaires dans `JobCard.test.tsx`.
+- **Pourquoi :** Tâche T6 du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md`. Expliquer clairement au candidat pourquoi une offre anglophone ou élargie par synonyme (« Senior Software Engineer ») lui est proposée sur une recherche « développeur ».
+- **Fichiers touchés :** `web/src/components/jobs/JobCard.tsx`, `web/src/components/jobs/JobCard.test.tsx`, `web/src/components/jobs/JobsView.tsx`, `web/src/lib/storage/db.ts`, `web/src/app/globals.css`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` OK, `npm run lint` OK (0 erreur), `npx vitest run` (816/816 tests verts).
+
 
 ### 2026-08-18 : Mots-clés conjonctifs — Task T5 : Enveloppe honnête
 

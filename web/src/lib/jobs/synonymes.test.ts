@@ -136,4 +136,25 @@ describe("Critères conjonctifs (synonymes)", () => {
       expect(meilleurCritere(titre, criteres)).toBeNull();
     });
   });
+
+  describe("mots de fonction dans le reste", () => {
+    it("n'exige pas un titre de fonction français dans un intitulé anglais", () => {
+      // Piège mesuré le 18/08/2026 : « Chargé marketing digital » exigeait
+      // « digital marketing » ET « chargé » dans le titre. Aucun titre anglais
+      // ne contient « chargé », et la recherche réelle du candidat tombait de
+      // 9 offres pertinentes à 1.
+      const criteres = construireCriteres(["Chargé marketing digital"]);
+      expect(criteres.some((c) => satisfait("Digital Marketing Manager", c))).toBe(true);
+      expect(criteres.some((c) => c.termes.includes("charge"))).toBe(false);
+    });
+
+    it("garde en revanche un reste qui désigne un domaine", () => {
+      // « marketing » nomme un métier, pas une position : il reste exigé, sinon
+      // « chef de projet marketing » retrouverait tous les chefs de projet.
+      const criteres = construireCriteres(["chef de projet marketing"]);
+      expect(criteres.some((c) => satisfait("Chef de projet Achats Parfums", c))).toBe(false);
+      expect(criteres.some((c) => satisfait("Marketing Project Manager", c))).toBe(true);
+    });
+  });
+
 });

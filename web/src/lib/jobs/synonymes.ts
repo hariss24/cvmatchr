@@ -137,6 +137,52 @@ const MOTS_VIDES = new Set([
 ]);
 
 /**
+ * Mots qui désignent une POSITION, jamais un métier — écartés du reste d'un
+ * mot-clé au même titre que les mots vides.
+ *
+ * ⚠️ Sans cette liste, l'exigence conjointe se retournait contre le candidat.
+ * « Chargé marketing digital » déclenche le groupe « marketing digital », et le
+ * reste valait alors « chargé » : la recherche exigeait un titre contenant à la
+ * fois « digital marketing » ET « chargé ». Aucun titre anglais ne contient
+ * « chargé » — et 4 581 des 19 555 offres de l'index sont intitulées en anglais
+ * pour des postes en France (Doctolib, Deliveroo, Deloitte, tous à Paris).
+ * Mesuré le 18/08/2026 sur la recherche réelle du candidat : 9 offres
+ * pertinentes tombaient à 1.
+ *
+ * C'est le pendant exact de la règle déjà écrite plus haut pour les GROUPES :
+ * un niveau hiérarchique ne désigne pas un métier, il désigne une place dans un
+ * métier quelconque. Il ne peut donc ni ramener des offres à lui seul, ni en
+ * exclure en étant exigé.
+ *
+ * N'y mettre que des positions incontestables : « gestionnaire » ou
+ * « technicien » nomment de vrais métiers et n'ont rien à faire ici.
+ */
+const MOTS_FONCTION = new Set([
+  "charge",
+  "chargee",
+  "responsable",
+  "assistant",
+  "assistante",
+  "consultant",
+  "consultante",
+  "chef",
+  "cheffe",
+  "directeur",
+  "directrice",
+  "manager",
+  "adjoint",
+  "adjointe",
+  "coordinateur",
+  "coordinatrice",
+  "lead",
+  "head",
+  "senior",
+  "junior",
+  "expert",
+  "experte",
+]);
+
+/**
  * Un critère de recherche : TOUS les termes doivent apparaître dans le texte
  * examiné. C'est ce qui distingue « chef de projet marketing » traduit en
  * « project manager » + « marketing » — qui trouve « Marketing Project
@@ -210,7 +256,9 @@ export function construireCriteres(keywords: string[]): Critere[] {
 
         const motsK = K.split(/\s+/).filter(Boolean);
         const motsT = new Set(terme.split(/\s+/).filter(Boolean));
-        const reste = motsK.filter((w) => !motsT.has(w) && !MOTS_VIDES.has(w));
+        const reste = motsK.filter(
+          (w) => !motsT.has(w) && !MOTS_VIDES.has(w) && !MOTS_FONCTION.has(w),
+        );
 
         if (reste.length === 0) {
           // Terme générique tapé directement (ex: "chef de projet")
