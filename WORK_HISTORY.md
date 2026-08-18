@@ -15,9 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Au 16/08/2026 — le serveur est la source unique.** Le local-first et ses 740 lignes de réplication sont supprimés (`syncEngine`/`syncMapping`/`syncFields`/`syncEvents`) : CV, lettres, CV Maîtres, candidatures, offres, profil, critères et modèles vivent sur Supabase ; seuls le brouillon en cours, l'annuler/rétablir et trois caches techniques restent locaux. Migrations `0002_user_settings.sql` et `0003_documents_templates.sql` **appliquées** par le propriétaire le 16/08. Vérifié en local contre la vraie base (import + enregistrement OK) ; **rien n'est poussé en ligne**, la production tourne encore l'ancien code — d'où un effet de bord temporaire et attendu : la table `applications` étant partagée par les deux versions, une candidature créée en local apparaît sur le site en ligne, mais sans son document (`documents` est inconnu de l'ancien code). Six défauts ont été trouvés en relecture après l'exécution par Gemini, dont un destructeur (Dexie v14 supprimait les tables avant que la reprise puisse les lire) et une fonctionnalité morte (colonnes `subject`/`body` inexistantes) — tous corrigés et verrouillés par tests, dont deux tests qui comparent le code au schéma réel (`schemaLocal.test.ts`, `colonnes.test.ts`). **Prochaine étape en cours :** `docs/superpowers/specs/2026-08-16-enregistrement-automatique-design.md` — supprimer le bouton « Enregistrer » au profit d'un enregistrement automatique, ce qui exige de donner une identité stable au document courant (aujourd'hui chaque enregistrement crée une copie). Ensuite seulement : pousser en ligne, puis le chantier B (compte obligatoire, `TODO.md`).
-
-**Ancienne note, conservée pour le contexte produit :** le **socle comptes + base serveur**. C'est le seul chantier qui transforme l'outil en produit : il débloque d'un coup les huit fonctionnalités listées en tête de `LIMITES.md` — alertes email sur le marché caché (la donnée est déjà produite chaque matin, il n'y a simplement personne à qui l'envoyer), synchronisation multi-appareils, offre payante, partage d'un CV par lien — et ferme la faille du quota, non corrigeable sans compteur serveur. La brique 3 vient d'ajouter du volume mais ne débloque aucune de ces fonctionnalités. Pistes secondaires, par ordre de rapport : **SuccessFactors et Talentsoft** (même méthode Common Crawl que Workday, API non mesurée) ; descendre le seuil SIRENE sous 50 salariés (à mesurer d'abord — le rendement chutait déjà à 0,113 % chez les 50–199) ; **surveiller le poids des données** (mémo 20,6 Mo hebdomadaire, index d'offres 7,9 Mo **quotidien** — presque doublé avec Workday). La chaîne est complète et vérifiée de bout en bout : index hebdomadaire (4 ATS devinés + Workday lu dans Common Crawl), scan quotidien, source branchée dans « Offres », pastille de fraîcheur, suite e2e fiable. Rappel de la mesure qui guide la suite : l'âge médian des offres moissonnées est de **46 jours** — la concurrence sur une offre dépend surtout de son ancienneté, pas du canal de publication.
+**Au 18/08/2026 — Chantier Mots-clés conjonctifs en cours.** Exécution du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md` pour éliminer le bruit sur les mots-clés composés dans le marché caché et le classement. Task T0 terminée (outil de mesure `scripts/boards/mesurer-pertinence.mjs` opérationnel). **Prochaine étape en cours :** Task T1 — Critères conjonctifs (`web/src/lib/jobs/synonymes.ts`).
 
 ---
 
@@ -42,6 +40,14 @@
 ---
 
 ## Journal
+
+### 2026-08-18 : Mots-clés conjonctifs — Task T0 : Outil de mesure de pertinence
+
+- **Quoi :** Création du script de mesure autonome `scripts/boards/mesurer-pertinence.mjs` et de son test unitaire `scripts/boards/mesurer-pertinence.test.mjs`. Rejoue la chaîne de sélection sur l'index réel `boards-offres.json` (19 555 offres) sans appel réseau.
+- **Pourquoi :** Tâche T0 du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md`. Établir un harnais de mesure chiffré avant toute modification de la logique de sélection.
+- **Fichiers touchés :** `scripts/boards/mesurer-pertinence.mjs`, `scripts/boards/mesurer-pertinence.test.mjs`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `node --test "scripts/boards/*.test.mjs"` (142/142 tests passés avec succès). Mesures reproduites sur les 4 jeux de test de référence : `chef de projet marketing` (236/0/60/0), `chef de projet web` (236/0/60/0), `chef de projet marketing + marketing digital + Webmaster` (245/1/60/1), `Web marketer + Webmaster + ...` (9/0/9/0).
+
 
 ### 2026-08-16 : Deuxième passage d'audit — quatre défauts de plus, et ce qu'aucun test ne pouvait voir
 
