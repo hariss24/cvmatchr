@@ -39,11 +39,20 @@ export default function QuotaBadge() {
     };
   }, [user]);
 
-  if (used === null) return null;
-
+  // Le compteur occupe sa place AVANT de connaître son chiffre. Il rendait
+  // `null` pendant l'aller-retour serveur, puis apparaissait : sur mobile, où
+  // il ouvre le menu ☰, tout le menu sautait d'une ligne sous le doigt de
+  // l'utilisateur — au moment précis où il vise « Nouveau CV ».
+  //
+  // Un chiffre inventé pendant l'attente serait pire que le décalage : on
+  // réserve la hauteur, on n'annonce rien. Si la lecture échoue, la ligne reste
+  // vide plutôt que d'afficher un solde faux.
   return (
-    <span className="quota-badge" style={{ fontSize: "0.85em", opacity: 0.8 }}>
-      {used} / {limit} crédits ce mois-ci
+    <span
+      className="quota-badge"
+      style={{ fontSize: "0.85em", opacity: 0.8, minHeight: "1.2em", display: "inline-block" }}
+    >
+      {used === null ? " " : `${used} / ${limit} crédits ce mois-ci`}
     </span>
   );
 }
