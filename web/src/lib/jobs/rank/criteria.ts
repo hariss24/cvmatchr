@@ -177,7 +177,12 @@ function offerLatLng(offer: JobOffer): LatLng | null {
   return parseLatLng(offer.commuteDestination);
 }
 
-/** Distance à vol d'oiseau. Aucun appel réseau (spec §2.7). */
+/**
+ * Distance à vol d'oiseau. Aucun appel réseau (spec §2.7).
+ * Distance inconnue → sort de l'enveloppe (`max: 0`) au lieu de donner des
+ * points gratuits (mesuré le 18/08/2026 : 44 % de l'index ATS n'a pas de
+ * coordonnées et recevait 8 points sur 15 gratuitement).
+ */
 export function distanceLigne(
   offer: JobOffer,
   profile: JobSearchProfile,
@@ -185,14 +190,24 @@ export function distanceLigne(
 ): Ligne {
   const cible = offerLatLng(offer);
   const km = ctx.home && cible ? haversineKm(ctx.home, cible) : null;
+  if (km === null) {
+    return {
+      key: "distance",
+      label: "Distance",
+      points: 0,
+      max: 0,
+      reason: "",
+    };
+  }
   return {
     key: "distance",
     label: "Distance",
     points: distancePoints(km, profile.location.radiusKm, MAX.distance),
     max: MAX.distance,
-    reason: km === null ? "" : `${Math.round(km)} km à vol d'oiseau`,
+    reason: `${Math.round(km)} km à vol d'oiseau`,
   };
 }
+
 
 const PART_CONTRAT = 6;
 const PART_SALAIRE = 4;

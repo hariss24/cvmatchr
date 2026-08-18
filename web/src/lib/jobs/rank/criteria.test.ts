@@ -102,12 +102,20 @@ describe("distanceLigne", () => {
       await ctx([], { lat: 48.85, lng: 2.35 }),
     );
     expect(l.points).toBe(MAX.distance);
+    expect(l.max).toBe(MAX.distance);
     expect(l.reason).toMatch(/km/);
   });
 
-  it("reste neutre sans domicile connu", async () => {
+  it("sort de l'enveloppe (max: 0) sans domicile connu", async () => {
     const l = distanceLigne(offre({ lat: 48.86, lng: 2.35 }), EMPTY_PROFILE, await ctx());
-    expect(l.points).toBe(Math.round(MAX.distance / 2));
+    expect(l.points).toBe(0);
+    expect(l.max).toBe(0);
+  });
+
+  it("sort de l'enveloppe (max: 0) sans coordonnées sur l'offre", async () => {
+    const l = distanceLigne(offre(), EMPTY_PROFILE, await ctx([], { lat: 48.85, lng: 2.35 }));
+    expect(l.points).toBe(0);
+    expect(l.max).toBe(0);
   });
 
   it("lit les coordonnées depuis commuteDestination en repli", async () => {
@@ -117,8 +125,10 @@ describe("distanceLigne", () => {
       await ctx([], { lat: 48.85, lng: 2.35 }),
     );
     expect(l.points).toBe(MAX.distance);
+    expect(l.max).toBe(MAX.distance);
   });
 });
+
 
 describe("contratSalairePoints", () => {
   it("récompense un contrat voulu et un salaire annoncé", () => {
