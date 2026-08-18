@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Au 18/08/2026 — Chantier Mots-clés conjonctifs en cours.** Exécution du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md` pour éliminer le bruit sur les mots-clés composés dans le marché caché et le classement. Lot 1 terminé (Tasks T0, T1, T2, T3). **Prochaine étape :** Point de contrôle Lot 1 (validation humaine) puis Lot 2 (T4, T5, T6).
+**Au 18/08/2026 — Chantier Mots-clés conjonctifs en cours.** Exécution du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md` pour éliminer le bruit sur les mots-clés composés dans le marché caché et le classement. Tasks T0 à T4 terminées. **Prochaine étape en cours :** Task T5 — Enveloppe honnête (`rank/criteria.ts`, `geo.ts`, `rank/index.ts`).
 
 ---
 
@@ -40,6 +40,14 @@
 ---
 
 ## Journal
+
+### 2026-08-18 : Mots-clés conjonctifs — Task T4 : Le classement note sur les critères conjonctifs
+
+- **Quoi :** `keywordPoints` remplacé par `criteresPoints` dans `rank/text.ts`. Disparition du découpage arbitraire en mots : un critère n'est crédité que si tous ses termes sont présents. Le maximum remplace la moyenne entre critères. Dans `competencesPoints` (`criteria.ts`), suppression du double comptage du titre lors du repli sur les mots-clés de poste.
+- **Pourquoi :** Tâche T4 du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md`. Empêcher une offre hors-sujet (« Chef de projet Achats ») de franchir le seuil d'enregistrement (score < 40, lettre D au lieu de B/C), tout en notant fidèlement les offres équivalentes complètes (« Marketing Project Manager »).
+- **Fichiers touchés :** `web/src/lib/jobs/rank/text.ts`, `web/src/lib/jobs/rank/text.test.ts`, `web/src/lib/jobs/rank/criteria.ts`, `web/src/lib/jobs/rank/index.test.ts`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` OK, `npm run lint` OK (0 erreur), `npx vitest run` (808/808 tests verts). Test unitaire sur `rankOffer` : « Chef de projet Achats » passe de ~58/100 (B/C) à 18/100 (D, non persistée) ; « Marketing Project Manager » notée ≥ 40 (persistée).
+
 
 ### 2026-08-18 : Mots-clés conjonctifs — Task T3 : Répartition par niveau de pertinence
 

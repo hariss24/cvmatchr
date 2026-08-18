@@ -151,7 +151,46 @@ describe("rankOffer", () => {
     const r2 = rankOffer(o, profilWeb, await ctx(), T0).score;
     expect(r1).toBe(r2);
   });
+
+  it("classe sous le seuil de 40 (lettre D) une offre qui ne satisfait qu'une partie d'un mot-clé composé", async () => {
+    // ⚠️ Mesuré le 18/08/2026 (T4) : « Chef de projet Achats » montait à 55-60 (lettre B/C)
+    // à cause de l'éclatement des mots-clés et du double comptage du titre.
+    const profilMarketing: JobSearchProfile = {
+      ...EMPTY_PROFILE,
+      keywords: ["chef de projet marketing"],
+      prefilterKeywords: [],
+    };
+    const ctxMkt = await buildRankContext(profilMarketing, null);
+    const offreAchats = offre({
+      title: "CDD - Chef de projet Achats - Parfums Beaute",
+      jobText: "Gestion de projet achats, coordination fournisseurs et planning.",
+    });
+
+    const r = rankOffer(offreAchats, profilMarketing, ctxMkt, T0);
+    // Le score doit tomber sous le seuil de 40 (lettre D)
+    expect(r.score).toBeLessThan(40);
+    expect(r.grade).toBe("D");
+    expect(shouldPersist(r, profilMarketing)).toBe(false);
+  });
+
+  it("classe au-dessus du seuil de 40 une offre anglophone satisfaisant le critère conjonctif", async () => {
+    const profilMarketing: JobSearchProfile = {
+      ...EMPTY_PROFILE,
+      keywords: ["chef de projet marketing"],
+      prefilterKeywords: [],
+    };
+    const ctxMkt = await buildRankContext(profilMarketing, null);
+    const offrePM = offre({
+      title: "Marketing Project Manager",
+      jobText: "Lead global marketing projects and campaigns.",
+    });
+
+    const r = rankOffer(offrePM, profilMarketing, ctxMkt, T0);
+    expect(r.score).toBeGreaterThanOrEqual(40);
+    expect(shouldPersist(r, profilMarketing)).toBe(true);
+  });
 });
+
 
 describe("shouldPersist", () => {
   it("n'enregistre pas une offre sous le seuil de la lettre C", () => {

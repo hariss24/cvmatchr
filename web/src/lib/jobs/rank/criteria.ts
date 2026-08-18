@@ -12,7 +12,8 @@ import type { JobOffer } from "../offer";
 import type { JobSearchProfile } from "../profile";
 import { romeLabel, type RomeTargets } from "../rome";
 import { parseLatLng, haversineKm, distancePoints, type LatLng } from "../geo";
-import { splitZones, keywordPoints } from "./text";
+import { splitZones, criteresPoints } from "./text";
+import { construireCriteres } from "../synonymes";
 
 export interface RankContext {
   rome: RomeTargets;
@@ -72,9 +73,19 @@ export function competencesPoints(
 ): Ligne {
   // À défaut de compétences saisies, on retombe sur les intitulés de poste —
   // même repli que le pré-tri historique.
-  const mots = profile.prefilterKeywords.length > 0 ? profile.prefilterKeywords : profile.keywords;
-  const zones = splitZones(offer.title, offer.jobText);
-  const texte = keywordPoints(zones, mots, MAX.competences);
+  const aDesCompetences = profile.prefilterKeywords.length > 0;
+  const mots = aDesCompetences ? profile.prefilterKeywords : profile.keywords;
+  const criteres = construireCriteres(mots);
+  const zonesBrutes = splitZones(offer.title, offer.jobText);
+
+  // Quand on se rabat sur les mots-clés faute de compétences saisies, la zone
+  // titre est exclue du calcul : elle est déjà notée, entièrement, par le
+  // critère « Métier ». Le repli ne lit plus que le corps de l'annonce.
+  const zones = aDesCompetences
+    ? zonesBrutes
+    : { titre: "", profil: zonesBrutes.profil, reste: zonesBrutes.reste };
+
+  const texte = criteresPoints(zones, criteres, MAX.competences);
 
   const structurable = offer.competences && offer.competences.length > 0 && ctx.rome.attendues.size > 0;
   if (!structurable) {
@@ -132,7 +143,8 @@ export function metierPoints(
   ctx: RankContext,
 ): Ligne {
   const zones = splitZones(offer.title, "");
-  const titre = keywordPoints(zones, profile.keywords, MAX.metier);
+  const criteres = construireCriteres(profile.keywords);
+  const titre = criteresPoints(zones, criteres, MAX.metier);
 
   let parRome = 0;
   let motif = "";
@@ -155,6 +167,7 @@ export function metierPoints(
 
   return { key: "metier", label: "Métier", points, max: MAX.metier, reason };
 }
+
 
 /** Coordonnées de l'offre : champs dédiés, puis repli sur `commuteDestination`. */
 function offerLatLng(offer: JobOffer): LatLng | null {

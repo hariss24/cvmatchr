@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { splitZones, keywordPoints } from "./text";
+import { splitZones, criteresPoints } from "./text";
+import { construireCriteres } from "../synonymes";
 
 describe("splitZones", () => {
   it("isole la section « profil recherché »", () => {
@@ -29,58 +30,68 @@ describe("splitZones", () => {
   });
 });
 
-describe("keywordPoints", () => {
+describe("criteresPoints", () => {
   const zones = (t: string, d: string) => splitZones(t, d);
+  const crit = (mots: string[]) => construireCriteres(mots);
 
-  it("rend zéro sans mot-clé", () => {
-    expect(keywordPoints(zones("Webmaster", "SEO"), [], 45)).toEqual({ points: 0, trouves: [] });
+  it("rend zéro sans critère", () => {
+    expect(criteresPoints(zones("Webmaster", "SEO"), [], 45)).toEqual({ points: 0, trouves: [] });
   });
 
   it("rend zéro si rien ne correspond", () => {
-    const r = keywordPoints(zones("Comptable", "Bilans."), ["SEO"], 45);
+    const r = criteresPoints(zones("Comptable", "Bilans."), crit(["SEO"]), 45);
     expect(r.points).toBe(0);
     expect(r.trouves).toEqual([]);
   });
 
-  it("donne le maximum quand tous les mots-clés sont dans le titre", () => {
-    const r = keywordPoints(zones("Webmaster SEO", ""), ["webmaster", "seo"], 45);
+  it("donne le maximum quand le critère est dans le titre", () => {
+    const r = criteresPoints(zones("Webmaster SEO", ""), crit(["webmaster"]), 45);
     expect(r.points).toBe(45);
-    expect(r.trouves).toEqual(["webmaster", "seo"]);
+    expect(r.trouves).toEqual(["webmaster"]);
   });
 
   it("pèse plus lourd dans le titre que dans le corps", () => {
-    const dansTitre = keywordPoints(zones("Expert SEO", ""), ["seo"], 45).points;
-    const dansCorps = keywordPoints(zones("Poste", "un peu de seo"), ["seo"], 45).points;
+    const dansTitre = criteresPoints(zones("Expert SEO", ""), crit(["seo"]), 45).points;
+    const dansCorps = criteresPoints(zones("Poste", "un peu de seo"), crit(["seo"]), 45).points;
     expect(dansTitre).toBeGreaterThan(dansCorps);
   });
 
   it("pèse plus lourd dans « profil recherché » que dans le reste", () => {
-    const dansProfil = keywordPoints(zones("P", "Profil recherché : seo."), ["seo"], 45).points;
-    const dansReste = keywordPoints(zones("P", "on fait du seo parfois."), ["seo"], 45).points;
+    const dansProfil = criteresPoints(zones("P", "Profil recherché : seo."), crit(["seo"]), 45).points;
+    const dansReste = criteresPoints(zones("P", "on fait du seo parfois."), crit(["seo"]), 45).points;
     expect(dansProfil).toBeGreaterThan(dansReste);
   });
 
   // Le cœur de la saturation : la répétition ne doit pas gonfler la note.
   it("sature — douze mentions ne valent pas douze fois deux mentions", () => {
-    const deux = keywordPoints(zones("P", "seo seo"), ["seo"], 45).points;
-    const douze = keywordPoints(zones("P", "seo ".repeat(12)), ["seo"], 45).points;
+    const deux = criteresPoints(zones("P", "seo seo"), crit(["seo"]), 45).points;
+    const douze = criteresPoints(zones("P", "seo ".repeat(12)), crit(["seo"]), 45).points;
     expect(douze).toBeLessThanOrEqual(deux * 2);
     expect(douze).toBeLessThanOrEqual(45);
   });
 
-  it("note au prorata des mots-clés trouvés", () => {
-    const r = keywordPoints(zones("Webmaster", ""), ["webmaster", "matomo"], 40);
-    expect(r.points).toBeGreaterThan(0);
-    expect(r.points).toBeLessThan(40);
+  it("retient le score du meilleur critère (le maximum remplace la moyenne)", () => {
+    // ⚠️ Mesuré le 18/08/2026 (T4) : un candidat cherchant 2 métiers ne doit pas
+    // être pénalisé quand une offre satisfait pleinement l'un d'eux.
+    const r = criteresPoints(zones("Webmaster", ""), crit(["webmaster", "matomo"]), 40);
+    expect(r.points).toBe(40);
     expect(r.trouves).toEqual(["webmaster"]);
   });
 
-  it("ignore les mots de deux lettres ou moins", () => {
-    expect(keywordPoints(zones("Un poste", "de la"), ["de"], 45).points).toBe(0);
+  it("exige que TOUS les termes d'un critère composé soient présents", () => {
+    const critCompos = crit(["chef de projet marketing"]);
+    // « Chef de projet achats » ne satisfait pas « chef de projet marketing »
+    const rIncomplet = criteresPoints(zones("Chef de projet achats", "Missions de gestion de projet"), critCompos, 45);
+    expect(rIncomplet.points).toBe(0);
+
+    // « Marketing Project Manager » satisfait la conjonction (« project manager » + « marketing »)
+    const rComplet = criteresPoints(zones("Marketing Project Manager", "Lead global projects"), critCompos, 45);
+    expect(rComplet.points).toBe(45);
   });
 
-  it("gère un mot-clé multi-mots", () => {
-    const r = keywordPoints(zones("Chargé de communication digitale", ""), ["communication digitale"], 45);
+  it("gère un critère multi-mots", () => {
+    const r = criteresPoints(zones("Chargé de communication digitale", ""), crit(["communication digitale"]), 45);
     expect(r.points).toBe(45);
   });
 });
+

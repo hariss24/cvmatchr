@@ -83,48 +83,63 @@ function compte(texte: string, terme: string): number {
   return n;
 }
 
+import { type Critere } from "../synonymes";
+
 /**
- * Note la présence des mots-clés, pondérée par zone et **saturante** : chaque
- * mot-clé rapporte au plus `PLAFOND` de crédit, donc répéter un terme douze fois
- * ne vaut pas douze fois le mentionner deux fois. Le score final est le prorata
- * des crédits sur le nombre de mots-clés.
+ * Note la présence des critères conjonctifs, pondérée par zone et **saturante** :
+ * chaque critère ne crédite que si TOUS ses termes sont présents dans les zones
+ * analysées. Le crédit d'une offre est celui de son **meilleur** critère
+ * (le maximum remplace la moyenne), plafonné à `PLAFOND` (3).
  *
- * Un mot-clé multi-mots (« communication digitale ») est cherché tel quel puis,
- * à défaut, mot à mot — sans quoi un intitulé légèrement différent le raterait.
+ * ⚠️ Sans ce fonctionnement conjonctif, un mot-clé « chef de projet marketing »
+ * était éclaté en mots et « chef » + « projet » rapportaient 66 % du crédit
+ * sur n'importe quel poste de chef de projet (achats, supply chain...).
  */
-export function keywordPoints(
+export function criteresPoints(
   zones: Zones,
-  keywords: string[],
+  criteres: Critere[],
   max: number,
 ): { points: number; trouves: string[] } {
-  const utiles = keywords.map((k) => k.trim()).filter((k) => k.length > 2);
-  if (utiles.length === 0) return { points: 0, trouves: [] };
+  if (criteres.length === 0 || max <= 0) return { points: 0, trouves: [] };
 
+  let meilleurCredit = 0;
   const trouves: string[] = [];
-  let credit = 0;
 
-  for (const kw of utiles) {
-    const terme = normalize(kw);
-    const termes = compte(zones.titre + " " + zones.profil + " " + zones.reste, terme) > 0
-      ? [terme]
-      : terme.split(/\s+/).filter((m) => m.length > 2);
+  for (const c of criteres) {
+    if (c.termes.length === 0) continue;
+
+    // Un critère ne crédite que si TOUS ses termes sont présents
+    const tousPresents = c.termes.every(
+      (t) => compte(zones.titre, t) + compte(zones.profil, t) + compte(zones.reste, t) > 0,
+    );
+    if (!tousPresents) continue;
 
     let brut = 0;
-    for (const t of termes) {
+    for (const t of c.termes) {
       brut +=
         POIDS_TITRE * compte(zones.titre, t) +
         POIDS_PROFIL * compte(zones.profil, t) +
         POIDS_RESTE * compte(zones.reste, t);
     }
-    // Un mot-clé multi-mots éclaté cumulerait mécaniquement plus : on ramène à
-    // la moyenne par mot pour rester comparable à un mot-clé simple.
-    if (termes.length > 1) brut = brut / termes.length;
+    // Un critère multi-termes ramène à la moyenne par terme pour rester comparable à un critère simple
+    if (c.termes.length > 1) {
+      brut = brut / c.termes.length;
+    }
 
-    if (brut > 0) {
-      trouves.push(kw);
-      credit += Math.min(brut, PLAFOND) / PLAFOND;
+    const credit = Math.min(brut, PLAFOND) / PLAFOND;
+    if (credit > 0) {
+      if (!trouves.includes(c.origine)) {
+        trouves.push(c.origine);
+      }
+      if (credit > meilleurCredit) {
+        meilleurCredit = credit;
+      }
     }
   }
 
-  return { points: Math.round((max * credit) / utiles.length), trouves };
+  return {
+    points: Math.round(max * meilleurCredit),
+    trouves,
+  };
 }
+
