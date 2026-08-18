@@ -235,19 +235,23 @@ produisait 26 484 fausses offres. Détail des deux voies dans
 **Quatrième source « Marché caché »** (`lib/jobs/boardsFr.ts`, décochée par
 défaut) : lit l'index léger `lib/jobs/data/boards-offres.json`
 (titre/entreprise/lieu/url/date, sans texte, rafraîchi **chaque jour** par
-`.github/workflows/boards-offres.yml`), ne garde que les offres dont le titre
-matche les mots-clés du profil, applique le **filtre de lieu** (distance réelle
+`.github/workflows/boards-offres.yml`), applique un pré-filtrage par
+**critères conjonctifs** (`lib/jobs/synonymes.ts`) où un mot-clé composé exige
+la présence de tous ses termes (éliminant les faux positifs sur les intitulés génériques),
+applique le **filtre de lieu** (distance réelle
 pour les offres qui portent des coordonnées — SmartRecruiters est le seul ATS à
 en donner, soit 36 % de l'index depuis Workday ; rapprochement de libellés pour
 les autres, voir
-`lib/jobs/boardsLieu.ts`), les classe **de la plus récente à la plus
-ancienne**, puis récupère le texte complet **en direct** pour les 60 premières
-— jamais de texte committé, pour ne pas faire grossir le dépôt à chaque scan.
-Le tri avant plafonnement n'est pas cosmétique : sans lui, les 60 retenues
-étaient les premières de l'index rangé par ats/slug/id, et aucune offre
-SmartRecruiters ne remontait jamais. Chaque offre porte `decouverteLe`, le jour
-où le scan l'a vue pour la première fois. Détail par ATS :
-`docs/superpowers/specs/2026-08-04-marche-cache-offres-design.md`.
+`lib/jobs/boardsLieu.ts`), les classe par niveau de pertinence (niveau 2 d'abord, puis niveau 1),
+répartit par employeur, puis récupère le texte complet **en direct** pour les candidates
+jusqu'au plafond de 60 — jamais de texte committé, pour ne pas faire grossir le dépôt à chaque scan.
+Le classement (`lib/jobs/rank/`) note sur ces mêmes critères, retient le meilleur crédit (maximum au lieu de la moyenne),
+et calcule une **enveloppe honnête** (`max: 0` sur distance, contrat, salaire, expérience quand non fournis).
+Chaque offre porte `decouverteLe` (le jour où le scan l'a vue pour la première fois) et `critereEntree`
+(affiché sur la carte si différent du titre).
+Détail par ATS : `docs/superpowers/specs/2026-08-04-marche-cache-offres-design.md`
+et `docs/superpowers/specs/2026-08-18-mots-cles-conjonctifs-design.md`.
+
 
 Google Maps n'est plus appelé pendant le scan (c'était 354 appels facturés par
 passage) mais au dépliage d'une offre, avec un cache de 30 jours.

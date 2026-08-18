@@ -77,21 +77,27 @@ Pour les offres du marché caché (`boardsFr.ts`) :
 - **Une offre sans lieu exploitable n'entre pas dans l'index** (`build-boards-offres.mjs`, décision du 06/08/2026). Sans ville, elle serait absente des recherches par rayon tout en s'affichant ailleurs — incohérence invisible pour le candidat. Le filtre vit à l'écriture du fichier et pas seulement chez chaque ATS, parce que les offres reprises d'un board injoignable viennent du fichier précédent, donc d'un code plus ancien. 56 offres écartées au dernier passage, toutes de `lever:ippon`.
 - **Plafond de 60 offres par recherche** dont on récupère le texte complet. Nombre choisi, jamais mesuré sur un usage réel. Depuis le 06/08/2026, ces 60 places sont mieux dépensées : les annonces que le dédoublonnage fusionnera de toute façon sont écartées **avant** le plafond (Colisée publiait quinze fois le même poste, qui prenaient quinze places pour une seule ligne affichée), et la sélection sert la meilleure offre de chaque employeur avant la deuxième de quiconque. « infirmier » rendait 34 offres Air Liquide sur 60 et 45 lignes affichées ; il en rend 60, chez 13 employeurs.
 
-### 2.4 ter La correspondance des intitulés reste littérale
+### 2.4 ter La correspondance des intitulés est désormais conjonctive
 
-`matchTitre` cherche le mot du candidat dans le titre, lettre à lettre. Depuis le
-06/08/2026, `synonymes.ts` élargit d'abord la recherche à 43 familles
-d'intitulés équivalents — sans quoi « développeur » ne trouvait pas « Software
-Engineer », et ces boards de grands groupes publient massivement en anglais pour
-des postes en France (mesuré : « responsable RH » laissait 147 offres
-invisibles sur 177, « ingénieur » 1 261).
+`matchTitre` et `synonymes.ts` : depuis le 18/08/2026 (chantier *Mots-clés conjonctifs*,
+plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md`), la correspondance
+est **strictement conjonctive** :
+- Tout mot-clé composé ou synonyme élargi exige la présence de **tous ses termes**
+  (ex. « chef de projet marketing » devient « project manager » + « marketing », éliminant
+  les faux positifs « Chef de projet Achats » qui polluaient à 100 % les résultats).
+- La sélection et le classement consomment désormais la même structure `Critere`
+  (module `synonymes.ts` unique).
+- Le classement utilise le maximum (au lieu de la moyenne) pour ne pas pénaliser
+  la recherche multi-métiers, et calcule une **enveloppe honnête** (`max: 0` sur les
+  champs non fournis par la source : distance, contrat, salaire, expérience).
 
-**Ce que ça ne fait toujours pas** : la table est écrite à la main et ne couvre
-que les métiers les plus fréquents de l'index. Un métier absent de la table
+**Ce que ça ne fait toujours pas** : la table de 43 familles est écrite à la main et
+ne couvre que les métiers les plus fréquents de l'index. Un métier absent de la table
 n'est trouvé que par son intitulé exact. Il n'y a ni analyse morphologique
 (« ingénieure » au féminin, pluriels irréguliers), ni recherche dans le texte de
 l'annonce — un poste intitulé « Consultant » qui décrit exactement le métier du
 candidat reste invisible.
+
 
 ### 2.4 bis 92 % des offres Workday n'ont pas de date de publication
 
