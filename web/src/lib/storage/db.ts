@@ -108,8 +108,11 @@ export interface JobEntry {
   contractLabel?: string;
   /** "33–36 k€ / an" ; absent/"" → « Salaire non précisé ». */
   salaryLabel?: string;
+  /** Critère ayant permis l'entrée de l'offre (ex. "software engineer" sur une recherche "développeur"). */
+  critereEntree?: string;
   /** Lettre de classement. Absent = offre notée avant la bascule (score /100 seul). */
   grade?: Grade;
+
   /** Détail par critère, pour afficher le POURQUOI que l'IA ne fournissait pas. */
   breakdown?: Ligne[];
 }

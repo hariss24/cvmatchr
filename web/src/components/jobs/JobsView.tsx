@@ -318,7 +318,9 @@ export default function JobsView() {
         boardName: offer.boardName,
         contractLabel: offer.contractLabel,
         salaryLabel: offer.salaryLabel,
+        critereEntree: offer.critereEntree,
       });
+
       retained++;
     }
 

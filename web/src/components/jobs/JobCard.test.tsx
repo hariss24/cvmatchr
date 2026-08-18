@@ -143,3 +143,42 @@ describe("JobCard — classement", () => {
     expect(screen.getByTestId("job-why")).not.toHaveTextContent("Signaux négatifs");
   });
 });
+
+describe("JobCard — critereEntree", () => {
+  afterEach(() => cleanup());
+
+  it("affiche la mention si critereEntree est présent et différent du titre", () => {
+    render(carte(entry({
+      title: "Senior Software Engineer",
+      critereEntree: "développeur",
+    })));
+    const el = screen.getByTestId("job-critere");
+    expect(el).toBeInTheDocument();
+    expect(el).toHaveTextContent("Trouvée via : « développeur »");
+  });
+
+  it("n'affiche pas la mention si critereEntree est absent", () => {
+    render(carte(entry({
+      title: "Senior Software Engineer",
+      critereEntree: undefined,
+    })));
+    expect(screen.queryByTestId("job-critere")).toBeNull();
+  });
+
+  it("n'affiche pas la mention si critereEntree est vide", () => {
+    render(carte(entry({
+      title: "Senior Software Engineer",
+      critereEntree: "   ",
+    })));
+    expect(screen.queryByTestId("job-critere")).toBeNull();
+  });
+
+  it("n'affiche pas la mention si critereEntree est identique au titre", () => {
+    render(carte(entry({
+      title: "Développeur",
+      critereEntree: "développeur",
+    })));
+    expect(screen.queryByTestId("job-critere")).toBeNull();
+  });
+});
+

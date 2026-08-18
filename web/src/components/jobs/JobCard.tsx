@@ -98,12 +98,20 @@ export default function JobCard({
 
         <div className="job-card__id">
           <h2 className="job-title">{job.title || "Sans titre"}</h2>
+          {job.critereEntree &&
+          job.critereEntree.trim() !== "" &&
+          job.critereEntree.trim().toLowerCase() !== (job.title || "").trim().toLowerCase() ? (
+            <div className="job-critere" data-testid="job-critere">
+              Trouvée via : « {job.critereEntree} »
+            </div>
+          ) : null}
           {job.company ? (
             <div className="job-company">
               <span className="job-company__name">{job.company}</span>
             </div>
           ) : null}
         </div>
+
 
         {/* Trois faits distincts tenaient jusqu'ici dans un seul emplacement, et
             le badge « Nouveau » évinçait la date — celle qui dit combien de
