@@ -942,6 +942,16 @@ button.ghost:active { box-shadow: var(--neu-inset); transform: translateY(1px); 
 }
 .mobile-menu__item:hover { box-shadow: var(--neu-raised); text-decoration: none; color: var(--text); }
 .mobile-menu__item:active { box-shadow: var(--neu-inset); }
+.mobile-menu__compte {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 8px; margin-bottom: 6px;
+  border-bottom: 1px solid var(--border, rgba(128,128,128,0.2));
+}
+.mobile-menu__identite {
+  font-size: 14px; font-weight: 700; color: var(--text);
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mobile-menu__item--sortie { margin-top: 6px; color: var(--muted); }
 .mobile-only { display: none !important; }
 
 /* ---- EditorDrawer ---- */
