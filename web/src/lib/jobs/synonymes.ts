@@ -240,31 +240,3 @@ export function construireCriteres(keywords: string[]): Critere[] {
   return sortie;
 }
 
-/**
- * @deprecated Remplacé par construireCriteres (T1). Conservé temporairement pour
- * la compatibilité de boardsFr.ts jusqu'à l'exécution de la tâche T2.
- */
-export function elargirMotsCles(keywords: string[]): string[] {
-  const sortie: string[] = [];
-  const vus = new Set<string>();
-
-  const ajouter = (mot: string) => {
-    const k = normaliser(mot);
-    if (!k || vus.has(k)) return;
-    vus.add(k);
-    sortie.push(mot);
-  };
-
-  for (const mot of keywords) ajouter(mot);
-
-  for (const mot of keywords) {
-    const k = normaliser(mot);
-    if (!k) continue;
-    for (const groupe of GROUPES) {
-      const touche = groupe.some((terme) => k.includes(terme));
-      if (!touche) continue;
-      for (const terme of groupe) ajouter(terme);
-    }
-  }
-  return sortie;
-}

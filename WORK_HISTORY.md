@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Au 18/08/2026 — Chantier Mots-clés conjonctifs en cours.** Exécution du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md` pour éliminer le bruit sur les mots-clés composés dans le marché caché et le classement. Tasks T0 et T1 terminées. **Prochaine étape en cours :** Task T2 — La sélection consomme les critères (`web/src/lib/jobs/boardsFr.ts`).
+**Au 18/08/2026 — Chantier Mots-clés conjonctifs en cours.** Exécution du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md` pour éliminer le bruit sur les mots-clés composés dans le marché caché et le classement. Tasks T0, T1, T2 terminées. **Prochaine étape en cours :** Task T3 — Répartition par niveau de pertinence (`web/src/lib/jobs/boardsFr.ts`).
 
 ---
 
@@ -40,6 +40,14 @@
 ---
 
 ## Journal
+
+### 2026-08-18 : Mots-clés conjonctifs — Task T2 : La sélection consomme les critères conjonctifs
+
+- **Quoi :** `boardsFr.ts` consomme désormais `construireCriteres`, `satisfait` et `meilleurCritere` pour le pré-filtrage et le calcul de pertinence. Ajout du champ `critereEntree` sur `JobOffer` (`offer.ts`). Suppression définitive d'`elargirMotsCles`. Mise à jour du commentaire de `PLAFOND_CANDIDATES`.
+- **Pourquoi :** Tâche T2 du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md`. Le plafond de 60 redevient un plafond et non un quota. Les recherches imprécises ou sans résultat rendent une liste honnête au lieu de se remplir de bruit.
+- **Fichiers touchés :** `web/src/lib/jobs/offer.ts`, `web/src/lib/jobs/boardsFr.ts`, `web/src/lib/jobs/boardsFr.test.ts`, `scripts/boards/mesurer-pertinence.mjs`, `scripts/boards/mesurer-pertinence.test.mjs`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` OK, `npm run lint` OK, `npx vitest run src/lib/jobs/boardsFr.test.ts` (23/23 tests verts), `node --test "scripts/boards/*.test.mjs"` (142/142 tests verts). Mesure T0 : `chef de projet marketing` passe de 60 offres retenues (0 pertinent) à 2 offres retenues (2 pertinents : Marketing Program Manager / Elastic, Marketing & Growth Project Manager / Picnic) ; `chef de projet web` passe de 60 à 0 offre retenue.
+
 
 ### 2026-08-18 : Mots-clés conjonctifs — Task T1 : Critères conjonctifs
 

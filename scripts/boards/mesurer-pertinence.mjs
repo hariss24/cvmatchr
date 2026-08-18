@@ -104,41 +104,103 @@ const GROUPES = [
   ["debutant", "junior", "entry level", "graduate"],
 ];
 
-function elargirMotsCles(keywords) {
+const MOTS_VIDES = new Set([
+  "de",
+  "du",
+  "des",
+  "le",
+  "la",
+  "les",
+  "l",
+  "d",
+  "en",
+  "et",
+  "a",
+  "au",
+  "aux",
+  "pour",
+  "sur",
+]);
+
+export function construireCriteres(keywords) {
   const sortie = [];
   const vus = new Set();
 
-  const ajouter = (mot) => {
-    const k = normaliser(mot);
-    if (!k || vus.has(k)) return;
-    vus.add(k);
-    sortie.push(mot);
+  const ajouter = (critere) => {
+    const sig = critere.termes.slice().sort().join("|");
+    if (!sig || vus.has(sig)) return;
+    vus.add(sig);
+    sortie.push(critere);
   };
 
-  for (const mot of keywords) ajouter(mot);
+  for (const mot of keywords) {
+    const K = normaliser(mot);
+    if (!K) continue;
+    ajouter({
+      termes: [K],
+      litteral: true,
+      origine: mot,
+    });
+  }
 
   for (const mot of keywords) {
-    const k = normaliser(mot);
-    if (!k) continue;
+    const K = normaliser(mot);
+    if (!K) continue;
+
     for (const groupe of GROUPES) {
-      const touche = groupe.some((terme) => k.includes(terme));
-      if (!touche) continue;
-      for (const terme of groupe) ajouter(terme);
+      for (const terme of groupe) {
+        if (!K.includes(terme)) continue;
+
+        const motsK = K.split(/\s+/).filter(Boolean);
+        const motsT = new Set(terme.split(/\s+/).filter(Boolean));
+        const reste = motsK.filter((w) => !motsT.has(w) && !MOTS_VIDES.has(w));
+
+        if (reste.length === 0) {
+          for (const s of groupe) {
+            if (s === terme) continue;
+            ajouter({
+              termes: [s],
+              litteral: false,
+              origine: mot,
+            });
+          }
+        } else {
+          for (const s of groupe) {
+            if (s === terme) continue;
+            ajouter({
+              termes: [s, ...reste],
+              litteral: false,
+              origine: mot,
+            });
+          }
+        }
+      }
     }
   }
+
   return sortie;
 }
 
-function matchTitre(titre, keywords) {
-  const hay = normalize(titre);
-  return keywords.some((k) => k.trim() !== "" && hay.includes(normalize(k)));
+export function satisfait(texte, critere) {
+  const norm = normaliser(texte);
+  if (!norm) return false;
+  return critere.termes.every((terme) => norm.includes(terme));
 }
 
-function pertinence(titre, saisis, elargis) {
-  const hay = normalize(titre);
-  if (saisis.some((k) => k.trim() !== "" && hay.includes(normalize(k)))) return 2;
-  if (elargis.some((k) => k.trim() !== "" && hay.includes(normalize(k)))) return 1;
-  return 0;
+export function meilleurCritere(texte, criteres) {
+  for (const c of criteres) {
+    if (c.litteral && satisfait(texte, c)) return c;
+  }
+  for (const c of criteres) {
+    if (!c.litteral && satisfait(texte, c)) return c;
+  }
+  return null;
+}
+
+export function pertinence(titre, criteres) {
+  const c = meilleurCritere(titre, criteres);
+  if (!c) return 0;
+  return c.litteral ? 2 : 1;
 }
 
 function sansRedites(offres) {
@@ -178,16 +240,16 @@ function repartirParEntreprise(offres, plafond) {
 }
 
 function estPertinent(titre, saisis) {
-  const hay = normalize(titre);
-  return saisis.some((k) => k.trim() !== "" && hay.includes(normalize(k)));
+  const hay = normaliser(titre);
+  return saisis.some((k) => k.trim() !== "" && hay.includes(normaliser(k)));
 }
 
 export function mesurer(keywords, options = {}) {
   const data = options.data || JSON.parse(fs.readFileSync(DATA_PATH, "utf-8"));
-  const elargis = elargirMotsCles(keywords);
+  const criteres = construireCriteres(keywords);
 
   const candidats = data
-    .filter((o) => matchTitre(o.titre, elargis))
+    .filter((o) => criteres.some((c) => satisfait(o.titre, c)))
     .filter((o) => !isExcludedText(o.titre, EXCLUDED_WORDS))
     .filter((o) => dansLage(o, MAX_AGE_DAYS));
 
@@ -195,7 +257,7 @@ export function mesurer(keywords, options = {}) {
 
   const triees = [...candidats].sort(
     (a, b) =>
-      pertinence(b.titre, keywords, elargis) - pertinence(a.titre, keywords, elargis) ||
+      pertinence(b.titre, criteres) - pertinence(a.titre, criteres) ||
       dateEffective(b).localeCompare(dateEffective(a))
   );
 
@@ -205,13 +267,13 @@ export function mesurer(keywords, options = {}) {
 
   return {
     keywords,
-    criteres: elargis,
+    criteres: criteres.map((c) => c.termes.join(" + ")),
     candidatsCount: candidats.length,
     pertinentsDispos,
     retenusCount: retenus.length,
     pertinentsRetenus,
     retenus: retenus.map((o) => ({
-      pertinence: pertinence(o.titre, keywords, elargis),
+      pertinence: pertinence(o.titre, criteres),
       titre: o.titre,
       entreprise: o.entreprise,
     })),

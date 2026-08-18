@@ -15,7 +15,12 @@ import { hostnameOf } from "./board";
 import { dansLeSecteur, villeDuLibelle } from "./boardsLieu";
 import { geocodeHome } from "./homeCoords";
 import { normKey } from "@/lib/applications/normKey";
-import { elargirMotsCles } from "./synonymes";
+import {
+  construireCriteres,
+  satisfait,
+  meilleurCritere,
+  type Critere,
+} from "./synonymes";
 import boardsOffresData from "./data/boards-offres.json";
 
 export interface OffreLegere {
@@ -49,7 +54,14 @@ export interface OffreLegere {
 
 const boardsOffres = boardsOffresData as OffreLegere[];
 
-/** Combien d'offres verront leur texte récupéré en direct — spec §6. */
+/**
+ * Combien d'offres verront leur texte récupéré en direct — spec §6.
+ *
+ * ⚠️ Mesuré le 18/08/2026 : sur « chef de projet marketing », l'index ne contenait
+ * aucune offre pertinente de moins de 30 jours, et le système en retenait
+ * pourtant 60. Un plafond qu'on cherche à remplir devient un quota, et un quota
+ * se remplit avec ce qui reste — c'est-à-dire du bruit.
+ */
 const PLAFOND_CANDIDATES = 60;
 
 /**
@@ -112,22 +124,6 @@ const NOMS_ATS: Record<OffreLegere["ats"], string> = {
   smartrecruiters: "SmartRecruiters",
   workday: "Workday",
 };
-
-/**
- * Minuscule sans accent. La plage U+0300–U+036F est celle des diacritiques
- * combinants isolés par la décomposition NFD — écrite en échappements, jamais
- * en caractères littéraux, qu'un outil de la chaîne pourrait normaliser en
- * silence et rendre la classe inopérante.
- */
-function normalize(s: string): string {
-  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-
-/** Un des mots-clés du profil apparaît-il dans le titre ? Liste vide → aucun résultat. */
-function matchTitre(titre: string, keywords: string[]): boolean {
-  const hay = normalize(titre);
-  return keywords.some((k) => k.trim() !== "" && hay.includes(normalize(k)));
-}
 
 /**
  * Ancienneté d'une offre, mesurée sur la PLUS ANCIENNE des deux dates connues.
@@ -200,11 +196,10 @@ function sansRedites(offres: OffreLegere[]): OffreLegere[] {
  * réellement tapés n'entraient jamais dans la sélection. La date reste le
  * second critère : à pertinence égale, une offre du jour a moins de candidats.
  */
-function pertinence(titre: string, saisis: string[], elargis: string[]): number {
-  const hay = normalize(titre);
-  if (saisis.some((k) => k.trim() !== "" && hay.includes(normalize(k)))) return 2;
-  if (elargis.some((k) => k.trim() !== "" && hay.includes(normalize(k)))) return 1;
-  return 0;
+export function pertinence(titre: string, criteres: Critere[]): number {
+  const c = meilleurCritere(titre, criteres);
+  if (!c) return 0;
+  return c.litteral ? 2 : 1;
 }
 
 export async function searchBoards(
@@ -222,14 +217,15 @@ export async function searchBoards(
       ? await geocodeHome(villeDuLibelle(profile.location.label))
       : null;
 
-  // ⚠️ Élargissement aux intitulés équivalents AVANT tout filtre. Ces boards
+  // ⚠️ Élargissement aux critères équivalents AVANT tout filtre. Ces boards
   // sont ceux de grands groupes, qui publient en anglais pour des postes en
   // France : « développeur » laissait 434 offres invisibles, « responsable RH »
   // 147 — mesuré le 06/08/2026. Voir `synonymes.ts`.
-  const motsCles = elargirMotsCles(profile.keywords);
+  const criteres = construireCriteres(profile.keywords);
+  if (criteres.length === 0) return { offers: [], calls: 0 };
 
   const triees = boardsOffres
-    .filter((o) => matchTitre(o.titre, motsCles))
+    .filter((o) => criteres.some((c) => satisfait(o.titre, c)))
     .filter((o) => !isExcludedText(o.titre, profile.excludedWords))
     .filter((o) => dansLage(o, profile.maxAgeDays))
     .filter((o) => dansLeSecteur(o, profile.location, cible))
@@ -247,8 +243,7 @@ export async function searchBoards(
     // que le tri alphabétique, sous une autre forme.
     .sort(
       (a, b) =>
-        pertinence(b.titre, profile.keywords, motsCles) -
-          pertinence(a.titre, profile.keywords, motsCles) ||
+        pertinence(b.titre, criteres) - pertinence(a.titre, criteres) ||
         dateEffective(b).localeCompare(dateEffective(a)),
     );
 
@@ -263,6 +258,8 @@ export async function searchBoards(
     const texte = textes.get(cleOffre(o));
     if (texte === undefined) continue; // fetch en échec pour cette offre : on ne l'affiche pas à moitié
     if (isExcludedText(`${o.titre} ${texte}`, profile.excludedWords)) continue;
+
+    const critere = meilleurCritere(o.titre, criteres);
 
     offers.push({
       id: `boards-${o.ats}-${o.slug}-${o.id}`,
@@ -280,6 +277,7 @@ export async function searchBoards(
       boardName: NOMS_ATS[o.ats],
       contractLabel: "",
       salaryLabel: "",
+      ...(critere ? { critereEntree: critere.termes.join(" + ") } : {}),
       ...(o.lat !== undefined ? { lat: o.lat } : {}),
       ...(o.lng !== undefined ? { lng: o.lng } : {}),
     });
@@ -287,3 +285,4 @@ export async function searchBoards(
 
   return { offers, calls: candidates.length };
 }
+

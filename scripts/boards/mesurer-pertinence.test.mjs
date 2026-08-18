@@ -29,8 +29,11 @@ test("mesurer-pertinence : rejoue la sélection et calcule les pertinents", () =
   ];
 
   const res = mesurer(["chef de projet marketing"], { data: fakeData });
-  assert.equal(res.candidatsCount, 2);
+  // Seule l'offre de marketing digital satisfait le critère conjonctif ;
+  // l'offre de supply chain est désormais écartée.
+  assert.equal(res.candidatsCount, 1);
   assert.equal(res.pertinentsDispos, 1);
-  assert.equal(res.retenusCount, 2);
+  assert.equal(res.retenusCount, 1);
   assert.equal(res.pertinentsRetenus, 1);
 });
+

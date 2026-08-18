@@ -137,7 +137,25 @@ describe("searchBoards", () => {
     const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["ingenieur"], excludedWords: [] });
     expect(r.offers.map((o) => o.title)).toContain("Ingénieur Logiciel Backend");
   });
+
+  it("renseigne le champ critereEntree avec les termes du meilleur critère", async () => {
+    const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["développeur"], excludedWords: [] });
+    const dev = r.offers.find((o) => o.title === "Développeur PHP");
+    expect(dev?.critereEntree).toBe("developpeur");
+    const eng = r.offers.find((o) => o.title === "Software Engineer");
+    expect(eng?.critereEntree).toBe("software engineer");
+  });
+
+  it("ne retient pas une offre qui ne satisfait qu'une partie d'un mot-clé composé", async () => {
+    // Si le candidat cherche « ingénieur logiciel », « Ingénieur Logiciel Backend » matche
+    // mais « Software Engineer » (sans mention de logiciel) ne matche pas.
+    const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["ingénieur logiciel"], excludedWords: [] });
+    expect(r.offers.map((o) => o.title)).toContain("Ingénieur Logiciel Backend");
+    expect(r.offers.map((o) => o.title)).not.toContain("Software Engineer");
+  });
+
 });
+
 
 describe("dateEffective", () => {
   it("retombe sur la découverte quand l'ATS ne date pas l'offre", () => {

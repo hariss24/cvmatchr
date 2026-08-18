@@ -36,6 +36,8 @@ export interface JobOffer {
   contractLabel: string;
   /** "33–36 k€ / an" ; "" si non précisé. */
   salaryLabel: string;
+  /** Critère de recherche qui a fait entrer cette offre. Marché caché seulement. */
+  critereEntree?: string;
 
   // --- Champs structurés, fournis par France Travail uniquement. -------------
   // Absents chez Adzuna et JSearch, qui n'exposent aucune taxonomie métier
