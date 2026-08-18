@@ -262,7 +262,12 @@ export function mesurer(keywords, options = {}) {
   );
 
   const dedupliquees = sansRedites(triees);
-  const retenus = repartirParEntreprise(dedupliquees, PLAFOND_CANDIDATES);
+  const retenus = [];
+  for (const niveau of [2, 1]) {
+    if (retenus.length >= PLAFOND_CANDIDATES) break;
+    const duNiveau = dedupliquees.filter((o) => pertinence(o.titre, criteres) === niveau);
+    retenus.push(...repartirParEntreprise(duNiveau, PLAFOND_CANDIDATES - retenus.length));
+  }
   const pertinentsRetenus = retenus.filter((o) => estPertinent(o.titre, keywords)).length;
 
   return {

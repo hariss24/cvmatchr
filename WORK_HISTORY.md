@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Au 18/08/2026 — Chantier Mots-clés conjonctifs en cours.** Exécution du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md` pour éliminer le bruit sur les mots-clés composés dans le marché caché et le classement. Tasks T0, T1, T2 terminées. **Prochaine étape en cours :** Task T3 — Répartition par niveau de pertinence (`web/src/lib/jobs/boardsFr.ts`).
+**Au 18/08/2026 — Chantier Mots-clés conjonctifs en cours.** Exécution du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md` pour éliminer le bruit sur les mots-clés composés dans le marché caché et le classement. Lot 1 terminé (Tasks T0, T1, T2, T3). **Prochaine étape :** Point de contrôle Lot 1 (validation humaine) puis Lot 2 (T4, T5, T6).
 
 ---
 
@@ -40,6 +40,14 @@
 ---
 
 ## Journal
+
+### 2026-08-18 : Mots-clés conjonctifs — Task T3 : Répartition par niveau de pertinence
+
+- **Quoi :** Dans `boardsFr.ts` et `mesurer-pertinence.mjs`, `repartirParEntreprise` est désormais exécutée par niveau de pertinence (niveau 2 d'abord, puis niveau 1 jusqu'au plafond). La diversité d'employeurs s'applique ainsi à l'intérieur de la pertinence, sans jamais diluer des offres littérales au profit d'offres élargies. Ajout de tests unitaires dédiés dans `boardsFr.test.ts`.
+- **Pourquoi :** Tâche T3 du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md`. Éviter que l'algorithme de distribution par tour n'annule le tri de pertinence.
+- **Fichiers touchés :** `web/src/lib/jobs/boardsFr.ts`, `web/src/lib/jobs/boardsFr.test.ts`, `scripts/boards/mesurer-pertinence.mjs`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` OK, `npm run lint` OK (0 erreur), `npx vitest run` (806/806 tests verts), `node --test "scripts/boards/*.test.mjs"` (142/142 tests verts), `npm run build` OK, `npx playwright test` (40/40 tests verts).
+
 
 ### 2026-08-18 : Mots-clés conjonctifs — Task T2 : La sélection consomme les critères conjonctifs
 

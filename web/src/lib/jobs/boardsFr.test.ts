@@ -154,7 +154,18 @@ describe("searchBoards", () => {
     expect(r.offers.map((o) => o.title)).not.toContain("Software Engineer");
   });
 
+  it("sert toutes les offres littérales (niveau 2) avant d'entamer les offres élargies (niveau 1)", async () => {
+    // ⚠️ Mesuré le 18/08/2026 (T3) : la répartition par employeur doit jouer à l'intérieur
+    // de chaque niveau de pertinence pour éviter que la diversité d'employeurs ne dilue la pertinence.
+    const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["développeur"], excludedWords: [] });
+    const indexDev = r.offers.findIndex((o) => o.title === "Développeur PHP");
+    const indexSoft = r.offers.findIndex((o) => o.title === "Software Engineer");
+    expect(indexDev).toBeGreaterThanOrEqual(0);
+    expect(indexSoft).toBeGreaterThanOrEqual(0);
+    expect(indexDev).toBeLessThan(indexSoft);
+  });
 });
+
 
 
 describe("dateEffective", () => {
@@ -216,4 +227,27 @@ describe("repartirParEntreprise", () => {
     expect(repartirParEntreprise([...lot("A", 1), ...lot("B", 1)], 60).length).toBe(2);
     expect(repartirParEntreprise([], 60)).toEqual([]);
   });
+
+  it("deux offres littérales chez le même employeur et 100 offres élargies chez 100 autres : les deux littérales passent d'abord", () => {
+    const niveau2 = [
+      { entreprise: "EmployeurUnique", id: "lit-1" },
+      { entreprise: "EmployeurUnique", id: "lit-2" },
+    ];
+    const niveau1 = Array.from({ length: 100 }, (_, i) => ({
+      entreprise: `Autre${i}`,
+      id: `elargi-${i}`,
+    }));
+
+    const gardees: { entreprise: string; id: string }[] = [];
+    const PLAFOND = 60;
+    for (const lot of [niveau2, niveau1]) {
+      if (gardees.length >= PLAFOND) break;
+      gardees.push(...repartirParEntreprise(lot, PLAFOND - gardees.length));
+    }
+
+    expect(gardees.filter((o) => o.entreprise === "EmployeurUnique").length).toBe(2);
+    expect(gardees.slice(0, 2).map((o) => o.id)).toEqual(["lit-1", "lit-2"]);
+    expect(gardees.length).toBe(60);
+  });
 });
+

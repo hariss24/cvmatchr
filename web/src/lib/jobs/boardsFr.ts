@@ -247,7 +247,20 @@ export async function searchBoards(
         dateEffective(b).localeCompare(dateEffective(a)),
     );
 
-  const candidates = repartirParEntreprise(sansRedites(triees), PLAFOND_CANDIDATES);
+  const dedupliquees = sansRedites(triees);
+
+  // La répartition entre employeurs empêche un gros publieur de manger la
+  // sélection — mais appliquée à l'ensemble, elle sert une place à chaque
+  // entreprise avant de servir la deuxième offre pertinente d'une autre. Les deux
+  // mécanismes se neutralisaient : le tri mettait le bon en tête, la répartition
+  // remplissait derrière avec n'importe quoi. Un niveau à la fois : la diversité
+  // d'employeurs joue à l'intérieur de la pertinence, jamais contre elle.
+  const candidates: OffreLegere[] = [];
+  for (const niveau of [2, 1]) {
+    if (candidates.length >= PLAFOND_CANDIDATES) break;
+    const duNiveau = dedupliquees.filter((o) => pertinence(o.titre, criteres) === niveau);
+    candidates.push(...repartirParEntreprise(duNiveau, PLAFOND_CANDIDATES - candidates.length));
+  }
 
   if (candidates.length === 0) return { offers: [], calls: 0 };
 
