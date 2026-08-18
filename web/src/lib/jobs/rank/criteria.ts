@@ -197,11 +197,28 @@ export function distanceLigne(
 const PART_CONTRAT = 6;
 const PART_SALAIRE = 4;
 
-/** Contrat voulu et salaire annoncé. Un salaire affiché vaut des points en soi. */
+/**
+ * Contrat voulu et salaire annoncé. Un salaire affiché vaut des points en soi.
+ * Sort de l'enveloppe (`max: 0`) si la source ne fournit ni contrat ni salaire
+ * (cas standard du marché caché ATS), au lieu d'imputer une pénalité indue.
+ */
 export function contratSalairePoints(offer: JobOffer, profile: JobSearchProfile): Ligne {
+  const contratVide = offer.contractLabel.trim() === "";
+  const salaireVide = offer.salaryLabel.trim() === "";
+
+  if (contratVide && salaireVide) {
+    return {
+      key: "contrat",
+      label: "Contrat & salaire",
+      points: 0,
+      max: 0,
+      reason: "",
+    };
+  }
+
   const label = offer.contractLabel.toUpperCase();
-  const contratOk = profile.contractTypes.some((t) => label.includes(t.toUpperCase()));
-  const salaireOk = offer.salaryLabel.trim() !== "";
+  const contratOk = !contratVide && profile.contractTypes.some((t) => label.includes(t.toUpperCase()));
+  const salaireOk = !salaireVide;
 
   const bouts: string[] = [];
   if (contratOk) bouts.push(offer.contractLabel);
@@ -216,6 +233,7 @@ export function contratSalairePoints(offer: JobOffer, profile: JobSearchProfile)
     reason: bouts.join(" · "),
   };
 }
+
 
 /** Années d'expérience que le profil déclare pouvoir couvrir. */
 const PLAFOND_NIVEAU: Record<JobSearchProfile["experienceLevel"], number> = {

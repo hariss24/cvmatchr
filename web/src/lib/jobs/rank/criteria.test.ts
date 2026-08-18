@@ -138,10 +138,13 @@ describe("contratSalairePoints", () => {
     expect(l.points).toBeLessThan(MAX.contrat);
   });
 
-  it("rend zéro sans aucune information", () => {
-    expect(contratSalairePoints(offre(), EMPTY_PROFILE).points).toBe(0);
+  it("rend zéro et sort de l'enveloppe (max: 0) sans aucune information", () => {
+    const l = contratSalairePoints(offre(), EMPTY_PROFILE);
+    expect(l.points).toBe(0);
+    expect(l.max).toBe(0);
   });
 });
+
 
 describe("experiencePoints", () => {
   it("donne le maximum si le niveau demandé est indifférent", () => {
