@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Au 18/08/2026 — Chantier Mots-clés conjonctifs en cours.** Exécution du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md` pour éliminer le bruit sur les mots-clés composés dans le marché caché et le classement. Tasks T0 à T4 terminées. **Prochaine étape en cours :** Task T5 — Enveloppe honnête (`rank/criteria.ts`, `geo.ts`, `rank/index.ts`).
+**Au 18/08/2026 — Chantier Mots-clés conjonctifs en cours.** Exécution du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md` pour éliminer le bruit sur les mots-clés composés dans le marché caché et le classement. Tasks T0 à T5 terminées. **Prochaine étape en cours :** Task T6 — Affichage du critère d'entrée (`JobCard.tsx`, `globals.css`).
 
 ---
 
@@ -40,6 +40,14 @@
 ---
 
 ## Journal
+
+### 2026-08-18 : Mots-clés conjonctifs — Task T5 : Enveloppe honnête
+
+- **Quoi :** Ce que la source ne sait pas dire ne rapporte ni ne coûte. Trois généralisations appliquées en commits distincts : 1) `contratSalairePoints` pèse `max: 0` si contrat et salaire sont vides (marché caché ATS) au lieu de pénaliser de 10 points ; 2) `distanceLigne` pèse `max: 0` si distance inconnue au lieu de donner la moitié des points gratuitement (44 % de l'index ATS) ; 3) `experiencePoints` pèse `max: 0` si exigence absente et profil indifférent au lieu de donner le maximum sans information.
+- **Pourquoi :** Tâche T5 du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md`. Assurer une notation proportionnelle et juste sans biaiser les offres partielles face aux offres complètes.
+- **Fichiers touchés :** `web/src/lib/jobs/rank/criteria.ts`, `web/src/lib/jobs/rank/criteria.test.ts`, `web/src/lib/jobs/rank/index.test.ts`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` OK, `npm run lint` OK (0 erreur), `npx vitest run` (812/812 tests verts). Tests d'enveloppe honnête validant 100/100 (S) pour une offre ATS pertinente et 0/100 (D) pour une offre ATS hors-sujet.
+
 
 ### 2026-08-18 : Mots-clés conjonctifs — Task T4 : Le classement note sur les critères conjonctifs
 
