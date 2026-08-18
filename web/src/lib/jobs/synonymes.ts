@@ -1,5 +1,5 @@
 /**
- * Élargissement des mots-clés d'une recherche aux intitulés équivalents.
+ * Élargissement des mots-clés d'une recherche aux critères équivalents.
  *
  * ⚠️ Pourquoi ce module existe. La source « Marché caché » est faite des pages
  * carrières de grands groupes, qui publient massivement en anglais **pour des
@@ -18,17 +18,10 @@
  *   sécurité informatique  382 →    36
  *   données                864 →   324
  *
- * ⚠️ Ce tableau en remplace un premier, du 06/08/2026, qui annonçait pour
- * « responsable RH » un passage de 30 à 177. Le chiffre était faux : la table
- * contenait alors un groupe `["responsable", "manager", "head of"]`, et ce seul
- * mot-clé atteignait 2 807 titres, soit 14 % de l'index — Release Manager, Bid
- * Manager, Responsable RAMS. La correction du 07/08 supprime les groupes de
- * niveau hiérarchique (voir plus bas) ; les quatre autres métiers sont
- * inchangés, ce qui délimite exactement ce que ce groupe apportait : du bruit.
- *
- * Les groupes ci-dessous sont bâtis sur les intitulés RÉELS de l'index — les
- * soixante-dix mots les plus fréquents ont été relevés avant d'écrire la table,
- * plutôt que devinés.
+ * ⚠️ Refonte du 18/08/2026 (mots-clés conjonctifs) : un mot-clé composé est
+ * désormais une conjonction. « chef de projet marketing » ne devient jamais
+ * « chef de projet » seul (qui atteignait 380 titres non pertinents), mais
+ * « project manager » + « marketing ».
  */
 
 /** Minuscule sans accent, ponctuation réduite à des espaces. */
@@ -125,17 +118,131 @@ const GROUPES: readonly (readonly string[])[] = [
   ["debutant", "junior", "entry level", "graduate"],
 ];
 
+const MOTS_VIDES = new Set([
+  "de",
+  "du",
+  "des",
+  "le",
+  "la",
+  "les",
+  "l",
+  "d",
+  "en",
+  "et",
+  "a",
+  "au",
+  "aux",
+  "pour",
+  "sur",
+]);
+
 /**
- * Ajoute aux mots-clés du candidat les intitulés équivalents.
- *
- * Un mot-clé déclenche un groupe quand il contient l'un de ses termes
- * (« responsable RH digital » déclenche « responsable rh ») ou quand il en est
- * une abréviation reconnaissable (« ingé » ne déclenche rien, « ingenieur »
- * oui).
- *
- * Les mots-clés d'origine sont toujours conservés, en tête et sans doublon :
- * un élargissement ne doit jamais faire perdre un résultat que la recherche
- * littérale aurait trouvé.
+ * Un critère de recherche : TOUS les termes doivent apparaître dans le texte
+ * examiné. C'est ce qui distingue « chef de projet marketing » traduit en
+ * « project manager » + « marketing » — qui trouve « Marketing Project
+ * Manager » — de « chef de projet » seul, qui trouve tous les chefs de projet.
+ */
+export interface Critere {
+  /** Termes exigés ensemble, déjà normalisés (minuscule, sans accent). */
+  termes: string[];
+  /** Vrai si ce critère est le mot-clé du candidat, tel qu'il l'a tapé. */
+  litteral: boolean;
+  /** Le mot-clé d'origine, pour l'affichage et le diagnostic. */
+  origine: string;
+}
+
+/**
+ * Vérifie si un texte satisfait un critère (tous les termes requis sont présents).
+ */
+export function satisfait(texte: string, critere: Critere): boolean {
+  const norm = normaliser(texte);
+  if (!norm) return false;
+  return critere.termes.every((terme) => norm.includes(terme));
+}
+
+/**
+ * Rend le critère littéral satisfait s'il en existe un, sinon le premier
+ * critère élargi satisfait, sinon null.
+ */
+export function meilleurCritere(texte: string, criteres: Critere[]): Critere | null {
+  for (const c of criteres) {
+    if (c.litteral && satisfait(texte, c)) return c;
+  }
+  for (const c of criteres) {
+    if (!c.litteral && satisfait(texte, c)) return c;
+  }
+  return null;
+}
+
+/**
+ * Construit la liste des critères conjonctifs à partir des mots-clés du candidat.
+ */
+export function construireCriteres(keywords: string[]): Critere[] {
+  const sortie: Critere[] = [];
+  const vus = new Set<string>();
+
+  const ajouter = (critere: Critere) => {
+    const sig = critere.termes.slice().sort().join("|");
+    if (!sig || vus.has(sig)) return;
+    vus.add(sig);
+    sortie.push(critere);
+  };
+
+  // 1. Toujours produire le critère littéral pour chaque mot-clé
+  for (const mot of keywords) {
+    const K = normaliser(mot);
+    if (!K) continue;
+    ajouter({
+      termes: [K],
+      litteral: true,
+      origine: mot,
+    });
+  }
+
+  // 2. Élargissement aux équivalents en préservant la conjonction
+  for (const mot of keywords) {
+    const K = normaliser(mot);
+    if (!K) continue;
+
+    for (const groupe of GROUPES) {
+      for (const terme of groupe) {
+        if (!K.includes(terme)) continue;
+
+        const motsK = K.split(/\s+/).filter(Boolean);
+        const motsT = new Set(terme.split(/\s+/).filter(Boolean));
+        const reste = motsK.filter((w) => !motsT.has(w) && !MOTS_VIDES.has(w));
+
+        if (reste.length === 0) {
+          // Terme générique tapé directement (ex: "chef de projet")
+          for (const s of groupe) {
+            if (s === terme) continue;
+            ajouter({
+              termes: [s],
+              litteral: false,
+              origine: mot,
+            });
+          }
+        } else {
+          // Mot-clé composé plus précis (ex: "chef de projet marketing")
+          for (const s of groupe) {
+            if (s === terme) continue;
+            ajouter({
+              termes: [s, ...reste],
+              litteral: false,
+              origine: mot,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  return sortie;
+}
+
+/**
+ * @deprecated Remplacé par construireCriteres (T1). Conservé temporairement pour
+ * la compatibilité de boardsFr.ts jusqu'à l'exécution de la tâche T2.
  */
 export function elargirMotsCles(keywords: string[]): string[] {
   const sortie: string[] = [];
@@ -154,11 +261,6 @@ export function elargirMotsCles(keywords: string[]): string[] {
     const k = normaliser(mot);
     if (!k) continue;
     for (const groupe of GROUPES) {
-      // ⚠️ Un seul sens : le mot-clé du candidat doit CONTENIR le terme.
-      // L'inclusion réciproque paraissait plus généreuse et ne l'était pas :
-      // « chef » déclenchait « chef de projet », donc « project manager », et
-      // un cuisinier recevait des postes d'encadrement. Un mot-clé d'une ou
-      // deux lettres déclenchait par ailleurs presque tous les groupes.
       const touche = groupe.some((terme) => k.includes(terme));
       if (!touche) continue;
       for (const terme of groupe) ajouter(terme);

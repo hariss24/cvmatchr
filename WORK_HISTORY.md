@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Au 18/08/2026 — Chantier Mots-clés conjonctifs en cours.** Exécution du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md` pour éliminer le bruit sur les mots-clés composés dans le marché caché et le classement. Task T0 terminée (outil de mesure `scripts/boards/mesurer-pertinence.mjs` opérationnel). **Prochaine étape en cours :** Task T1 — Critères conjonctifs (`web/src/lib/jobs/synonymes.ts`).
+**Au 18/08/2026 — Chantier Mots-clés conjonctifs en cours.** Exécution du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md` pour éliminer le bruit sur les mots-clés composés dans le marché caché et le classement. Tasks T0 et T1 terminées. **Prochaine étape en cours :** Task T2 — La sélection consomme les critères (`web/src/lib/jobs/boardsFr.ts`).
 
 ---
 
@@ -40,6 +40,14 @@
 ---
 
 ## Journal
+
+### 2026-08-18 : Mots-clés conjonctifs — Task T1 : Critères conjonctifs
+
+- **Quoi :** Refonte de `synonymes.ts` : introduction de l'interface `Critere` (`termes`, `litteral`, `origine`) et des fonctions `construireCriteres`, `satisfait`, `meilleurCritere`. Un mot-clé composé (« chef de projet marketing ») n'est plus remplacé par un terme générique (« chef de projet »), mais devient une conjonction (« project manager » + « marketing »). Réécriture des tests unitaires dans `synonymes.test.ts` (18 tests).
+- **Pourquoi :** Tâche T1 du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md`. Éliminer la cause 1 du bruit dans le catalogue marché caché sans régresser sur les mots-clés simples.
+- **Fichiers touchés :** `web/src/lib/jobs/synonymes.ts`, `web/src/lib/jobs/synonymes.test.ts`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `npx tsc --noEmit` OK, `npm run lint` OK (0 erreur), `npx vitest run src/lib/jobs/synonymes.test.ts` (18/18 tests verts). Vérifications sur l'index complet : `developpeur` (734 titres dont 7 Full-Stack avec tiret), `ingenieur` (3 031 titres), `commercial` (1 188 titres).
+
 
 ### 2026-08-18 : Mots-clés conjonctifs — Task T0 : Outil de mesure de pertinence
 
