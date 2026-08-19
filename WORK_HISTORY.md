@@ -41,6 +41,13 @@
 
 ## Journal
 
+### 2026-08-19 : Connexion email — Task 2 : traduction des erreurs et validation des champs
+
+- **Quoi :** Création des modules purs `src/lib/auth/messages.ts` (+ tests `messages.test.ts`) et `src/lib/auth/validation.ts` (+ tests `validation.test.ts`).
+- **Pourquoi :** Supabase répond en anglais. `messageErreurAuth` traduit les erreurs standard (identifiants invalides, mot de passe court, rate limits, token expiré, compte Google existant...) et conserve le détail pour les erreurs imprévues sans jamais renvoyer une chaîne vide. `validerEmail` et `validerMotDePasse` filtrent les fautes de frappe et vérifient la longueur minimale (8 caractères) avant tout appel réseau.
+- **Fichiers touchés :** `web/src/lib/auth/messages.ts`, `web/src/lib/auth/messages.test.ts`, `web/src/lib/auth/validation.ts`, `web/src/lib/auth/validation.test.ts`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** TDD respecté (tests rouges puis verts). `tsc` OK, `lint` OK (0 erreur, 3 warnings préexistants), `vitest` (858/858), `build` OK.
+
 ### 2026-08-19 : Connexion email — Task 1 : reconnaissance d'un compte Google en base
 
 - **Quoi :** Création de la fonction SQL `public.identite_est_google(p_email TEXT)` dans la migration `0005_identite_google.sql`, testée par `tests/identite_google.sql`. Complétion du bouchon `_auth_stub.sql` (table `auth.identities`, rôle `service_role`). Mise à jour de `web/supabase/README.md`.
