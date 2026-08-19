@@ -34,6 +34,13 @@ const HEURE = 3600;
 export const RATE_LIMITS = {
   /** Force brute sur le mot de passe partagé. */
   login: { limit: 5, windowSeconds: 300 },
+  /**
+   * Reconnaissance d'un compte Google, appelée seulement après un échec de mot
+   * de passe. Plafond serré : c'est le seul point de l'app qui répond quoi que
+   * ce soit au sujet d'une adresse, et le compte à protéger est celui d'un
+   * utilisateur légitime qui se trompe deux ou trois fois, pas dix.
+   */
+  "auth-methode": { limit: 10, windowSeconds: 300 },
   /** France Travail + Adzuna + JSearch. Un scan complet par appel. */
   "jobs-search": { limit: 20, windowSeconds: HEURE },
   /** Google Maps, facturé à l'appel. Une offre ouverte = un appel (caché 30 j côté client). */

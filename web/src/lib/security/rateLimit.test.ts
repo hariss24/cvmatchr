@@ -66,6 +66,10 @@ describe("couverture des routes API", () => {
 });
 
 describe("RATE_LIMITS", () => {
+  it("plafonne la reconnaissance de compte Google", () => {
+    expect(RATE_LIMITS["auth-methode"]).toEqual({ limit: 10, windowSeconds: 300 });
+  });
+
   it("n'a que des plafonds et des fenêtres exploitables", () => {
     for (const [route, regle] of Object.entries(RATE_LIMITS)) {
       expect(regle.limit, route).toBeGreaterThan(0);

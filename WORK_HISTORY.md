@@ -41,6 +41,13 @@
 
 ## Journal
 
+### 2026-08-19 : Connexion email — Task 3 : route API de reconnaissance de compte Google
+
+- **Quoi :** Création de `web/src/lib/supabase/admin.ts` (`createAdminClient()`), de la route `web/src/app/api/auth/methode/route.ts` et ajout de la règle de limitation de débit `auth-methode` (10 appels / 300 s) dans `src/lib/security/rateLimit.ts` (+ tests dans `rateLimit.test.ts`). Documentation de `SUPABASE_SERVICE_ROLE_KEY` dans `.env.example`.
+- **Pourquoi :** `identite_est_google` n'est exécutable que par `service_role`. Cette route permet à la page de connexion de savoir si un échec de mot de passe correspond à un compte créé via Google, sans jamais exposer la clé d'administration au client ni autoriser les balayages d'adresses (rate limit strict par IP).
+- **Fichiers touchés :** `web/src/lib/supabase/admin.ts`, `web/src/app/api/auth/methode/route.ts`, `web/src/lib/security/rateLimit.ts`, `web/src/lib/security/rateLimit.test.ts`, `web/.env.example`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** TDD respecté (scanner anti-régression vérifie la protection). `tsc` OK, `lint` OK (0 erreur, 3 warnings préexistants), `vitest` (860/860), `build` OK.
+
 ### 2026-08-19 : Connexion email — Task 2 : traduction des erreurs et validation des champs
 
 - **Quoi :** Création des modules purs `src/lib/auth/messages.ts` (+ tests `messages.test.ts`) et `src/lib/auth/validation.ts` (+ tests `validation.test.ts`).
