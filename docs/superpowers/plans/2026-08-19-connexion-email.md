@@ -94,6 +94,7 @@ Extraites de `.agents/rules/cadrage.md` et de la spec. Elles s'appliquent à
 | `web/src/app/globals.css` | Styles de la page de connexion |
 | `web/.env.example` | `SUPABASE_SERVICE_ROLE_KEY`, documentée |
 | `web/supabase/README.md` | Migration 0005 et son test |
+| `.github/workflows/web.yml` | Variables Supabase factices sur la seule étape e2e (Task 9) |
 | `WORK_HISTORY.md` | Une entrée par task |
 
 **Explicitement hors périmètre — ne pas y toucher :** le portail `/login` et sa
@@ -112,6 +113,7 @@ bloquée devant ses propres CV (spec §6).
 **Fichiers :**
 - Créer : `web/supabase/migrations/0005_identite_google.sql`
 - Créer : `web/supabase/tests/identite_google.sql`
+- Modifier : `web/supabase/_auth_stub.sql` (table `auth.identities`, rôle `service_role`)
 - Modifier : `web/supabase/README.md`
 
 **Interfaces produites :**
@@ -256,6 +258,40 @@ $$;
 SELECT 'TOUS_LES_TESTS_OK' AS resultat;
 ```
 
+- [ ] **Étape 3 bis : compléter le bouchon du schéma `auth`**
+
+**Vérifié le 19/08 : `web/supabase/_auth_stub.sql` ne contient ni la table
+`auth.identities` ni le rôle `service_role`.** Sans les deux, la migration
+échoue au `GRANT` et le test ne peut pas insérer ses comptes. Ajouter, **sans
+rien modifier de ce qui existe déjà** :
+
+Après la définition de `auth.users` :
+
+```sql
+-- Identités liées à un compte : une par méthode de connexion. Supabase en crée
+-- une pour Google, une pour l'email. La migration 0005 s'en sert pour dire
+-- « ce compte passe par Google ».
+CREATE TABLE IF NOT EXISTS auth.identities (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  provider    TEXT NOT NULL,
+  provider_id TEXT NOT NULL
+);
+```
+
+Et dans le bloc `DO $$` qui crée les rôles, à la suite de `anon` :
+
+```sql
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+    CREATE ROLE service_role NOLOGIN;
+  END IF;
+```
+
+⚠️ Le vrai `auth.identities` de Supabase a d'autres colonnes (dont
+`identity_data`, NOT NULL). Le bouchon ne reproduit que ce dont les migrations
+ont besoin — c'est la règle déjà écrite dans son en-tête. Ne pas chercher à le
+rendre fidèle.
+
 - [ ] **Étape 4 : lancer le test, vérifier qu'il est VERT**
 
 La procédure exacte (Docker PostgreSQL + `_auth_stub.sql`) est décrite dans
@@ -264,11 +300,8 @@ démarré ; compter ~20 s avant que le démon réponde.
 
 Attendu : `TOUS_LES_TESTS_OK`.
 
-⚠️ Le bouchon `_auth_stub.sql` doit contenir une table `auth.identities` avec
-les colonnes `id`, `user_id`, `provider`, `provider_id`. Si elle manque, ajouter
-sa définition au bouchon **sans toucher** aux tables déjà présentes, puis
-relancer aussi `tests/rls_etancheite.sql` et `tests/rate_limit.sql` pour
-prouver que l'ajout n'a rien cassé.
+Relancer ensuite `tests/rls_etancheite.sql` **et** `tests/rate_limit.sql` :
+l'ajout au bouchon ne doit rien avoir cassé. Coller leurs sorties.
 
 - [ ] **Étape 5 : validation par mutation**
 
@@ -308,7 +341,7 @@ npx tsc --noEmit && npm run lint && npx vitest run && npm run build
 prouve que rien n'a bougé.)
 
 ```bash
-git add web/supabase/migrations/0005_identite_google.sql web/supabase/tests/identite_google.sql web/supabase/README.md WORK_HISTORY.md
+git add web/supabase/migrations/0005_identite_google.sql web/supabase/tests/identite_google.sql web/supabase/_auth_stub.sql web/supabase/README.md WORK_HISTORY.md
 git commit -m "feat(auth): la base sait reconnaitre un compte cree avec Google"
 ```
 
@@ -607,11 +640,22 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
  * porte volontairement pas le préfixe NEXT_PUBLIC_, sans quoi Next.js
  * l'embarquerait dans le paquet envoyé au navigateur.
  *
+ * La garde `typeof window` ci-dessous n'est pas décorative : si un composant
+ * client importe ce fichier un jour, l'erreur est immédiate et nommée, au lieu
+ * d'un `null` silencieux qu'on mettrait des heures à comprendre. Le paquet
+ * `server-only` ferait mieux — au moment du build — mais il n'est pas installé
+ * et ce plan n'ajoute aucune dépendance.
+ *
  * Renvoie `null` quand la clé est absente : l'app tourne alors en mode dégradé
  * plutôt que de refuser de démarrer — c'est le cas d'un poste de développement
  * ou d'une installation 100 % locale.
  */
 export function createAdminClient(): SupabaseClient | null {
+  if (typeof window !== 'undefined') {
+    throw new Error(
+      "createAdminClient() est réservé au serveur : ne l'importez pas depuis un composant client.",
+    );
+  }
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const cle = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !cle) return null;
@@ -761,6 +805,29 @@ describe('AuthStore — parcours email et mot de passe', () => {
     expect(signUp).toHaveBeenCalledWith({ email: 'marc@test.fr', password: 'motdepasse' });
   });
 
+  // Supabase n'échoue PAS sur une adresse déjà prise quand la confirmation est
+  // activée : il renvoie un utilisateur sans identité. Sans ce garde-fou, la
+  // personne attendrait un code qui n'arrive jamais.
+  it('signale une adresse déjà inscrite, que Supabase annonce sans erreur', async () => {
+    signUp.mockResolvedValue({
+      data: { user: { id: 'u1', identities: [] } }, error: null,
+    });
+    const { useAuthStore } = await import('./authStore');
+    await expect(
+      useAuthStore.getState().signUpWithEmail('deja@test.fr', 'motdepasse'),
+    ).rejects.toMatchObject({ message: 'User already registered' });
+  });
+
+  it('accepte une inscription qui produit une identité', async () => {
+    signUp.mockResolvedValue({
+      data: { user: { id: 'u1', identities: [{ provider: 'email' }] } }, error: null,
+    });
+    const { useAuthStore } = await import('./authStore');
+    await expect(
+      useAuthStore.getState().signUpWithEmail('neuf@test.fr', 'motdepasse'),
+    ).resolves.toBeUndefined();
+  });
+
   it('connecte avec l\'adresse et le mot de passe fournis', async () => {
     const { useAuthStore } = await import('./authStore');
     await useAuthStore.getState().signInWithEmail('marc@test.fr', 'motdepasse');
@@ -823,8 +890,20 @@ les implémentations juste avant `signOut` :
   signUpWithEmail: async (email, password) => {
     const supabase = createBrowserClientHelper();
     if (!supabase) return;
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
+
+    // Piège de Supabase, vérifié le 19/08 : quand « Confirm email » est activé,
+    // une inscription sur une adresse DÉJÀ prise ne renvoie aucune erreur. Elle
+    // renvoie un utilisateur dont la liste `identities` est vide — c'est ainsi
+    // que Supabase évite de révéler l'existence du compte.
+    //
+    // Sans ce test, la personne passe à l'écran « saisissez votre code » et
+    // attend indéfiniment un courriel qui n'arrivera jamais. On lève donc le
+    // message que `messageErreurAuth` sait déjà traduire.
+    if (data.user && data.user.identities?.length === 0) {
+      throw new Error('User already registered');
+    }
   },
 
   signInWithEmail: async (email, password) => {
@@ -920,6 +999,15 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import FormulaireConnexion from './FormulaireConnexion';
 import { useAuthStore } from '@/state/authStore';
+
+// Sans ce mock, `useRouter` lève « expected app router to be mounted » : sous
+// jsdom il n'y a aucun routeur Next. Même procédé que MobileMenu.test.tsx,
+// qui mocke `usePathname` pour la même raison.
+const pousser = vi.fn();
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: pousser, replace: pousser, refresh: pousser }),
+  usePathname: () => '/connexion',
+}));
 
 describe('FormulaireConnexion', () => {
   afterEach(() => cleanup());
@@ -1137,8 +1225,11 @@ export default function FormulaireConnexion() {
         router.push("/");
       }
     } catch (err) {
+      // Les deux échecs méritent la question : « mot de passe refusé » et
+      // « adresse déjà prise » ont la même cause quand le compte vient de
+      // Google, et la même réponse utile.
       const brut = (err as Error).message ?? "";
-      const google = etape === "connexion" && (await compteVientDeGoogle(email.trim()));
+      const google = await compteVientDeGoogle(email.trim());
       setErreur(messageErreurAuth(brut, google));
     } finally {
       setEnCours(false);
@@ -1653,7 +1744,36 @@ pas aller jusqu'à la création d'un compte réel : cela exigerait une boîte ma
 - Créer : `web/tests/e2e/connexion-email.spec.ts`
 - Modifier : `WORK_HISTORY.md` (entrée de clôture, section « État actuel » comprise)
 
-- [ ] **Étape 1 : écrire le parcours**
+- [ ] **Étape 1 : donner une configuration Supabase factice à la CI**
+
+**Vérifié le 19/08 : `.github/workflows/web.yml` lance `npm run test:e2e` sans
+aucune variable Supabase.** `createBrowserClientHelper()` renvoie alors `null`,
+`isConfigured` vaut `false`, et la page affiche « La connexion est indisponible
+sur cette installation » — les trois premiers tests ci-dessous tomberaient sur
+GitHub tout en passant sur le poste de développement. Le check `test-web` étant
+requis, la branche serait bloquée.
+
+**⚠️ Exception explicite au cadrage §3** (« tu ne touches pas aux workflows
+CI ») : cette modification-ci est ordonnée par le plan. Aucune autre.
+
+Dans `.github/workflows/web.yml`, sur la seule étape « E2E Tests (Playwright) » :
+
+```yaml
+      - name: E2E Tests (Playwright)
+        run: npm run test:e2e
+        env:
+          # Valeurs factices, jamais contactées : les parcours testés
+          # s'arrêtent à la validation côté navigateur. Elles servent
+          # uniquement à ce que `isConfigured` soit vrai et que la page de
+          # connexion s'affiche au lieu de se déclarer indisponible.
+          NEXT_PUBLIC_SUPABASE_URL: https://exemple-ci.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: cle-anonyme-factice-pour-la-ci
+```
+
+Ne rien changer d'autre dans le fichier : les étapes `tsc`, `lint`, `vitest` et
+`build` n'en ont pas besoin.
+
+- [ ] **Étape 2 : écrire le parcours**
 
 Lire d'abord `web/tests/e2e/auth.spec.ts` (conventions du projet), puis créer
 `web/tests/e2e/connexion-email.spec.ts` :
@@ -1693,7 +1813,7 @@ test.describe('Connexion par email', () => {
 });
 ```
 
-- [ ] **Étape 2 : lancer les e2e**
+- [ ] **Étape 3 : lancer les e2e**
 
 ```bash
 cd web
@@ -1703,7 +1823,7 @@ npx playwright test tests/e2e/connexion-email.spec.ts
 Attendu : 4 tests verts. En cas d'échec incompréhensible : supprimer
 `web/.next`, vérifier qu'aucun serveur ne traîne sur le port 3000, relancer.
 
-- [ ] **Étape 3 : vérification complète, e2e inclus**
+- [ ] **Étape 4 : vérification complète, e2e inclus**
 
 ```bash
 cd web
@@ -1712,16 +1832,16 @@ npx tsc --noEmit && npm run lint && npx vitest run && npm run build && npx playw
 
 Attendu : suite complète verte, y compris les tests préexistants.
 
-- [ ] **Étape 4 : écrire l'entrée de clôture**
+- [ ] **Étape 5 : écrire l'entrée de clôture**
 
 Dans `WORK_HISTORY.md` : une entrée de journal au format du fichier (Quoi,
 Pourquoi, Fichiers touchés, Résultat vérifs, Reste ouvert), **et** la mise à
 jour de la ligne unique « État actuel » en tête.
 
-« Reste ouvert » doit citer explicitement les réglages de l'étape 5 non encore
+« Reste ouvert » doit citer explicitement les réglages de l'étape 6 non encore
 faits, et le fait que le chantier n'est pas livrable sans eux.
 
-- [ ] **Étape 5 : le rapport final liste les réglages humains**
+- [ ] **Étape 6 : le rapport final liste les réglages humains**
 
 Ces cinq points ne peuvent pas être faits par un agent. Les recopier tels quels
 dans le rapport final, en tête :
@@ -1747,10 +1867,10 @@ dans le rapport final, en tête :
 > `SUPABASE_SERVICE_ROLE_KEY` dans les variables d'environnement locales **et**
 > dans Vercel. Absente, la fonctionnalité se tait proprement — rien ne casse.
 
-- [ ] **Étape 6 : commit**
+- [ ] **Étape 7 : commit**
 
 ```bash
-git add web/tests/e2e/connexion-email.spec.ts WORK_HISTORY.md
+git add web/tests/e2e/connexion-email.spec.ts .github/workflows/web.yml WORK_HISTORY.md
 git commit -m "test(auth): parcours e2e de la page de connexion, et cloture du chantier A"
 ```
 
