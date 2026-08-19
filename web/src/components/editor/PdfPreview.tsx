@@ -57,6 +57,12 @@ export default function PdfPreview({
 
     (async () => {
       const pdfjsLib = await import("pdfjs-dist");
+      // Ce fichier doit avoir la version EXACTE de `pdfjs-dist`, sinon pdf.js
+      // refuse de s'ouvrir (« API version does not match Worker version ») et
+      // l'aperçu reste vide. Il était copié à la main : `npm audit fix` du
+      // 19/08 a monté la bibliothèque en 6.2.108 sans toucher au fichier resté
+      // en 6.0.227, et l'aperçu est tombé. Le script `postinstall` recopie
+      // désormais le worker depuis `node_modules` — ne pas le retirer.
       pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
       const data = new Uint8Array(await blob.arrayBuffer());
