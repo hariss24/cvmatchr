@@ -43,6 +43,16 @@ describe('FormulaireConnexion', () => {
     expect(screen.queryByText(/indisponible sur cette installation/i)).toBeNull();
   });
 
+  it("renvoie vers l'accueil quelqu'un qui est déjà connecté", async () => {
+    pousser.mockClear();
+    useAuthStore.setState({
+      user: { id: 'u1', email: 'marc@test.fr' } as never,
+      isConfigured: true, isLoading: false,
+    });
+    render(<FormulaireConnexion />);
+    await waitFor(() => expect(pousser).toHaveBeenCalledWith('/'));
+  });
+
   it("annonce l'indisponibilité seulement une fois l'initialisation terminée", () => {
     useAuthStore.setState({ isConfigured: false, isLoading: false });
     render(<FormulaireConnexion />);

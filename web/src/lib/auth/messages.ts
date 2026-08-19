@@ -15,6 +15,23 @@ const TRADUCTIONS: ReadonlyArray<{ motif: string; texte: string }> = [
 ];
 
 /**
+ * Les deux seules réponses de Supabase qu'un compte Google peut expliquer :
+ * « identifiants refusés » (le compte n'a jamais eu de mot de passe) et
+ * « adresse déjà prise » (elle l'est par le compte Google).
+ *
+ * Sert à n'interroger `/api/auth/methode` que dans ces cas. Une coupure réseau
+ * ou une erreur inconnue ne dit rien sur la méthode d'inscription : poser la
+ * question consommerait le compteur de débit sans pouvoir rien apprendre.
+ */
+export function erreurPeutVenirDeGoogle(brut: string): boolean {
+  const normalise = brut.toLowerCase();
+  return (
+    normalise.includes('invalid login credentials') ||
+    normalise.includes('user already registered')
+  );
+}
+
+/**
  * @param brut       message renvoyé par Supabase
  * @param compteGoogle vrai si la route /api/auth/methode a reconnu un compte
  *                     Google pour cette adresse — le message change alors

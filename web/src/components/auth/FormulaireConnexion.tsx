@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import { useAuthStore } from "@/state/authStore";
 import { toast } from "@/state/uiStore";
-import { messageErreurAuth } from "@/lib/auth/messages";
+import { messageErreurAuth, erreurPeutVenirDeGoogle } from "@/lib/auth/messages";
 import { validerEmail, validerMotDePasse } from "@/lib/auth/validation";
 
 type Etape = "connexion" | "inscription" | "code" | "oubli";
@@ -20,9 +20,17 @@ type Etape = "connexion" | "inscription" | "code" | "oubli";
 export default function FormulaireConnexion() {
   const router = useRouter();
   const {
-    isConfigured, isLoading, signInWithEmail, signUpWithEmail, confirmSignupCode,
-    requestPasswordReset,
+    user, isConfigured, isLoading, signInWithEmail, signUpWithEmail,
+    confirmSignupCode, requestPasswordReset,
   } = useAuthStore();
+
+  // Quelqu'un de déjà connecté n'a rien à faire ici : la session revenant
+  // d'elle-même au chargement, il verrait sinon un formulaire de connexion
+  // alors qu'il l'est déjà. `replace` et non `push` : la page ne doit pas
+  // rester dans l'historique, sans quoi le bouton Retour y ramène en boucle.
+  useEffect(() => {
+    if (user) router.replace("/");
+  }, [user, router]);
 
   const [etape, setEtape] = useState<Etape>("connexion");
   const [email, setEmail] = useState("");
@@ -107,7 +115,12 @@ export default function FormulaireConnexion() {
       // « adresse déjà prise » ont la même cause quand le compte vient de
       // Google, et la même réponse utile.
       const brut = (err as Error).message ?? "";
-      const google = await compteVientDeGoogle(email.trim());
+      // On ne pose la question que si la réponse peut servir : une coupure
+      // réseau ne dit rien de la méthode d'inscription, et l'appel
+      // consommerait le compteur de débit pour rien.
+      const google = erreurPeutVenirDeGoogle(brut)
+        ? await compteVientDeGoogle(email.trim())
+        : false;
       setErreur(messageErreurAuth(brut, google));
     } finally {
       setEnCours(false);

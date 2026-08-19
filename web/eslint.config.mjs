@@ -22,6 +22,19 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-explicit-any": "off",
     },
   },
+  // Un paramètre préfixé `_` est déclaré exprès sans être lu : c'est la
+  // convention TypeScript pour un argument dont seule la POSITION compte.
+  // Le cas réel est un mock de `fetch` — retirer `_url`/`_init` ferait
+  // disparaître le warning mais casserait le typage de `mock.calls[0][0]`,
+  // qui se déduit de la signature (constaté le 19/08 : 3 erreurs TS2493).
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

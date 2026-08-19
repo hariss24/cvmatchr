@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { messageErreurAuth } from './messages';
+import { messageErreurAuth, erreurPeutVenirDeGoogle } from './messages';
 
 describe('messageErreurAuth', () => {
   it('traduit un mot de passe ou un email incorrect', () => {
@@ -40,5 +40,20 @@ describe('messageErreurAuth', () => {
 
   it('ne renvoie jamais une chaîne vide', () => {
     expect(messageErreurAuth('').length).toBeGreaterThan(0);
+  });
+});
+
+describe('erreurPeutVenirDeGoogle', () => {
+  it("retient les identifiants refusés : le compte peut n'avoir aucun mot de passe", () => {
+    expect(erreurPeutVenirDeGoogle('Invalid login credentials')).toBe(true);
+  });
+
+  it("retient l'adresse déjà prise : elle peut l'être par le compte Google", () => {
+    expect(erreurPeutVenirDeGoogle('User already registered')).toBe(true);
+  });
+
+  it("écarte une coupure réseau, qui ne dit rien de la méthode d'inscription", () => {
+    expect(erreurPeutVenirDeGoogle('Failed to fetch')).toBe(false);
+    expect(erreurPeutVenirDeGoogle('')).toBe(false);
   });
 });
