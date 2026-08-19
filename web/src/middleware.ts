@@ -23,6 +23,11 @@ export async function middleware(req: NextRequest) {
   // Ne pas bloquer la page de login, les assets statiques et Next.js internals
   if (
     path === "/login" ||
+    // Sans cette ligne, tout lien de confirmation d'adresse ou de
+    // réinitialisation de mot de passe est renvoyé sur le portail à mot de
+    // passe partagé au lieu de connecter la personne — le code de session
+    // arrive dans l'URL et est perdu.
+    path === "/auth/callback" ||
     path.startsWith("/_next/") ||
     path.startsWith("/static/") ||
     path === "/favicon.ico" ||

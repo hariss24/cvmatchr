@@ -33,7 +33,7 @@ export function evaluateQuotaRules(params: QuotaCheckParams): QuotaResult {
       allowed: false,
       status: 401,
       message:
-        'Connectez-vous avec Google, ou ajoutez votre propre clé API dans les Paramètres.',
+        'Créez un compte gratuit pour utiliser l\'IA, ou ajoutez votre propre clé API dans les Paramètres.',
     };
   }
   return { allowed: true, reason: 'server_quota' };

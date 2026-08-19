@@ -41,6 +41,13 @@
 
 ## Journal
 
+### 2026-08-19 : Connexion email — Task 8 : correctifs d'environnement (callback libre et message quota)
+
+- **Quoi :** Ajout de `/auth/callback` dans les chemins libres de `src/middleware.ts`. Mise à jour de `src/lib/ai/quota.ts` (`evaluateQuotaRules`) pour remplacer la mention restrictive de Google par la création d'un compte gratuit.
+- **Pourquoi :** Si le mot de passe partagé (`AUTH_PASSWORD`) était activé, le middleware interceptait les liens de confirmation d'adresse et de réinitialisation avant échange du token en session. Le message de quota reflète désormais la possibilité de créer un compte avec ou sans Google.
+- **Fichiers touchés :** `web/src/middleware.ts`, `web/src/lib/ai/quota.ts`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `tsc` OK, `lint` OK (0 erreur, 3 warnings préexistants), `vitest` (874/874), `build` OK.
+
 ### 2026-08-19 : Connexion email — Task 7 : redirection des menus bureau et mobile vers /connexion
 
 - **Quoi :** Remplacement du bouton Google par un lien unique « Se connecter » vers `/connexion` dans `UserMenu.tsx` (desktop) et `MobileMenu.tsx` (mobile). Nettoyage des imports inutilisés (`GoogleSignInButton`). Adaptation des tests unitaires `UserMenuAuth.test.tsx` et `MobileMenu.test.tsx`.
