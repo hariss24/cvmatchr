@@ -41,6 +41,13 @@
 
 ## Journal
 
+### 2026-08-19 : Connexion email — Task 6 : page de pose du nouveau mot de passe
+
+- **Quoi :** Création de la page `web/src/app/connexion/nouveau-mot-de-passe/page.tsx` pour conclure le parcours de réinitialisation de mot de passe.
+- **Pourquoi :** Le lien envoyé par courriel via Supabase Auth pointe vers `/auth/callback?next=/connexion/nouveau-mot-de-passe`. Cette page permet à l'utilisateur de saisir son nouveau mot de passe sous validation (8 caractères minimum) et appelle `updatePassword` sur la session de récupération active avant de rediriger vers l'accueil.
+- **Fichiers touchés :** `web/src/app/connexion/nouveau-mot-de-passe/page.tsx`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `tsc` OK, `lint` OK (0 erreur, 3 warnings préexistants), `vitest` (874/874), `build` OK (`/connexion/nouveau-mot-de-passe` compilé en statique).
+
 ### 2026-08-19 : Connexion email — Task 5 : page /connexion (quatre états, deux chemins d'entrée)
 
 - **Quoi :** Création du composant `web/src/components/auth/FormulaireConnexion.tsx` (+ tests `FormulaireConnexion.test.tsx`), de la page `web/src/app/connexion/page.tsx` et des styles associés dans `web/src/app/globals.css`.
