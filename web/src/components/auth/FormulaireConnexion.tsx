@@ -20,7 +20,7 @@ type Etape = "connexion" | "inscription" | "code" | "oubli";
 export default function FormulaireConnexion() {
   const router = useRouter();
   const {
-    isConfigured, signInWithEmail, signUpWithEmail, confirmSignupCode,
+    isConfigured, isLoading, signInWithEmail, signUpWithEmail, confirmSignupCode,
     requestPasswordReset,
   } = useAuthStore();
 
@@ -58,7 +58,10 @@ export default function FormulaireConnexion() {
     if (etape === "code") {
       setEnCours(true);
       try {
-        await confirmSignupCode(email, code.trim());
+        // `email.trim()` et non `email` : l'inscription a été faite sur
+        // l'adresse nettoyée. Confirmer avec la version brute ferait échouer la
+        // vérification pour quiconque a laissé une espace en collant son adresse.
+        await confirmSignupCode(email.trim(), code.trim());
         toast("Votre adresse est confirmée.", "success");
         router.push("/");
       } catch (err) {
@@ -111,7 +114,13 @@ export default function FormulaireConnexion() {
     }
   }
 
-  if (!isConfigured) {
+  // `isLoading` est vrai tant que `initAuth()` n'a pas répondu, et `isConfigured`
+  // vaut alors encore `false` : sans cette condition, le HTML servi pour
+  // /connexion ne contient QUE « connexion indisponible » — le premier écran
+  // d'un visiteur venu créer un compte lui annonce que c'est impossible, avant
+  // de se corriger une fois le JavaScript exécuté. Vérifié le 19/08 sur le HTML
+  // rendu, pas déduit.
+  if (!isConfigured && !isLoading) {
     return <p className="connexion__indispo">La connexion est indisponible sur cette installation.</p>;
   }
 

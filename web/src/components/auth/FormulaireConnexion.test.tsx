@@ -32,6 +32,23 @@ describe('FormulaireConnexion', () => {
     }));
   });
 
+  // Régression du 19/08 : le composant ne regardait que `isConfigured`, qui
+  // vaut `false` tant que `initAuth()` n'a pas répondu. Le HTML servi pour
+  // /connexion ne contenait alors QUE le message d'indisponibilité — la page
+  // d'inscription annonçait au visiteur qu'il ne pouvait pas s'inscrire.
+  it("affiche le formulaire pendant l'initialisation de la session", () => {
+    useAuthStore.setState({ isConfigured: false, isLoading: true });
+    render(<FormulaireConnexion />);
+    expect(screen.getByLabelText(/adresse email/i)).toBeInTheDocument();
+    expect(screen.queryByText(/indisponible sur cette installation/i)).toBeNull();
+  });
+
+  it("annonce l'indisponibilité seulement une fois l'initialisation terminée", () => {
+    useAuthStore.setState({ isConfigured: false, isLoading: false });
+    render(<FormulaireConnexion />);
+    expect(screen.getByText(/indisponible sur cette installation/i)).toBeInTheDocument();
+  });
+
   // Le bouton Google est rendu par Google Identity Services, dont le script ne
   // se charge pas sous jsdom : on ne peut donc pas chercher son libellé. Le
   // séparateur « ou » prouve que le bloc Google est bien monté à côté du
