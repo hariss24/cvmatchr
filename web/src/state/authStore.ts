@@ -15,6 +15,11 @@ interface AuthState {
   /** Flux Google Identity Services : le jeton est obtenu côté navigateur, donc
    *  Google affiche notre domaine et non celui du projet Supabase. */
   signInWithGoogleIdToken: (credential: string, nonce: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string) => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  confirmSignupCode: (email: string, token: string) => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
   signOut: () => Promise<void>;
   initAuth: () => Promise<void>;
 }
@@ -44,6 +49,62 @@ export const useAuthStore = create<AuthState>((set) => ({
       token: credential,
       nonce,
     });
+    if (error) throw error;
+  },
+
+  signUpWithEmail: async (email, password) => {
+    const supabase = createBrowserClientHelper();
+    if (!supabase) return;
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) throw error;
+
+    // Piège de Supabase, vérifié le 19/08 : quand « Confirm email » est activé,
+    // une inscription sur une adresse DÉJÀ prise ne renvoie aucune erreur. Elle
+    // renvoie un utilisateur dont la liste `identities` est vide — c'est ainsi
+    // que Supabase évite de révéler l'existence du compte.
+    //
+    // Sans ce test, la personne passe à l'écran « saisissez votre code » et
+    // attend indéfiniment un courriel qui n'arrivera jamais. On lève donc le
+    // message que `messageErreurAuth` sait déjà traduire.
+    if (data.user && data.user.identities?.length === 0) {
+      throw new Error('User already registered');
+    }
+  },
+
+  signInWithEmail: async (email, password) => {
+    const supabase = createBrowserClientHelper();
+    if (!supabase) return;
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  },
+
+  // `type: 'signup'` et non `'email'` : c'est le code du courriel de
+  // confirmation d'inscription. Se tromper de type fait échouer la
+  // vérification sans que le message ne dise pourquoi.
+  confirmSignupCode: async (email, token) => {
+    const supabase = createBrowserClientHelper();
+    if (!supabase) return;
+    const { error } = await supabase.auth.verifyOtp({ email, token, type: 'signup' });
+    if (error) throw error;
+  },
+
+  // Le lien du courriel passe par /auth/callback, qui échange le code contre
+  // une session avant de rediriger. `next` y est validé par safeRedirectPath :
+  // seul un chemin interne est accepté.
+  requestPasswordReset: async (email) => {
+    const supabase = createBrowserClientHelper();
+    if (!supabase) return;
+    const retour = `${window.location.origin}/auth/callback?next=/connexion/nouveau-mot-de-passe`;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: retour,
+    });
+    if (error) throw error;
+  },
+
+  updatePassword: async (password) => {
+    const supabase = createBrowserClientHelper();
+    if (!supabase) return;
+    const { error } = await supabase.auth.updateUser({ password });
     if (error) throw error;
   },
 

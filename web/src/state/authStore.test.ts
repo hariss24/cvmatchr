@@ -54,3 +54,93 @@ describe('AuthStore.signOut — déconnexion et vidage du cache de session', () 
     expect(callOrder).toEqual(['auth.signOut', 'cacheClear']);
   });
 });
+
+describe('AuthStore — parcours email et mot de passe', () => {
+  const signUp = vi.fn();
+  const signInWithPassword = vi.fn();
+  const verifyOtp = vi.fn();
+  const resetPasswordForEmail = vi.fn();
+  const updateUser = vi.fn();
+
+  beforeEach(() => {
+    vi.resetModules();
+    for (const m of [signUp, signInWithPassword, verifyOtp, resetPasswordForEmail, updateUser]) {
+      m.mockClear().mockResolvedValue({ data: {}, error: null });
+    }
+    vi.doMock('@/lib/supabase/client', () => ({
+      createBrowserClientHelper: () => ({
+        auth: { signUp, signInWithPassword, verifyOtp, resetPasswordForEmail, updateUser },
+      }),
+    }));
+  });
+
+  it('crée un compte avec l\'adresse et le mot de passe fournis', async () => {
+    const { useAuthStore } = await import('./authStore');
+    await useAuthStore.getState().signUpWithEmail('marc@test.fr', 'motdepasse');
+    expect(signUp).toHaveBeenCalledWith({ email: 'marc@test.fr', password: 'motdepasse' });
+  });
+
+  // Supabase n'échoue PAS sur une adresse déjà prise quand la confirmation est
+  // activée : il renvoie un utilisateur sans identité. Sans ce garde-fou, la
+  // personne attendrait un code qui n'arrive jamais.
+  it('signale une adresse déjà inscrite, que Supabase annonce sans erreur', async () => {
+    signUp.mockResolvedValue({
+      data: { user: { id: 'u1', identities: [] } }, error: null,
+    });
+    const { useAuthStore } = await import('./authStore');
+    await expect(
+      useAuthStore.getState().signUpWithEmail('deja@test.fr', 'motdepasse'),
+    ).rejects.toMatchObject({ message: 'User already registered' });
+  });
+
+  it('accepte une inscription qui produit une identité', async () => {
+    signUp.mockResolvedValue({
+      data: { user: { id: 'u1', identities: [{ provider: 'email' }] } }, error: null,
+    });
+    const { useAuthStore } = await import('./authStore');
+    await expect(
+      useAuthStore.getState().signUpWithEmail('neuf@test.fr', 'motdepasse'),
+    ).resolves.toBeUndefined();
+  });
+
+  it('connecte avec l\'adresse et le mot de passe fournis', async () => {
+    const { useAuthStore } = await import('./authStore');
+    await useAuthStore.getState().signInWithEmail('marc@test.fr', 'motdepasse');
+    expect(signInWithPassword).toHaveBeenCalledWith({
+      email: 'marc@test.fr', password: 'motdepasse',
+    });
+  });
+
+  it('valide le code d\'inscription avec le bon type', async () => {
+    const { useAuthStore } = await import('./authStore');
+    await useAuthStore.getState().confirmSignupCode('marc@test.fr', '123456');
+    expect(verifyOtp).toHaveBeenCalledWith({
+      email: 'marc@test.fr', token: '123456', type: 'signup',
+    });
+  });
+
+  it('renvoie le lien de réinitialisation vers le callback puis la page dédiée', async () => {
+    const { useAuthStore } = await import('./authStore');
+    await useAuthStore.getState().requestPasswordReset('marc@test.fr');
+    const [adresse, options] = resetPasswordForEmail.mock.calls[0];
+    expect(adresse).toBe('marc@test.fr');
+    expect(options.redirectTo).toContain('/auth/callback');
+    expect(options.redirectTo).toContain('next=/connexion/nouveau-mot-de-passe');
+  });
+
+  it('change le mot de passe de la session en cours', async () => {
+    const { useAuthStore } = await import('./authStore');
+    await useAuthStore.getState().updatePassword('nouveaumotdepasse');
+    expect(updateUser).toHaveBeenCalledWith({ password: 'nouveaumotdepasse' });
+  });
+
+  it('laisse remonter l\'erreur Supabase sans l\'avaler', async () => {
+    signInWithPassword.mockResolvedValue({
+      data: {}, error: { message: 'Invalid login credentials' },
+    });
+    const { useAuthStore } = await import('./authStore');
+    await expect(
+      useAuthStore.getState().signInWithEmail('marc@test.fr', 'faux'),
+    ).rejects.toMatchObject({ message: 'Invalid login credentials' });
+  });
+});

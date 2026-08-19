@@ -41,6 +41,13 @@
 
 ## Journal
 
+### 2026-08-19 : Connexion email — Task 4 : inscription, connexion, code et mot de passe oublié dans authStore
+
+- **Quoi :** Ajout de 5 méthodes dans `src/state/authStore.ts` (`signUpWithEmail`, `signInWithEmail`, `confirmSignupCode`, `requestPasswordReset`, `updatePassword`) et tests unitaires complets dans `authStore.test.ts`.
+- **Pourquoi :** `authStore.ts` est le point central d'authentification de l'application côté navigateur. `onAuthStateChange` y écoute toutes les sessions et déclenche automatiquement `reprendreDonneesLocales()` — ces nouvelles méthodes bénéficient donc directement de la restitution des documents. Détection intégrée du cas Supabase « adresse déjà inscrite avec Confirm email actif » (liste d'identités vide) pour lever une erreur explicite au lieu d'un écran de code muet.
+- **Fichiers touchés :** `web/src/state/authStore.ts`, `web/src/state/authStore.test.ts`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** TDD respecté (8 tests rouges puis verts). `tsc` OK, `lint` OK (0 erreur, 3 warnings préexistants), `vitest` (868/868), `build` OK.
+
 ### 2026-08-19 : Connexion email — Task 3 : route API de reconnaissance de compte Google
 
 - **Quoi :** Création de `web/src/lib/supabase/admin.ts` (`createAdminClient()`), de la route `web/src/app/api/auth/methode/route.ts` et ajout de la règle de limitation de débit `auth-methode` (10 appels / 300 s) dans `src/lib/security/rateLimit.ts` (+ tests dans `rateLimit.test.ts`). Documentation de `SUPABASE_SERVICE_ROLE_KEY` dans `.env.example`.
