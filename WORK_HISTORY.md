@@ -41,6 +41,15 @@
 
 ## Journal
 
+### 2026-08-19 : Connexion email — Task 1 : reconnaissance d'un compte Google en base
+
+- **Quoi :** Création de la fonction SQL `public.identite_est_google(p_email TEXT)` dans la migration `0005_identite_google.sql`, testée par `tests/identite_google.sql`. Complétion du bouchon `_auth_stub.sql` (table `auth.identities`, rôle `service_role`). Mise à jour de `web/supabase/README.md`.
+- **Pourquoi :** Supabase renvoie « Invalid login credentials » sans distinction qu'un mot de passe soit erroné ou que le compte ait été créé via Google sans mot de passe. Cette fonction permet à la couche serveur de reconnaître ce cas sans révéler d'autres informations sur l'adresse.
+- **Droits :** Exécution révoquée pour `PUBLIC` et accordée uniquement à `service_role` (jamais `anon` ni `authenticated`).
+- **Fichiers touchés :** `web/supabase/migrations/0005_identite_google.sql`, `web/supabase/tests/identite_google.sql`, `web/supabase/_auth_stub.sql`, `web/supabase/README.md`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `tests/identite_google.sql` `TOUS_LES_TESTS_OK`, `tests/rls_etancheite.sql` `TOUS_LES_TESTS_OK`, `tests/rate_limit.sql` `TOUS_LES_TESTS_OK`. Validation par mutation des 3 failles (provider='email' -> TEST 1 KO, lower() retiré -> TEST 4 KO, droits anon -> TEST 5 KO). `tsc`, `lint` (0 erreur, 3 warnings préexistants), `vitest` (843/843), `build` OK.
+- **Action humaine requise :** Appliquer la migration `0005_identite_google.sql` sur Supabase.
+
 ### 2026-08-19 : Sécurité — lot A : les routes publiques ne sont plus à débit libre
 
 - **Quoi :** Neuf routes API n'avaient ni compte requis ni limite de débit : `jobs/search`, `jobs/commute`, `jobs/logos`, `jobs/ats`, `jobs/locations`, `jobs/metiers`, `extract-job`, `test-model`, `login`. Ajout d'une limitation par IP (`src/lib/security/rateLimit.ts` + migration `0004_rate_limits.sql`), appliquée à toutes. Mise à jour des dépendances vulnérables (`npm audit fix`).

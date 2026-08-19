@@ -22,6 +22,7 @@ tourné. Un changement se fait toujours par un nouveau fichier.
 | `0002_user_settings.sql` | Réglages utilisateur répliqués (profil, critères de recherche d'offres) |
 | `0003_documents_templates.sql` | Documents et modèles répliqués |
 | `0004_rate_limits.sql` | Compteur d'appels partagé, pour limiter le débit des routes API publiques |
+| `0005_identite_google.sql` | Reconnaître un compte créé avec Google (exécutable par service_role uniquement) |
 
 Spécification associée : `docs/superpowers/specs/2026-08-10-auth-database-design.md`.
 
@@ -74,6 +75,30 @@ Pour le compteur de débit (migration 0004), même principe :
 ```bash
 cd web/supabase && docker run --rm -e POSTGRES_PASSWORD=x -v "$PWD:/sql" postgres:15 sh -c "docker-entrypoint.sh postgres > /tmp/pg.log 2>&1 & sleep 15 && psql -U postgres -q -v ON_ERROR_STOP=1 -f /sql/_auth_stub.sql -f /sql/migrations/0004_rate_limits.sql > /dev/null && psql -U postgres -v ON_ERROR_STOP=1 -f /sql/tests/rate_limit.sql"
 ```
+
+Pour la reconnaissance des comptes Google (migration 0005) :
+
+```bash
+cd web/supabase && docker run --rm -e POSTGRES_PASSWORD=x -v "$PWD:/sql" postgres:15 sh -c "docker-entrypoint.sh postgres > /tmp/pg.log 2>&1 & sleep 15 && psql -U postgres -q -v ON_ERROR_STOP=1 -f /sql/_auth_stub.sql -f /sql/migrations/0005_identite_google.sql > /dev/null && psql -U postgres -v ON_ERROR_STOP=1 -f /sql/tests/identite_google.sql"
+```
+
+### Ce que couvre `tests/identite_google.sql`
+
+| Test | Vérifie |
+|---|---|
+| 1 | Une adresse liée à Google renvoie vrai. |
+| 2 | Une adresse à mot de passe renvoie faux. |
+| 3 | Une adresse inconnue renvoie faux (indistinguable du cas 2). |
+| 4 | La casse de l'adresse n'a aucune influence. |
+| 5 | `anon` et `authenticated` ne peuvent pas exécuter la fonction (réservée à `service_role`). |
+
+Validation par mutation, exécutée le 19/08/2026 :
+
+| Faille réintroduite | Résultat |
+|---|---|
+| `i.provider = 'email'` | TEST 1 échoue : « un compte Google n'est pas reconnu » |
+| Suppression de `lower(...)` | TEST 4 échoue : « la casse de l'adresse change la réponse » |
+| `GRANT ... TO anon, authenticated` | TEST 5 échoue : « le rôle anon peut exécuter la fonction » |
 
 ### Ce que couvre `tests/rate_limit.sql`
 

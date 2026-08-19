@@ -16,6 +16,16 @@ CREATE TABLE IF NOT EXISTS auth.users (
   raw_user_meta_data JSONB DEFAULT '{}'::jsonb
 );
 
+-- Identités liées à un compte : une par méthode de connexion. Supabase en crée
+-- une pour Google, une pour l'email. La migration 0005 s'en sert pour dire
+-- « ce compte passe par Google ».
+CREATE TABLE IF NOT EXISTS auth.identities (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  provider    TEXT NOT NULL,
+  provider_id TEXT NOT NULL
+);
+
 -- Renvoient NULL hors contexte Supabase, comme les vraies fonctions quand
 -- aucun jeton n'est présent (elles utilisent current_setting(..., true)).
 CREATE OR REPLACE FUNCTION auth.uid() RETURNS UUID
@@ -38,6 +48,9 @@ BEGIN
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
     CREATE ROLE anon NOLOGIN;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+    CREATE ROLE service_role NOLOGIN;
   END IF;
 END
 $$;
