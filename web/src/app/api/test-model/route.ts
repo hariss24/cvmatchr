@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { testConnection } from "@/lib/ai/clients";
+import { enforceRateLimit } from "@/lib/security/rateLimit";
 
 export const runtime = "nodejs";
 export const maxDuration = 20;
@@ -14,6 +15,9 @@ type Body = { model?: string; key?: string };
  * sans passer par le quota).
  */
 export async function POST(req: Request): Promise<Response> {
+  const limite = await enforceRateLimit(req, "test-model");
+  if (limite) return limite;
+
   let body: Body;
   try {
     body = await req.json();

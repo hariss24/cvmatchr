@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { resolveProfile } from "@/lib/jobs/resolveProfile";
 import { getCommuteTimes, commuteSummary } from "@/lib/jobs/maps";
+import { enforceRateLimit } from "@/lib/security/rateLimit";
 
 // Google Maps (fetch) : runtime Node.js.
 export const runtime = "nodejs";
@@ -13,6 +14,9 @@ export const runtime = "nodejs";
  * (spec §2.7). Le client met le résultat en cache 30 jours.
  */
 export async function POST(req: Request): Promise<Response> {
+  const limite = await enforceRateLimit(req, "jobs-commute");
+  if (limite) return limite;
+
   let body: { destination?: string; profile?: unknown };
   try {
     body = await req.json();

@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { scrapeJobText } from "@/lib/scraper/scraper";
+import { enforceRateLimit } from "@/lib/security/rateLimit";
 
 export async function POST(req: Request) {
+  const limite = await enforceRateLimit(req, "extract-job");
+  if (limite) return limite;
+
   try {
     const body = await req.json();
     if (!body || !body.url) {

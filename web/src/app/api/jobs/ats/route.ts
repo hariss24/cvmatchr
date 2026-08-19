@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { resolveAts, type AtsProvider } from "@/lib/jobs/ats";
+import { enforceRateLimit } from "@/lib/security/rateLimit";
 
 // Appels réseau sortants vers les boards publics : runtime Node.js.
 export const runtime = "nodejs";
@@ -19,6 +20,9 @@ const MAX_ENTREPRISES = 60;
  * sans board confirmé étant simplement absentes.
  */
 export async function POST(req: Request): Promise<Response> {
+  const limite = await enforceRateLimit(req, "jobs-ats");
+  if (limite) return limite;
+
   let body: unknown;
   try {
     body = await req.json();

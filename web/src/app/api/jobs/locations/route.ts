@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { enforceRateLimit } from "@/lib/security/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -38,6 +39,11 @@ async function fetchJson<T>(url: string): Promise<T[]> {
 export async function GET(req: Request): Promise<Response> {
   const q = new URL(req.url).searchParams.get("q")?.trim() ?? "";
   if (q.length < 2) return NextResponse.json({ results: [] });
+
+  // Après le filtre : une frappe trop courte ne coûte rien, elle ne doit donc
+  // pas entamer le quota de l'utilisateur qui tape lettre par lettre.
+  const limite = await enforceRateLimit(req, "jobs-locations");
+  if (limite) return limite;
 
   const [communes, regions] = await Promise.all([
     fetchJson<GeoCommune>(`${COMMUNES_URL}?nom=${encodeURIComponent(q)}&fields=nom,code,codesPostaux&boost=population&limit=8`),

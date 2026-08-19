@@ -7,6 +7,7 @@ import { searchBoards } from "@/lib/jobs/boardsFr";
 import { dedupeOffers } from "@/lib/jobs/dedupe";
 import { matchesIncludeKeywords } from "@/lib/jobs/includeFilter";
 import type { JobOffer, SourceId } from "@/lib/jobs/offer";
+import { enforceRateLimit } from "@/lib/security/rateLimit";
 
 // Appels réseau sortants : runtime Node.js.
 export const runtime = "nodejs";
@@ -25,6 +26,9 @@ const ZERO_CALLS: Record<SourceId, number> = { francetravail: 0, adzuna: 0, jsea
  * local côté client.
  */
 export async function POST(req: Request): Promise<Response> {
+  const limite = await enforceRateLimit(req, "jobs-search");
+  if (limite) return limite;
+
   let body: unknown = {};
   try {
     body = await req.json();

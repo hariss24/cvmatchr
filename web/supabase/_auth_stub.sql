@@ -28,11 +28,16 @@ CREATE OR REPLACE FUNCTION auth.role() RETURNS TEXT
     SELECT NULLIF(current_setting('request.jwt.claim.role', TRUE), '')::TEXT;
   $$;
 
--- Rôle cible des GRANT de la migration.
+-- Rôles cibles des GRANT des migrations. `anon` est celui du visiteur non
+-- connecté : la migration 0004 lui accorde consume_rate_limit(), puisque c'est
+-- précisément le trafic anonyme qu'il s'agit de compter.
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
     CREATE ROLE authenticated NOLOGIN;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+    CREATE ROLE anon NOLOGIN;
   END IF;
 END
 $$;
@@ -42,7 +47,7 @@ $$;
 -- reproduit ce comportement, sinon le test d'étanchéité échouerait sur un
 -- « permission denied » au niveau table, sans jamais atteindre le RLS —
 -- et donnerait donc un faux sentiment de sécurité.
-GRANT USAGE ON SCHEMA public TO authenticated;
+GRANT USAGE ON SCHEMA public TO authenticated, anon;
 GRANT USAGE ON SCHEMA auth   TO authenticated;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
-  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO authenticated;
+  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO authenticated, anon;

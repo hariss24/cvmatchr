@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { logoUrlsFor } from "@/lib/jobs/logos";
+import { enforceRateLimit } from "@/lib/security/rateLimit";
 
 // Appels réseau sortants (annuaire de marques, pages d'accueil) : runtime Node.js.
 export const runtime = "nodejs";
@@ -24,6 +25,9 @@ const MAX_ENTREPRISES = 120;
  * logo confirmé étant simplement absentes.
  */
 export async function POST(req: Request): Promise<Response> {
+  const limite = await enforceRateLimit(req, "jobs-logos");
+  if (limite) return limite;
+
   let body: unknown;
   try {
     body = await req.json();

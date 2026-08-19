@@ -41,6 +41,17 @@
 
 ## Journal
 
+### 2026-08-19 : Sécurité — lot A : les routes publiques ne sont plus à débit libre
+
+- **Quoi :** Neuf routes API n'avaient ni compte requis ni limite de débit : `jobs/search`, `jobs/commute`, `jobs/logos`, `jobs/ats`, `jobs/locations`, `jobs/metiers`, `extract-job`, `test-model`, `login`. Ajout d'une limitation par IP (`src/lib/security/rateLimit.ts` + migration `0004_rate_limits.sql`), appliquée à toutes. Mise à jour des dépendances vulnérables (`npm audit fix`).
+- **Pourquoi :** Ces routes dépensent des ressources facturées à l'appel — Google Maps sur `jobs/commute`, France Travail / Adzuna / JSearch sur `jobs/search`, Brandfetch sur `jobs/logos` — ou du temps machine (`extract-job` scrape une URL arbitraire). Une simple boucle produisait une facture. Les routes IA, elles, étaient correctement gardées par `guardAiRequest` depuis le début : c'est l'écart entre les deux familles qui était le défaut.
+- **Le compteur mémoire de `login` ne comptait rien :** il vivait dans une `Map` JavaScript. Sur Vercel, chaque requête peut atterrir sur une autre instance et la mémoire disparaît à froid — le seuil « 5 essais par minute » repartait de zéro en permanence. La protection existait dans le code sans exister dans les faits. Le compteur est désormais en base, donc partagé par toutes les instances.
+- **Choix :** limite par IP et non compte obligatoire, parce que chercher des offres doit rester possible avant inscription. Fenêtre fixe et non glissante (une ligne par IP et par route, au lieu d'une par appel) : on rend l'abus non rentable, on ne le rend pas impossible. En cas de panne Supabase, on laisse passer plutôt que de rendre la recherche inutilisable.
+- **Fichiers touchés :** `web/src/lib/security/rateLimit.ts` (+ test), `web/supabase/migrations/0004_rate_limits.sql`, `web/supabase/tests/rate_limit.sql`, `web/supabase/_auth_stub.sql` (rôle `anon`), `web/supabase/README.md`, les 9 `route.ts`, `web/src/app/api/login/route.test.ts`, `web/package-lock.json`.
+- **Garde anti-régression :** un test parcourt les fichiers `route.ts` et exige que chacun appelle `guardAiRequest` ou `enforceRateLimit`. Une route ajoutée plus tard sans protection fait échouer la suite — c'est exactement l'oubli qui a produit ce chantier.
+- **Résultat vérifs :** `npm run lint` 0 erreur (3 warnings préexistants), `npx vitest run` 843/843, `npm run build` OK, `tests/rate_limit.sql` sous Docker `TOUS_LES_TESTS_OK`, `tests/rls_etancheite.sql` toujours vert après ajout du rôle `anon` au bouchon. Validation par mutation des 3 assertions clés du test SQL (cf. `web/supabase/README.md`).
+- **Reste ouvert :** `npm audit` passe de 9 à 5 vulnérabilités ; les 4 restantes (`sharp`, `postcss`) viennent de Next et exigent 16.2.9 → 16.3.1, non fait ici. Lot B (CSP complète, en-têtes) et lot C (auth partagée, injection de prompt) non entamés.
+
 ### 2026-08-18 : Mots-clés conjonctifs — correctif : un mot de fonction n'est pas une exigence
 
 - **Quoi :** Ajout de `MOTS_FONCTION` dans `synonymes.ts` (« chargé », « responsable », « assistant », « chef », « senior »…), écartés du reste d'un mot-clé au même titre que les mots vides. Liste répliquée dans `scripts/boards/mesurer-pertinence.mjs`, avec un test qui compare les tables des deux fichiers terme à terme.

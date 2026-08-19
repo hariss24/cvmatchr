@@ -1,9 +1,23 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { POST } from "./route";
 
+// Le débit n'est plus compté ici : la route délègue à `enforceRateLimit`, qui
+// s'appuie sur un compteur partagé en base (le compteur mémoire d'avant ne
+// survivait pas au serverless). Ce qui se teste ici, c'est donc la délégation —
+// le comptage lui-même est couvert par lib/security/rateLimit.test.ts.
+const enforceRateLimit = vi.hoisted(() =>
+  vi.fn<(req: Request, route: string) => Promise<Response | null>>(),
+);
+vi.mock("@/lib/security/rateLimit", () => ({ enforceRateLimit }));
+
 describe("Login API", () => {
   beforeEach(() => {
     process.env.REMOTE_AUTH_PASSWORD = "secretpassword";
+    // mockReset et pas seulement mockResolvedValue : `vi.restoreAllMocks()`
+    // ne remet pas à zéro l'historique d'un mock créé par vi.hoisted, et les
+    // appels s'additionneraient d'un test à l'autre.
+    enforceRateLimit.mockReset();
+    enforceRateLimit.mockResolvedValue(null);
     // Mock crypto.subtle.digest for tests to avoid having to use real crypto API in node
     const mockDigest = vi.fn().mockResolvedValue(new ArrayBuffer(32));
     Object.defineProperty(global, 'crypto', {
@@ -27,7 +41,7 @@ describe("Login API", () => {
       body: JSON.stringify({ password: "anything" }),
       headers: { "x-forwarded-for": "1.1.1.1" }
     });
-    
+
     const res = await POST(req);
     expect(res.status).toBe(200);
     const data = await res.json();
@@ -40,46 +54,51 @@ describe("Login API", () => {
       body: JSON.stringify({ password: "wrong" }),
       headers: { "x-forwarded-for": "2.2.2.2" }
     });
-    
+
     const res = await POST(req);
     expect(res.status).toBe(401);
   });
 
-  it("should rate limit after 5 failed attempts", async () => {
-    const makeRequest = () => new Request("http://localhost/api/login", {
+  it("passe la main au compteur partagé, sous le nom de route 'login'", async () => {
+    const req = new Request("http://localhost/api/login", {
       method: "POST",
       body: JSON.stringify({ password: "wrong" }),
       headers: { "x-forwarded-for": "3.3.3.3" }
     });
 
-    for (let i = 0; i < 5; i++) {
-      const res = await POST(makeRequest());
-      expect(res.status).toBe(401);
-    }
+    await POST(req);
 
-    // The 6th request should hit the rate limit
-    const resLimited = await POST(makeRequest());
-    expect(resLimited.status).toBe(429);
-    const data = await resLimited.json();
-    expect(data.error).toContain("Trop de tentatives");
+    expect(enforceRateLimit).toHaveBeenCalledOnce();
+    expect(enforceRateLimit.mock.calls[0][1]).toBe("login");
   });
 
-  it("should succeed with correct password and clear rate limit", async () => {
-    const makeRequest = (pwd: string) => new Request("http://localhost/api/login", {
+  it("renvoie le 429 du compteur sans même regarder le mot de passe", async () => {
+    enforceRateLimit.mockResolvedValue(
+      Response.json({ error: "Trop de requêtes." }, { status: 429 }),
+    );
+
+    // Mot de passe CORRECT : s'il passait quand même, la limite serait contournable.
+    const req = new Request("http://localhost/api/login", {
       method: "POST",
-      body: JSON.stringify({ password: pwd }),
+      body: JSON.stringify({ password: "secretpassword" }),
+      headers: { "x-forwarded-for": "3.3.3.3" }
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(429);
+    expect(res.headers.get("Set-Cookie")).toBeNull();
+  });
+
+  it("should succeed with correct password", async () => {
+    const req = new Request("http://localhost/api/login", {
+      method: "POST",
+      body: JSON.stringify({ password: "secretpassword" }),
       headers: { "x-forwarded-for": "4.4.4.4" }
     });
 
-    // Fail 3 times
-    for (let i = 0; i < 3; i++) {
-      await POST(makeRequest("wrong"));
-    }
-
-    // Success
-    const res = await POST(makeRequest("secretpassword"));
+    const res = await POST(req);
     expect(res.status).toBe(200);
-    
+
     // Cookie should be set
     const cookie = res.headers.get("Set-Cookie");
     expect(cookie).toContain("auth_token=");

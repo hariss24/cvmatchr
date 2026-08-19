@@ -1,29 +1,17 @@
 import { NextResponse } from "next/server";
-
-const rateLimits = new Map<string, { count: number; lastAttempt: number }>();
+import { enforceRateLimit } from "@/lib/security/rateLimit";
 
 export async function POST(req: Request) {
-  // Simple rate limiting by IP (using x-forwarded-for if available)
-  const ip = req.headers.get("x-forwarded-for") || "unknown-ip";
-  const now = Date.now();
+  // Le compteur de tentatives vivait dans une `Map` en mémoire. Sur Vercel,
+  // chaque requête peut atterrir sur une instance différente et la mémoire
+  // disparaît à froid : le seuil « 5 essais par minute » repartait de zéro sans
+  // arrêt, et ne freinait donc aucune attaque par force brute. Le compteur est
+  // désormais partagé en base (cf. lib/security/rateLimit.ts).
+  const limite = await enforceRateLimit(req, "login");
+  if (limite) return limite;
 
-  const record = rateLimits.get(ip);
-  if (record) {
-    if (now - record.lastAttempt < 60000) {
-      if (record.count >= 5) {
-        return NextResponse.json({ error: "Trop de tentatives. Réessayez dans une minute." }, { status: 429 });
-      }
-      record.count += 1;
-      record.lastAttempt = now;
-    } else {
-      record.count = 1;
-      record.lastAttempt = now;
-    }
-  } else {
-    rateLimits.set(ip, { count: 1, lastAttempt: now });
-  }
-
-  // Artificial delay to mitigate timing attacks and slow down brute-force further
+  // Ralentit la force brute et lisse les écarts de temps de réponse entre un
+  // mot de passe correct et un mot de passe faux.
   await new Promise(resolve => setTimeout(resolve, 500));
 
   try {
@@ -35,9 +23,6 @@ export async function POST(req: Request) {
     }
 
     if (password === authPassword) {
-      // Clear rate limit on success
-      rateLimits.delete(ip);
-
       const encoder = new TextEncoder();
       const data = encoder.encode(authPassword);
       const hashBuffer = await crypto.subtle.digest("SHA-256", data);

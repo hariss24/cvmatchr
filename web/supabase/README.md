@@ -19,6 +19,9 @@ tourné. Un changement se fait toujours par un nouveau fichier.
 | Fichier | Contenu |
 |---|---|
 | `0001_auth_quotas.sql` | Tables profils/CV/lettres/candidatures/offres/compteurs, RLS, triggers, fonctions de quota |
+| `0002_user_settings.sql` | Réglages utilisateur répliqués (profil, critères de recherche d'offres) |
+| `0003_documents_templates.sql` | Documents et modèles répliqués |
+| `0004_rate_limits.sql` | Compteur d'appels partagé, pour limiter le débit des routes API publiques |
 
 Spécification associée : `docs/superpowers/specs/2026-08-10-auth-database-design.md`.
 
@@ -65,6 +68,40 @@ cd web/supabase && docker run --rm -e POSTGRES_PASSWORD=x -v "$PWD:/sql" postgre
 
 Attendu en fin de sortie : `TOUS_LES_TESTS_OK`. Toute assertion violée interrompt le script
 avec un message explicite.
+
+Pour le compteur de débit (migration 0004), même principe :
+
+```bash
+cd web/supabase && docker run --rm -e POSTGRES_PASSWORD=x -v "$PWD:/sql" postgres:15 sh -c "docker-entrypoint.sh postgres > /tmp/pg.log 2>&1 & sleep 15 && psql -U postgres -q -v ON_ERROR_STOP=1 -f /sql/_auth_stub.sql -f /sql/migrations/0004_rate_limits.sql > /dev/null && psql -U postgres -v ON_ERROR_STOP=1 -f /sql/tests/rate_limit.sql"
+```
+
+### Ce que couvre `tests/rate_limit.sql`
+
+| Test | Vérifie |
+|---|---|
+| 1 | Les appels sous la limite passent, et le compteur s'incrémente d'un par appel. |
+| 2 | L'appel de trop est refusé, avec un `retry_after` compris dans la fenêtre. |
+| 3 | Deux seaux (route ou IP différente) ne se contaminent pas. |
+| 4 | Une fenêtre expirée remet le compteur à 1 au lieu de continuer à l'incrémenter. |
+| 5 | Un utilisateur connecté ne peut ni lire, ni modifier, ni insérer un compteur. |
+| 5b | Le visiteur anonyme, lui, peut toujours appeler la fonction — sans quoi toutes les routes publiques repasseraient sans limite. |
+
+Validation par mutation, exécutée le 19/08/2026 :
+
+| Faille réintroduite | Résultat |
+|---|---|
+| `CREATE POLICY ... ON rate_limits FOR ALL` | TEST 5 échoue : « 3 ligne(s) de compteur lisibles par l'utilisateur » |
+| `REVOKE EXECUTE ... FROM anon` | TEST 5b échoue : « permission denied for function consume_rate_limit » |
+| Réarmement de fenêtre supprimé | TEST 4 échoue : « seau toujours bloqué après expiration de la fenêtre » |
+
+### Purge
+
+`rate_limits` garde une ligne par IP et par route. Le volume est borné par le nombre d'IP
+distinctes, mais rien ne l'efface : à exécuter de temps en temps si la table grossit.
+
+```sql
+DELETE FROM public.rate_limits WHERE window_start < now() - INTERVAL '1 day';
+```
 
 ### Ce que couvre `tests/rls_etancheite.sql`
 
