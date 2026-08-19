@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Au 18/08/2026 — Chantier Mots-clés conjonctifs terminé, plus un correctif de vérification.** Exécution complète du plan `docs/superpowers/plans/2026-08-18-mots-cles-conjonctifs.md` (T0 à T6), suivie d'une relecture qui a trouvé une régression : les mots de fonction (« chargé ») étaient exigés dans les titres anglais, faisant tomber la recherche réelle du candidat de 9 offres pertinentes à 1. Corrigé et mesuré. **Prochaine étape suggérée :** décider du sort du critère « compétences » quand le candidat n'a saisi aucune compétence — il pèse aujourd'hui 45 des 65 points de l'enveloppe du marché caché et peut faire tomber à 31/100 une offre dont le titre est exactement le métier cherché.
+**Au 19/08/2026 — Chantier A (Connexion par email et mot de passe) terminé.** Exécution complète du plan `docs/superpowers/plans/2026-08-19-connexion-email.md` (Tasks 1 à 9). Base Supabase capable de reconnaître les comptes Google (migration 0005), traduction des erreurs en français et validation des champs (8 car. min), route API sous rate limit (`/api/auth/methode`), 5 méthodes dans `authStore`, page `/connexion` à 4 états gérant les deux chemins exclusifs (Google / email) avec redirection intelligente, page `/connexion/nouveau-mot-de-passe`, menus topbar/mobile pointant vers `/connexion`, et suite e2e Playwright validée (44/44 tests verts).
 
 ---
 
@@ -40,6 +40,13 @@
 ---
 
 ## Journal
+
+### 2026-08-19 : Connexion email — Task 9 : test e2e de bout en bout et livraison du chantier A
+
+- **Quoi :** Création du test Playwright `web/tests/e2e/connexion-email.spec.ts`, configuration des variables Supabase factices pour l'étape e2e de la CI dans `.github/workflows/web.yml`, validation intégrale de la suite de tests et mise à jour de l'état actuel.
+- **Pourquoi :** Valider de bout en bout la présence des deux chemins, le rejet d'une adresse invalide sans appel réseau, l'état de mot de passe oublié et la réaction de la page de saisie d'un nouveau mot de passe.
+- **Fichiers touchés :** `web/tests/e2e/connexion-email.spec.ts`, `.github/workflows/web.yml`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `tsc` OK, `lint` OK (0 erreur, 3 warnings préexistants), `vitest` (874/874), `build` OK, `playwright test` (44/44 tests e2e verts).
 
 ### 2026-08-19 : Connexion email — Task 8 : correctifs d'environnement (callback libre et message quota)
 

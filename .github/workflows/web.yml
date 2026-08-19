@@ -49,3 +49,10 @@ jobs:
 
       - name: E2E Tests (Playwright)
         run: npm run test:e2e
+        env:
+          # Valeurs factices, jamais contactées : les parcours testés
+          # s'arrêtent à la validation côté navigateur. Elles servent
+          # uniquement à ce que `isConfigured` soit vrai et que la page de
+          # connexion s'affiche au lieu de se déclarer indisponible.
+          NEXT_PUBLIC_SUPABASE_URL: https://exemple-ci.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: cle-anonyme-factice-pour-la-ci
