@@ -41,6 +41,13 @@
 
 ## Journal
 
+### 2026-08-19 : Connexion email — Task 5 : page /connexion (quatre états, deux chemins d'entrée)
+
+- **Quoi :** Création du composant `web/src/components/auth/FormulaireConnexion.tsx` (+ tests `FormulaireConnexion.test.tsx`), de la page `web/src/app/connexion/page.tsx` et des styles associés dans `web/src/app/globals.css`.
+- **Pourquoi :** Offrir une entrée unifiée et accessible sans dépendre exclusivement de Google. 4 états (connexion, inscription, code, oubli) gérés en un seul écran. Google et email cohabitent sans se chevaucher (chemins exclusifs). En cas d'échec d'authentification sur une adresse créée avec Google, l'appel à `/api/auth/methode` oriente explicitement vers le bouton Google.
+- **Fichiers touchés :** `web/src/components/auth/FormulaireConnexion.tsx`, `web/src/components/auth/FormulaireConnexion.test.tsx`, `web/src/app/connexion/page.tsx`, `web/src/app/globals.css`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** TDD respecté (tests rouges puis verts). `tsc` OK, `lint` OK (0 erreur, 3 warnings préexistants), `vitest` (874/874), `build` OK (`/connexion` compilé en statique).
+
 ### 2026-08-19 : Connexion email — Task 4 : inscription, connexion, code et mot de passe oublié dans authStore
 
 - **Quoi :** Ajout de 5 méthodes dans `src/state/authStore.ts` (`signUpWithEmail`, `signInWithEmail`, `confirmSignupCode`, `requestPasswordReset`, `updatePassword`) et tests unitaires complets dans `authStore.test.ts`.
