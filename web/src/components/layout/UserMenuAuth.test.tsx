@@ -14,16 +14,16 @@ describe('UserMenu — authentification', () => {
     useAuthStore.setState({ user: null, session: null, isLoading: false, isConfigured: true });
   });
 
-  it('propose la connexion Google quand personne n\'est connecté', () => {
+  it('propose la connexion quand personne n\'est connecté', () => {
     render(<UserMenu onToggleTheme={() => {}} />);
     fireEvent.click(screen.getByLabelText(/menu utilisateur/i));
-    expect(screen.getByText(/se connecter avec google/i)).toBeInTheDocument();
+    expect(screen.getByText(/se connecter/i)).toBeInTheDocument();
   });
 
   it('masque l\'entrée de connexion si Supabase n\'est pas configuré', () => {
     useAuthStore.setState({ isConfigured: false });
     render(<UserMenu onToggleTheme={() => {}} />);
     fireEvent.click(screen.getByLabelText(/menu utilisateur/i));
-    expect(screen.queryByText(/se connecter avec google/i)).toBeNull();
+    expect(screen.queryByText(/se connecter/i)).toBeNull();
   });
 });

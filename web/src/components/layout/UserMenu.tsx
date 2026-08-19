@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@/state/authStore";
 import QuotaBadge from "@/components/auth/QuotaBadge";
-import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 
 /**
  * Bouton "Utilisateur" du topbar : regroupe authentification Supabase, quota IA,
@@ -14,7 +13,7 @@ export default function UserMenu({ onToggleTheme }: { onToggleTheme: () => void 
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const { user, isConfigured, signInWithGoogle, signOut } = useAuthStore();
+  const { user, isConfigured, signOut } = useAuthStore();
 
   useEffect(() => {
     if (!open) return;
@@ -69,30 +68,22 @@ export default function UserMenu({ onToggleTheme }: { onToggleTheme: () => void 
               </div>
             </div>
           ) : isConfigured ? (
-            // Bouton Google Identity Services : le jeton est récupéré côté
-            // navigateur, donc l'écran Google affiche cvmatchr.fr et non le
-            // domaine du projet Supabase. Sans NEXT_PUBLIC_GOOGLE_CLIENT_ID, on
-            // se rabat sur la redirection classique pour ne pas perdre la
-            // connexion — au prix de l'affichage du domaine Supabase.
-            process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? (
-              <GoogleSignInButton />
-            ) : (
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setOpen(false);
-                  void signInWithGoogle();
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                  <polyline points="10 17 15 12 10 7" />
-                  <line x1="15" y1="12" x2="3" y2="12" />
-                </svg>
-                Se connecter avec Google
-              </button>
-            )
+            // Les deux méthodes (Google, email) vivent désormais sur
+            // /connexion : un menu déroulant ne peut pas porter un formulaire
+            // à quatre états, un code de confirmation et un mot de passe
+            // oublié.
+            <Link
+              href="/connexion"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                <polyline points="10 17 15 12 10 7" />
+                <line x1="15" y1="12" x2="3" y2="12" />
+              </svg>
+              Se connecter
+            </Link>
           ) : null}
 
           <button

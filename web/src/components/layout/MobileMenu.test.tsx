@@ -48,7 +48,7 @@ beforeEach(() => {
 describe("MobileMenu — accès au compte", () => {
   it("propose de se connecter quand personne ne l'est", () => {
     afficher();
-    expect(screen.getByText("Se connecter avec Google")).toBeTruthy();
+    expect(screen.getByText("Se connecter")).toBeTruthy();
     expect(screen.queryByText("Déconnexion")).toBeNull();
   });
 
@@ -57,13 +57,13 @@ describe("MobileMenu — accès au compte", () => {
     afficher();
     expect(screen.getByText("Hariss")).toBeTruthy();
     expect(screen.getByText("Déconnexion")).toBeTruthy();
-    expect(screen.queryByText("Se connecter avec Google")).toBeNull();
+    expect(screen.queryByText("Se connecter")).toBeNull();
   });
 
   it("ne promet pas une connexion impossible si Supabase n'est pas configuré", () => {
     auth.isConfigured = false;
     afficher();
-    expect(screen.queryByText("Se connecter avec Google")).toBeNull();
+    expect(screen.queryByText("Se connecter")).toBeNull();
     auth.isConfigured = true;
   });
 });

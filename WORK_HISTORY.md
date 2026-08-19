@@ -41,6 +41,13 @@
 
 ## Journal
 
+### 2026-08-19 : Connexion email — Task 7 : redirection des menus bureau et mobile vers /connexion
+
+- **Quoi :** Remplacement du bouton Google par un lien unique « Se connecter » vers `/connexion` dans `UserMenu.tsx` (desktop) et `MobileMenu.tsx` (mobile). Nettoyage des imports inutilisés (`GoogleSignInButton`). Adaptation des tests unitaires `UserMenuAuth.test.tsx` et `MobileMenu.test.tsx`.
+- **Pourquoi :** Permettre l'accès direct aux deux méthodes d'authentification (Google et email) depuis n'importe quel écran, sans surcharger les menus déroulants avec un formulaire complexe.
+- **Fichiers touchés :** `web/src/components/layout/UserMenu.tsx`, `web/src/components/layout/MobileMenu.tsx`, `web/src/components/layout/UserMenuAuth.test.tsx`, `web/src/components/layout/MobileMenu.test.tsx`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `tsc` OK, `lint` OK (0 erreur, 3 warnings préexistants), `vitest` (874/874), `build` OK, `playwright test` (40/40 tests e2e verts).
+
 ### 2026-08-19 : Connexion email — Task 6 : page de pose du nouveau mot de passe
 
 - **Quoi :** Création de la page `web/src/app/connexion/nouveau-mot-de-passe/page.tsx` pour conclure le parcours de réinitialisation de mot de passe.
