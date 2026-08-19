@@ -52,10 +52,17 @@ Une page, quatre états internes :
 
 | État | Contenu |
 |---|---|
-| `connexion` *(défaut)* | Bouton Google, puis email + mot de passe. Liens vers `inscription` et `oubli`. |
-| `inscription` | Email + mot de passe. Bouton Google également présent. |
-| `code` | Champ à 6 chiffres, après une inscription réussie. Bouton « renvoyer l'email ». |
+| `connexion` *(défaut)* | **Deux chemins au choix**, séparés par un « ou » : le bouton Google, ou le couple email + mot de passe. Liens vers `inscription` et `oubli`. |
+| `inscription` | Idem : le bouton Google, ou email + mot de passe à créer. |
+| `code` | Champ à 6 chiffres, après une inscription par email réussie. Bouton « renvoyer l'email ». |
 | `oubli` | Email seul. Confirme l'envoi sans dire si l'adresse existe. |
+
+**Google et le formulaire ne se combinent jamais.** Un clic sur Google inscrit
+et connecte en un seul geste : aucun mot de passe n'est jamais créé pour ce
+compte, et l'état `code` ne le concerne pas. Le formulaire email est l'autre
+chemin, pour qui n'a pas de compte Google ou ne veut pas l'utiliser. Le seul
+point où les deux se rencontrent est le §6 — quelqu'un venu par Google qui
+tente plus tard le formulaire avec la même adresse.
 
 Le nom est `/connexion` et **non `/login`** : cette dernière adresse est déjà
 prise par le portail à mot de passe partagé (§7.2). Deux pages appelées
@@ -85,6 +92,18 @@ puisque Supabase reçoit le mot de passe en HTTPS dans les deux cas, tandis que
 le coût est réel — deux mécaniques d'authentification à maintenir côté client
 pour Google et côté serveur pour l'email. C'est précisément le genre de dualité
 qui a produit les trois pertes de données du 15/08.
+
+**Un prestataire d'authentification externe (Clerk) a été envisagé et écarté le
+19/08.** Il fournirait les écrans tout faits et ses propres emails, supprimant
+la configuration du §10. Mais **21 politiques de sécurité en base reposent sur
+`auth.uid()`**, l'identité Supabase (migrations `0001`, `0002`, `0003`,
+vérifiées par `tests/rls_etancheite.sql`) : ce sont elles qui empêchent un
+utilisateur de lire les documents, candidatures, réglages et crédits d'un autre.
+Les faire accepter une identité venue d'ailleurs impose de migrer les comptes
+existants et de revalider entièrement le chantier 0 — pour économiser des écrans
+de formulaire, c'est-à-dire la partie la moins risquée de ce chantier. La
+question mériterait d'être rouverte le jour où un SSO d'entreprise serait
+vendable.
 
 Quatre parcours s'ajoutent aux deux entrées Google existantes, pour cinq appels
 Supabase (le dernier, `updateUser`, achève le parcours de réinitialisation) :
