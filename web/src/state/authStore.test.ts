@@ -60,16 +60,17 @@ describe('AuthStore — parcours email et mot de passe', () => {
   const signInWithPassword = vi.fn();
   const verifyOtp = vi.fn();
   const resetPasswordForEmail = vi.fn();
+  const signOut = vi.fn();
   const updateUser = vi.fn();
 
   beforeEach(() => {
     vi.resetModules();
-    for (const m of [signUp, signInWithPassword, verifyOtp, resetPasswordForEmail, updateUser]) {
+    for (const m of [signUp, signInWithPassword, verifyOtp, resetPasswordForEmail, updateUser, signOut]) {
       m.mockClear().mockResolvedValue({ data: {}, error: null });
     }
     vi.doMock('@/lib/supabase/client', () => ({
       createBrowserClientHelper: () => ({
-        auth: { signUp, signInWithPassword, verifyOtp, resetPasswordForEmail, updateUser },
+        auth: { signUp, signInWithPassword, verifyOtp, resetPasswordForEmail, updateUser, signOut },
       }),
     }));
   });
@@ -135,6 +136,51 @@ describe('AuthStore — parcours email et mot de passe', () => {
     expect(options.redirectTo).toContain('/auth/confirmer');
     expect(options.redirectTo).not.toContain('/auth/callback');
     expect(options.redirectTo).toContain('next=/connexion/nouveau-mot-de-passe');
+  });
+
+  describe('gestion du compte', () => {
+    // ⚠️ Le cœur du garde-fou : sans cette vérification, un ordinateur laissé
+    // ouvert suffit à un tiers pour changer le mot de passe et enfermer dehors
+    // le propriétaire du compte. Supabase ne le fait pas de lui-même.
+    it("refuse de changer le mot de passe si l'ancien est faux", async () => {
+      const { useAuthStore } = await import('./authStore');
+      useAuthStore.setState({ user: { email: 'marc@test.fr' } as never });
+      signInWithPassword.mockResolvedValue({ error: new Error('Invalid login credentials') });
+
+      await expect(useAuthStore.getState().changePassword('faux', 'nouveaumotdepasse'))
+        .rejects.toThrow(/actuel incorrect/i);
+      expect(updateUser).not.toHaveBeenCalled();
+    });
+
+    it("change le mot de passe une fois l'ancien confirmé", async () => {
+      const { useAuthStore } = await import('./authStore');
+      useAuthStore.setState({ user: { email: 'marc@test.fr' } as never });
+      signInWithPassword.mockResolvedValue({ error: null });
+      updateUser.mockResolvedValue({ error: null });
+
+      await useAuthStore.getState().changePassword('ancien123', 'nouveaumotdepasse');
+      expect(signInWithPassword)
+        .toHaveBeenCalledWith({ email: 'marc@test.fr', password: 'ancien123' });
+      expect(updateUser).toHaveBeenCalledWith({ password: 'nouveaumotdepasse' });
+    });
+
+    // `others` et non `global` : fermer les autres sessions ne doit pas
+    // déconnecter celle depuis laquelle on cherche justement à se protéger.
+    it('ferme les autres sessions en gardant celle-ci', async () => {
+      const { useAuthStore } = await import('./authStore');
+      signOut.mockResolvedValue({ error: null });
+      await useAuthStore.getState().signOutOthers();
+      expect(signOut).toHaveBeenCalledWith({ scope: 'others' });
+    });
+
+    it('remonte le refus du serveur au lieu de laisser croire à un effacement', async () => {
+      const { useAuthStore } = await import('./authStore');
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: false, json: async () => ({ error: 'Suppression indisponible.' }),
+      }));
+      await expect(useAuthStore.getState().deleteAccount())
+        .rejects.toThrow(/indisponible/i);
+    });
   });
 
   it('change le mot de passe de la session en cours', async () => {

@@ -105,6 +105,12 @@ export default function UserMenu({ onToggleTheme }: { onToggleTheme: () => void 
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><circle cx="9" cy="10" r="2" /><path d="M7 15h4M15 9h2M15 13h2" /></svg>
             Mes infos
           </Link>
+          {user && (
+            <Link href="/compte" role="menuitem" onClick={() => setOpen(false)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+              Mon compte
+            </Link>
+          )}
 
           {user && (
             <button

@@ -20,6 +20,11 @@ interface AuthState {
   confirmSignupCode: (email: string, token: string) => Promise<void>;
   requestPasswordReset: (email: string) => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
+  /** Change le mot de passe APRÈS avoir vérifié l'ancien. */
+  changePassword: (ancien: string, nouveau: string) => Promise<void>;
+  /** Ferme les sessions ouvertes ailleurs, en gardant celle-ci. */
+  signOutOthers: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
   signOut: () => Promise<void>;
   initAuth: () => Promise<void>;
 }
@@ -115,6 +120,46 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (!supabase) return;
     const { error } = await supabase.auth.updateUser({ password });
     if (error) throw error;
+  },
+
+  // ⚠️ Supabase n'offre aucun « vérifier le mot de passe actuel » : `updateUser`
+  // se contente d'une session valide. Un ordinateur laissé ouvert suffirait
+  // donc à un tiers pour changer le mot de passe et enfermer dehors le
+  // propriétaire du compte. On le vérifie en tentant une connexion avec
+  // l'ancien — la seule preuve dont on dispose.
+  changePassword: async (ancien, nouveau) => {
+    const supabase = createBrowserClientHelper();
+    if (!supabase) return;
+    const email = useAuthStore.getState().user?.email;
+    if (!email) throw new Error('Connectez-vous pour changer votre mot de passe.');
+
+    const { error: refus } = await supabase.auth.signInWithPassword({ email, password: ancien });
+    if (refus) throw new Error('Mot de passe actuel incorrect.');
+
+    const { error } = await supabase.auth.updateUser({ password: nouveau });
+    if (error) throw error;
+  },
+
+  // `scope: 'others'` et non `'global'` : la personne qui ferme les autres
+  // sessions veut rester connectée ici, sinon elle se déconnecterait elle-même
+  // en cherchant à se protéger.
+  signOutOthers: async () => {
+    const supabase = createBrowserClientHelper();
+    if (!supabase) return;
+    const { error } = await supabase.auth.signOut({ scope: 'others' });
+    if (error) throw error;
+  },
+
+  // La suppression exige la clé d'administration : elle passe donc par une
+  // route serveur, qui lit l'identité dans la session (voir
+  // /api/compte/supprimer). Le nettoyage local reprend celui de `signOut`.
+  deleteAccount: async () => {
+    const reponse = await fetch('/api/compte/supprimer', { method: 'POST' });
+    if (!reponse.ok) {
+      const corps = await reponse.json().catch(() => ({}));
+      throw new Error(corps.error ?? 'Suppression impossible.');
+    }
+    await useAuthStore.getState().signOut();
   },
 
   signOut: async () => {

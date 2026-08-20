@@ -3143,6 +3143,23 @@ button.go:disabled {
   background: var(--orange-hover);
 }
 .connexion__valider:disabled { opacity: 0.6; cursor: default; }
+.compte { text-align: left; }
+.compte__bloc {
+  border-top: 1px solid var(--border, rgba(0,0,0,0.08));
+  padding-top: 18px; margin-top: 22px;
+}
+.compte__bloc--danger { border-top-color: var(--orange); }
+.compte__titre { font-size: 1rem; font-weight: 600; margin: 0 0 12px; }
+.compte__ligne { display: flex; gap: 12px; margin: 0 0 8px; font-size: 0.92rem; }
+.compte__etiquette { color: var(--muted); min-width: 90px; }
+.compte__aide { font-size: 0.88rem; color: var(--muted); line-height: 1.5; margin: 0 0 14px; }
+.compte__bouton {
+  background: var(--bg); border: 1px solid var(--border, rgba(0,0,0,0.12));
+  color: var(--text); border-radius: 10px; padding: 10px 16px;
+  font-size: 0.9rem; cursor: pointer;
+}
+.compte__bouton--danger { border-color: var(--orange); color: var(--orange-text); }
+
 .connexion__mentions {
   font-size: 0.8rem; color: var(--muted); line-height: 1.5;
   margin-top: 14px; text-align: center;

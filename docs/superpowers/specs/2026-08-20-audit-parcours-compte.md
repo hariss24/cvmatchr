@@ -48,7 +48,7 @@ impose de nommer les destinataires ou leurs catégories.
 
 Une phrase suffit, dans la section des sous-traitants.
 
-### 2.3 — La suppression de compte est promise mais n'existe pas dans l'app
+### 2.3 — La suppression de compte est promise mais n'existe pas dans l'app — CORRIGÉ le 20/08
 
 La section « Vos droits » annonce : « La suppression d'un compte entraîne la
 suppression en cascade de l'ensemble des données associées ». La seule voie
@@ -74,7 +74,7 @@ et aujourd'hui décochée. Sans elle, `motdepasse123` est accepté.
 Notre seule règle est une longueur de 8 caractères
 (`web/src/lib/auth/validation.ts`).
 
-### 3.2 — Changer de mot de passe n'exige pas l'ancien
+### 3.2 — Changer de mot de passe n'exige pas l'ancien — CORRIGÉ le 20/08
 
 `updatePassword` agit sur la session en cours sans rien demander d'autre. Un
 ordinateur laissé ouvert quelques minutes suffit à un tiers pour changer le mot
@@ -83,17 +83,21 @@ de passe — et donc pour enfermer dehors le propriétaire du compte.
 Ce point ne se manifeste pas encore, faute d'écran de changement de mot de
 passe (§ 4.1) : il doit être traité **en même temps** que celui-ci, pas après.
 
-### 3.3 — Une réinitialisation ne révoque pas les autres sessions
+### 3.3 — Une réinitialisation ne révoque pas les autres sessions — PARTIELLEMENT CORRIGÉ le 20/08
 
 Quelqu'un qui réinitialise son mot de passe parce qu'il craint une intrusion
 laisse l'intrus connecté. Supabase sait déconnecter les autres sessions
 (`signOut({ scope: 'others' })`).
 
+**20/08 :** le bouton existe désormais sur `/compte`, mais la révocation reste
+manuelle — elle n'est pas déclenchée automatiquement à la fin d'une
+réinitialisation. À faire le jour où le parcours de récupération est repris.
+
 ---
 
 ## 4. Fonctionnalités absentes
 
-### 4.1 — Aucune page « Mon compte »
+### 4.1 — Aucune page « Mon compte » — CORRIGÉ le 20/08, sauf le changement d'adresse
 
 `/settings` ne traite que les données locales et la clé d'API ; `/profil`
 concerne les informations qui alimentent les CV. Rien nulle part pour :
@@ -103,6 +107,12 @@ concerne les informations qui alimentent les CV. Rien nulle part pour :
 - changer son adresse email ;
 - se déconnecter de tous les appareils ;
 - supprimer son compte (§ 2.3).
+
+**20/08 :** page `/compte` livrée avec l'identité, le changement de mot de passe
+vérifié, la déconnexion des autres appareils et la suppression du compte. **Le
+changement d'adresse email n'y est pas** : il suppose un flux à double
+confirmation (ancienne et nouvelle adresse) et un gabarit d'email
+supplémentaire à traduire. À traiter séparément.
 
 C'est le manque structurel de ce parcours : tout ce que l'utilisateur peut
 faire de son compte aujourd'hui, c'est s'y connecter et s'en déconnecter.

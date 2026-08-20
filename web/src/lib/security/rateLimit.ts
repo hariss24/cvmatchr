@@ -41,6 +41,13 @@ export const RATE_LIMITS = {
    * utilisateur légitime qui se trompe deux ou trois fois, pas dix.
    */
   "auth-methode": { limit: 10, windowSeconds: 300 },
+  /**
+   * Suppression de compte. La route exige déjà une session valide : ce plafond
+   * ne protège pas d'un inconnu, il borne les dégâts d'un jeton volé ou d'une
+   * boucle de code, sur une action strictement irréversible. Trois par heure
+   * suffisent — on ne supprime pas son compte deux fois.
+   */
+  "compte-supprimer": { limit: 3, windowSeconds: HEURE },
   /** France Travail + Adzuna + JSearch. Un scan complet par appel. */
   "jobs-search": { limit: 20, windowSeconds: HEURE },
   /** Google Maps, facturé à l'appel. Une offre ouverte = un appel (caché 30 j côté client). */

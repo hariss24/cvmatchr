@@ -41,6 +41,14 @@
 
 ## Journal
 
+### 2026-08-20 : Page « Mon compte »
+
+- **Quoi :** Nouvelle page `/compte` (identité et méthode de connexion, changement de mot de passe avec vérification de l'ancien, déconnexion des autres appareils, suppression définitive du compte), route serveur `POST /api/compte/supprimer` sous plafond de 3/heure, trois méthodes dans `authStore` (`changePassword`, `signOutOthers`, `deleteAccount`), entrées dans le menu bureau et le menu mobile.
+- **Pourquoi :** Points 2.3, 3.2, 3.3 et 4.1 de l'audit. Tout ce qu'une personne pouvait faire de son compte, c'était s'y connecter et s'en déconnecter — alors que la politique de confidentialité promettait une suppression en cascade. `updateUser` n'exige aucune preuve du mot de passe actuel : on la fabrique en tentant une connexion avec l'ancien, sans quoi un ordinateur laissé ouvert suffit à enfermer dehors le propriétaire du compte.
+- **Fichiers touchés :** `web/src/app/compte/page.tsx` (+ test), `web/src/app/api/compte/supprimer/route.ts` (+ test), `web/src/state/authStore.ts` (+ test), `web/src/lib/security/rateLimit.ts`, `web/src/components/layout/UserMenu.tsx`, `web/src/components/layout/MobileMenu.tsx`, `web/src/app/globals.css`, docs.
+- **Résultat vérifs :** `tsc` OK, `lint` 0 erreur / 1 warning préexistant, `vitest` 918/918, `build` OK (`/compte` et `/api/compte/supprimer` présentes), `playwright` 44/44.
+- **Non fait, à traiter séparément :** changement d'adresse email (flux à double confirmation + gabarit supplémentaire).
+
 ### 2026-08-20 : Compte — volet juridique de l'audit
 
 - **Quoi :** Mention « En créant un compte, vous acceptez… » avec liens vers `/conditions-utilisation` et `/confidentialite`, affichée à la seule étape d'inscription. Resend ajouté à la liste des services utilisés dans la politique de confidentialité.
