@@ -49,11 +49,16 @@ export default function FormulaireConnexion() {
   // rendrait absente du rendu serveur et présente au client, soit exactement la
   // divergence d'hydratation que React refuse.
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("erreur") === "session_impossible") {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setErreur(
+    const motifs: Record<string, string> = {
+      session_impossible:
         "La session n'a pas pu s'ouvrir sur cet appareil. Si vous venez de confirmer votre adresse, connectez-vous ci-dessous.",
-      );
+      lien_expire:
+        "Ce lien n'est plus valable : il expire au bout d'une heure et ne sert qu'une fois. Demandez-en un nouveau ci-dessous.",
+    };
+    const motif = motifs[new URLSearchParams(window.location.search).get("erreur") ?? ""];
+    if (motif) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setErreur(motif);
     }
   }, []);
 

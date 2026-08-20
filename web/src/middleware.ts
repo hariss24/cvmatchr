@@ -28,6 +28,7 @@ export async function middleware(req: NextRequest) {
     // passe partagé au lieu de connecter la personne — le code de session
     // arrive dans l'URL et est perdu.
     path === "/auth/callback" ||
+    path === "/auth/confirmer" ||
     path.startsWith("/_next/") ||
     path.startsWith("/static/") ||
     path === "/favicon.ico" ||

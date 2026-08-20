@@ -77,7 +77,12 @@ describe('AuthStore — parcours email et mot de passe', () => {
   it('crée un compte avec l\'adresse et le mot de passe fournis', async () => {
     const { useAuthStore } = await import('./authStore');
     await useAuthStore.getState().signUpWithEmail('marc@test.fr', 'motdepasse');
-    expect(signUp).toHaveBeenCalledWith({ email: 'marc@test.fr', password: 'motdepasse' });
+    const [arg] = signUp.mock.calls[0];
+    expect(arg.email).toBe('marc@test.fr');
+    expect(arg.password).toBe('motdepasse');
+    // Le retour doit passer par /auth/confirmer, seule porte qui fonctionne
+    // depuis un appareil autre que celui de l'inscription.
+    expect(arg.options.emailRedirectTo).toContain('/auth/confirmer');
   });
 
   // Supabase n'échoue PAS sur une adresse déjà prise quand la confirmation est
@@ -119,12 +124,16 @@ describe('AuthStore — parcours email et mot de passe', () => {
     });
   });
 
-  it('renvoie le lien de réinitialisation vers le callback puis la page dédiée', async () => {
+  // ⚠️ /auth/confirmer et NON /auth/callback : ce dernier exige une clé de
+  // vérification présente dans le navigateur d'origine, si bien qu'un lien
+  // ouvert sur le téléphone échouait toujours (constaté le 20/08/2026).
+  it("renvoie le lien de réinitialisation vers la porte indépendante de l'appareil", async () => {
     const { useAuthStore } = await import('./authStore');
     await useAuthStore.getState().requestPasswordReset('marc@test.fr');
     const [adresse, options] = resetPasswordForEmail.mock.calls[0];
     expect(adresse).toBe('marc@test.fr');
-    expect(options.redirectTo).toContain('/auth/callback');
+    expect(options.redirectTo).toContain('/auth/confirmer');
+    expect(options.redirectTo).not.toContain('/auth/callback');
     expect(options.redirectTo).toContain('next=/connexion/nouveau-mot-de-passe');
   });
 

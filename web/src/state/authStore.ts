@@ -55,7 +55,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   signUpWithEmail: async (email, password) => {
     const supabase = createBrowserClientHelper();
     if (!supabase) return;
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      // Même raison que pour la réinitialisation : le lien doit fonctionner
+      // depuis n'importe quel appareil, pas seulement celui de l'inscription.
+      options: { emailRedirectTo: `${window.location.origin}/auth/confirmer?next=/` },
+    });
     if (error) throw error;
 
     // Piège de Supabase, vérifié le 19/08 : quand « Confirm email » est activé,
@@ -88,13 +94,16 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (error) throw error;
   },
 
-  // Le lien du courriel passe par /auth/callback, qui échange le code contre
-  // une session avant de rediriger. `next` y est validé par safeRedirectPath :
-  // seul un chemin interne est accepté.
+  // ⚠️ Le retour passe par /auth/confirmer et NON /auth/callback. Ce dernier
+  // échange un `code` contre une session, ce qui exige une clé de vérification
+  // présente dans le navigateur d'origine : un lien ouvert sur le téléphone
+  // échouait donc toujours, alors que c'est là qu'on lit ses courriels
+  // (constaté le 20/08/2026). `next` est validé par safeRedirectPath : seul un
+  // chemin interne est accepté.
   requestPasswordReset: async (email) => {
     const supabase = createBrowserClientHelper();
     if (!supabase) return;
-    const retour = `${window.location.origin}/auth/callback?next=/connexion/nouveau-mot-de-passe`;
+    const retour = `${window.location.origin}/auth/confirmer?next=/connexion/nouveau-mot-de-passe`;
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: retour,
     });

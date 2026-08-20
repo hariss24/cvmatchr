@@ -145,6 +145,14 @@ describe('FormulaireConnexion', () => {
       .toHaveTextContent(/n'a pas pu s'ouvrir sur cet appareil/i);
   });
 
+  // Lien de réinitialisation cliqué trop tard, ou déjà utilisé. Sans message,
+  // la personne retombe sur le formulaire sans comprendre ce qui a échoué.
+  it("explique qu'un lien périmé se redemande", async () => {
+    window.history.replaceState({}, '', '/connexion?erreur=lien_expire');
+    render(<FormulaireConnexion />);
+    expect(await screen.findByRole('alert')).toHaveTextContent(/n'est plus valable/i);
+  });
+
   it('ne demande pas de mot de passe pour une réinitialisation', async () => {
     render(<FormulaireConnexion />);
     fireEvent.click(screen.getByRole('button', { name: /mot de passe oublié/i }));

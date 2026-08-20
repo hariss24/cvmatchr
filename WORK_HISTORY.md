@@ -41,6 +41,14 @@
 
 ## Journal
 
+### 2026-08-20 : Connexion email — les liens des courriels fonctionnent depuis n'importe quel appareil
+
+- **Quoi :** Nouvelle route `/auth/confirmer` qui vérifie un `token_hash` par `verifyOtp`, sans rien attendre du navigateur. L'inscription (`emailRedirectTo`) et la réinitialisation (`redirectTo`) y renvoient désormais au lieu de `/auth/callback`, réservé au retour de Google. Gabarits d'emails en français, aux couleurs de l'app, versionnés dans `web/supabase/templates/`. Message affiché pour un lien périmé.
+- **Pourquoi :** `/auth/callback` échange un `code` contre une session, ce qui exige une clé de vérification présente dans le navigateur d'origine. Constaté en production le 20/08 : un lien de réinitialisation ouvert sur le téléphone échouait toujours (`/connexion?erreur=session_impossible`) — or c'est là qu'on lit ses courriels, et ce parcours n'a ni code de secours ni déblocage automatique pour rattraper. Les emails partaient par ailleurs en anglais, sans identité visuelle, et n'existaient que dans un tableau de bord externe.
+- **Fichiers touchés :** `web/src/app/auth/confirmer/route.ts` (+ test), `web/src/state/authStore.ts` (+ test), `web/src/components/auth/FormulaireConnexion.tsx` (+ test), `web/src/middleware.ts`, `web/supabase/templates/` (2 gabarits + README), `WORK_HISTORY.md`.
+- **Résultat vérifs :** `tsc` OK, `lint` 0 erreur / 1 warning préexistant, `vitest` 895/895, `build` OK (route `/auth/confirmer` présente), `playwright` 44/44.
+- **Action humaine requise :** recoller les deux gabarits dans Supabase → Authentication → Emails (voir `web/supabase/templates/README.md`).
+
 ### 2026-08-20 : Scan des offres — déduplication de l'index
 
 - **Quoi :** Nouvelle fonction `sansDoublons` dans `scripts/boards/nouveaute.mjs`, branchée dans `build-boards-offres.mjs` juste après la reprise des boards indéterminés, et fichier `boards-offres.json` nettoyé de ses deux doublons existants (19 780 → 19 778).
