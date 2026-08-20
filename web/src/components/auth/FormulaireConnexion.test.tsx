@@ -153,6 +153,24 @@ describe('FormulaireConnexion', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(/n'est plus valable/i);
   });
 
+  // Sans ces liens, on crée un compte sans avoir jamais eu l'occasion de lire
+  // ce qu'on accepte : les deux pages existaient, mais n'étaient atteignables
+  // que depuis l'aide.
+  it("montre les conditions à qui crée un compte", () => {
+    render(<FormulaireConnexion />);
+    fireEvent.click(screen.getByRole('button', { name: /créer un compte/i }));
+    expect(screen.getByRole('link', { name: /conditions d'utilisation/i }))
+      .toHaveAttribute('href', '/conditions-utilisation');
+    expect(screen.getByRole('link', { name: /politique de confidentialité/i }))
+      .toHaveAttribute('href', '/confidentialite');
+  });
+
+  // À la connexion, rien n'est accepté : afficher la mention y serait faux.
+  it("ne prétend pas faire accepter quoi que ce soit à la connexion", () => {
+    render(<FormulaireConnexion />);
+    expect(screen.queryByRole('link', { name: /conditions d'utilisation/i })).toBeNull();
+  });
+
   it('ne demande pas de mot de passe pour une réinitialisation', async () => {
     render(<FormulaireConnexion />);
     fireEvent.click(screen.getByRole('button', { name: /mot de passe oublié/i }));

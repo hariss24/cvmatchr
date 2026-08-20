@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import { useAuthStore } from "@/state/authStore";
 import { toast } from "@/state/uiStore";
@@ -262,6 +263,17 @@ export default function FormulaireConnexion() {
           {etape === "oubli" && "Envoyer le lien"}
         </button>
       </form>
+
+      {/* Uniquement à l'inscription : c'est le seul moment où quelque chose est
+          accepté. L'afficher à la connexion laisserait croire qu'on redemande
+          un consentement à chaque visite. */}
+      {etape === "inscription" && (
+        <p className="connexion__mentions">
+          En créant un compte, vous acceptez les{" "}
+          <Link href="/conditions-utilisation">conditions d&apos;utilisation</Link> et la{" "}
+          <Link href="/confidentialite">politique de confidentialité</Link>.
+        </p>
+      )}
 
       <div className="connexion__liens">
         {etape === "connexion" && (

@@ -3143,6 +3143,12 @@ button.go:disabled {
   background: var(--orange-hover);
 }
 .connexion__valider:disabled { opacity: 0.6; cursor: default; }
+.connexion__mentions {
+  font-size: 0.8rem; color: var(--muted); line-height: 1.5;
+  margin-top: 14px; text-align: center;
+}
+.connexion__mentions a { color: var(--orange-text); text-decoration: underline; }
+
 .connexion__liens {
   display: flex;
   justify-content: space-between;

@@ -86,6 +86,7 @@ export default function ConfidentialitePage() {
           <h2>Autres services utilisés</h2>
           <ul className="help-list">
             <li><strong>Vercel</strong> : hébergement de l&apos;application, et mesure d&apos;audience anonymisée (sans cookies) via Vercel Analytics.</li>
+            <li><strong>Resend</strong> : envoi des emails du compte — confirmation d&apos;adresse et réinitialisation de mot de passe. Votre adresse email lui est transmise à cette seule fin. Resend s&apos;appuie sur Amazon SES (région Irlande) pour l&apos;acheminement.</li>
             <li><strong>France Travail, Adzuna, JSearch</strong> : recherche d&apos;offres d&apos;emploi publiques. Aucune donnée personnelle ne leur est transmise, hormis les critères de recherche que vous saisissez (métier, ville).</li>
             <li><strong>Google Maps</strong> : calcul du temps de trajet entre une ville que vous indiquez et le lieu d&apos;une offre, à votre demande.</li>
             <li><strong>Brandfetch</strong> : récupération du logo d&apos;une entreprise à partir de son nom, pour l&apos;affichage des offres.</li>

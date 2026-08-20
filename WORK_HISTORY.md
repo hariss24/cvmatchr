@@ -41,6 +41,14 @@
 
 ## Journal
 
+### 2026-08-20 : Compte — volet juridique de l'audit
+
+- **Quoi :** Mention « En créant un compte, vous acceptez… » avec liens vers `/conditions-utilisation` et `/confidentialite`, affichée à la seule étape d'inscription. Resend ajouté à la liste des services utilisés dans la politique de confidentialité.
+- **Pourquoi :** Points 2.1 et 2.2 de `docs/superpowers/specs/2026-08-20-audit-parcours-compte.md`. Les deux pages n'étaient atteignables que depuis l'aide : on créait un compte sans avoir eu l'occasion de lire ce qu'on accepte. Et depuis le branchement du SMTP, les adresses email transitent par Resend et Amazon SES sans que la politique le déclare, ce qu'impose l'article 13 du RGPD.
+- **Fichiers touchés :** `web/src/components/auth/FormulaireConnexion.tsx` (+ test), `web/src/app/confidentialite/page.tsx`, `web/src/app/globals.css`, `docs/superpowers/specs/2026-08-20-audit-parcours-compte.md`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `tsc` OK, `lint` 0 erreur / 1 warning préexistant, `vitest` 897/897, `build` OK, `playwright` 44/44.
+- **Action humaine requise :** activer « Prevent use of leaked passwords » dans Supabase (point 3.1 de l'audit, non traitable par le code).
+
 ### 2026-08-20 : Connexion email — les liens des courriels fonctionnent depuis n'importe quel appareil
 
 - **Quoi :** Nouvelle route `/auth/confirmer` qui vérifie un `token_hash` par `verifyOtp`, sans rien attendre du navigateur. L'inscription (`emailRedirectTo`) et la réinitialisation (`redirectTo`) y renvoient désormais au lieu de `/auth/callback`, réservé au retour de Google. Gabarits d'emails en français, aux couleurs de l'app, versionnés dans `web/supabase/templates/`. Message affiché pour un lien périmé.

@@ -28,7 +28,7 @@ Vérifié en production le 20/08 :
 
 ## 2. Manques juridiques
 
-### 2.1 — Les conditions ne sont montrées nulle part à l'inscription
+### 2.1 — Les conditions ne sont montrées nulle part à l'inscription — CORRIGÉ le 20/08
 
 `/conditions-utilisation` et `/confidentialite` existent, mais ne sont liées
 que depuis `/help` et depuis la politique elle-même. **Aucun lien sur
@@ -39,7 +39,7 @@ Le minimum attendu : sous le bouton d'inscription, une phrase du type « En
 créant un compte, vous acceptez les conditions d'utilisation et la politique de
 confidentialité », les deux termes étant des liens.
 
-### 2.2 — Resend n'est pas déclaré comme destinataire
+### 2.2 — Resend n'est pas déclaré comme destinataire — CORRIGÉ le 20/08
 
 La politique de confidentialité cite Supabase et Google. Depuis le 20/08, les
 adresses email des utilisateurs transitent aussi par **Resend** (et par
