@@ -71,3 +71,28 @@ export function sansPerimees(offres, jourCourant, jours = PEREMPTION_JOURS) {
     return Number.isNaN(vue) || vue >= limite;
   });
 }
+
+/**
+ * Écarte les offres qui apparaissent deux fois sous la même identité.
+ *
+ * ⚠️ La règle vit ICI, au niveau de l'index entier, et pas seulement chez
+ * l'ATS fautif — même raisonnement que le filtre « offre sans lieu » de
+ * build-boards-offres.mjs. Les ATS paginent par décalage : une offre retirée
+ * entre deux pages décale la suite d'un cran et fait relire la précédente.
+ * Constaté le 20/08/2026 sur `workday:valeo.wd3/valeo_jobs`, deux offres
+ * strictement identiques dans le fichier publié. Rien ne garantit que les
+ * quatre autres ATS en soient exempts.
+ *
+ * Le PREMIER exemplaire est conservé : les offres moissonnées du jour sont
+ * empilées avant celles reprises d'un board injoignable, donc c'est celle qui
+ * porte le `vuLe` le plus récent.
+ */
+export function sansDoublons(offres) {
+  const vues = new Set();
+  return offres.filter((o) => {
+    const k = cleOffre(o);
+    if (vues.has(k)) return false;
+    vues.add(k);
+    return true;
+  });
+}

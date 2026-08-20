@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { cleOffre, jour, dater, reprendreIndetermines, sansPerimees, PEREMPTION_JOURS } from "./nouveaute.mjs";
+import { cleOffre, jour, dater, reprendreIndetermines, sansPerimees, sansDoublons, PEREMPTION_JOURS } from "./nouveaute.mjs";
 
 const offre = (id, extra = {}) => ({ ats: "lever", slug: "acme", id, ...extra });
 
@@ -86,4 +86,36 @@ test("les autres champs sont préservés", () => {
   const resultat = dater([], [offre("1", { titre: "Dev", lat: 48.8 })], "2026-08-04");
   assert.equal(resultat[0].titre, "Dev");
   assert.equal(resultat[0].lat, 48.8);
+});
+
+// Constaté le 20/08/2026 sur le board Workday `valeo.wd3/valeo_jobs` : deux
+// offres strictement identiques dans l'index publié, ce qui a mis la CI au
+// rouge. Workday pagine par décalage ; une offre retirée entre deux pages
+// décale tout d'un cran et fait relire la précédente.
+test("sansDoublons écarte deux offres de même clé", () => {
+  const resultat = sansDoublons([offre("1"), offre("2"), offre("1")]);
+  assert.equal(resultat.length, 2);
+  assert.deepEqual(resultat.map(cleOffre), ["lever:acme:1", "lever:acme:2"]);
+});
+
+test("le premier exemplaire est celui qui reste", () => {
+  // L'ordre compte : les offres moissonnées aujourd'hui sont empilées AVANT
+  // celles reprises d'un board injoignable. Garder la première, c'est garder
+  // celle qui porte le `vuLe` du jour.
+  const resultat = sansDoublons([
+    offre("1", { vuLe: "2026-08-20" }),
+    offre("1", { vuLe: "2026-08-05" }),
+  ]);
+  assert.equal(resultat.length, 1);
+  assert.equal(resultat[0].vuLe, "2026-08-20");
+});
+
+test("deux offres de boards différents ne sont pas des doublons", () => {
+  const resultat = sansDoublons([offre("1"), { ats: "ashby", slug: "acme", id: "1" }]);
+  assert.equal(resultat.length, 2);
+});
+
+test("une liste sans doublon traverse intacte", () => {
+  const entree = [offre("1"), offre("2"), offre("3")];
+  assert.deepEqual(sansDoublons(entree), entree);
 });

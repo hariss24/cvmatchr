@@ -41,6 +41,13 @@
 
 ## Journal
 
+### 2026-08-20 : Scan des offres — déduplication de l'index
+
+- **Quoi :** Nouvelle fonction `sansDoublons` dans `scripts/boards/nouveaute.mjs`, branchée dans `build-boards-offres.mjs` juste après la reprise des boards indéterminés, et fichier `boards-offres.json` nettoyé de ses deux doublons existants (19 780 → 19 778).
+- **Pourquoi :** Le scan du 20/08 (commit `857e09f`) a publié deux offres Valeo strictement identiques, mettant `boards-offres.test.ts` au rouge. Aucune déduplication n'existait dans le pipeline : les ATS paginent par décalage, et une offre retirée entre deux pages décale la suite d'un cran, faisant relire la précédente. La règle vit au niveau de l'index entier et non chez Workday seul — même raisonnement que le filtre « offre sans lieu » : rien ne garantit que les quatre autres ATS en soient exempts.
+- **Fichiers touchés :** `scripts/boards/nouveaute.mjs`, `scripts/boards/nouveaute.test.mjs`, `scripts/build-boards-offres.mjs`, `web/src/lib/jobs/data/boards-offres.json`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `node --test scripts/boards/*.test.mjs` 147/147, `tsc` OK, `lint` 0 erreur / 1 warning préexistant, `vitest` 887/887, `build` OK.
+
 ### 2026-08-20 : Connexion email — déblocage automatique de l'onglet en attente
 
 - **Quoi :** L'écran de saisie du code retente la connexion en arrière-plan toutes les 15 s pendant 5 minutes, avec les identifiants déjà saisis ; dès que l'adresse est confirmée, Supabase accepte et l'effet existant sur `user` redirige. `/auth/callback` renvoie désormais vers `/connexion?erreur=session_impossible` au lieu de `/?auth_error=callback_failed`, et ce motif est affiché.

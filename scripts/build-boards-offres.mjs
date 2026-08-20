@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 import { listerOffresFR } from "./boards/offres.mjs";
 import { enLot } from "./boards/lot.mjs";
 import { cle } from "./boards/memo.mjs";
-import { dater, jour, reprendreIndetermines, sansPerimees, PEREMPTION_JOURS } from "./boards/nouveaute.mjs";
+import { dater, jour, reprendreIndetermines, sansDoublons, sansPerimees, PEREMPTION_JOURS } from "./boards/nouveaute.mjs";
 import { coordonneesDe } from "./boards/geo.mjs";
 
 /**
@@ -125,6 +125,17 @@ boards.forEach((board, i) => {
 const reprisBruts = reprendreIndetermines(precedentes, indetermines);
 const repris = sansPerimees(reprisBruts, aujourdhui);
 index.push(...repris);
+
+// Une même offre peut revenir deux fois : les ATS paginent par décalage, et une
+// offre retirée entre deux pages décale la suite d'un cran. Placé ICI, après la
+// reprise : le doublon peut venir d'un seul board comme du recouvrement entre
+// moisson et reprise.
+const uniques = sansDoublons(index);
+if (uniques.length < index.length) {
+  console.log(`${index.length - uniques.length} offres en double écartées.`);
+}
+index.length = 0;
+index.push(...uniques);
 
 console.log(
   `${boards.length - indetermines.size} boards exploitables, ${indetermines.size} indéterminés `
