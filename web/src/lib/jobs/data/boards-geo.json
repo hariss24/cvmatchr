@@ -17796,5 +17796,2369 @@
     "lng": 4.95847,
     "via": "commune",
     "departement": "01"
+  },
+  "Cergy Pontoise, Val-d'Oise, France / Tremezzina, Como, Italy": {
+    "ville": "Pontoise",
+    "lat": 49.047592,
+    "lng": 2.099968,
+    "via": "commune",
+    "departement": "95"
+  },
+  "Sesto San Giovanni, Milano, Italy / Kalundborg, Zealand, Denmark / Milano, Italy / Budapest, Budapest, Hungary / Dublin, Dublin, Ireland / Bucharest, Bucureşti, Romania / Brussels, Antwerp, Belgium / Prague, Praha, Czechia / Rotterdam, South Holland, Netherlands / Krakow, Lesser Poland, Poland / Helsinki, Uusimaa, Finland / Madrid, Madrid, Spain / Split, Splitsko-dalmatinska, Croatia / Remote, Sweden / Remote, Luxembourg / Serris, Paris, France / Remote, Greece / Milton Keynes, Buckinghamshire, United Kingdom / Sofia, Sofia, Bulgaria / Riga, Rīga, Latvia / Remote, Lithuania / Istanbul, İstanbul, Türkiye / Porto, Porto, Portugal / Bratislava, Bratislavsky kraj, Slovakia / Ljubljana, Osrednjeslovenska, Slovenia / Salzburg, Salzburg, Austria / Friedberg, Hesse, Germany / Tallinn, Harju, Estonia": {
+    "ville": "Serris",
+    "lat": 48.846958,
+    "lng": 2.784749,
+    "via": "commune",
+    "departement": "77"
+  },
+  "Kecskemet, Bacs-Kiskun, Hungary / La Louvière, Hainaut, Belgium / Coleshill, Warwickshire, United Kingdom / Boulay-Moselle, Moselle, France / Uster, Zurich, Switzerland / Nottingham, Nottinghamshire, United Kingdom / Sesto San Giovanni, Milano, Italy": {
+    "ville": "Boulay-Moselle",
+    "lat": 49.17479,
+    "lng": 6.494882,
+    "via": "commune",
+    "departement": "57"
+  },
+  "Zurich, Zurich, Switzerland / Sesto San Giovanni, Milano, Italy / Krakow, Malopolskie, Poland / Prague, Praha, Czechia / Milton Keynes, Buckinghamshire, United Kingdom / Amsterdam, North Holland, Netherlands / Cergy Pontoise, Val-d'Oise, France": {
+    "ville": "Pontoise",
+    "lat": 49.047592,
+    "lng": 2.099968,
+    "via": "commune",
+    "departement": "95"
+  },
+  "Xinhui, Guangdong, China / Bangalore, Karnataka, India / Chassieu, Rhone, France / Xiamen, Fujian, China / Vaesteras, Vastmanland County, Sweden": {
+    "ville": "Chassieu",
+    "lat": 45.73584,
+    "lng": 4.958712,
+    "via": "commune",
+    "departement": "69"
+  },
+  "Heidelberg, Baden-Wurttemberg, Germany / Beynost, Ain, France / Milano, Italy / Madrid, Madrid, Spain": {
+    "ville": "Beynost",
+    "lat": 45.830672,
+    "lng": 4.99944,
+    "via": "commune",
+    "departement": "01"
+  },
+  "France - Issy les Moulineaux / France - Angers / France - Nantes / France - rennes": {
+    "ville": "Issy-les-Moulineaux",
+    "lat": 48.823903,
+    "lng": 2.262887,
+    "via": "commune",
+    "departement": "92"
+  },
+  "France - Issy les Moulineaux / France - Nantes": {
+    "ville": "Issy-les-Moulineaux",
+    "lat": 48.823903,
+    "lng": 2.262887,
+    "via": "commune",
+    "departement": "92"
+  },
+  "Marcq-en-Baroeul": null,
+  "paris, IDF, France": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Nancy, , France": {
+    "ville": "Nancy",
+    "lat": 48.688135,
+    "lng": 6.171263,
+    "via": "commune",
+    "departement": "54"
+  },
+  "NICE, PACA, France": {
+    "ville": "Nice",
+    "lat": 43.71273,
+    "lng": 7.255313,
+    "via": "commune",
+    "departement": "06"
+  },
+  "Denmark-Glostrup / Option to Work Remote in Germany / Option to Work Remote in United States / Option to Work Remote in Sweden / Option to Work Remote in United Kingdom / Option to Work Remote in Switzerland / Option to Work Remote in Spain / US-PA-Remote Location-Philadelphia Area / Option to Work Remote in Norway / Option to Work Remote in Netherlands / Option to Work Remote in Italy / Option to Work Remote in Ireland / Option to Work Remote in France / Option to Work Remote in Finland / US-CA-Carpinteria / Option to Work Remote in Denmark / Option to Work Remote in Belgium / Option to Work Remote in Austria / US-MA-Remote Location-Lexington Area / Option to Work Remote in Canada": null,
+  "France, le Lamentin": {
+    "ville": "Le Lamentin",
+    "lat": 14.636808,
+    "lng": -60.991071,
+    "via": "commune",
+    "departement": "972"
+  },
+  "Tours - Other therapy - O'": {
+    "ville": "Tours",
+    "lat": 47.395476,
+    "lng": 0.695848,
+    "via": "commune",
+    "departement": "37"
+  },
+  "France, Le Poire sur Vie": {
+    "ville": "Le Poiré-sur-Vie",
+    "lat": 46.76567,
+    "lng": -1.501035,
+    "via": "commune",
+    "departement": "85"
+  },
+  "France, Valence": null,
+  "France, Fos-sur-Mer": {
+    "ville": "Fos-sur-Mer",
+    "lat": 43.451226,
+    "lng": 4.933732,
+    "via": "commune",
+    "departement": "13"
+  },
+  "Toulouse - Saint-Martin / Getafe": {
+    "ville": "Toulouse",
+    "lat": 43.604082,
+    "lng": 1.433805,
+    "via": "commune",
+    "departement": "31"
+  },
+  "Toulouse Area / Hamburg - Finkenwerder / Augsburg Area": {
+    "ville": "Toulouse",
+    "lat": 43.604082,
+    "lng": 1.433805,
+    "via": "commune",
+    "departement": "31"
+  },
+  "Allentown, Pennsylvania / Paris, France / Kristiansand, Norway / Warsaw, Poland / Barcelona, Spain / Bethlehem, Pennsylvania / Houston, Texas / Chertsey UK / Rotterdam, Netherlands": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Copenhagen / Nakskov / Madrid / Aalborg / Budapest / Fontanil / Espoo / Staffanstorp / Eskilstuna / Ronneby / Breda / Nijmegen / Rotterdam / Lisboa / Aberdeen / Kolding / Krakow - Przybyszewskiego / Krakow - Zawila / Madrid - Avenida Reina Victoria / Parma / Monza / Alonte / Dublin / Hull / Antwerpen - Ouland / Glinde bei Hamburg / Hamburg Hafencity Watermark Tower / Saint-Priest / Stockholm / Madrid / Marseille": {
+    "ville": "Marseille",
+    "lat": 43.282,
+    "lng": 5.405,
+    "via": "commune",
+    "departement": "13"
+  },
+  "Villeneuve Loubet": {
+    "ville": "Villeneuve-Loubet",
+    "lat": 43.639175,
+    "lng": 7.106505,
+    "via": "commune",
+    "departement": "06"
+  },
+  "Nice / Bangalore": {
+    "ville": "Nice",
+    "lat": 43.71273,
+    "lng": 7.255313,
+    "via": "commune",
+    "departement": "06"
+  },
+  "La Courneuve / La Courneuve": {
+    "ville": "La Courneuve",
+    "lat": 48.929758,
+    "lng": 2.399108,
+    "via": "commune",
+    "departement": "93"
+  },
+  "FR-Cesson Sevigne, France (2 rue des Buttes)": {
+    "ville": "Cesson-Sévigné",
+    "lat": 48.123772,
+    "lng": -1.596972,
+    "via": "commune",
+    "departement": "35"
+  },
+  "Remote - United Kingdom / Leuven, BEL / DEU-Remote / FRA-Remote": null,
+  "Caen Gare": {
+    "ville": "Caen",
+    "lat": 49.184316,
+    "lng": -0.37193,
+    "via": "commune",
+    "departement": "14"
+  },
+  "Gare de Lyon": {
+    "ville": "Lyon",
+    "lat": 45.778866,
+    "lng": 4.800831,
+    "via": "adresse",
+    "departement": "69"
+  },
+  "FC Tours": null,
+  "FC Nice": {
+    "ville": "Nice",
+    "lat": 43.71273,
+    "lng": 7.255313,
+    "via": "commune",
+    "departement": "06"
+  },
+  "FRA - Cherbourg-en-Cotentin - 157 Rue des Chênes": {
+    "ville": "Cherbourg-en-Cotentin",
+    "lat": 49.628684,
+    "lng": -1.63324,
+    "via": "commune",
+    "departement": "50"
+  },
+  "Chambéry Gare": {
+    "ville": "Chambéry",
+    "lat": 45.583223,
+    "lng": 5.909299,
+    "via": "commune",
+    "departement": "73"
+  },
+  "Mantes La Ville, Ile de France": {
+    "ville": "Mantes-la-Ville",
+    "lat": 48.974694,
+    "lng": 1.710809,
+    "via": "commune",
+    "departement": "78"
+  },
+  "Entzheim": {
+    "ville": "Entzheim",
+    "lat": 48.537823,
+    "lng": 7.641038,
+    "via": "commune",
+    "departement": "67"
+  },
+  "Clermont-Ferrand, France": {
+    "ville": "Clermont-Ferrand",
+    "lat": 45.786671,
+    "lng": 3.107055,
+    "via": "commune",
+    "departement": "63"
+  },
+  "Lens, France": {
+    "ville": "Lens",
+    "lat": 50.437872,
+    "lng": 2.819642,
+    "via": "commune",
+    "departement": "62"
+  },
+  "grenoble, FRANCE, France": {
+    "ville": "Grenoble",
+    "lat": 45.182828,
+    "lng": 5.724301,
+    "via": "commune",
+    "departement": "38"
+  },
+  "QUIMPER, Bretagne, France": {
+    "ville": "Quimper",
+    "lat": 47.998695,
+    "lng": -4.093228,
+    "via": "commune",
+    "departement": "29"
+  },
+  "Beaucouzé, Pays de la Loire, France": {
+    "ville": "Beaucouzé",
+    "lat": 47.474128,
+    "lng": -0.628861,
+    "via": "commune",
+    "departement": "49"
+  },
+  "MONTIVILLIERS, , France": {
+    "ville": "Montivilliers",
+    "lat": 49.542715,
+    "lng": 0.18932,
+    "via": "commune",
+    "departement": "76"
+  },
+  "Geispolsheim, Alsace, France": {
+    "ville": "Geispolsheim",
+    "lat": 48.523153,
+    "lng": 7.677407,
+    "via": "commune",
+    "departement": "67"
+  },
+  "/, /, France": null,
+  "Tourville la rivière, , France": {
+    "ville": "Tourville-la-Rivière",
+    "lat": 49.327993,
+    "lng": 1.093917,
+    "via": "commune",
+    "departement": "76"
+  },
+  "Sainte-Eulalie, Nouvelle Aquitaine, France": {
+    "ville": "Sainte-Eulalie",
+    "lat": 44.90275,
+    "lng": -0.480888,
+    "via": "commune",
+    "departement": "33"
+  },
+  "Rezé, ouest, France": {
+    "ville": "Rezé",
+    "lat": 47.17269,
+    "lng": -1.552789,
+    "via": "commune",
+    "departement": "44"
+  },
+  "Lattes, Hérault, France": {
+    "ville": "Lattes",
+    "lat": 43.570523,
+    "lng": 3.900373,
+    "via": "commune",
+    "departement": "34"
+  },
+  "Andelnans, Territoire de Belfort, France": {
+    "ville": "Andelnans",
+    "lat": 47.604209,
+    "lng": 6.859643,
+    "via": "commune",
+    "departement": "90"
+  },
+  "Biganos, , France": {
+    "ville": "Biganos",
+    "lat": 44.64819,
+    "lng": -0.949103,
+    "via": "commune",
+    "departement": "33"
+  },
+  "Aubenas, Auvergne Rhone-Alpes, France": {
+    "ville": "Aubenas",
+    "lat": 44.612671,
+    "lng": 4.391775,
+    "via": "commune",
+    "departement": "07"
+  },
+  "Aubenas, Auvergne-Rhône-Alpes, France": {
+    "ville": "Aubenas",
+    "lat": 44.612671,
+    "lng": 4.391775,
+    "via": "commune",
+    "departement": "07"
+  },
+  "chasse sur rhone , Auvergne-Rhône-Alpes, France": {
+    "ville": "Chasse-sur-Rhône",
+    "lat": 45.578799,
+    "lng": 4.807289,
+    "via": "commune",
+    "departement": "38"
+  },
+  "ANGOULINS, , France": {
+    "ville": "Angoulins",
+    "lat": 46.103589,
+    "lng": -1.109098,
+    "via": "commune",
+    "departement": "17"
+  },
+  "Amiens, , France": {
+    "ville": "Amiens",
+    "lat": 49.903041,
+    "lng": 2.292605,
+    "via": "commune",
+    "departement": "80"
+  },
+  "Beziers, Occitanie, France": {
+    "ville": "Béziers",
+    "lat": 43.343264,
+    "lng": 3.233465,
+    "via": "commune",
+    "departement": "34"
+  },
+  "chantepie, Bretagne, France": {
+    "ville": "Chantepie",
+    "lat": 48.083291,
+    "lng": -1.609773,
+    "via": "commune",
+    "departement": "35"
+  },
+  "Château Gontier sur Mayenne, , France": {
+    "ville": "Château-Gontier-sur-Mayenne",
+    "lat": 47.819956,
+    "lng": -0.694321,
+    "via": "commune",
+    "departement": "53"
+  },
+  "ANTIBES, PACA, France": {
+    "ville": "Antibes",
+    "lat": 43.582195,
+    "lng": 7.103254,
+    "via": "commune",
+    "departement": "06"
+  },
+  "vannes, , France": {
+    "ville": "Vannes",
+    "lat": 47.659971,
+    "lng": -2.752192,
+    "via": "commune",
+    "departement": "56"
+  },
+  "Arles, , France": {
+    "ville": "Arles",
+    "lat": 43.596721,
+    "lng": 4.645086,
+    "via": "commune",
+    "departement": "13"
+  },
+  "THIAIS, , France": {
+    "ville": "Thiais",
+    "lat": 48.760465,
+    "lng": 2.386991,
+    "via": "commune",
+    "departement": "94"
+  },
+  "reims, , France": {
+    "ville": "Reims",
+    "lat": 49.250948,
+    "lng": 4.055595,
+    "via": "commune",
+    "departement": "51"
+  },
+  "Sainte Eulalie, , France": {
+    "ville": "Sainte-Eulalie",
+    "lat": 44.90275,
+    "lng": -0.480888,
+    "via": "adresse",
+    "departement": "33"
+  },
+  "Saint Herblain , , France": {
+    "ville": "Saint-Herblain",
+    "lat": 47.227082,
+    "lng": -1.625284,
+    "via": "commune",
+    "departement": "44"
+  },
+  "Vitrolles,France": null,
+  "UK, Reading / Netherlands, Assen / France, Paris / India, Bangalore / Germany, Frankfurt / Poland, Warsaw / South Africa, Johannesburg / Ireland, Dublin": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "UK, Reading / France, Paris / Spain, Madrid / Bulgaria, Sofia / Austria, Vienna / Portugal, Lisbon / Greece, Athens / Poland, Gdansk / Italy, Milan / Ireland, Dublin / Sweden, Lund": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Bulgaria, Sofia / France, Lyon": {
+    "ville": "Lyon",
+    "lat": 45.758,
+    "lng": 4.835,
+    "via": "commune",
+    "departement": "69"
+  },
+  "UK, Reading / France, Paris / Spain, Barcelona / Croatia, Zagreb / Romania, Bucharest / Germany, Frankfurt / Greece, Athens / Italy, Milan / Sweden, Lund / South Africa, Johannesburg": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Toulouse, France / France , Remote": {
+    "ville": "Toulouse",
+    "lat": 43.604082,
+    "lng": 1.433805,
+    "via": "commune",
+    "departement": "31"
+  },
+  "Viessmann France SAS: Rue Saint Patrick, 59133 PHALEMPIN / Lille, France": {
+    "ville": "Phalempin",
+    "lat": 50.512769,
+    "lng": 3.023725,
+    "via": "code postal",
+    "departement": "59"
+  },
+  "Belgium; France; Germany; Italy; Netherlands; Portugal; Spain; United Kingdom": null,
+  "Fléville-devant-Nancy | 24 rue Antoine de St Exupéry": {
+    "ville": "Fléville-devant-Nancy",
+    "lat": 48.627353,
+    "lng": 6.204029,
+    "via": "commune",
+    "departement": "54"
+  },
+  "France - Remote ": null,
+  "FRA Paris - 3 rue d'Heliopolis-CPS / FRA Chambery - Avenue les Massettes Lot A002 et A003": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "GIVRAND, , France": {
+    "ville": "Givrand",
+    "lat": 46.680095,
+    "lng": -1.878588,
+    "via": "commune",
+    "departement": "85"
+  },
+  "JARVILLE LA MALGRANGE, Grand Est, France": {
+    "ville": "Jarville-la-Malgrange",
+    "lat": 48.667194,
+    "lng": 6.203971,
+    "via": "commune",
+    "departement": "54"
+  },
+  "Jarville-la-Malgrange, Grand Est, France": {
+    "ville": "Jarville-la-Malgrange",
+    "lat": 48.667194,
+    "lng": 6.203971,
+    "via": "commune",
+    "departement": "54"
+  },
+  "Romans, Auvergne-Rhône-Alpes, France": {
+    "ville": "Romans",
+    "lat": 46.119984,
+    "lng": 5.021118,
+    "via": "commune",
+    "departement": "01"
+  },
+  "Oraison, Alpes de Haute Provence, France": {
+    "ville": "Oraison",
+    "lat": 43.90067,
+    "lng": 5.915535,
+    "via": "commune",
+    "departement": "04"
+  },
+  "Soulac-sur-Mer, Nouvelle-Aquitaine, France": {
+    "ville": "Soulac-sur-Mer",
+    "lat": 45.497638,
+    "lng": -1.116894,
+    "via": "commune",
+    "departement": "33"
+  },
+  "Saint Lubin des Joncherets, Centre val de loire, France": {
+    "ville": "Saint-Lubin-des-Joncherets",
+    "lat": 48.752559,
+    "lng": 1.191499,
+    "via": "commune",
+    "departement": "28"
+  },
+  "saint martin d'albois, , France": null,
+  "Miramas, Bouches-du-Rhone, France": {
+    "ville": "Miramas",
+    "lat": 43.582796,
+    "lng": 5.009776,
+    "via": "commune",
+    "departement": "13"
+  },
+  "PORTET SUR GARONNE": {
+    "ville": "Portet-sur-Garonne",
+    "lat": 43.529131,
+    "lng": 1.396832,
+    "via": "commune",
+    "departement": "31"
+  },
+  "MUNDOLSHEIM": {
+    "ville": "Mundolsheim",
+    "lat": 48.638775,
+    "lng": 7.716596,
+    "via": "commune",
+    "departement": "67"
+  },
+  "DIJON": {
+    "ville": "Dijon",
+    "lat": 47.331953,
+    "lng": 5.033601,
+    "via": "commune",
+    "departement": "21"
+  },
+  "LA VALENTINE": {
+    "ville": "Valentine",
+    "lat": 43.088741,
+    "lng": 0.69897,
+    "via": "commune",
+    "departement": "31"
+  },
+  "Marsac-sur-l'Isle": {
+    "ville": "Marsac-sur-l'Isle",
+    "lat": 45.183282,
+    "lng": 0.649229,
+    "via": "commune",
+    "departement": "24"
+  },
+  "BLAGNAC": {
+    "ville": "Blagnac",
+    "lat": 43.63735,
+    "lng": 1.38326,
+    "via": "commune",
+    "departement": "31"
+  },
+  "AUXERRE": {
+    "ville": "Auxerre",
+    "lat": 47.790189,
+    "lng": 3.580299,
+    "via": "commune",
+    "departement": "89"
+  },
+  "LIMOGES": {
+    "ville": "Limoges",
+    "lat": 45.856159,
+    "lng": 1.221254,
+    "via": "commune",
+    "departement": "87"
+  },
+  "CARCASSONNE": {
+    "ville": "Carcassonne",
+    "lat": 43.206781,
+    "lng": 2.349415,
+    "via": "commune",
+    "departement": "11"
+  },
+  "Paris Office, France / London Office, United Kingdom": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "London, United Kingdom; Madrid, Spain; Paris, France": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Bordeaux, France; Lyon, France; Madrid, Spain; Nantes, France; Paris, France; Sophia Antipolis, France": {
+    "ville": "Bordeaux",
+    "lat": 44.851895,
+    "lng": -0.587877,
+    "via": "commune",
+    "departement": "33"
+  },
+  "France - Marseille (Editions)": {
+    "ville": "Marseille",
+    "lat": 43.282,
+    "lng": 5.405,
+    "via": "commune",
+    "departement": "13"
+  },
+  "Montevrain, France": {
+    "ville": "Montévrain",
+    "lat": 48.867105,
+    "lng": 2.74974,
+    "via": "commune",
+    "departement": "77"
+  },
+  "Coupvray, France": {
+    "ville": "Coupvray",
+    "lat": 48.894199,
+    "lng": 2.795044,
+    "via": "commune",
+    "departement": "77"
+  },
+  "Issy-les-Moulineaux, France / Brussels, Brussels-Capital Region, Belgium": {
+    "ville": "Issy-les-Moulineaux",
+    "lat": 48.823903,
+    "lng": 2.262887,
+    "via": "commune",
+    "departement": "92"
+  },
+  "Allonnes, France / Enkhuizen Seed Operations": null,
+  "Tremorel, Bretagne , France": {
+    "ville": "Trémorel",
+    "lat": 48.1906,
+    "lng": -2.293849,
+    "via": "commune",
+    "departement": "22"
+  },
+  "Ham": {
+    "ville": "Ham",
+    "lat": 49.746377,
+    "lng": 3.08118,
+    "via": "commune",
+    "departement": "80"
+  },
+  "Le Haillan, France": {
+    "ville": "Le Haillan",
+    "lat": 44.86943,
+    "lng": -0.690404,
+    "via": "commune",
+    "departement": "33"
+  },
+  "Bad Homburg, Germany / ESP SP01-2800 - Madrid - Office / GBR Huthwaite - Office / FRA Fresnes - Office / ITA Crema - Office / Wrocław - Office / PRT Lisboa - Office": null,
+  "ESP SP01-2800 - Madrid - Office / MONTPELLIER, France / FRA Fresnes - Office / ITA Crema - Office / NAPOLI, Napoli, Italy / Wrocław, Poland / Lisboa - Sede, Portugal / FRA SMAD - Plant / Dublin, Ireland": {
+    "ville": "Montpellier",
+    "lat": 43.610476,
+    "lng": 3.87048,
+    "via": "commune",
+    "departement": "34"
+  },
+  "Limonest": {
+    "ville": "Limonest",
+    "lat": 45.825721,
+    "lng": 4.777125,
+    "via": "commune",
+    "departement": "69"
+  },
+  "NIORT": {
+    "ville": "Niort",
+    "lat": 46.327232,
+    "lng": -0.466291,
+    "via": "commune",
+    "departement": "79"
+  },
+  "TINQUEUX": {
+    "ville": "Tinqueux",
+    "lat": 49.249951,
+    "lng": 3.989012,
+    "via": "commune",
+    "departement": "51"
+  },
+  "FLEVY": {
+    "ville": "Flévy",
+    "lat": 49.235511,
+    "lng": 6.252299,
+    "via": "commune",
+    "departement": "57"
+  },
+  "Münster, Nordrhein-Westfalen, Deutschland / POL GPC Krakow / NLD AAG Ede – HQ Europe / Nanterre / London": {
+    "ville": "Nanterre",
+    "lat": 48.898095,
+    "lng": 2.202314,
+    "via": "commune",
+    "departement": "92"
+  },
+  "Massy / Belfort": {
+    "ville": "Belfort",
+    "lat": 47.640938,
+    "lng": 6.857469,
+    "via": "commune",
+    "departement": "90"
+  },
+  "Saint Germain-lès-Arpajon": {
+    "ville": "Saint-Germain-lès-Arpajon",
+    "lat": 48.601694,
+    "lng": 2.267002,
+    "via": "commune",
+    "departement": "91"
+  },
+  "Sainte-Lizaigne": {
+    "ville": "Sainte-Lizaigne",
+    "lat": 46.996384,
+    "lng": 2.006166,
+    "via": "commune",
+    "departement": "36"
+  },
+  "Bonneuil-en-France": null,
+  "BARENTIN (76)": {
+    "ville": "Barentin",
+    "lat": 49.544169,
+    "lng": 0.949823,
+    "via": "commune",
+    "departement": "76"
+  },
+  "MALAUZAT (63)": {
+    "ville": "Malauzat",
+    "lat": 45.873738,
+    "lng": 3.065402,
+    "via": "commune",
+    "departement": "63"
+  },
+  "ESSEY-LES-NANCY (54)": {
+    "ville": "Essey-lès-Nancy",
+    "lat": 48.707292,
+    "lng": 6.232347,
+    "via": "commune",
+    "departement": "54"
+  },
+  "STRASBOURG (67)": {
+    "ville": "Strasbourg",
+    "lat": 48.579831,
+    "lng": 7.761454,
+    "via": "commune",
+    "departement": "67"
+  },
+  "DIEPPE (76)": {
+    "ville": "Dieppe",
+    "lat": 49.919877,
+    "lng": 1.086296,
+    "via": "commune",
+    "departement": "76"
+  },
+  "CHATEAU-THIERRY (02)": {
+    "ville": "Château-Thierry",
+    "lat": 49.050003,
+    "lng": 3.383835,
+    "via": "commune",
+    "departement": "02"
+  },
+  "VICHY (03)": {
+    "ville": "Vichy",
+    "lat": 46.131168,
+    "lng": 3.428025,
+    "via": "commune",
+    "departement": "03"
+  },
+  "CORMEILLES-EN-PARISIS (95)": {
+    "ville": "Cormeilles-en-Parisis",
+    "lat": 48.970343,
+    "lng": 2.19574,
+    "via": "commune",
+    "departement": "95"
+  },
+  "CLERMONT-FERRAND LE BREZET (63)": {
+    "ville": "Clermont-Ferrand",
+    "lat": 45.786671,
+    "lng": 3.107055,
+    "via": "commune",
+    "departement": "63"
+  },
+  "CHALON-SUR-SAONE (71)": {
+    "ville": "Chalon-sur-Saône",
+    "lat": 46.7917,
+    "lng": 4.845526,
+    "via": "commune",
+    "departement": "71"
+  },
+  "MERIGNAC (33)": {
+    "ville": "Mérignac",
+    "lat": 44.83337,
+    "lng": -0.674682,
+    "via": "adresse",
+    "departement": "33"
+  },
+  "DAVEZIEUX (07)": {
+    "ville": "Davézieux",
+    "lat": 45.254704,
+    "lng": 4.697818,
+    "via": "commune",
+    "departement": "07"
+  },
+  "LIVRY-GARGAN (93)": {
+    "ville": "Livry-Gargan",
+    "lat": 48.917656,
+    "lng": 2.533775,
+    "via": "commune",
+    "departement": "93"
+  },
+  "CARVIN (62)": {
+    "ville": "Carvin",
+    "lat": 50.488104,
+    "lng": 2.950265,
+    "via": "commune",
+    "departement": "62"
+  },
+  "TOURCOING (59)": {
+    "ville": "Tourcoing",
+    "lat": 50.720797,
+    "lng": 3.157799,
+    "via": "commune",
+    "departement": "59"
+  },
+  "CORMONTREUIL (51)": {
+    "ville": "Cormontreuil",
+    "lat": 49.220317,
+    "lng": 4.05091,
+    "via": "commune",
+    "departement": "51"
+  },
+  "SOISSONS (02)": {
+    "ville": "Soissons",
+    "lat": 49.377401,
+    "lng": 3.327152,
+    "via": "commune",
+    "departement": "02"
+  },
+  "LA RICHARDAIS (35)": {
+    "ville": "La Richardais",
+    "lat": 48.61044,
+    "lng": -2.043746,
+    "via": "commune",
+    "departement": "35"
+  },
+  "ANDREZIEUX-BOUTHEON (42)": {
+    "ville": "Andrézieux-Bouthéon",
+    "lat": 45.532152,
+    "lng": 4.28067,
+    "via": "commune",
+    "departement": "42"
+  },
+  "VIERZON (18)": {
+    "ville": "Vierzon",
+    "lat": 47.223215,
+    "lng": 2.082045,
+    "via": "commune",
+    "departement": "18"
+  },
+  "PACE (35)": null,
+  "BEAUCE (35)": {
+    "ville": "Beaucé",
+    "lat": 48.345873,
+    "lng": -1.158143,
+    "via": "commune",
+    "departement": "35"
+  },
+  "GONESSE (95)": {
+    "ville": "Gonesse",
+    "lat": 48.985195,
+    "lng": 2.457867,
+    "via": "commune",
+    "departement": "95"
+  },
+  "COUDEKERQUE-BRANCHE (59)": {
+    "ville": "Coudekerque-Branche",
+    "lat": 51.018714,
+    "lng": 2.388025,
+    "via": "commune",
+    "departement": "59"
+  },
+  "HYERES (83)": {
+    "ville": "Hyères",
+    "lat": 43.116731,
+    "lng": 6.20255,
+    "via": "adresse",
+    "departement": "83"
+  },
+  "MONTAUBAN (82)": {
+    "ville": "Montauban",
+    "lat": 44.01984,
+    "lng": 1.363799,
+    "via": "commune",
+    "departement": "82"
+  },
+  "DECINES-CHARPIEU (69)": {
+    "ville": "Décines-Charpieu",
+    "lat": 45.768363,
+    "lng": 4.958356,
+    "via": "commune",
+    "departement": "69"
+  },
+  "NANTEUIL-LES-MEAUX (77)": {
+    "ville": "Nanteuil-lès-Meaux",
+    "lat": 48.933445,
+    "lng": 2.897362,
+    "via": "commune",
+    "departement": "77"
+  },
+  "FAMECK (57)": {
+    "ville": "Fameck",
+    "lat": 49.299164,
+    "lng": 6.103328,
+    "via": "commune",
+    "departement": "57"
+  },
+  "FREJUS": {
+    "ville": "Fréjus",
+    "lat": 43.445657,
+    "lng": 6.770515,
+    "via": "commune",
+    "departement": "83"
+  },
+  "MEYZIEU (69)": {
+    "ville": "Meyzieu",
+    "lat": 45.774559,
+    "lng": 5.008024,
+    "via": "commune",
+    "departement": "69"
+  },
+  "SAINT-GERVAIS-LA-FORET (41)": {
+    "ville": "Saint-Gervais-la-Forêt",
+    "lat": 47.567387,
+    "lng": 1.359833,
+    "via": "commune",
+    "departement": "41"
+  },
+  "AMILLY (45)": null,
+  "GUYANCOURT (78)": {
+    "ville": "Guyancourt",
+    "lat": 48.772152,
+    "lng": 2.070346,
+    "via": "commune",
+    "departement": "78"
+  },
+  "PUGET-SUR-ARGENS (83)": {
+    "ville": "Puget-sur-Argens",
+    "lat": 43.470449,
+    "lng": 6.685531,
+    "via": "commune",
+    "departement": "83"
+  },
+  "CLERMONT FERRAND CRISTAL (63)": {
+    "ville": "Clermont-Ferrand",
+    "lat": 45.786671,
+    "lng": 3.107055,
+    "via": "commune",
+    "departement": "63"
+  },
+  "COIGNIERES (78)": {
+    "ville": "Coignières",
+    "lat": 48.747077,
+    "lng": 1.921342,
+    "via": "commune",
+    "departement": "78"
+  },
+  "VERDUN (55)": null,
+  "AHUY (21)": {
+    "ville": "Ahuy",
+    "lat": 47.363862,
+    "lng": 5.024171,
+    "via": "commune",
+    "departement": "21"
+  },
+  "OSNY (95)": {
+    "ville": "Osny",
+    "lat": 49.062903,
+    "lng": 2.06412,
+    "via": "commune",
+    "departement": "95"
+  },
+  "PLAN D'ORGON": {
+    "ville": "Plan-d'Orgon",
+    "lat": 43.81199,
+    "lng": 4.999673,
+    "via": "commune",
+    "departement": "13"
+  },
+  "ROBERTSAU, , France": null,
+  "Office - Grenoble": {
+    "ville": "Grenoble",
+    "lat": 45.182828,
+    "lng": 5.724301,
+    "via": "commune",
+    "departement": "38"
+  },
+  "Office - Aix-en-Provence / Office - Lyon": {
+    "ville": "Aix-en-Provence",
+    "lat": 43.541369,
+    "lng": 5.406124,
+    "via": "commune",
+    "departement": "13"
+  },
+  "Office - Etampes / Office - Aix-en-Provence": {
+    "ville": "Étampes",
+    "lat": 48.427733,
+    "lng": 2.14952,
+    "via": "commune",
+    "departement": "91"
+  },
+  "FRA > St Jean De Vedas > Zac Mas De Grille Parc St Jean": null,
+  "Decize": {
+    "ville": "Decize",
+    "lat": 46.809753,
+    "lng": 3.473532,
+    "via": "commune",
+    "departement": "58"
+  },
+  "Arpajon": {
+    "ville": "Arpajon",
+    "lat": 48.590761,
+    "lng": 2.246292,
+    "via": "commune",
+    "departement": "91"
+  },
+  "Amsterdam, North Holland, Netherlands; Berlin, Berlin, Germany; London, England, United Kingdom; Paris, Paris, France": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Joué-Lès-Tours - France": {
+    "ville": "Joué-lès-Tours",
+    "lat": 47.336276,
+    "lng": 0.657551,
+    "via": "commune",
+    "departement": "37"
+  },
+  "Brétigny-Sur-Orge, Île-de-France, France": {
+    "ville": "Brétigny-sur-Orge",
+    "lat": 48.603562,
+    "lng": 2.296311,
+    "via": "commune",
+    "departement": "91"
+  },
+  "Brussels; London; Paris": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Hilversum (Liebergerweg), Netherlands / Dijon, France / Haverhill, United Kingdom / Oberhausen, Germany / Barcelona, Spain / Milan, Italy": {
+    "ville": "Dijon",
+    "lat": 47.331953,
+    "lng": 5.033601,
+    "via": "commune",
+    "departement": "21"
+  },
+  "Brugge, Belgium / Valencia, Spain / Neuilly-Sur-Seine Cedex, France / Bomlitz, Germany": {
+    "ville": "Neuilly-sur-Seine",
+    "lat": 48.886191,
+    "lng": 2.265869,
+    "via": "commune",
+    "departement": "92"
+  },
+  "Asturias, Spain / Neuilly-Sur-Seine Cedex, France": {
+    "ville": "Neuilly-sur-Seine",
+    "lat": 48.886191,
+    "lng": 2.265869,
+    "via": "commune",
+    "departement": "92"
+  },
+  "France, Massy": null,
+  "Duppigheim-Bas Rhin-France": {
+    "ville": "Duppigheim",
+    "lat": 48.534535,
+    "lng": 7.592083,
+    "via": "commune",
+    "departement": "67"
+  },
+  "Cergy, Menucourt, Saint-Ouen-L'aumône, Pontoise, Bessancourt": {
+    "ville": "Cergy",
+    "lat": 49.04227,
+    "lng": 2.045547,
+    "via": "commune",
+    "departement": "95"
+  },
+  "Saint Doulchard, , France": {
+    "ville": "Saint-Doulchard",
+    "lat": 47.108769,
+    "lng": 2.363377,
+    "via": "commune",
+    "departement": "18"
+  },
+  "Orthez, France": {
+    "ville": "Orthez",
+    "lat": 43.493121,
+    "lng": -0.773351,
+    "via": "commune",
+    "departement": "64"
+  },
+  "SEYNOD, Auvergne-Rhône-Alpes, France": null,
+  "London, United Kingdom / Paris, France / Utrecht, Netherlands": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "MANOSQUE, FRANCE, France": {
+    "ville": "Manosque",
+    "lat": 43.826542,
+    "lng": 5.790238,
+    "via": "commune",
+    "departement": "04"
+  },
+  "LA HAGUE, Normandie, France": {
+    "ville": "La Hague",
+    "lat": 49.658246,
+    "lng": -1.818725,
+    "via": "commune",
+    "departement": "50"
+  },
+  "LILLEBONNE, , France": {
+    "ville": "Lillebonne",
+    "lat": 49.519589,
+    "lng": 0.534929,
+    "via": "commune",
+    "departement": "76"
+  },
+  "DEOLS, , France": {
+    "ville": "Déols",
+    "lat": 46.835263,
+    "lng": 1.715274,
+    "via": "commune",
+    "departement": "36"
+  },
+  "Aen, Calvados, Frances": null,
+  "Besançon, Bourgogne-Franche-Comté, France": {
+    "ville": "Besançon",
+    "lat": 47.251938,
+    "lng": 6.001699,
+    "via": "commune",
+    "departement": "25"
+  },
+  "Brest, Brittany, France": {
+    "ville": "Brest",
+    "lat": 48.406435,
+    "lng": -4.497736,
+    "via": "commune",
+    "departement": "29"
+  },
+  "Le Chesnay, Île-de-France, France": null,
+  "Béziers, Occitanie, France": {
+    "ville": "Béziers",
+    "lat": 43.343264,
+    "lng": 3.233465,
+    "via": "commune",
+    "departement": "34"
+  },
+  "Pont-Sainte-Marie, Grand Est, France": {
+    "ville": "Pont-Sainte-Marie",
+    "lat": 48.319859,
+    "lng": 4.098452,
+    "via": "commune",
+    "departement": "10"
+  },
+  "Labège, Occitanie, France": {
+    "ville": "Labège",
+    "lat": 43.541148,
+    "lng": 1.52312,
+    "via": "commune",
+    "departement": "31"
+  },
+  "Roissy-en-France, Île-de-France, France": null,
+  "GRENOBLE Neyrpic SC WN": {
+    "ville": "Grenoble",
+    "lat": 45.182828,
+    "lng": 5.724301,
+    "via": "commune",
+    "departement": "38"
+  },
+  "Créteil, Île-de-France, France": {
+    "ville": "Créteil",
+    "lat": 48.784506,
+    "lng": 2.452976,
+    "via": "commune",
+    "departement": "94"
+  },
+  "Thiais, Île-de-France, France": {
+    "ville": "Thiais",
+    "lat": 48.760465,
+    "lng": 2.386991,
+    "via": "commune",
+    "departement": "94"
+  },
+  "ROSNY-SOUS-BOIS Rosny 2 SC WN (new)": {
+    "ville": "Rosny-sous-Bois",
+    "lat": 48.873864,
+    "lng": 2.487396,
+    "via": "commune",
+    "departement": "93"
+  },
+  "Serris, Île-de-France, France": {
+    "ville": "Serris",
+    "lat": 48.846958,
+    "lng": 2.784749,
+    "via": "commune",
+    "departement": "77"
+  },
+  "Arcueil, Île-de-France, France": {
+    "ville": "Arcueil",
+    "lat": 48.805178,
+    "lng": 2.333471,
+    "via": "commune",
+    "departement": "94"
+  },
+  "Épagny, Auvergne-Rhône-Alpes, France": null,
+  "Nancy, Grand Est, France": {
+    "ville": "Nancy",
+    "lat": 48.688135,
+    "lng": 6.171263,
+    "via": "commune",
+    "departement": "54"
+  },
+  "BEAUCOUZE L'Atoll Angers SC": {
+    "ville": "Beaucouzé",
+    "lat": 47.474128,
+    "lng": -0.628861,
+    "via": "commune",
+    "departement": "49"
+  },
+  "Saint Genis Laval, Rhône, France": {
+    "ville": "Saint-Genis-Laval",
+    "lat": 45.695316,
+    "lng": 4.794065,
+    "via": "commune",
+    "departement": "69"
+  },
+  "Puteaux, Île-de-France, France": {
+    "ville": "Puteaux",
+    "lat": 48.884156,
+    "lng": 2.237199,
+    "via": "commune",
+    "departement": "92"
+  },
+  "Poitiers, Nouvelle-Aquitaine, France": {
+    "ville": "Poitiers",
+    "lat": 46.586578,
+    "lng": 0.35668,
+    "via": "commune",
+    "departement": "86"
+  },
+  "Dijon, Bourgogne-Franche-Comté, France": {
+    "ville": "Dijon",
+    "lat": 47.331953,
+    "lng": 5.033601,
+    "via": "commune",
+    "departement": "21"
+  },
+  "Cergy-Pontoise, Île-de-France, France": {
+    "ville": "Pontoise",
+    "lat": 49.047592,
+    "lng": 2.099968,
+    "via": "commune",
+    "departement": "95"
+  },
+  "Le Havre, Normandy, France": {
+    "ville": "Le Havre",
+    "lat": 49.507345,
+    "lng": 0.129995,
+    "via": "commune",
+    "departement": "76"
+  },
+  "Quimper, Finistere, France": {
+    "ville": "Quimper",
+    "lat": 47.998695,
+    "lng": -4.093228,
+    "via": "commune",
+    "departement": "29"
+  },
+  "NICE Cap 3000 SC": null,
+  "St.-Denis, Île-de-France, France": null,
+  "Moulins-lès-Metz, Grand Est, France": {
+    "ville": "Moulins-lès-Metz",
+    "lat": 49.095397,
+    "lng": 6.123362,
+    "via": "commune",
+    "departement": "57"
+  },
+  "Cagnes-sur-Mer, Provence-Alpes-Côte d'Azur, France": {
+    "ville": "Cagnes-sur-Mer",
+    "lat": 43.675413,
+    "lng": 7.150354,
+    "via": "commune",
+    "departement": "06"
+  },
+  "Anglet, Nouvelle-Aquitaine, France": {
+    "ville": "Anglet",
+    "lat": 43.488004,
+    "lng": -1.518997,
+    "via": "commune",
+    "departement": "64"
+  },
+  "Boulogne Billancourt, Hauts-de-Seine, France": {
+    "ville": "Boulogne-Billancourt",
+    "lat": 48.837799,
+    "lng": 2.243202,
+    "via": "commune",
+    "departement": "92"
+  },
+  "Caen, Normandy, France": {
+    "ville": "Caen",
+    "lat": 49.184316,
+    "lng": -0.37193,
+    "via": "commune",
+    "departement": "14"
+  },
+  "Nailloux, Occitanie, France": {
+    "ville": "Nailloux",
+    "lat": 43.366865,
+    "lng": 1.620608,
+    "via": "commune",
+    "departement": "31"
+  },
+  "Rennes, Brittany, France": {
+    "ville": "Rennes",
+    "lat": 48.110899,
+    "lng": -1.68365,
+    "via": "commune",
+    "departement": "35"
+  },
+  "Reims, Grand Est, France": {
+    "ville": "Reims",
+    "lat": 49.250948,
+    "lng": 4.055595,
+    "via": "commune",
+    "departement": "51"
+  },
+  "Nice, Provence-Alpes-Côte d'Azur, France": {
+    "ville": "Nice",
+    "lat": 43.71273,
+    "lng": 7.255313,
+    "via": "commune",
+    "departement": "06"
+  },
+  "Collégien, Île-de-France, France": {
+    "ville": "Collégien",
+    "lat": 48.830337,
+    "lng": 2.6737,
+    "via": "commune",
+    "departement": "77"
+  },
+  "Yvelines, Île-de-France, France": null,
+  "Lieusaint, Seine-et-Marne, France": {
+    "ville": "Lieusaint",
+    "lat": 48.628626,
+    "lng": 2.547935,
+    "via": "commune",
+    "departement": "77"
+  },
+  "Montigny Le Bretonneux, Yvelines, France": {
+    "ville": "Montigny-le-Bretonneux",
+    "lat": 48.779563,
+    "lng": 2.033014,
+    "via": "commune",
+    "departement": "78"
+  },
+  "Saint-Herblain, Pays de la Loire, France": {
+    "ville": "Saint-Herblain",
+    "lat": 47.227082,
+    "lng": -1.625284,
+    "via": "commune",
+    "departement": "44"
+  },
+  "Annemasse, Auvergne-Rhône-Alpes, France": {
+    "ville": "Annemasse",
+    "lat": 46.189327,
+    "lng": 6.243054,
+    "via": "commune",
+    "departement": "74"
+  },
+  "Le Plessis Pate, Essonne, France": {
+    "ville": "Le Plessis-Pâté",
+    "lat": 48.610207,
+    "lng": 2.332946,
+    "via": "commune",
+    "departement": "91"
+  },
+  "La Valette-du-Var, Provence-Alpes-Côte d'Azur, France": {
+    "ville": "La Valette-du-Var",
+    "lat": 43.143841,
+    "lng": 5.990889,
+    "via": "commune",
+    "departement": "83"
+  },
+  "Rouen, Normandy, France": {
+    "ville": "Rouen",
+    "lat": 49.440051,
+    "lng": 1.093912,
+    "via": "commune",
+    "departement": "76"
+  },
+  "Bègles, Nouvelle-Aquitaine, France": {
+    "ville": "Bègles",
+    "lat": 44.802062,
+    "lng": -0.551187,
+    "via": "commune",
+    "departement": "33"
+  },
+  "Lieusaint, Île-de-France, France": {
+    "ville": "Lieusaint",
+    "lat": 48.628626,
+    "lng": 2.547935,
+    "via": "commune",
+    "departement": "77"
+  },
+  "St-Étienne, Auvergne-Rhône-Alpes, France": null,
+  "Colmar, Grand Est, France": {
+    "ville": "Colmar",
+    "lat": 48.081779,
+    "lng": 7.352569,
+    "via": "commune",
+    "departement": "68"
+  },
+  "NOISY-LE-GRAND Arcades SC": {
+    "ville": "Noisy-le-Grand",
+    "lat": 48.841877,
+    "lng": 2.545752,
+    "via": "adresse",
+    "departement": "93"
+  },
+  "External Name Lyon, Auvergne-Rhône-Alpes, France": {
+    "ville": "Lyon",
+    "lat": 45.758,
+    "lng": 4.835,
+    "via": "commune",
+    "departement": "69"
+  },
+  "Orléans, Centre-Val de Loire, France": {
+    "ville": "Orléans",
+    "lat": 47.873569,
+    "lng": 1.911358,
+    "via": "commune",
+    "departement": "45"
+  },
+  "Évry, Île-de-France, France": null,
+  "Blagnac, Occitanie, France": {
+    "ville": "Blagnac",
+    "lat": 43.63735,
+    "lng": 1.38326,
+    "via": "commune",
+    "departement": "31"
+  },
+  "Nîmes, Occitanie, France": {
+    "ville": "Nîmes",
+    "lat": 43.814652,
+    "lng": 4.356289,
+    "via": "commune",
+    "departement": "30"
+  },
+  "Tours, Centre-Val de Loire, France": {
+    "ville": "Tours",
+    "lat": 47.395476,
+    "lng": 0.695848,
+    "via": "commune",
+    "departement": "37"
+  },
+  "AIX EN PROV. J. Bouffan SC WN": null,
+  "Moisselles, Île-de-France, France": {
+    "ville": "Moisselles",
+    "lat": 49.046769,
+    "lng": 2.340564,
+    "via": "commune",
+    "departement": "95"
+  },
+  "Mont-Saint-Martin, Grand Est, France": {
+    "ville": "Grand",
+    "lat": 48.3843,
+    "lng": 5.485548,
+    "via": "commune",
+    "departement": "88"
+  },
+  "La Roche-sur-Yon, Pays de la Loire, France": {
+    "ville": "La Roche-sur-Yon",
+    "lat": 46.670848,
+    "lng": -1.412533,
+    "via": "commune",
+    "departement": "85"
+  },
+  "London, London, United Kingdom / Amsterdam, Noord-Holland, Netherlands / Mollsfeld, Meerbusch, Germany / Brussels, Brussels, Belgium / Madrid, Madrid, Spain / Milano, Lombardia, Italy / Paris, Île de France, France": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Fourmies, Nord-Pas-de-Calais, France": {
+    "ville": "Fourmies",
+    "lat": 50.015147,
+    "lng": 4.061667,
+    "via": "commune",
+    "departement": "59"
+  },
+  "Lisboa, Lisboa, Portugal / Munich area, Bavaria, Germany / Amsterdam, Noord-Holland, Netherlands / Brussels, Brussels, Belgium / Madrid, Madrid, Spain / Milano, Lombardia, Italy / Paris, Île de France, France": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Czechia; France; Germany; Ireland; United Kingdom": null,
+  "Czechia; France; Germany; Spain; United Kingdom": null,
+  "Canada, Quebec; France; Germany; Ireland; Netherlands; Spain; United Kingdom; United States": null,
+  "Le Blanc-Mesnil / Mollem": {
+    "ville": "Le Blanc-Mesnil",
+    "lat": 48.936683,
+    "lng": 2.457832,
+    "via": "commune",
+    "departement": "93"
+  },
+  "Pisseloup - Principale": {
+    "ville": "Pisseloup",
+    "lat": 47.826893,
+    "lng": 5.739705,
+    "via": "commune",
+    "departement": "52"
+  },
+  "AIX EN PROVENCE, FR-U, France": {
+    "ville": "Aix-en-Provence",
+    "lat": 43.541369,
+    "lng": 5.406124,
+    "via": "commune",
+    "departement": "13"
+  },
+  "Germany Offsite (ZWG99), More...": null,
+  "NIORT (fresh.) (79)": {
+    "ville": "Niort",
+    "lat": 46.327232,
+    "lng": -0.466291,
+    "via": "commune",
+    "departement": "79"
+  },
+  "DOUVRES LA DELIVRANDE": {
+    "ville": "Douvres-la-Délivrande",
+    "lat": 49.29468,
+    "lng": -0.389686,
+    "via": "commune",
+    "departement": "14"
+  },
+  "SAINT-MAXIMIN-LA-SAINTE-BAUME (83)": {
+    "ville": "Saint-Maximin-la-Sainte-Baume",
+    "lat": 43.446306,
+    "lng": 5.866175,
+    "via": "commune",
+    "departement": "83"
+  },
+  "HOUDEMONT (54)": {
+    "ville": "Houdemont",
+    "lat": 48.644569,
+    "lng": 6.18064,
+    "via": "commune",
+    "departement": "54"
+  },
+  "SAINT-AVOLD (57)": {
+    "ville": "Saint-Avold",
+    "lat": 49.127523,
+    "lng": 6.719764,
+    "via": "commune",
+    "departement": "57"
+  },
+  "LA VALETTE DU VAR (83)": {
+    "ville": "La Valette-du-Var",
+    "lat": 43.143841,
+    "lng": 5.990889,
+    "via": "commune",
+    "departement": "83"
+  },
+  "Merignac, France": {
+    "ville": "Mérignac",
+    "lat": 44.83337,
+    "lng": -0.674682,
+    "via": "adresse",
+    "departement": "33"
+  },
+  "Mulhouse, France": {
+    "ville": "Mulhouse",
+    "lat": 47.751661,
+    "lng": 7.326517,
+    "via": "commune",
+    "departement": "68"
+  },
+  "Begles, France": {
+    "ville": "Bègles",
+    "lat": 44.802062,
+    "lng": -0.551187,
+    "via": "commune",
+    "departement": "33"
+  },
+  "Talange, France": {
+    "ville": "Talange",
+    "lat": 49.232879,
+    "lng": 6.171405,
+    "via": "commune",
+    "departement": "57"
+  },
+  "St. Maximin, France": null,
+  "Angers, France": {
+    "ville": "Angers",
+    "lat": 47.467471,
+    "lng": -0.561615,
+    "via": "commune",
+    "departement": "49"
+  },
+  "France, Courbevoie / UK, Remote / Spain, Remote / UK, Bristol": {
+    "ville": "Courbevoie",
+    "lat": 48.897974,
+    "lng": 2.257057,
+    "via": "commune",
+    "departement": "92"
+  },
+  "Toulouse / Saclay / Grenoble / Caen / Sophia-Antipolis (Valbonne)": {
+    "ville": "Toulouse",
+    "lat": 43.604082,
+    "lng": 1.433805,
+    "via": "commune",
+    "departement": "31"
+  },
+  "Caen / Eindhoven": {
+    "ville": "Caen",
+    "lat": 49.184316,
+    "lng": -0.37193,
+    "via": "commune",
+    "departement": "14"
+  },
+  "Sophia-Antipolis (Valbonne)": {
+    "ville": "Valbonne",
+    "lat": 43.627339,
+    "lng": 7.016557,
+    "via": "commune",
+    "departement": "06"
+  },
+  "Sophia-Antipolis (Valbonne) / Gratkorn": {
+    "ville": "Valbonne",
+    "lat": 43.627339,
+    "lng": 7.016557,
+    "via": "commune",
+    "departement": "06"
+  },
+  "Caen / Sophia-Antipolis (Valbonne)": {
+    "ville": "Caen",
+    "lat": 49.184316,
+    "lng": -0.37193,
+    "via": "commune",
+    "departement": "14"
+  },
+  "Sophia-Antipolis (Valbonne) / Caen / Toulouse / Catania": {
+    "ville": "Caen",
+    "lat": 49.184316,
+    "lng": -0.37193,
+    "via": "commune",
+    "departement": "14"
+  },
+  "Caen / Gratkorn / Hamburg / Sophia-Antipolis (Valbonne)": {
+    "ville": "Caen",
+    "lat": 49.184316,
+    "lng": -0.37193,
+    "via": "commune",
+    "departement": "14"
+  },
+  "Toulouse / Sophia-Antipolis (Valbonne)": {
+    "ville": "Toulouse",
+    "lat": 43.604082,
+    "lng": 1.433805,
+    "via": "commune",
+    "departement": "31"
+  },
+  "Caen / Sophia-Antipolis (Valbonne) / Toulouse": {
+    "ville": "Caen",
+    "lat": 49.184316,
+    "lng": -0.37193,
+    "via": "commune",
+    "departement": "14"
+  },
+  "Toulouse / Caen / Sophia-Antipolis (Valbonne)": {
+    "ville": "Toulouse",
+    "lat": 43.604082,
+    "lng": 1.433805,
+    "via": "commune",
+    "departement": "31"
+  },
+  "Caen / Nijmegen / Toulouse / Hamburg / Sophia-Antipolis (Valbonne)": {
+    "ville": "Caen",
+    "lat": 49.184316,
+    "lng": -0.37193,
+    "via": "commune",
+    "departement": "14"
+  },
+  "Sophia-Antipolis (Valbonne) / Nijmegen / Hamburg": {
+    "ville": "Valbonne",
+    "lat": 43.627339,
+    "lng": 7.016557,
+    "via": "commune",
+    "departement": "06"
+  },
+  "LPN BO / MIL VIP / MAD MA / SHU H 14 / DMS IR / CEY BO": null,
+  "Montpellier ": {
+    "ville": "Montpellier",
+    "lat": 43.610476,
+    "lng": 3.87048,
+    "via": "commune",
+    "departement": "34"
+  },
+  "Office - France - Paris / Office - Italy - Milan / Office - Spain - Madrid": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Paris, France / Remote - Netherlands": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Val Thoiry, , France": null,
+  "PARIS GO-ASNIERES-SUR-SEINE / Vannes / Grenoble / Valence / Avignon": {
+    "ville": "Vannes",
+    "lat": 47.659971,
+    "lng": -2.752192,
+    "via": "commune",
+    "departement": "56"
+  },
+  "PARIS GO-ASNIERES-SUR-SEINE / Mulhouse / Metz": {
+    "ville": "Mulhouse",
+    "lat": 47.751661,
+    "lng": 7.326517,
+    "via": "commune",
+    "departement": "68"
+  },
+  "Suresnes / France - Home Based": {
+    "ville": "Suresnes",
+    "lat": 48.870985,
+    "lng": 2.218087,
+    "via": "commune",
+    "departement": "92"
+  },
+  "Paris | Remote": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Remote • UK, France, Spain, Germany or Canada": null,
+  "London; Paris; Prague": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "London, Barcelona, Paris": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "London; Paris; Geneva": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Geneva; Paris; Barcelona": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Dubai, Dubai, United Arab Emirates / Watford, Hertfordshire, United Kingdom / Singapore, Singapore, Singapore / Petaling Jaya, Selangor, Malaysia / Mollsfeld, Meerbusch, Germany / Istanbul, Istanbul, Türkiye / Madrid, Madrid, Spain / Heerlen, Limburg, Netherlands / Bangkok, Bangkok, Thailand / Warsaw, Mazowieckie, Poland / Paris, Île de France, France": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "FRANCE - Tour Vista": null,
+  "Barcelona, Spain; Copenhagen, Denmark; London, United Kingdom; Paris, France; Stockholm, Sweden; Warsaw, Poland": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Barcelona, Spain; Copenhagen, Denmark; Gothenburg, Sweden; Helsinki, Finland; Lisbon, Portugal; London, United Kingdom; Milan, Italy; Paris, France; Warsaw, Poland; Wiesbaden, Germany": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Remote- France": null,
+  "US, UK, France, DRC": null,
+  "Amsterdam, North Holland, Netherlands; Remote (France); Remote (Germany)": null,
+  "Meylan": {
+    "ville": "Meylan",
+    "lat": 45.215013,
+    "lng": 5.780514,
+    "via": "commune",
+    "departement": "38"
+  },
+  "Lyon, France / Paris, France / Nantes, France / Lille, France": {
+    "ville": "Lyon",
+    "lat": 45.758,
+    "lng": 4.835,
+    "via": "commune",
+    "departement": "69"
+  },
+  "La Madeleine": {
+    "ville": "La Madeleine",
+    "lat": 50.655147,
+    "lng": 3.069899,
+    "via": "commune",
+    "departement": "59"
+  },
+  "Remote (France) / Remote (United Kingdom) / Remote (Germany) / Remote (Spain)": null,
+  "Local Office (Paris, France) / Remote (France)": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "France / Lyon": {
+    "ville": "Lyon",
+    "lat": 45.758,
+    "lng": 4.835,
+    "via": "commune",
+    "departement": "69"
+  },
+  "France / Compiègne ": {
+    "ville": "Compiègne",
+    "lat": 49.405934,
+    "lng": 2.844366,
+    "via": "commune",
+    "departement": "60"
+  },
+  "Remote - France; Remote - Germany; Remote - Netherlands; Remote - UK": null,
+  "France, Meyzieu": {
+    "ville": "Meyzieu",
+    "lat": 45.774559,
+    "lng": 5.008024,
+    "via": "commune",
+    "departement": "69"
+  },
+  "France, Bourges": {
+    "ville": "Bourges",
+    "lat": 47.082882,
+    "lng": 2.402294,
+    "via": "commune",
+    "departement": "18"
+  },
+  "France, Montbonnot-Saint-Martin": {
+    "ville": "Montbonnot-Saint-Martin",
+    "lat": 45.225419,
+    "lng": 5.80876,
+    "via": "commune",
+    "departement": "38"
+  },
+  "Gentilly": {
+    "ville": "Gentilly",
+    "lat": 48.812317,
+    "lng": 2.342606,
+    "via": "commune",
+    "departement": "94"
+  },
+  "Vitry-sur-Seine": {
+    "ville": "Vitry-sur-Seine",
+    "lat": 48.789495,
+    "lng": 2.39571,
+    "via": "commune",
+    "departement": "94"
+  },
+  "Ambarès": null,
+  "Le Trait": {
+    "ville": "Le Trait",
+    "lat": 49.484162,
+    "lng": 0.802257,
+    "via": "commune",
+    "departement": "76"
+  },
+  "Val-de-Reuil": {
+    "ville": "Val-de-Reuil",
+    "lat": 49.261533,
+    "lng": 1.20933,
+    "via": "commune",
+    "departement": "27"
+  },
+  "Marcy-l'Etoile": {
+    "ville": "Marcy-l'Étoile",
+    "lat": 45.783483,
+    "lng": 4.712176,
+    "via": "commune",
+    "departement": "69"
+  },
+  "Sisteron": {
+    "ville": "Sisteron",
+    "lat": 44.20371,
+    "lng": 5.935608,
+    "via": "commune",
+    "departement": "04"
+  },
+  "Gentilly / Lyon": {
+    "ville": "Gentilly",
+    "lat": 48.812317,
+    "lng": 2.342606,
+    "via": "commune",
+    "departement": "94"
+  },
+  "Lyon / Paris": {
+    "ville": "Lyon",
+    "lat": 45.758,
+    "lng": 4.835,
+    "via": "commune",
+    "departement": "69"
+  },
+  "Montpellier / Vitry-sur-Seine": {
+    "ville": "Montpellier",
+    "lat": 43.610476,
+    "lng": 3.87048,
+    "via": "commune",
+    "departement": "34"
+  },
+  "Aramon": {
+    "ville": "Aramon",
+    "lat": 43.902284,
+    "lng": 4.685615,
+    "via": "commune",
+    "departement": "30"
+  },
+  "Lyon , , France": {
+    "ville": "Lyon",
+    "lat": 45.758,
+    "lng": 4.835,
+    "via": "commune",
+    "departement": "69"
+  },
+  "Vitrolles, Provence-Alpes-Côte d’Azur, France, PACA, France": null,
+  "Etrelles, , France": {
+    "ville": "Étrelles",
+    "lat": 48.067569,
+    "lng": -1.221315,
+    "via": "commune",
+    "departement": "35"
+  },
+  "La Chapelle-sur-Erdre, , France": {
+    "ville": "La Chapelle-sur-Erdre",
+    "lat": 47.302321,
+    "lng": -1.560549,
+    "via": "commune",
+    "departement": "44"
+  },
+  "RAMBOUILLET, , France": {
+    "ville": "Rambouillet",
+    "lat": 48.641966,
+    "lng": 1.844673,
+    "via": "commune",
+    "departement": "78"
+  },
+  "Saint-Denis, IDF, France": null,
+  "92130 Issy-les-Moulineaux, , France": {
+    "ville": "Issy-les-Moulineaux",
+    "lat": 48.823903,
+    "lng": 2.262887,
+    "via": "code postal",
+    "departement": "92"
+  },
+  "Noisy-le-Grand, , France": {
+    "ville": "Noisy-le-Grand",
+    "lat": 48.840106,
+    "lng": 2.551491,
+    "via": "commune",
+    "departement": "93"
+  },
+  "La Garenne-Colombes (92), , France": {
+    "ville": "La Garenne-Colombes",
+    "lat": 48.907164,
+    "lng": 2.244406,
+    "via": "commune",
+    "departement": "92"
+  },
+  "La Garenne-Colombes, , France": {
+    "ville": "La Garenne-Colombes",
+    "lat": 48.907164,
+    "lng": 2.244406,
+    "via": "commune",
+    "departement": "92"
+  },
+  "Levallois-Perret, , France": {
+    "ville": "Levallois-Perret",
+    "lat": 48.894215,
+    "lng": 2.286846,
+    "via": "commune",
+    "departement": "92"
+  },
+  "Nîmes, , France": {
+    "ville": "Nîmes",
+    "lat": 43.814652,
+    "lng": 4.356289,
+    "via": "commune",
+    "departement": "30"
+  },
+  "noyelles godault, , France": {
+    "ville": "Noyelles-Godault",
+    "lat": 50.421676,
+    "lng": 2.990806,
+    "via": "commune",
+    "departement": "62"
+  },
+  "Arcueil, , France": {
+    "ville": "Arcueil",
+    "lat": 48.805178,
+    "lng": 2.333471,
+    "via": "commune",
+    "departement": "94"
+  },
+  "Copenhagen / London / San Francisco / Singapore / Vienna / Barcelona / Manila / Noida / Mexico City / Paris (Victoire) / Hong Kong / Warsaw / Sydney / Bad Homburg / Toronto": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Warsaw / London / Vienna / Barcelona / Milano / Bad Homburg / Copenhagen / Paris (Victoire)": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Le Plessis-Pâté, France": {
+    "ville": "Le Plessis-Pâté",
+    "lat": 48.610207,
+    "lng": 2.332946,
+    "via": "commune",
+    "departement": "91"
+  },
+  "Villacoublay, France": null,
+  "Roppenheim, FRA / Store: 1508 The Style Outlets Roppenheim, FRA": {
+    "ville": "Roppenheim",
+    "lat": 48.845584,
+    "lng": 8.055946,
+    "via": "commune",
+    "departement": "67"
+  },
+  "FR.Paris.Garnier Pagès": {
+    "ville": "Paris",
+    "lat": 48.843915,
+    "lng": 2.317985,
+    "via": "adresse",
+    "departement": "75"
+  },
+  "FR.Tours.MAME Bureau": {
+    "ville": "Tours",
+    "lat": 47.395476,
+    "lng": 0.695848,
+    "via": "commune",
+    "departement": "37"
+  },
+  "FR.Lyon.Rue Bossuet": {
+    "ville": "Lyon",
+    "lat": 45.767905,
+    "lng": 4.851409,
+    "via": "adresse",
+    "departement": "69"
+  },
+  "Paris, FR / Frankfurt, DE": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Paris, FR / Madrid, ES / Frankfurt, DE": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Dunkerque, , France": {
+    "ville": "Dunkerque",
+    "lat": 51.028256,
+    "lng": 2.346525,
+    "via": "commune",
+    "departement": "59"
+  },
+  "BREUIL LE SEC, , France": {
+    "ville": "Breuil-le-Sec",
+    "lat": 49.374521,
+    "lng": 2.451427,
+    "via": "commune",
+    "departement": "60"
+  },
+  "ARRAS, Hauts-de-France, France": {
+    "ville": "Arras",
+    "lat": 50.287896,
+    "lng": 2.768267,
+    "via": "commune",
+    "departement": "62"
+  },
+  "Marquette-lez-lille, , France": {
+    "ville": "Marquette-lez-Lille",
+    "lat": 50.672133,
+    "lng": 3.058712,
+    "via": "commune",
+    "departement": "59"
+  },
+  "Pusignan, France / Bordeaux, France / Paris, France / Marseille, France / Toulouse, France": {
+    "ville": "Pusignan",
+    "lat": 45.754488,
+    "lng": 5.067288,
+    "via": "commune",
+    "departement": "69"
+  },
+  "Toulouse, France / Bordeaux, France / Perpignan, France / Pau, France / Biarritz, France": {
+    "ville": "Toulouse",
+    "lat": 43.604082,
+    "lng": 1.433805,
+    "via": "commune",
+    "departement": "31"
+  },
+  "Rhone, Pusignan ZAC - Ave Satolas Green / Bordeaux, France / Nantes, France / Lyon, France / Paris, France / Marseille, France / Toulouse, France / Montpellier, France / Rennes, France": {
+    "ville": "Bordeaux",
+    "lat": 44.851895,
+    "lng": -0.587877,
+    "via": "commune",
+    "departement": "33"
+  },
+  "Brest, France / Finistere, Plouzane 145 rue Rene Descartes": {
+    "ville": "Brest",
+    "lat": 48.406435,
+    "lng": -4.497736,
+    "via": "commune",
+    "departement": "29"
+  },
+  "Wambrechies": {
+    "ville": "Wambrechies",
+    "lat": 50.695971,
+    "lng": 3.046954,
+    "via": "commune",
+    "departement": "59"
+  },
+  "Dijon, Côte-d’Or, France": {
+    "ville": "Dijon",
+    "lat": 47.331953,
+    "lng": 5.033601,
+    "via": "commune",
+    "departement": "21"
+  },
+  "Villeurbanne, Rhône, France": {
+    "ville": "Villeurbanne",
+    "lat": 45.768975,
+    "lng": 4.890035,
+    "via": "commune",
+    "departement": "69"
+  },
+  "Bergerac, Dordogne, France": {
+    "ville": "Bergerac",
+    "lat": 44.85304,
+    "lng": 0.482291,
+    "via": "commune",
+    "departement": "24"
+  },
+  "Agen, Lot-et-Garonne, France; Arcachon, Gironde, France; Bergerac, Dordogne, France; Gironde, France; Mont-de-Marsan, Landes, France; Niort, Deux-Sèvres, France": {
+    "ville": "Agen",
+    "lat": 44.202304,
+    "lng": 0.631041,
+    "via": "commune",
+    "departement": "47"
+  },
+  "Gironde, France": null,
+  "Rouen, Seine-Maritime, France": {
+    "ville": "Rouen",
+    "lat": 49.440051,
+    "lng": 1.093912,
+    "via": "commune",
+    "departement": "76"
+  },
+  "Périgueux, Dordogne, France": {
+    "ville": "Périgueux",
+    "lat": 45.193072,
+    "lng": 0.711299,
+    "via": "commune",
+    "departement": "24"
+  },
+  "Andernos-les-Bains, Gironde, France": {
+    "ville": "Andernos-les-Bains",
+    "lat": 44.751412,
+    "lng": -1.083375,
+    "via": "commune",
+    "departement": "33"
+  },
+  "Lacanau, Gironde, France": {
+    "ville": "Lacanau",
+    "lat": 44.982416,
+    "lng": -1.09762,
+    "via": "commune",
+    "departement": "33"
+  },
+  "Hossegor, Landes, France": {
+    "ville": "Landes",
+    "lat": 45.995784,
+    "lng": -0.597415,
+    "via": "commune",
+    "departement": "17"
+  },
+  "Roubaix, FRA": {
+    "ville": "Roubaix",
+    "lat": 50.688454,
+    "lng": 3.183662,
+    "via": "commune",
+    "departement": "59"
+  },
+  "St Herblain, FRA": null,
+  "Strasbourg, FRA": {
+    "ville": "Strasbourg",
+    "lat": 48.579831,
+    "lng": 7.761454,
+    "via": "commune",
+    "departement": "67"
+  },
+  "Illkirch, France / Loughborough, United Kingdom / Schwerte, Germany / Gothenburg, Sweden / Madrid, Spain / Landsmeer, Netherlands": null,
+  "Berlin; London; Paris": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "UK - Remote / Spain - Remote / France - Remote / Ireland - Remote": null,
+  "Avèze": null,
+  "Barenton": {
+    "ville": "Barenton",
+    "lat": 48.602702,
+    "lng": -0.846939,
+    "via": "commune",
+    "departement": "50"
+  },
+  "Carcassonne": {
+    "ville": "Carcassonne",
+    "lat": 43.206781,
+    "lng": 2.349415,
+    "via": "commune",
+    "departement": "11"
+  },
+  "Espalion": {
+    "ville": "Espalion",
+    "lat": 44.520149,
+    "lng": 2.759094,
+    "via": "commune",
+    "departement": "12"
+  },
+  "Messei": {
+    "ville": "Messei",
+    "lat": 48.714753,
+    "lng": -0.538047,
+    "via": "commune",
+    "departement": "61"
+  },
+  "Pleaux": {
+    "ville": "Pleaux",
+    "lat": 45.144959,
+    "lng": 2.246668,
+    "via": "commune",
+    "departement": "15"
+  },
+  "Rignac": {
+    "ville": "Rignac",
+    "lat": 44.403643,
+    "lng": 2.292693,
+    "via": "adresse",
+    "departement": "12"
+  },
+  "Sées": {
+    "ville": "Sées",
+    "lat": 48.605531,
+    "lng": 0.166549,
+    "via": "commune",
+    "departement": "61"
+  },
+  "Claye-Souilly": {
+    "ville": "Claye-Souilly",
+    "lat": 48.943181,
+    "lng": 2.668776,
+    "via": "commune",
+    "departement": "77"
+  },
+  "Hautmont": {
+    "ville": "Hautmont",
+    "lat": 50.252233,
+    "lng": 3.921316,
+    "via": "commune",
+    "departement": "59"
+  },
+  "Breuilpont / BREUILPONT - BRE1": {
+    "ville": "Breuilpont",
+    "lat": 48.959526,
+    "lng": 1.429177,
+    "via": "commune",
+    "departement": "27"
+  },
+  "Créteil / Biot / Tuam / Bietigheim-Bissingen": {
+    "ville": "Créteil",
+    "lat": 48.784506,
+    "lng": 2.452976,
+    "via": "commune",
+    "departement": "94"
+  },
+  "EMEA > FRA > Paris > Paris Etienne - NAP": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "EMEA > FRA > Paris > 25-27 rue du Mail": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "GBR - London, Canada Square / NLD - Alphen Aan Den Rijn / DEU - Garching / FRA - Rue des Messageries / ITA - Milan, Via Bisceglie": null,
+  "France, Paris / Italy, Milan": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Noyal sur Vilaine": {
+    "ville": "Noyal-sur-Vilaine",
+    "lat": 48.091392,
+    "lng": -1.501132,
+    "via": "commune",
+    "departement": "35"
   }
 }
