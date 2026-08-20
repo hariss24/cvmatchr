@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, cleanup, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import FormulaireConnexion from './FormulaireConnexion';
@@ -20,6 +20,7 @@ describe('FormulaireConnexion', () => {
   afterEach(() => cleanup());
 
   beforeEach(() => {
+    window.history.replaceState({}, '', '/connexion');
     useAuthStore.setState({
       user: null, session: null, isLoading: false, isConfigured: true,
       signInWithEmail: vi.fn().mockResolvedValue(undefined),
@@ -134,10 +135,87 @@ describe('FormulaireConnexion', () => {
     expect(await screen.findByLabelText(/code reçu par email/i)).toBeInTheDocument();
   });
 
+  // Retour de /auth/callback : le lien a bien confirmé l'adresse côté serveur,
+  // mais la session ne pouvait pas s'ouvrir dans CE navigateur. Sans message,
+  // la personne se retrouvait devant un formulaire de connexion muet.
+  it("explique pourquoi la session ne s'est pas ouverte sur cet appareil", async () => {
+    window.history.replaceState({}, '', '/connexion?erreur=session_impossible');
+    render(<FormulaireConnexion />);
+    expect(await screen.findByRole('alert'))
+      .toHaveTextContent(/n'a pas pu s'ouvrir sur cet appareil/i);
+  });
+
   it('ne demande pas de mot de passe pour une réinitialisation', async () => {
     render(<FormulaireConnexion />);
     fireEvent.click(screen.getByRole('button', { name: /mot de passe oublié/i }));
     expect(screen.queryByLabelText(/^mot de passe$/i)).toBeNull();
     expect(screen.getByLabelText(/adresse email/i)).toBeInTheDocument();
+  });
+});
+
+describe('FormulaireConnexion — déblocage automatique', () => {
+  afterEach(() => { vi.useRealTimers(); cleanup(); });
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    window.history.replaceState({}, '', '/connexion');
+    useAuthStore.setState({
+      user: null, session: null, isLoading: false, isConfigured: true,
+      signUpWithEmail: vi.fn().mockResolvedValue(undefined),
+    });
+  });
+
+  /** Amène le formulaire à l'écran de saisie du code, sous timers simulés. */
+  async function jusquAuCode() {
+    render(<FormulaireConnexion />);
+    fireEvent.click(screen.getByRole('button', { name: /créer un compte/i }));
+    fireEvent.change(screen.getByLabelText(/adresse email/i), {
+      target: { value: 'marc@test.fr' },
+    });
+    fireEvent.change(screen.getByLabelText(/^mot de passe$/i), {
+      target: { value: 'motdepasse' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /^créer mon compte$/i }));
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+    expect(screen.getByLabelText(/code reçu par email/i)).toBeInTheDocument();
+  }
+
+  // Le cas visé : la personne clique le lien depuis son téléphone. Cet onglet
+  // ne reçoit rien — sans cette relance il resterait bloqué indéfiniment.
+  it("retente la connexion tant que l'adresse n'est pas confirmée", async () => {
+    const connexion = vi.fn().mockRejectedValue(new Error('Email not confirmed'));
+    useAuthStore.setState({ signInWithEmail: connexion });
+    await jusquAuCode();
+
+    expect(connexion).not.toHaveBeenCalled();
+    await act(async () => { await vi.advanceTimersByTimeAsync(15_000); });
+    expect(connexion).toHaveBeenCalledWith('marc@test.fr', 'motdepasse');
+    await act(async () => { await vi.advanceTimersByTimeAsync(15_000); });
+    expect(connexion).toHaveBeenCalledTimes(2);
+  });
+
+  // Supabase plafonne les tentatives à 30 par 5 minutes ET PAR IP : une boucle
+  // sans fin épuiserait le quota de tout le foyer ou de tout le bureau.
+  it('cesse de relancer au bout de cinq minutes', async () => {
+    const connexion = vi.fn().mockRejectedValue(new Error('Email not confirmed'));
+    useAuthStore.setState({ signInWithEmail: connexion });
+    await jusquAuCode();
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(5 * 60_000); });
+    const apresCinqMinutes = connexion.mock.calls.length;
+    expect(apresCinqMinutes).toBeLessThanOrEqual(20);
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(5 * 60_000); });
+    expect(connexion).toHaveBeenCalledTimes(apresCinqMinutes);
+  });
+
+  it('ne relance pas depuis les autres écrans', async () => {
+    const connexion = vi.fn().mockRejectedValue(new Error('Email not confirmed'));
+    useAuthStore.setState({ signInWithEmail: connexion });
+    render(<FormulaireConnexion />);
+    fireEvent.click(screen.getByRole('button', { name: /mot de passe oublié/i }));
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(60_000); });
+    expect(connexion).not.toHaveBeenCalled();
   });
 });

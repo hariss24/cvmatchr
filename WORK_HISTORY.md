@@ -15,7 +15,7 @@
 
 *(une seule ligne, écrasée à chaque mise à jour — pas un historique)*
 
-**Au 19/08/2026 — Chantier A (Connexion par email et mot de passe) terminé.** Exécution complète du plan `docs/superpowers/plans/2026-08-19-connexion-email.md` (Tasks 1 à 9). Base Supabase capable de reconnaître les comptes Google (migration 0005), traduction des erreurs en français et validation des champs (8 car. min), route API sous rate limit (`/api/auth/methode`), 5 méthodes dans `authStore`, page `/connexion` à 4 états gérant les deux chemins exclusifs (Google / email) avec redirection intelligente, page `/connexion/nouveau-mot-de-passe`, menus topbar/mobile pointant vers `/connexion`, et suite e2e Playwright validée (44/44 tests verts).
+**Au 20/08/2026 — Chantier A (Connexion par email et mot de passe) terminé, réglages Supabase/Resend en cours côté humain.** Exécution complète du plan `docs/superpowers/plans/2026-08-19-connexion-email.md` (Tasks 1 à 9). Base Supabase capable de reconnaître les comptes Google (migration 0005), traduction des erreurs en français et validation des champs (8 car. min), route API sous rate limit (`/api/auth/methode`), 5 méthodes dans `authStore`, page `/connexion` à 4 états gérant les deux chemins exclusifs (Google / email) avec redirection intelligente, page `/connexion/nouveau-mot-de-passe`, menus topbar/mobile pointant vers `/connexion`, et suite e2e Playwright validée (44/44 tests verts).
 
 ---
 
@@ -40,6 +40,13 @@
 ---
 
 ## Journal
+
+### 2026-08-20 : Connexion email — déblocage automatique de l'onglet en attente
+
+- **Quoi :** L'écran de saisie du code retente la connexion en arrière-plan toutes les 15 s pendant 5 minutes, avec les identifiants déjà saisis ; dès que l'adresse est confirmée, Supabase accepte et l'effet existant sur `user` redirige. `/auth/callback` renvoie désormais vers `/connexion?erreur=session_impossible` au lieu de `/?auth_error=callback_failed`, et ce motif est affiché.
+- **Pourquoi :** Le gabarit de courriel contient à la fois le lien et le code. Or le lien n'ouvre une session QUE dans le navigateur de l'inscription (clé de vérification PKCE) : cliquer depuis son téléphone confirmait l'adresse tout en laissant l'onglet d'origine figé, et le code devenait inutilisable (même jeton). Le paramètre `auth_error` n'était de surcroît affiché nulle part. Intervalle à 15 s et non 5 : Supabase plafonne les tentatives à 30 par 5 min **et par IP**.
+- **Fichiers touchés :** `web/src/components/auth/FormulaireConnexion.tsx`, `web/src/components/auth/FormulaireConnexion.test.tsx`, `web/src/app/auth/callback/route.ts`, `web/src/app/auth/callback/route.test.ts`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `tsc` OK, `lint` 0 erreur / 1 warning préexistant (`<img>` dans `FormEditor.tsx:168`), `vitest` 885/885, `build` OK, `playwright` 44/44.
 
 ### 2026-08-19 : Connexion email — Task 9 : test e2e de bout en bout et livraison du chantier A
 

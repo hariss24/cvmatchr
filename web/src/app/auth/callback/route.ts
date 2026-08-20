@@ -42,7 +42,12 @@ export async function GET(request: Request): Promise<Response> {
 
   const { error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
-    return NextResponse.redirect(`${origin}/?auth_error=callback_failed`);
+    // Cas de loin le plus fréquent : le lien du courriel a été ouvert dans un
+    // autre navigateur que celui de l'inscription, où la clé de vérification
+    // n'existe pas. L'adresse VIENT pourtant d'être confirmée par ce même lien
+    // — renvoyer sur l'accueil déconnecté, sans un mot, laissait la personne
+    // croire à un échec complet. On la ramène là où elle peut agir.
+    return NextResponse.redirect(`${origin}/connexion?erreur=session_impossible`);
   }
   return NextResponse.redirect(`${origin}${next}`);
 }

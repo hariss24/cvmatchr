@@ -39,6 +39,51 @@ export default function FormulaireConnexion() {
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
 
+  // Retour de /auth/callback quand la session n'a pas pu s'ouvrir ici. On lit
+  // `window.location` et non `useSearchParams` : ce dernier impose une
+  // frontière Suspense au rendu statique, pour une valeur dont on n'a besoin
+  // qu'une fois, côté navigateur.
+  //
+  // `setErreur` dans un effet est signalé par ESLint, à raison en général. Ici
+  // c'est le seul endroit sûr : initialiser l'état avec la valeur de l'URL la
+  // rendrait absente du rendu serveur et présente au client, soit exactement la
+  // divergence d'hydratation que React refuse.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("erreur") === "session_impossible") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setErreur(
+        "La session n'a pas pu s'ouvrir sur cet appareil. Si vous venez de confirmer votre adresse, connectez-vous ci-dessous.",
+      );
+    }
+  }, []);
+
+  // Déblocage automatique de cet onglet. Le lien du courriel ne peut ouvrir une
+  // session QUE dans le navigateur où l'inscription a eu lieu : la clé de
+  // vérification qu'il faut lui associer n'existe nulle part ailleurs. Quelqu'un
+  // qui clique depuis son téléphone confirme donc bien son adresse, mais cette
+  // page-ci ne reçoit rien et resterait figée sur la saisie du code.
+  //
+  // On retente donc la connexion en arrière-plan avec les identifiants que la
+  // personne vient de saisir : Supabase la refuse tant que l'adresse n'est pas
+  // confirmée, et l'accepte à la seconde où elle l'est. L'effet sur `user`
+  // ci-dessus se charge alors de la redirection.
+  //
+  // 15 s et non 5 : Supabase plafonne les tentatives à 30 par tranche de cinq
+  // minutes ET PAR ADRESSE IP. Plus vif, on épuiserait le quota de toutes les
+  // personnes derrière la même box — y compris celles qui essaient juste de se
+  // connecter.
+  useEffect(() => {
+    if (etape !== "code" || !motDePasse) return;
+    const fin = Date.now() + 5 * 60_000;
+    const minuteur = setInterval(() => {
+      if (Date.now() >= fin) return clearInterval(minuteur);
+      // L'échec est le cas NORMAL ici (« Email not confirmed ») : on l'ignore
+      // en silence, sinon une erreur surgirait à l'écran toutes les 15 s.
+      signInWithEmail(email.trim(), motDePasse).catch(() => {});
+    }, 15_000);
+    return () => clearInterval(minuteur);
+  }, [etape, email, motDePasse, signInWithEmail]);
+
   /**
    * Appelée UNIQUEMENT après un échec de mot de passe (cf. la route
    * /api/auth/methode). Un échec réseau vaut « je ne sais pas » : on retombe
@@ -161,8 +206,10 @@ export default function FormulaireConnexion() {
         {etape === "code" ? (
           <>
             <p className="connexion__aide">
-              Un code à 6 chiffres vient d&apos;être envoyé à {email}. Saisissez-le
-              ici pour rester sur cette page — votre CV en cours n&apos;est pas perdu.
+              Un email vient d&apos;être envoyé à {email}. Cliquez sur le lien
+              qu&apos;il contient, ou saisissez le code ci-dessous. Cette page se
+              débloque d&apos;elle-même dès que votre adresse est confirmée, même
+              depuis un autre appareil.
             </p>
             <label className="connexion__champ">
               Code reçu par email
