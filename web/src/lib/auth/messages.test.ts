@@ -27,6 +27,21 @@ describe('messageErreurAuth', () => {
       .toBe('Trop de tentatives. Réessayez dans quelques minutes.');
   });
 
+  // Rencontré en production le 20/08 : SMTP mal configuré côté Supabase. La
+  // personne lisait « La connexion a échoué. Détail : Error sending
+  // confirmation email » — une phrase anglaise qui la désigne, elle, comme
+  // fautive, alors que rien de ce qu'elle peut faire n'y changera quoi que ce
+  // soit.
+  it("distingue une panne d'envoi d'un refus d'identifiants", () => {
+    expect(messageErreurAuth('Error sending confirmation email'))
+      .toBe("L'envoi de l'email a échoué. Le problème vient de nous, pas de vous : réessayez dans quelques minutes.");
+  });
+
+  it("couvre aussi l'envoi du lien de réinitialisation", () => {
+    expect(messageErreurAuth('Error sending recovery email'))
+      .toBe("L'envoi de l'email a échoué. Le problème vient de nous, pas de vous : réessayez dans quelques minutes.");
+  });
+
   it('signale un code périmé', () => {
     expect(messageErreurAuth('Token has expired or is invalid'))
       .toBe("Ce code n'est plus valable. Demandez-en un nouveau.");

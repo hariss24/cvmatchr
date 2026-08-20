@@ -10,6 +10,12 @@ const TRADUCTIONS: ReadonlyArray<{ motif: string; texte: string }> = [
   { motif: 'password should be at least', texte: 'Le mot de passe doit faire au moins 8 caractères.' },
   { motif: 'email rate limit exceeded', texte: 'Trop de tentatives. Réessayez dans quelques minutes.' },
   { motif: 'over email send rate limit', texte: 'Trop de tentatives. Réessayez dans quelques minutes.' },
+  // Panne d'expédition côté serveur (SMTP absent, refusé, ou quota atteint) :
+  // « Error sending confirmation email », « ... recovery email », « ... magic
+  // link ». Rien de ce que la personne saisit n'y change quoi que ce soit — le
+  // message doit donc la décharger explicitement, sinon elle recommence en
+  // boucle en croyant s'être trompée.
+  { motif: 'error sending', texte: "L'envoi de l'email a échoué. Le problème vient de nous, pas de vous : réessayez dans quelques minutes." },
   { motif: 'token has expired or is invalid', texte: "Ce code n'est plus valable. Demandez-en un nouveau." },
   { motif: 'email not confirmed', texte: "Confirmez d'abord votre adresse : le code vous a été envoyé par email." },
 ];
