@@ -32,13 +32,19 @@ export default function PageCompte() {
   const [mdpAdresse, setMdpAdresse] = useState("");
   const [erreurAdresse, setErreurAdresse] = useState<string | null>(null);
   const [enCoursAdresse, setEnCoursAdresse] = useState(false);
+  const [supprime, setSupprime] = useState(false);
 
   // Cette page n'a aucun sens sans compte. `isLoading` est attendu : la session
   // revient d'elle-même au chargement, rediriger avant reviendrait à éjecter
   // quelqu'un de parfaitement connecté.
+  // ⚠️ `supprime` court-circuite la garde. Sans lui, la suppression déclenche
+  // deux redirections concurrentes — celle qu'on demande vers l'accueil et
+  // celle-ci, que la disparition de `user` réveille — et la destination
+  // dépendait de laquelle arrivait la première.
   useEffect(() => {
+    if (supprime) return;
     if (!isLoading && !user) router.replace("/connexion");
-  }, [user, isLoading, router]);
+  }, [user, isLoading, router, supprime]);
 
   if (!user) return null;
 
@@ -113,11 +119,13 @@ export default function PageCompte() {
     );
     if (saisie?.trim() !== "SUPPRIMER") return;
 
+    setSupprime(true);
     try {
       await deleteAccount();
       toast("Votre compte a été supprimé.", "success");
-      router.push("/");
+      router.replace("/");
     } catch (err) {
+      setSupprime(false);
       toast((err as Error).message ?? "Suppression impossible.", "error");
     }
   }

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { User, Session } from '@supabase/supabase-js';
 import { createBrowserClientHelper } from '@/lib/supabase/client';
+import { MESSAGES_INTERNES } from '@/lib/auth/messages';
 import { reprendreDonneesLocales } from '@/lib/storage/reprise';
 import { cacheClear } from '@/lib/storage/sessionCache';
 import { db } from '@/lib/storage/db';
@@ -133,10 +134,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     const supabase = createBrowserClientHelper();
     if (!supabase) return;
     const email = useAuthStore.getState().user?.email;
-    if (!email) throw new Error('Connectez-vous pour changer votre mot de passe.');
+    if (!email) throw new Error(MESSAGES_INTERNES.sessionRequiseMotDePasse);
 
     const { error: refus } = await supabase.auth.signInWithPassword({ email, password: ancien });
-    if (refus) throw new Error('Mot de passe actuel incorrect.');
+    if (refus) throw new Error(MESSAGES_INTERNES.motDePasseActuelFaux);
 
     const { error } = await supabase.auth.updateUser({ password: nouveau });
     if (error) throw error;
@@ -153,13 +154,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     const supabase = createBrowserClientHelper();
     if (!supabase) return;
     const email = useAuthStore.getState().user?.email;
-    if (!email) throw new Error('Connectez-vous pour changer votre adresse.');
+    if (!email) throw new Error(MESSAGES_INTERNES.sessionRequiseAdresse);
     if (nouvelle.toLowerCase() === email.toLowerCase()) {
-      throw new Error('Cette adresse est déjà celle du compte.');
+      throw new Error(MESSAGES_INTERNES.adresseInchangee);
     }
 
     const { error: refus } = await supabase.auth.signInWithPassword({ email, password: motDePasse });
-    if (refus) throw new Error('Mot de passe actuel incorrect.');
+    if (refus) throw new Error(MESSAGES_INTERNES.motDePasseActuelFaux);
 
     const { error } = await supabase.auth.updateUser(
       { email: nouvelle },
@@ -187,7 +188,15 @@ export const useAuthStore = create<AuthState>((set) => ({
       const corps = await reponse.json().catch(() => ({}));
       throw new Error(corps.error ?? 'Suppression impossible.');
     }
-    await useAuthStore.getState().signOut();
+    // ⚠️ Le compte n'existe plus : la déconnexion parle à un serveur qui ne
+    // reconnaît plus cette session. Laisser son échec remonter afficherait
+    // « Suppression impossible » alors que tout a bien été effacé — le nettoyage
+    // local, lui, a déjà eu lieu.
+    try {
+      await useAuthStore.getState().signOut();
+    } catch {
+      set({ user: null, session: null, isLoading: false });
+    }
   },
 
   signOut: async () => {

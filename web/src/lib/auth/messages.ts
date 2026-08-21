@@ -21,6 +21,26 @@ const TRADUCTIONS: ReadonlyArray<{ motif: string; texte: string }> = [
 ];
 
 /**
+ * Messages levés par l'application elle-même — déjà en français, déjà adressés
+ * à la personne. Ils sont déclarés ici pour que `messageErreurAuth` les laisse
+ * traverser intacts : sans cela, la page « Mon compte » affichait « La
+ * connexion a échoué. Détail : Mot de passe actuel incorrect. » (constaté le
+ * 21/08), une phrase absurde là où personne ne cherchait à se connecter.
+ *
+ * ⚠️ Toute nouvelle erreur levée par `authStore` en français doit être ajoutée
+ * ici, et jamais recopiée ailleurs : c'est la comparaison à ces valeurs exactes
+ * qui les protège.
+ */
+export const MESSAGES_INTERNES = {
+  motDePasseActuelFaux: 'Mot de passe actuel incorrect.',
+  adresseInchangee: 'Cette adresse est déjà celle du compte.',
+  sessionRequiseMotDePasse: 'Connectez-vous pour changer votre mot de passe.',
+  sessionRequiseAdresse: 'Connectez-vous pour changer votre adresse.',
+} as const;
+
+const INTERNES: readonly string[] = Object.values(MESSAGES_INTERNES);
+
+/**
  * Les deux seules réponses de Supabase qu'un compte Google peut expliquer :
  * « identifiants refusés » (le compte n'a jamais eu de mot de passe) et
  * « adresse déjà prise » (elle l'est par le compte Google).
@@ -48,6 +68,8 @@ export function messageErreurAuth(brut: string, compteGoogle = false): string {
   if (compteGoogle) {
     return 'Ce compte a été créé avec Google. Utilisez le bouton Google ci-dessus.';
   }
+
+  if (INTERNES.includes(brut)) return brut;
 
   const normalise = brut.toLowerCase();
   const trouve = TRADUCTIONS.find(({ motif }) => normalise.includes(motif));

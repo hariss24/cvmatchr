@@ -41,6 +41,13 @@
 
 ## Journal
 
+### 2026-08-21 : Compte — trois négligences relevées à la relecture
+
+- **Quoi :** (1) `MESSAGES_INTERNES` dans `lib/auth/messages.ts` : les erreurs que l'application écrit elle-même traversent `messageErreurAuth` intactes, et `authStore` les tire de cette source unique. (2) Un drapeau `supprime` court-circuite la garde de `/compte` pendant la suppression. (3) La déconnexion qui suit une suppression ne peut plus faire échouer celle-ci.
+- **Pourquoi :** (1) La page « Mon compte » affichait « La connexion a échoué. Détail : Mot de passe actuel incorrect. » — nos messages français passaient dans une table conçue pour l'anglais de Supabase. (2) La disparition de `user` réveillait la redirection « pas de compte → /connexion » en même temps que celle vers l'accueil : la destination dépendait de laquelle arrivait la première. (3) Le compte n'existant plus, la déconnexion parle à un serveur qui ne reconnaît plus la session ; son échec aurait affiché « Suppression impossible » alors que tout était effacé.
+- **Fichiers touchés :** `web/src/lib/auth/messages.ts` (+ test), `web/src/state/authStore.ts`, `web/src/app/compte/page.tsx` (+ test), `WORK_HISTORY.md`.
+- **Résultat vérifs :** `tsc` OK, `lint` 0 erreur / 1 warning préexistant, `vitest` 927/927, `build` OK, `playwright` 44/44.
+
 ### 2026-08-21 : Compte — changement d'adresse email
 
 - **Quoi :** Section « Changer d'adresse email » sur `/compte`, méthode `changeEmail` dans `authStore`, type `email_change` accepté par `/auth/confirmer`, gabarit `changement-adresse.html` traduit et documenté.

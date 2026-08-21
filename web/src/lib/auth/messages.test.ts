@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { messageErreurAuth, erreurPeutVenirDeGoogle } from './messages';
+import { messageErreurAuth, erreurPeutVenirDeGoogle, MESSAGES_INTERNES } from './messages';
 
 describe('messageErreurAuth', () => {
   it('traduit un mot de passe ou un email incorrect', () => {
@@ -40,6 +40,16 @@ describe('messageErreurAuth', () => {
   it("couvre aussi l'envoi du lien de réinitialisation", () => {
     expect(messageErreurAuth('Error sending recovery email'))
       .toBe("L'envoi de l'email a échoué. Le problème vient de nous, pas de vous : réessayez dans quelques minutes.");
+  });
+
+  // Constaté le 21/08 : la page « Mon compte » lève ses propres messages, déjà
+  // en français et déjà adressés à la personne. Les faire passer par la table
+  // de traduction produisait « La connexion a échoué. Détail : Mot de passe
+  // actuel incorrect. » — une phrase absurde là où personne ne se connectait.
+  it("laisse intacts les messages que l'application écrit elle-même", () => {
+    for (const message of Object.values(MESSAGES_INTERNES)) {
+      expect(messageErreurAuth(message)).toBe(message);
+    }
   });
 
   it('signale un code périmé', () => {

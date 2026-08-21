@@ -172,6 +172,32 @@ describe('Page Mon compte', () => {
     expect(uiPrompt).toHaveBeenCalled();
   });
 
+  // Après suppression, la disparition de `user` réveille la garde « pas de
+  // compte → /connexion ». Sans court-circuit, la destination dépendait de
+  // laquelle des deux redirections arrivait la première.
+  it("mène à l'accueil après suppression, pas à la page de connexion", async () => {
+    const { rerender } = render(<PageCompte />);
+    fireEvent.click(screen.getByRole('button', { name: /^supprimer mon compte$/i }));
+    await waitFor(() => expect(useAuthStore.getState().deleteAccount).toHaveBeenCalled());
+
+    // Ce que fait vraiment la suppression : le compte disparaît de l'état.
+    useAuthStore.setState({ user: null });
+    rerender(<PageCompte />);
+
+    expect(pousser).toHaveBeenCalledWith('/');
+    expect(pousser).not.toHaveBeenCalledWith('/connexion');
+  });
+
+  it("rétablit la garde si la suppression échoue", async () => {
+    useAuthStore.setState({
+      deleteAccount: vi.fn().mockRejectedValue(new Error('Suppression indisponible.')),
+    });
+    render(<PageCompte />);
+    fireEvent.click(screen.getByRole('button', { name: /^supprimer mon compte$/i }));
+    await waitFor(() => expect(useAuthStore.getState().deleteAccount).toHaveBeenCalled());
+    expect(pousser).not.toHaveBeenCalledWith('/');
+  });
+
   it("ne supprime rien si l'avertissement est refusé", async () => {
     uiConfirm.mockResolvedValue(false);
     render(<PageCompte />);
