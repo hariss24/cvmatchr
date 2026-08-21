@@ -20,8 +20,12 @@ import { safeRedirectPath } from '@/app/auth/callback/route';
  * laisserait un lien fabriqué choisir n'importe quel flux d'authentification.
  * Seuls les deux que l'application envoie réellement sont acceptés.
  */
+const TYPES_ENVOYES = ['recovery', 'signup', 'email_change'] as const;
+
 export function typeAutorise(brut: string | null): EmailOtpType | null {
-  return brut === 'recovery' || brut === 'signup' ? brut : null;
+  return (TYPES_ENVOYES as readonly string[]).includes(brut ?? '')
+    ? (brut as EmailOtpType)
+    : null;
 }
 
 /** Derrière un proxy (Vercel), `origin` n'est pas l'hôte public. */

@@ -35,6 +35,7 @@ describe('Page Mon compte', () => {
     useAuthStore.setState({
       user: compte() as never, isLoading: false, isConfigured: true,
       changePassword: vi.fn().mockResolvedValue(undefined),
+      changeEmail: vi.fn().mockResolvedValue(undefined),
       signOutOthers: vi.fn().mockResolvedValue(undefined),
       deleteAccount: vi.fn().mockResolvedValue(undefined),
     });
@@ -113,6 +114,46 @@ describe('Page Mon compte', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/identique/i);
     expect(useAuthStore.getState().changePassword).not.toHaveBeenCalled();
+  });
+
+  it("change l'adresse en exigeant le mot de passe", async () => {
+    render(<PageCompte />);
+    fireEvent.change(screen.getByLabelText(/nouvelle adresse email/i), {
+      target: { value: 'neuf@test.fr' },
+    });
+    fireEvent.change(screen.getByLabelText(/mot de passe, pour confirmer/i), {
+      target: { value: 'motdepasse' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /envoyer les confirmations/i }));
+
+    await waitFor(() => {
+      expect(useAuthStore.getState().changeEmail)
+        .toHaveBeenCalledWith('motdepasse', 'neuf@test.fr');
+    });
+  });
+
+  it('refuse une adresse invalide sans appeler le réseau', async () => {
+    render(<PageCompte />);
+    fireEvent.change(screen.getByLabelText(/nouvelle adresse email/i), {
+      target: { value: 'pas-une-adresse' },
+    });
+    fireEvent.change(screen.getByLabelText(/mot de passe, pour confirmer/i), {
+      target: { value: 'motdepasse' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /envoyer les confirmations/i }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/n'est pas valide/i);
+    expect(useAuthStore.getState().changeEmail).not.toHaveBeenCalled();
+  });
+
+  // Un compte Google est identifié par son adresse Google : la changer ici
+  // romprait le lien, et il n'y a aucun mot de passe pour le prouver.
+  it("ne propose pas de changer l'adresse d'un compte Google", () => {
+    useAuthStore.setState({
+      user: compte({ app_metadata: { provider: 'google' } }) as never,
+    });
+    render(<PageCompte />);
+    expect(screen.queryByLabelText(/nouvelle adresse email/i)).toBeNull();
   });
 
   it('ferme les autres sessions', async () => {

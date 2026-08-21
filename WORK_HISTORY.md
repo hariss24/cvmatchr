@@ -41,6 +41,14 @@
 
 ## Journal
 
+### 2026-08-21 : Compte — changement d'adresse email
+
+- **Quoi :** Section « Changer d'adresse email » sur `/compte`, méthode `changeEmail` dans `authStore`, type `email_change` accepté par `/auth/confirmer`, gabarit `changement-adresse.html` traduit et documenté.
+- **Pourquoi :** Dernier point ouvert du § 4.1 de l'audit. Le mot de passe est exigé, comme pour le changement de mot de passe et pour une raison plus forte encore : l'adresse est ce qui permet de reprendre la main sur un compte, la détourner revient à s'en emparer définitivement (« mot de passe oublié » compris). Le lien passe par `/auth/confirmer` et non `/auth/callback`, sans quoi on réintroduisait le défaut corrigé la veille — un lien qui ne fonctionne que sur l'appareil d'origine. Le gabarit d'origine était en anglais et portait ce format de lien.
+- **Fichiers touchés :** `web/src/app/compte/page.tsx` (+ test), `web/src/state/authStore.ts` (+ test), `web/src/app/auth/confirmer/route.ts` (+ test), `web/supabase/templates/changement-adresse.html`, `web/supabase/templates/README.md`, `docs/superpowers/specs/2026-08-20-audit-parcours-compte.md`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `tsc` OK, `lint` 0 erreur / 1 warning préexistant, `vitest` 924/924, `build` OK, `playwright` 44/44.
+- **Action humaine requise :** coller `changement-adresse.html` dans Supabase (gabarit « Change Email Address ») et vérifier que « Secure email change » reste activé.
+
 ### 2026-08-20 : Page « Mon compte »
 
 - **Quoi :** Nouvelle page `/compte` (identité et méthode de connexion, changement de mot de passe avec vérification de l'ancien, déconnexion des autres appareils, suppression définitive du compte), route serveur `POST /api/compte/supprimer` sous plafond de 3/heure, trois méthodes dans `authStore` (`changePassword`, `signOutOthers`, `deleteAccount`), entrées dans le menu bureau et le menu mobile.

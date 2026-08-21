@@ -164,6 +164,41 @@ describe('AuthStore — parcours email et mot de passe', () => {
       expect(updateUser).toHaveBeenCalledWith({ password: 'nouveaumotdepasse' });
     });
 
+    // L'adresse du compte est ce qui permet d'en reprendre la main : la
+    // détourner sans preuve, c'est s'emparer du compte pour de bon.
+    it("refuse de changer l'adresse si le mot de passe est faux", async () => {
+      const { useAuthStore } = await import('./authStore');
+      useAuthStore.setState({ user: { email: 'marc@test.fr' } as never });
+      signInWithPassword.mockResolvedValue({ error: new Error('Invalid login credentials') });
+
+      await expect(useAuthStore.getState().changeEmail('faux', 'neuf@test.fr'))
+        .rejects.toThrow(/actuel incorrect/i);
+      expect(updateUser).not.toHaveBeenCalled();
+    });
+
+    it("change l'adresse une fois le mot de passe confirmé", async () => {
+      const { useAuthStore } = await import('./authStore');
+      useAuthStore.setState({ user: { email: 'marc@test.fr' } as never });
+      signInWithPassword.mockResolvedValue({ error: null });
+      updateUser.mockResolvedValue({ error: null });
+
+      await useAuthStore.getState().changeEmail('motdepasse', 'neuf@test.fr');
+      const [attributs, options] = updateUser.mock.calls[0];
+      expect(attributs).toEqual({ email: 'neuf@test.fr' });
+      // /auth/confirmer et non /auth/callback : le lien doit marcher partout.
+      expect(options.emailRedirectTo).toContain('/auth/confirmer');
+      expect(options.emailRedirectTo).toContain('next=/compte');
+    });
+
+    it("refuse l'adresse déjà en place, à la casse près", async () => {
+      const { useAuthStore } = await import('./authStore');
+      useAuthStore.setState({ user: { email: 'marc@test.fr' } as never });
+
+      await expect(useAuthStore.getState().changeEmail('motdepasse', 'MARC@test.fr'))
+        .rejects.toThrow(/déjà celle du compte/i);
+      expect(signInWithPassword).not.toHaveBeenCalled();
+    });
+
     // `others` et non `global` : fermer les autres sessions ne doit pas
     // déconnecter celle depuis laquelle on cherche justement à se protéger.
     it('ferme les autres sessions en gardant celle-ci', async () => {

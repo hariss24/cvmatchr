@@ -13,10 +13,20 @@ gabarit, coller le contenu du fichier correspondant :
 |---|---|
 | `confirmation-inscription.html` | Confirm signup |
 | `reinitialisation-mot-de-passe.html` | Reset password |
+| `changement-adresse.html` | Change Email Address |
 
-Les autres gabarits (Magic Link, Invite user, Change Email Address,
-Reauthentication) restent en anglais : l'application ne déclenche aucun d'eux
-aujourd'hui. À traduire le jour où l'un est mis en service.
+Les autres gabarits (Magic Link, Invite user, Reauthentication) restent en
+anglais : l'application ne déclenche aucun d'eux aujourd'hui. À traduire le
+jour où l'un est mis en service.
+
+## Réglage à ne pas désactiver
+
+**« Secure email change »** (Authentication → Providers → Email) doit rester
+activé. Il impose une confirmation sur l'ANCIENNE adresse en plus de la
+nouvelle. Désactivé, quelqu'un qui met la main sur une session ouverte
+détourne le compte vers sa propre adresse sans que le propriétaire soit
+prévenu — et reprend alors la main dessus par « mot de passe oublié ». Le
+gabarit `changement-adresse.html` est écrit en supposant ce réglage actif.
 
 ## Pourquoi `{{ .RedirectTo }}&token_hash=...` et non `{{ .ConfirmationURL }}`
 

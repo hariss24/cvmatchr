@@ -14,9 +14,10 @@ beforeEach(() => {
 describe('typeAutorise', () => {
   // Le type vient de l'URL, donc de l'extérieur. Le passer tel quel à Supabase
   // laisserait choisir n'importe quel flux depuis un lien fabriqué.
-  it('accepte les deux flux réellement envoyés par l\'application', () => {
+  it("accepte les trois flux réellement envoyés par l'application", () => {
     expect(typeAutorise('recovery')).toBe('recovery');
     expect(typeAutorise('signup')).toBe('signup');
+    expect(typeAutorise('email_change')).toBe('email_change');
   });
   it('refuse tout le reste', () => {
     expect(typeAutorise('magiclink')).toBeNull();

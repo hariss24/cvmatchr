@@ -97,7 +97,7 @@ réinitialisation. À faire le jour où le parcours de récupération est repris
 
 ## 4. Fonctionnalités absentes
 
-### 4.1 — Aucune page « Mon compte » — CORRIGÉ le 20/08, sauf le changement d'adresse
+### 4.1 — Aucune page « Mon compte » — CORRIGÉ
 
 `/settings` ne traite que les données locales et la clé d'API ; `/profil`
 concerne les informations qui alimentent les CV. Rien nulle part pour :
@@ -109,10 +109,12 @@ concerne les informations qui alimentent les CV. Rien nulle part pour :
 - supprimer son compte (§ 2.3).
 
 **20/08 :** page `/compte` livrée avec l'identité, le changement de mot de passe
-vérifié, la déconnexion des autres appareils et la suppression du compte. **Le
-changement d'adresse email n'y est pas** : il suppose un flux à double
-confirmation (ancienne et nouvelle adresse) et un gabarit d'email
-supplémentaire à traduire. À traiter séparément.
+vérifié, la déconnexion des autres appareils et la suppression du compte.
+
+**21/08 :** changement d'adresse email ajouté, sous la même preuve par mot de
+passe. Le gabarit `changement-adresse.html` est traduit et passe par
+`/auth/confirmer`. Repose sur « Secure email change » : les DEUX adresses
+doivent confirmer, sinon une session détournée suffit à s'emparer du compte.
 
 C'est le manque structurel de ce parcours : tout ce que l'utilisateur peut
 faire de son compte aujourd'hui, c'est s'y connecter et s'en déconnecter.

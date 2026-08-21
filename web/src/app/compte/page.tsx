@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useAuthStore } from "@/state/authStore";
 import { toast, uiConfirm, uiPrompt } from "@/state/uiStore";
 import { messageErreurAuth } from "@/lib/auth/messages";
-import { validerMotDePasse } from "@/lib/auth/validation";
+import { validerEmail, validerMotDePasse } from "@/lib/auth/validation";
 
 /**
  * Tout ce qu'une personne peut faire de son compte.
@@ -17,12 +17,21 @@ import { validerMotDePasse } from "@/lib/auth/validation";
  */
 export default function PageCompte() {
   const router = useRouter();
-  const { user, isLoading, changePassword, signOutOthers, deleteAccount } = useAuthStore();
+  const {
+    user, isLoading, changePassword, changeEmail, signOutOthers, deleteAccount,
+  } = useAuthStore();
 
   const [ancien, setAncien] = useState("");
   const [nouveau, setNouveau] = useState("");
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
+
+  // État propre au changement d'adresse : mêler les deux formulaires ferait
+  // qu'une erreur de mot de passe s'afficherait sous le mauvais.
+  const [nouvelleAdresse, setNouvelleAdresse] = useState("");
+  const [mdpAdresse, setMdpAdresse] = useState("");
+  const [erreurAdresse, setErreurAdresse] = useState<string | null>(null);
+  const [enCoursAdresse, setEnCoursAdresse] = useState(false);
 
   // Cette page n'a aucun sens sans compte. `isLoading` est attendu : la session
   // revient d'elle-même au chargement, rediriger avant reviendrait à éjecter
@@ -56,6 +65,25 @@ export default function PageCompte() {
       setErreur(messageErreurAuth((err as Error).message ?? ""));
     } finally {
       setEnCours(false);
+    }
+  }
+
+  async function changerAdresse(e: React.FormEvent) {
+    e.preventDefault();
+    setErreurAdresse(null);
+    const faute = validerEmail(nouvelleAdresse);
+    if (faute) return setErreurAdresse(faute);
+
+    setEnCoursAdresse(true);
+    try {
+      await changeEmail(mdpAdresse, nouvelleAdresse.trim());
+      toast("Vérifiez vos deux boîtes : le changement attend vos confirmations.", "success");
+      setNouvelleAdresse("");
+      setMdpAdresse("");
+    } catch (err) {
+      setErreurAdresse(messageErreurAuth((err as Error).message ?? ""));
+    } finally {
+      setEnCoursAdresse(false);
     }
   }
 
@@ -136,6 +164,41 @@ export default function PageCompte() {
               {erreur && <p className="connexion__erreur" role="alert">{erreur}</p>}
               <button type="submit" className="connexion__valider" disabled={enCours}>
                 Enregistrer le nouveau mot de passe
+              </button>
+            </form>
+          </section>
+        )}
+
+        {!viaGoogle && (
+          <section className="compte__bloc">
+            <h2 className="compte__titre">Changer d&apos;adresse email</h2>
+            <p className="compte__aide">
+              Deux messages de confirmation seront envoyés : un à votre adresse actuelle, un à
+              la nouvelle. Le changement ne prend effet qu&apos;une fois les deux liens ouverts —
+              c&apos;est ce qui empêche qu&apos;on détourne votre compte à votre insu.
+            </p>
+            <form onSubmit={changerAdresse} className="connexion__form" noValidate>
+              <label className="connexion__champ">
+                Nouvelle adresse email
+                <input
+                  type="email"
+                  autoComplete="email"
+                  value={nouvelleAdresse}
+                  onChange={(e) => setNouvelleAdresse(e.target.value)}
+                />
+              </label>
+              <label className="connexion__champ">
+                Mot de passe, pour confirmer
+                <input
+                  type="password"
+                  autoComplete="current-password"
+                  value={mdpAdresse}
+                  onChange={(e) => setMdpAdresse(e.target.value)}
+                />
+              </label>
+              {erreurAdresse && <p className="connexion__erreur" role="alert">{erreurAdresse}</p>}
+              <button type="submit" className="connexion__valider" disabled={enCoursAdresse}>
+                Envoyer les confirmations
               </button>
             </form>
           </section>

@@ -22,6 +22,8 @@ interface AuthState {
   updatePassword: (password: string) => Promise<void>;
   /** Change le mot de passe APRÈS avoir vérifié l'ancien. */
   changePassword: (ancien: string, nouveau: string) => Promise<void>;
+  /** Change l'adresse du compte APRÈS avoir vérifié le mot de passe. */
+  changeEmail: (motDePasse: string, nouvelle: string) => Promise<void>;
   /** Ferme les sessions ouvertes ailleurs, en gardant celle-ci. */
   signOutOthers: () => Promise<void>;
   deleteAccount: () => Promise<void>;
@@ -137,6 +139,32 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (refus) throw new Error('Mot de passe actuel incorrect.');
 
     const { error } = await supabase.auth.updateUser({ password: nouveau });
+    if (error) throw error;
+  },
+
+  // ⚠️ Même garde-fou que `changePassword`, et pour une raison plus forte
+  // encore : l'adresse du compte est ce qui permet de reprendre la main
+  // dessus. Quelqu'un qui la détourne sur la sienne s'empare du compte pour de
+  // bon, mot de passe oublié compris.
+  //
+  // ⚠️ `emailRedirectTo` pointe vers /auth/confirmer, jamais /auth/callback :
+  // le lien doit fonctionner depuis n'importe quel appareil.
+  changeEmail: async (motDePasse, nouvelle) => {
+    const supabase = createBrowserClientHelper();
+    if (!supabase) return;
+    const email = useAuthStore.getState().user?.email;
+    if (!email) throw new Error('Connectez-vous pour changer votre adresse.');
+    if (nouvelle.toLowerCase() === email.toLowerCase()) {
+      throw new Error('Cette adresse est déjà celle du compte.');
+    }
+
+    const { error: refus } = await supabase.auth.signInWithPassword({ email, password: motDePasse });
+    if (refus) throw new Error('Mot de passe actuel incorrect.');
+
+    const { error } = await supabase.auth.updateUser(
+      { email: nouvelle },
+      { emailRedirectTo: `${window.location.origin}/auth/confirmer?next=/compte` },
+    );
     if (error) throw error;
   },
 
