@@ -20160,5 +20160,1088 @@
     "lng": -1.501132,
     "via": "commune",
     "departement": "35"
+  },
+  "Prague, Praha, Czechia / Helsinki, Uusimaa, Finland / Vaesteras, Sweden / Krakow, Lesser Poland, Poland / Sesto San Giovanni, Milano, Italy / Gilching, Bavaria, Germany / Friedberg, Hesse, Germany / Amsterdam, North Holland, Netherlands / Milton Keynes, Buckinghamshire, United Kingdom / Cergy Pontoise, Val-d'Oise, France": {
+    "ville": "Hesse",
+    "lat": 48.693875,
+    "lng": 7.046085,
+    "via": "commune",
+    "departement": "57"
+  },
+  "London / Dublin / Warsaw / Paris / Berlin": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Rouen, Normandie, France": {
+    "ville": "Rouen",
+    "lat": 49.440051,
+    "lng": 1.093912,
+    "via": "commune",
+    "departement": "76"
+  },
+  "Dumbarton, UK / Madrid / Moerdijk / Brétigny-sur-Orge 91 / Lyon": {
+    "ville": "Brétigny-sur-Orge",
+    "lat": 48.603562,
+    "lng": 2.296311,
+    "via": "commune",
+    "departement": "91"
+  },
+  "Italy-Milan / France-Dahlia / Spain-Barcelona / UK-Cheadle": null,
+  "France, Villeneuve sur Yonne": {
+    "ville": "Villeneuve-sur-Yonne",
+    "lat": 48.081861,
+    "lng": 3.308209,
+    "via": "commune",
+    "departement": "89"
+  },
+  "Blagnac (Airbus Protect)": {
+    "ville": "Blagnac",
+    "lat": 43.63735,
+    "lng": 1.38326,
+    "via": "commune",
+    "departement": "31"
+  },
+  "FC Vitrolles": null,
+  "TOULOUSE 02": {
+    "ville": "Toulouse",
+    "lat": 43.604082,
+    "lng": 1.433805,
+    "via": "commune",
+    "departement": "31"
+  },
+  "MEYLAN 01": {
+    "ville": "Meylan",
+    "lat": 45.215013,
+    "lng": 5.780514,
+    "via": "commune",
+    "departement": "38"
+  },
+  "Austria-Remote / France-Remote / Switzerland-Remote": null,
+  "FRA - Concarneau - D346": {
+    "ville": "Concarneau",
+    "lat": 47.891735,
+    "lng": -3.896018,
+    "via": "commune",
+    "departement": "29"
+  },
+  "France, Paris; France, Remote": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "France - Paris Opera Demo Store": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Nantes, Pays de la Loire Region, France": {
+    "ville": "Nantes",
+    "lat": 47.239367,
+    "lng": -1.555335,
+    "via": "commune",
+    "departement": "44"
+  },
+  "Chateau-Thierry : 18 C avenue de l'Europe - 02400": {
+    "ville": "Château-Thierry",
+    "lat": 49.050003,
+    "lng": 3.383835,
+    "via": "code postal",
+    "departement": "02"
+  },
+  "VAUX-SUR-MER (17)": {
+    "ville": "Vaux-sur-Mer",
+    "lat": 45.643092,
+    "lng": -1.058948,
+    "via": "commune",
+    "departement": "17"
+  },
+  "SOCHAUX (25)": {
+    "ville": "Sochaux",
+    "lat": 47.515475,
+    "lng": 6.828345,
+    "via": "commune",
+    "departement": "25"
+  },
+  "CLERMONT-FERRAND PARDIEU (63)": {
+    "ville": "Clermont-Ferrand",
+    "lat": 45.786671,
+    "lng": 3.107055,
+    "via": "commune",
+    "departement": "63"
+  },
+  "Remote -  Masovian, Poland / (HEU) Home Based HEU UK / (HEU) Home Based France / (HEU) Home Based Germany / (HEU) Brussels": null,
+  "St. Maurice-Val de Marne-France": null,
+  "Homebased - France": null,
+  "Toute France": null,
+  "EUROMASTER SAINT HERBLAIN / Toute France": {
+    "ville": "Saint-Herblain",
+    "lat": 47.227082,
+    "lng": -1.625284,
+    "via": "commune",
+    "departement": "44"
+  },
+  "Montbonnot": null,
+  "Epinal": {
+    "ville": "Épinal",
+    "lat": 48.170226,
+    "lng": 6.484892,
+    "via": "commune",
+    "departement": "88"
+  },
+  "Boulogne Billancourt": {
+    "ville": "Boulogne-Billancourt",
+    "lat": 48.837799,
+    "lng": 2.243202,
+    "via": "commune",
+    "departement": "92"
+  },
+  "Montceau-Les-Mines": {
+    "ville": "Montceau-les-Mines",
+    "lat": 46.676942,
+    "lng": 4.358337,
+    "via": "commune",
+    "departement": "71"
+  },
+  "Avallon": {
+    "ville": "Avallon",
+    "lat": 47.484856,
+    "lng": 3.917279,
+    "via": "commune",
+    "departement": "89"
+  },
+  "Clermont-Ferrand / Paris Intramuros - Trocadero": {
+    "ville": "Clermont-Ferrand",
+    "lat": 45.786671,
+    "lng": 3.107055,
+    "via": "commune",
+    "departement": "63"
+  },
+  "Roanne": {
+    "ville": "Roanne",
+    "lat": 46.043412,
+    "lng": 4.072015,
+    "via": "commune",
+    "departement": "42"
+  },
+  "EUROMASTER ILLZACH MODENHEIM": {
+    "ville": "Illzach",
+    "lat": 47.780071,
+    "lng": 7.349529,
+    "via": "adresse",
+    "departement": "68"
+  },
+  "EUROMASTER CARQUEFOU": {
+    "ville": "Carquefou",
+    "lat": 47.280355,
+    "lng": -1.507664,
+    "via": "adresse",
+    "departement": "44"
+  },
+  "EUROMASTER MONTLUCON": {
+    "ville": "Montluçon",
+    "lat": 46.342307,
+    "lng": 2.604952,
+    "via": "commune",
+    "departement": "03"
+  },
+  "EUROMASTER DIJON ST APO": {
+    "ville": "Dijon",
+    "lat": 47.331953,
+    "lng": 5.033601,
+    "via": "commune",
+    "departement": "21"
+  },
+  "EUROMASTER STRASBOURG": {
+    "ville": "Strasbourg",
+    "lat": 48.579831,
+    "lng": 7.761454,
+    "via": "commune",
+    "departement": "67"
+  },
+  "EUROMASTER SAINTES": {
+    "ville": "Saintes",
+    "lat": 45.748804,
+    "lng": -0.647217,
+    "via": "commune",
+    "departement": "17"
+  },
+  "EUROMASTER THOUARS VL": {
+    "ville": "Thouars",
+    "lat": 46.981613,
+    "lng": -0.233224,
+    "via": "commune",
+    "departement": "79"
+  },
+  "EUROMASTER CHALON SUR SAONE": {
+    "ville": "Chalon-sur-Saône",
+    "lat": 46.7917,
+    "lng": 4.845526,
+    "via": "commune",
+    "departement": "71"
+  },
+  "EUROMASTER LONGWY": {
+    "ville": "Longwy",
+    "lat": 49.527665,
+    "lng": 5.776856,
+    "via": "adresse",
+    "departement": "54"
+  },
+  "EUROMASTER  ST ALBAN LEYSSE": {
+    "ville": "Alban",
+    "lat": 43.886901,
+    "lng": 2.458798,
+    "via": "commune",
+    "departement": "81"
+  },
+  "EUROMASTER MONTELIMAR VI": {
+    "ville": "Montélimar",
+    "lat": 44.553424,
+    "lng": 4.745639,
+    "via": "commune",
+    "departement": "26"
+  },
+  "EUROMASTER VITOT LE NEUBOURG": {
+    "ville": "Le Neubourg",
+    "lat": 49.157032,
+    "lng": 0.904073,
+    "via": "adresse",
+    "departement": "27"
+  },
+  "EUROMASTER LANESTER": {
+    "ville": "Lanester",
+    "lat": 47.759115,
+    "lng": -3.343374,
+    "via": "adresse",
+    "departement": "56"
+  },
+  "EUROMASTER RENNES SERVIGNE / Vannes": {
+    "ville": "Vannes",
+    "lat": 47.659971,
+    "lng": -2.752192,
+    "via": "commune",
+    "departement": "56"
+  },
+  "EUROMASTER NICE MONTEL": {
+    "ville": "Nice",
+    "lat": 43.71273,
+    "lng": 7.255313,
+    "via": "commune",
+    "departement": "06"
+  },
+  "EUROMASTER LESQUIN": {
+    "ville": "Lesquin",
+    "lat": 50.58776,
+    "lng": 3.105336,
+    "via": "adresse",
+    "departement": "59"
+  },
+  "EUROMASTER SARREBOURG": {
+    "ville": "Sarrebourg",
+    "lat": 48.736347,
+    "lng": 7.053883,
+    "via": "commune",
+    "departement": "57"
+  },
+  "EUROMASTER ARGANCY": {
+    "ville": "Argancy",
+    "lat": 49.19716,
+    "lng": 6.203234,
+    "via": "commune",
+    "departement": "57"
+  },
+  "EUROMASTER LUDRES": {
+    "ville": "Ludres",
+    "lat": 48.618012,
+    "lng": 6.177712,
+    "via": "commune",
+    "departement": "54"
+  },
+  "EUROMASTER  SALAISE": null,
+  "EUROMASTER RENNES SERVIGNE / Nantes": {
+    "ville": "Nantes",
+    "lat": 47.239367,
+    "lng": -1.555335,
+    "via": "commune",
+    "departement": "44"
+  },
+  "EUROMASTER POISSY": {
+    "ville": "Poissy",
+    "lat": 48.931115,
+    "lng": 2.048855,
+    "via": "adresse",
+    "departement": "78"
+  },
+  "EUROMASTER HALLENNES": null,
+  "EUROMASTER TOULON SUR ALLIER": {
+    "ville": "Toulon-sur-Allier",
+    "lat": 46.519568,
+    "lng": 3.356768,
+    "via": "commune",
+    "departement": "03"
+  },
+  "EUROMASTER REIMS": {
+    "ville": "Reims",
+    "lat": 49.250948,
+    "lng": 4.055595,
+    "via": "commune",
+    "departement": "51"
+  },
+  "EUROMASTER ILLZACH VI": {
+    "ville": "Illzach",
+    "lat": 47.776,
+    "lng": 7.361973,
+    "via": "commune",
+    "departement": "68"
+  },
+  "EUROMASTER LE COTEAU": null,
+  "EUROMASTER AUBAGNE": {
+    "ville": "Aubagne",
+    "lat": 43.301892,
+    "lng": 5.563888,
+    "via": "commune",
+    "departement": "13"
+  },
+  "EUROMASTER SAINT MARCEL": null,
+  "EUROMASTER SAINT HERBLAIN": {
+    "ville": "Saint-Herblain",
+    "lat": 47.227082,
+    "lng": -1.625284,
+    "via": "commune",
+    "departement": "44"
+  },
+  "EUROMASTER NANTERRE": {
+    "ville": "Nanterre",
+    "lat": 48.898095,
+    "lng": 2.202314,
+    "via": "commune",
+    "departement": "92"
+  },
+  "EUROMASTER ANGOULEME": {
+    "ville": "Angoulême",
+    "lat": 45.644105,
+    "lng": 0.148008,
+    "via": "commune",
+    "departement": "16"
+  },
+  "EUROMASTER PIERRELAYE": {
+    "ville": "Pierrelaye",
+    "lat": 49.016669,
+    "lng": 2.162316,
+    "via": "commune",
+    "departement": "95"
+  },
+  "EUROMASTER LES PONTS DE CE": {
+    "ville": "Les Ponts-de-Cé",
+    "lat": 47.42928,
+    "lng": -0.521967,
+    "via": "commune",
+    "departement": "49"
+  },
+  "EUROMASTER CGO DIJON": {
+    "ville": "Dijon",
+    "lat": 47.331953,
+    "lng": 5.033601,
+    "via": "commune",
+    "departement": "21"
+  },
+  "EUROMASTER SIX FOURS PLAGES": null,
+  "EUROMASTER LE PONTET": null,
+  "EUROMASTER LAVELANET": {
+    "ville": "Lavelanet",
+    "lat": 42.931748,
+    "lng": 1.850886,
+    "via": "commune",
+    "departement": "09"
+  },
+  "EUROMASTER SABLE SUR SARTHE": {
+    "ville": "Sablé-sur-Sarthe",
+    "lat": 47.839167,
+    "lng": -0.338763,
+    "via": "commune",
+    "departement": "72"
+  },
+  "EUROMASTER CAUDAN / EUROMASTER LANDERNEAU": {
+    "ville": "Caudan",
+    "lat": 47.791898,
+    "lng": -3.353107,
+    "via": "adresse",
+    "departement": "56"
+  },
+  "EUROMASTER LE HAVRE": null,
+  "EUROMASTER GONFREVILLE ORCHER": {
+    "ville": "Gonfreville",
+    "lat": 49.23038,
+    "lng": -1.410697,
+    "via": "commune",
+    "departement": "50"
+  },
+  "EUROMASTER ST NABORD / EUROMASTER GOLBEY": {
+    "ville": "Golbey",
+    "lat": 48.196392,
+    "lng": 6.428957,
+    "via": "commune",
+    "departement": "88"
+  },
+  "EUROMASTER PLAISIR": {
+    "ville": "Plaisir",
+    "lat": 48.812226,
+    "lng": 1.946353,
+    "via": "commune",
+    "departement": "78"
+  },
+  "EUROMASTER DARDILLY": {
+    "ville": "Dardilly",
+    "lat": 45.81573,
+    "lng": 4.74933,
+    "via": "commune",
+    "departement": "69"
+  },
+  "EUROMASTER MASSY CORA VL": null,
+  "EUROMASTER CESSON SEVIGNE": {
+    "ville": "Cesson-Sévigné",
+    "lat": 48.123772,
+    "lng": -1.596972,
+    "via": "commune",
+    "departement": "35"
+  },
+  "EUROMASTER AUXERRE": {
+    "ville": "Auxerre",
+    "lat": 47.792761,
+    "lng": 3.55832,
+    "via": "adresse",
+    "departement": "89"
+  },
+  "EUROMASTER LUDRES PASTEUR": {
+    "ville": "Ludres",
+    "lat": 48.617001,
+    "lng": 6.180908,
+    "via": "adresse",
+    "departement": "54"
+  },
+  "EUROMASTER STRASBOURG PORT": {
+    "ville": "Strasbourg",
+    "lat": 48.581342,
+    "lng": 7.709611,
+    "via": "adresse",
+    "departement": "67"
+  },
+  "EUROMASTER ST PIERRE FAUCIGNY": {
+    "ville": "Faucigny",
+    "lat": 46.116348,
+    "lng": 6.368461,
+    "via": "commune",
+    "departement": "74"
+  },
+  "EUROMASTER LE BLANC": null,
+  "EUROMASTER AMIENS VL": {
+    "ville": "Amiens",
+    "lat": 49.903041,
+    "lng": 2.292605,
+    "via": "commune",
+    "departement": "80"
+  },
+  "EUROMASTER COULOMMIERS": {
+    "ville": "Coulommiers",
+    "lat": 48.813927,
+    "lng": 3.091115,
+    "via": "commune",
+    "departement": "77"
+  },
+  "EUROMASTER LAGNY SUR MARNE": {
+    "ville": "Lagny-sur-Marne",
+    "lat": 48.873876,
+    "lng": 2.705794,
+    "via": "commune",
+    "departement": "77"
+  },
+  "EUROMASTER VILLEMANDEUR": {
+    "ville": "Villemandeur",
+    "lat": 47.9864,
+    "lng": 2.701824,
+    "via": "commune",
+    "departement": "45"
+  },
+  "EUROMASTER LAON MINIMES": {
+    "ville": "Laon",
+    "lat": 49.570096,
+    "lng": 3.614939,
+    "via": "commune",
+    "departement": "02"
+  },
+  "EUROMASTER BLANC MESNIL VI": null,
+  "EUROMASTER PROVINS": {
+    "ville": "Provins",
+    "lat": 48.558668,
+    "lng": 3.2981,
+    "via": "commune",
+    "departement": "77"
+  },
+  "EUROMASTER VILLENEUVE GARENNE": null,
+  "EUROMASTER MONTELIMAR VL": {
+    "ville": "Montélimar",
+    "lat": 44.553424,
+    "lng": 4.745639,
+    "via": "commune",
+    "departement": "26"
+  },
+  "EUROMASTER PERONNE": null,
+  "EUROMASTER ECHIROLLES": {
+    "ville": "Échirolles",
+    "lat": 45.146125,
+    "lng": 5.715042,
+    "via": "commune",
+    "departement": "38"
+  },
+  "EUROMASTER MAYENNE": {
+    "ville": "Mayenne",
+    "lat": 48.303387,
+    "lng": -0.617261,
+    "via": "commune",
+    "departement": "53"
+  },
+  "EUROMASTER ST MALO": null,
+  "EUROMASTER MONDEVILLE": {
+    "ville": "Mondeville",
+    "lat": 49.170017,
+    "lng": -0.310786,
+    "via": "commune",
+    "departement": "14"
+  },
+  "EUROMASTER ALENCON": {
+    "ville": "Alençon",
+    "lat": 48.429633,
+    "lng": 0.092012,
+    "via": "commune",
+    "departement": "61"
+  },
+  "EUROMASTER AURILLAC": {
+    "ville": "Aurillac",
+    "lat": 44.918771,
+    "lng": 2.435053,
+    "via": "commune",
+    "departement": "15"
+  },
+  "EUROMASTER BEZIERS": {
+    "ville": "Béziers",
+    "lat": 43.343264,
+    "lng": 3.233465,
+    "via": "commune",
+    "departement": "34"
+  },
+  "EUROMASTER PERPIGNAN CHARLE VI": {
+    "ville": "Perpignan",
+    "lat": 42.701507,
+    "lng": 2.902811,
+    "via": "commune",
+    "departement": "66"
+  },
+  "EUROMASTER ANTIBES": {
+    "ville": "Antibes",
+    "lat": 43.582492,
+    "lng": 7.121429,
+    "via": "adresse",
+    "departement": "06"
+  },
+  "EUROMASTER ANNECY SEYNOD": {
+    "ville": "Annecy",
+    "lat": 45.856348,
+    "lng": 6.07648,
+    "via": "adresse",
+    "departement": "74"
+  },
+  "EUROMASTER LA FERTE BERNARD": {
+    "ville": "La Ferté-Bernard",
+    "lat": 48.180121,
+    "lng": 0.63966,
+    "via": "commune",
+    "departement": "72"
+  },
+  "EUROMASTER FOIX": {
+    "ville": "Foix",
+    "lat": 42.968777,
+    "lng": 1.607355,
+    "via": "commune",
+    "departement": "09"
+  },
+  "EUROMASTER HAGUENAU": {
+    "ville": "Haguenau",
+    "lat": 48.805321,
+    "lng": 7.776832,
+    "via": "adresse",
+    "departement": "67"
+  },
+  "EUROMASTER CHENOVE DIJON": {
+    "ville": "Dijon",
+    "lat": 47.305736,
+    "lng": 5.0218,
+    "via": "adresse",
+    "departement": "21"
+  },
+  "EUROMASTER ANNAY": null,
+  "EUROMASTER LANDERNEAU": {
+    "ville": "Landerneau",
+    "lat": 48.450764,
+    "lng": -4.26042,
+    "via": "commune",
+    "departement": "29"
+  },
+  "EUROMASTER COIGNIERES": {
+    "ville": "Coignières",
+    "lat": 48.747077,
+    "lng": 1.921342,
+    "via": "commune",
+    "departement": "78"
+  },
+  "EUROMASTER  NIMES": {
+    "ville": "Nîmes",
+    "lat": 43.814652,
+    "lng": 4.356289,
+    "via": "commune",
+    "departement": "30"
+  },
+  "EUROMASTER MONTPELLIER VL": {
+    "ville": "Montpellier",
+    "lat": 43.610476,
+    "lng": 3.87048,
+    "via": "commune",
+    "departement": "34"
+  },
+  "EUROMASTER FOUGERES": {
+    "ville": "Fougères",
+    "lat": 48.35611,
+    "lng": -1.194247,
+    "via": "commune",
+    "departement": "35"
+  },
+  "EUROMASTER VIRE": {
+    "ville": "Viré",
+    "lat": 46.445848,
+    "lng": 4.850348,
+    "via": "commune",
+    "departement": "71"
+  },
+  "EUROMASTER BRIVE VL": null,
+  "EUROMASTER DUNKERQUE": {
+    "ville": "Dunkerque",
+    "lat": 51.047934,
+    "lng": 2.399408,
+    "via": "adresse",
+    "departement": "59"
+  },
+  "EUROMASTER EU": null,
+  "EUROMASTER MONS EN BAROEUL / EUROMASTER LILLE ISLY": {
+    "ville": "Lille",
+    "lat": 50.623295,
+    "lng": 3.037263,
+    "via": "adresse",
+    "departement": "59"
+  },
+  "EUROMASTER CONFLANS": null,
+  "EUROMASTER ARRAS": {
+    "ville": "Arras",
+    "lat": 50.287896,
+    "lng": 2.768267,
+    "via": "commune",
+    "departement": "62"
+  },
+  "EUROMASTER VALENCIENNES": {
+    "ville": "Valenciennes",
+    "lat": 50.358552,
+    "lng": 3.510438,
+    "via": "commune",
+    "departement": "59"
+  },
+  "EUROMASTER VIRY CHATILLON": {
+    "ville": "Viry-Châtillon",
+    "lat": 48.666884,
+    "lng": 2.373708,
+    "via": "commune",
+    "departement": "91"
+  },
+  "EUROMASTER CGO LESQUIN": {
+    "ville": "Lesquin",
+    "lat": 50.58776,
+    "lng": 3.105336,
+    "via": "adresse",
+    "departement": "59"
+  },
+  "EUROMASTER MONTPELLIER VI": {
+    "ville": "Montpellier",
+    "lat": 43.610476,
+    "lng": 3.87048,
+    "via": "commune",
+    "departement": "34"
+  },
+  "EUROMASTER RODEZ ONET L.C.": {
+    "ville": "Rodez",
+    "lat": 44.359272,
+    "lng": 2.566732,
+    "via": "commune",
+    "departement": "12"
+  },
+  "EUROMASTER MANOSQUE VI": {
+    "ville": "Manosque",
+    "lat": 43.826542,
+    "lng": 5.790238,
+    "via": "commune",
+    "departement": "04"
+  },
+  "EUROMASTER ST GERMAIN DU PUY": null,
+  "EUROMASTER BOURGOIN": null,
+  "EUROMASTER ST ETIENNE NEYRET": null,
+  "EUROMASTER CLERMONT LUM. VI": {
+    "ville": "Clermont",
+    "lat": 49.37814,
+    "lng": 2.413758,
+    "via": "adresse",
+    "departement": "60"
+  },
+  "EUROMASTER SALAISE": null,
+  "EUROMASTER  PORTES VALENCE": null,
+  "EUROMASTER EVREUX": {
+    "ville": "Évreux",
+    "lat": 49.020599,
+    "lng": 1.146898,
+    "via": "commune",
+    "departement": "27"
+  },
+  "EUROMASTER ARLES": {
+    "ville": "Arles",
+    "lat": 43.596721,
+    "lng": 4.645086,
+    "via": "commune",
+    "departement": "13"
+  },
+  "EUROMASTER MEYZIEU": {
+    "ville": "Meyzieu",
+    "lat": 45.779571,
+    "lng": 5.002533,
+    "via": "adresse",
+    "departement": "69"
+  },
+  "EUROMASTER MAGENTA": {
+    "ville": "Magenta",
+    "lat": 49.052864,
+    "lng": 3.966151,
+    "via": "commune",
+    "departement": "51"
+  },
+  "EUROMASTER MUTZIG": {
+    "ville": "Mutzig",
+    "lat": 48.536102,
+    "lng": 7.459405,
+    "via": "commune",
+    "departement": "67"
+  },
+  "EUROMASTER COLMAR": {
+    "ville": "Colmar",
+    "lat": 48.081779,
+    "lng": 7.352569,
+    "via": "commune",
+    "departement": "68"
+  },
+  "EUROMASTER CORBEIL ESSONNES": {
+    "ville": "Corbeil-Essonnes",
+    "lat": 48.598229,
+    "lng": 2.465045,
+    "via": "commune",
+    "departement": "91"
+  },
+  "EUROMASTER VITRE": {
+    "ville": "Vitré",
+    "lat": 48.111352,
+    "lng": -1.192619,
+    "via": "commune",
+    "departement": "35"
+  },
+  "EUROMASTER LES HERBIERS": {
+    "ville": "Les Herbiers",
+    "lat": 46.863236,
+    "lng": -1.028639,
+    "via": "commune",
+    "departement": "85"
+  },
+  "EUROMASTER ST BERTHEVIN": null,
+  "EUROMASTER ST EGREVE VL": null,
+  "EUROMASTER FERNEY VOLTAIRE": {
+    "ville": "Ferney-Voltaire",
+    "lat": 46.25456,
+    "lng": 6.108318,
+    "via": "commune",
+    "departement": "01"
+  },
+  "EUROMASTER BLOIS": {
+    "ville": "Blois",
+    "lat": 47.581406,
+    "lng": 1.316533,
+    "via": "commune",
+    "departement": "41"
+  },
+  "EUROMASTER CLISSON": {
+    "ville": "Clisson",
+    "lat": 47.092311,
+    "lng": -1.27044,
+    "via": "commune",
+    "departement": "44"
+  },
+  "EUROMASTER SARAN": {
+    "ville": "Saran",
+    "lat": 47.946923,
+    "lng": 1.875773,
+    "via": "commune",
+    "departement": "45"
+  },
+  "EUROMASTER CORBAS": {
+    "ville": "Corbas",
+    "lat": 45.666017,
+    "lng": 4.909309,
+    "via": "commune",
+    "departement": "69"
+  },
+  "EUROMASTER MAROLLES": {
+    "ville": "Marolles",
+    "lat": 48.720781,
+    "lng": 4.624459,
+    "via": "adresse",
+    "departement": "51"
+  },
+  "VENDENHEIM (67)": {
+    "ville": "Vendenheim",
+    "lat": 48.669566,
+    "lng": 7.721357,
+    "via": "commune",
+    "departement": "67"
+  },
+  "CAMPUS NOISIEL : 3 AVENUE PIERRE MENDES France - RER A NOISIEL, 77186 NOISIEL": {
+    "ville": "Noisiel",
+    "lat": 48.847293,
+    "lng": 2.623401,
+    "via": "code postal",
+    "departement": "77"
+  },
+  "RATP SIEGE SOCIAL LYBY : 54 QUAI  DE LA RAPEE, 75112 PARIS": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "STATION VILLEJUIF LOUIS ARAGON L07 : 175 BD MAXIME GORKI, 94076 VILLEJUIF": {
+    "ville": "Villejuif",
+    "lat": 48.793468,
+    "lng": 2.360996,
+    "via": "commune",
+    "departement": "94"
+  },
+  "BATIMENT VAL BIENVENUE : 11 AVENUE LOUISON BOBET, 94120 FONTENAY SOUS BOIS": {
+    "ville": "Fontenay-sous-Bois",
+    "lat": 48.850022,
+    "lng": 2.473494,
+    "via": "code postal",
+    "departement": "94"
+  },
+  "4 sites": null,
+  "BATIMENT CHOISY : 27 AV DE LA PORTE DITALIE, 75113 PARIS": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "ATELIERS DE BOISSY RER A : 13 CHEMIN VERT, 94071 SUCY EN BRIE": {
+    "ville": "Sucy-en-Brie",
+    "lat": 48.77067,
+    "lng": 2.528396,
+    "via": "commune",
+    "departement": "94"
+  },
+  "BATIMENT TOUL EST : 45 RUE DE TOUL, 75112 PARIS": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "BATIMENT NOISY LE GRAND": {
+    "ville": "Noisy-le-Grand",
+    "lat": 48.840106,
+    "lng": 2.551491,
+    "via": "commune",
+    "departement": "93"
+  },
+  "BATIMENT SHAMROCK": null,
+  "STATION SAINT DENIS PORTE DE PARIS L13 : 2 MAIL DE LA PETITE ESPAGNE, 93212 SAINT DENIS": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "BATIMENT SHAMROCK : 32 AVENUE DU PAVE NEUF, 93160 NOISY LE GRAND": {
+    "ville": "Noisy-le-Grand",
+    "lat": 48.840106,
+    "lng": 2.551491,
+    "via": "code postal",
+    "departement": "93"
+  },
+  "TRAM T7 SMR VITRY : 13 route de Fontainebleau, 94400 Vitry-sur-Seine": {
+    "ville": "Vitry-sur-Seine",
+    "lat": 48.789495,
+    "lng": 2.39571,
+    "via": "code postal",
+    "departement": "94"
+  },
+  "CENTRE BUS MONTROUGE": {
+    "ville": "Montrouge",
+    "lat": 48.817316,
+    "lng": 2.328865,
+    "via": "adresse",
+    "departement": "92"
+  },
+  "CENTRE BUS CROIX NIVERT : 10 RUE CHARLES LECOCQ, 75115 PARIS": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "ATELIER DE MAINTENANCE TRAMWAY AMT T5 : 24 Avenue Maurice Utrillo, 93059 PIERREFITTE SUR SEINE": null,
+  "SAINT DENIS AMBROISE CROIZAT": {
+    "ville": "Saint-Denis",
+    "lat": 48.930164,
+    "lng": 2.351397,
+    "via": "adresse",
+    "departement": "93"
+  },
+  "TRAM T3A SMR LUCOTTE : 2 Rue Lucien Bossoutrot, 75015 Paris 15e Arrondissement": {
+    "ville": "Paris 15e Arrondissement",
+    "lat": 48.84162,
+    "lng": 2.295289,
+    "via": "code postal",
+    "departement": "75"
+  },
+  "BATIMENT CHANZY : 105 BD CHANZY, 93048 MONTREUIL": {
+    "ville": "Montreuil",
+    "lat": 48.863728,
+    "lng": 2.449364,
+    "via": "adresse",
+    "departement": "93"
+  },
+  "BATIMENT CHANZY": null,
+  "ATELIERS DE SAINT OUEN": null,
+  "BATIMENT VAL BIENVENUE": null,
+  "BATIMENT TOUL EST": {
+    "ville": "Toul",
+    "lat": 48.678031,
+    "lng": 5.900596,
+    "via": "commune",
+    "departement": "54"
+  },
+  "BATIMENT NOISY LE GRAND : 102 ESP DE LA COMMUNE DE PARIS, 93051 NOISY LE GRAND": {
+    "ville": "Noisy-le-Grand",
+    "lat": 48.841628,
+    "lng": 2.547916,
+    "via": "adresse",
+    "departement": "93"
+  },
+  "CENTRE MEDICAL LACHAMBEAUDIE : 18 PL  LACHAMBEAUDIE, 75112 PARIS": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "ATELIER ISSY LES MOULINEAUX MRF T2 : 22 RUE JEAN JACQUES ROUSSEAU, 92040 ISSY LES MOULINEAUX": {
+    "ville": "Issy-les-Moulineaux",
+    "lat": 48.822343,
+    "lng": 2.257102,
+    "via": "adresse",
+    "departement": "92"
+  },
+  "MEDECINE DU TRAVAIL VERSAILLES : 61 BD VICTOR, 75115 PARIS": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "BATIMENT CHAMPIONNET : 34 RUE CHAMPIONNET, 75118 PARIS": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "RATP SIEGE SOCIAL LYBY": null,
+  "VILLETANEUSE AMT T8 : 1 RUE ATELIERS VILLETANEUSE, 93079 VILLETANEUSE": {
+    "ville": "Villetaneuse",
+    "lat": 48.958552,
+    "lng": 2.3481,
+    "via": "adresse",
+    "departement": "93"
+  },
+  "M2E BAGNEUX MEUNIERS : 80 RUE DES MEUNIERS, 92007 BAGNEUX": {
+    "ville": "Bagneux",
+    "lat": 48.79783,
+    "lng": 2.313182,
+    "via": "adresse",
+    "departement": "92"
+  },
+  "BATIMENT BOURDON": {
+    "ville": "Bourdon",
+    "lat": 49.986213,
+    "lng": 2.074403,
+    "via": "commune",
+    "departement": "80"
+  },
+  "BATIMENT BOURDON : 21 BD BOURDON, 75104 PARIS": {
+    "ville": "Paris",
+    "lat": 48.859,
+    "lng": 2.347,
+    "via": "commune",
+    "departement": "75"
+  },
+  "Marne-la-Vallée, France": {
+    "ville": "La Vallée",
+    "lat": 45.890426,
+    "lng": -0.844333,
+    "via": "commune",
+    "departement": "17"
+  },
+  "Saint-Thibault-des-Vignes, Seine-et-Marne, France": {
+    "ville": "Saint-Thibault-des-Vignes",
+    "lat": 48.861725,
+    "lng": 2.67667,
+    "via": "commune",
+    "departement": "77"
+  },
+  "Alençon": {
+    "ville": "Alençon",
+    "lat": 48.429633,
+    "lng": 0.092012,
+    "via": "commune",
+    "departement": "61"
+  },
+  "Flers": null,
+  "Albi": {
+    "ville": "Albi",
+    "lat": 43.930374,
+    "lng": 2.136314,
+    "via": "commune",
+    "departement": "81"
+  },
+  "Cesson-Sevigne": {
+    "ville": "Cesson-Sévigné",
+    "lat": 48.123772,
+    "lng": -1.596972,
+    "via": "commune",
+    "departement": "35"
   }
 }
