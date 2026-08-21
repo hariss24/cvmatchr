@@ -29,7 +29,8 @@
 | ~~**Conflits hors-ligne (Last-Write-Wins)**~~ | **Levé le 15/08/2026** (chantier *Le serveur devient la source unique*) : la double copie et le moteur de réplication bidirectionnelle ont été supprimés. Le serveur Supabase est désormais la source unique de vérité. |
 | **Photos de profil en base64 dans JSONB** | Les photos de profil sont stockées encodées en base64 directement dans le champ JSONB `content` (table `documents`). Le catalogue des documents sépare désormais les résumés légers du contenu complet, limitant le transit de la photo à l'ouverture dans l'éditeur. Aucun stockage objet (Supabase Storage) n'est raccordé. |
 | ~~**Tables Dexie non synchronisées**~~ | **Levé le 15/08/2026** : `profile` (« Mes infos »), `jobProfile` (« Critères de recherche ») et `templates` (« Modèles de lettre ») sont désormais persistés sur le serveur dans les tables `user_settings` et `templates`. |
-| **Briques RGPD UI absentes** | Bien que la suppression en cascade PostgreSQL (`ON DELETE CASCADE`) soit configurée, il n'existe pas encore de bouton "Supprimer mon compte" ni d'export RGPD en un clic dans l'interface utilisateur. |
+| ~~**Briques RGPD UI absentes**~~ | **Partiellement levé le 20/08/2026** : la page `/compte` porte la suppression du compte, qui déclenche la cascade `ON DELETE CASCADE`. **L'export des données en un clic n'existe toujours pas** : une demande de portabilité se traite encore à la main. |
+| **Mots de passe compromis acceptés** | Supabase sait refuser un mot de passe figurant dans les fuites connues (« Prevent use of leaked passwords »), mais **cette option est réservée au plan Pro** — constaté le 21/08/2026 sur le plan gratuit. Notre seule règle est donc une longueur de 8 caractères : `motdepasse123` est accepté. Contournement possible sans changer de plan : interroger nous-mêmes l'API publique HaveIBeenPwned au moment du choix du mot de passe. |
 
 ---
 

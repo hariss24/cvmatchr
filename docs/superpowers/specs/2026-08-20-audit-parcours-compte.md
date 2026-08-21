@@ -65,7 +65,7 @@ Voir aussi § 4.1.
 
 ## 3. Sécurité
 
-### 3.1 — Les mots de passe compromis ne sont pas refusés
+### 3.1 — Les mots de passe compromis ne sont pas refusés — RÉGLAGE INDISPONIBLE
 
 Supabase propose « Prevent use of leaked passwords », qui vérifie le mot de
 passe choisi contre la base HaveIBeenPwned. C'est une case à cocher, gratuite,
@@ -73,6 +73,12 @@ et aujourd'hui décochée. Sans elle, `motdepasse123` est accepté.
 
 Notre seule règle est une longueur de 8 caractères
 (`web/src/lib/auth/validation.ts`).
+
+**21/08 :** l'option s'avère **réservée au plan Pro** de Supabase. Ce n'est donc
+pas un oubli de réglage mais une limite du plan gratuit, tracée dans
+`LIMITES.md`. Deux issues : changer de plan, ou interroger nous-mêmes l'API
+publique HaveIBeenPwned au moment du choix du mot de passe — elle ne reçoit que
+les cinq premiers caractères de l'empreinte, jamais le mot de passe.
 
 ### 3.2 — Changer de mot de passe n'exige pas l'ancien — CORRIGÉ le 20/08
 
