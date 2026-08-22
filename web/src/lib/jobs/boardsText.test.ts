@@ -185,3 +185,39 @@ describe("obtenirTextes", () => {
     expect(r.get("smartrecruiters:accor:2")).toContain("OK");
   });
 });
+
+describe("Talentsoft", () => {
+  it("un seul appel RSS donne le texte de toutes les offres du même hôte", async () => {
+    // ⚠️ Sans cette extraction, les offres Talentsoft n'auraient AUCUN texte et
+    // `searchBoards` les écarterait toutes : la source entière serait invisible
+    // dans l'app tout en gonflant l'index. Le flux porte déjà les descriptions,
+    // il n'y a donc rien à demander de plus.
+    let appels = 0;
+    const rss = `<?xml version="1.0"?><rss version="2.0"><channel>
+      <item><link>https://brgm-recrute.talent-soft.com/o.aspx?idOffre=4093</link>
+        <description>&lt;b&gt;Ville : &lt;/b&gt;Orléans&lt;br /&gt;Piloter des projets SI.</description></item>
+      <item><link>https://brgm-recrute.talent-soft.com/o.aspx?idOffre=4089</link>
+        <description>&lt;b&gt;Ville : &lt;/b&gt;Orléans&lt;br /&gt;Juriste droit des sociétés.</description></item>
+    </channel></rss>`;
+
+    const f: FetchLike = async () => { appels += 1; return new Response(rss, { status: 200 }); };
+
+    const r = await obtenirTextes(
+      [
+        offre({ ats: "talentsoft", slug: "brgm-recrute.talent-soft.com", id: "4093" }),
+        offre({ ats: "talentsoft", slug: "brgm-recrute.talent-soft.com", id: "4089" }),
+      ],
+      f,
+    );
+
+    expect(appels).toBe(1);
+    expect(r.get("talentsoft:brgm-recrute.talent-soft.com:4093")).toContain("Piloter des projets SI");
+    expect(r.get("talentsoft:brgm-recrute.talent-soft.com:4089")).toContain("Juriste droit des sociétés");
+  });
+
+  it("un hôte injoignable laisse ses offres sans texte, il n'invente pas une chaîne vide", async () => {
+    const f: FetchLike = async () => new Response("", { status: 503 });
+    const r = await obtenirTextes([offre({ ats: "talentsoft", slug: "x.talent-soft.com", id: "1" })], f);
+    expect(r.has("talentsoft:x.talent-soft.com:1")).toBe(false);
+  });
+});

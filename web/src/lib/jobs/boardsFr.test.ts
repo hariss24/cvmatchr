@@ -17,6 +17,11 @@ vi.mock("./data/boards-offres.json", () => ({
     { ats: "greenhouse", slug: "onrunning", entreprise: "On Running", id: "7", titre: "Chargé de retouche", lieu: "Paris", url: "https://boards.greenhouse.io/onrunning/jobs/7", publieLe: new Date().toISOString(), decouverteLe: "2020-01-01" },
     { ats: "greenhouse", slug: "onrunning", entreprise: "On Running", id: "8", titre: "Développeur PHP", lieu: "Paris", url: "https://boards.greenhouse.io/onrunning/jobs/8", publieLe: new Date(Date.now() - 20 * 86_400_000).toISOString(), decouverteLe: new Date(Date.now() - 20 * 86_400_000).toISOString().slice(0, 10) },
     { ats: "greenhouse", slug: "onrunning", entreprise: "On Running", id: "9", titre: "Software Engineer", lieu: "Paris", url: "https://boards.greenhouse.io/onrunning/jobs/9", publieLe: new Date().toISOString(), decouverteLe: new Date().toISOString().slice(0, 10) },
+    // Talentsoft : son slug est un nom d'HÔTE, pas un identifiant de board.
+    { ats: "talentsoft", slug: "brgm-recrute.talent-soft.com", entreprise: "Brgm", id: "10", titre: "Juriste Corporate", lieu: "Paris", url: "https://brgm-recrute.talent-soft.com/Pages/Offre/detailoffre.aspx?idOffre=10", publieLe: new Date().toISOString(), decouverteLe: new Date().toISOString().slice(0, 10) },
+    // En Gironde, avec le département que le géocodage a produit : c'est lui
+    // qui fait fonctionner les filtres département et région (`boardsLieu`).
+    { ats: "talentsoft", slug: "dassault-aviation-cand.talent-soft.com", entreprise: "Dassault Aviation", id: "11", titre: "Soudeur Aéronautique", lieu: "MERIGNAC", dept: "33", lat: 44.83, lng: -0.67, url: "https://dassault-aviation-cand.talent-soft.com/Pages/Offre/detailoffre.aspx?idOffre=11", publieLe: new Date().toISOString(), decouverteLe: new Date().toISOString().slice(0, 10) },
   ],
 }));
 
@@ -30,6 +35,8 @@ vi.mock("./boardsText", () => ({
     ["ashby:alan:6", "Construction de pipelines de données."],
     ["greenhouse:onrunning:8", "Développement PHP backend."],
     ["greenhouse:onrunning:9", "Software engineering."],
+    ["talentsoft:brgm-recrute.talent-soft.com:10", "Juriste droit des sociétés."],
+    ["talentsoft:dassault-aviation-cand.talent-soft.com:11", "Soudure sur pièces aéronautiques."],
   ])),
 }));
 
@@ -251,3 +258,39 @@ describe("repartirParEntreprise", () => {
   });
 });
 
+
+describe("Talentsoft", () => {
+  it("une offre Talentsoft affiche le nom de sa plateforme", async () => {
+    const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["juriste"], excludedWords: [] });
+    expect(r.offers.map((o) => o.title)).toEqual(["Juriste Corporate"]);
+    expect(r.offers[0].boardName).toBe("Talentsoft");
+  });
+});
+
+describe("Talentsoft et les filtres", () => {
+  const NOUVELLE_AQUITAINE = { kind: "region" as const, code: "75", label: "Nouvelle-Aquitaine", radiusKm: 0 };
+  const ILE_DE_FRANCE = { kind: "region" as const, code: "11", label: "Île-de-France", radiusKm: 0 };
+
+  it("le filtre région retient l'offre grâce au département issu du géocodage", async () => {
+    // ⚠️ Ce test verrouille le raccord `departement` → `dept` fait dans
+    // talentsoft.mjs. Sans lui, l'offre n'aurait aucun département et ce filtre
+    // l'écarterait en silence, comme toutes les offres Talentsoft.
+    const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["soudeur"], excludedWords: [], location: NOUVELLE_AQUITAINE });
+    expect(r.offers.map((o) => o.title)).toEqual(["Soudeur Aéronautique"]);
+  });
+
+  it("le filtre région écarte l'offre d'une autre région", async () => {
+    const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["soudeur"], excludedWords: [], location: ILE_DE_FRANCE });
+    expect(r.offers).toHaveLength(0);
+  });
+
+  it("le filtre d'ancienneté s'applique comme aux autres sources", async () => {
+    const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["soudeur"], excludedWords: [], maxAgeDays: 30 });
+    expect(r.offers).toHaveLength(1);
+  });
+
+  it("un mot interdit écarte l'offre Talentsoft", async () => {
+    const r = await searchBoards({ ...EMPTY_PROFILE, keywords: ["soudeur"], excludedWords: ["aéronaut"] });
+    expect(r.offers).toHaveLength(0);
+  });
+});

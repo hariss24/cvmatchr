@@ -24,7 +24,9 @@ jobs:
     # le 06/08/2026 avec Workday, dont le premier passage a duré 1 h 30 sur
     # 2 467 vitrines. Un passage à froid est le pire cas ; ensuite le mémo en
     # épargne la majorité.
-    timeout-minutes: 300
+    # Puis à 380 le 21/08/2026 avec Talentsoft, mesuré à ~52 min à froid
+    # (11 min de lecture columnaire, 41 min de sondage sur ~61 000 candidats).
+    timeout-minutes: 380
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,7 +34,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          # 24 : voir scripts/boards/parquet.mjs (décompression ZSTD).
+          node-version: "24"
+
+      - name: Dépendances des scripts
+        run: npm ci
 
       - name: Tests des modules de l'index
         run: node --test "scripts/boards/*.test.mjs"
@@ -47,6 +53,18 @@ jobs:
       # duré 1 h 30 sur 2 467 vitrines, les suivants sont bien plus courts.
       - name: Rafraîchir les boards Workday
         run: node scripts/build-boards-workday.mjs
+
+      # Talentsoft à part, et pour une raison différente de Workday : ses clients
+      # sont souvent sur leur PROPRE domaine (jobs.groupe-psa.com), qu'aucun
+      # préfixe de domaine ne trouve. La découverte lit donc l'index COLUMNAR de
+      # Common Crawl — les noms d'hôtes du web entier, ~600 Mo — puis ne garde
+      # que ceux qui se nomment comme un site carrière.
+      # Voir scripts/boards/parquet.mjs et scripts/boards/carrieres.mjs.
+      #
+      # ⚠️ `--max-old-space-size` obligatoire : un fichier columnar matérialise
+      # ~7,3 millions de lignes le temps de sa lecture.
+      - name: Rafraîchir les boards Talentsoft
+        run: node --max-old-space-size=8192 scripts/build-boards-talentsoft.mjs
 
       - name: Commiter si l'index a changé
         run: |

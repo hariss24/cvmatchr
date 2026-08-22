@@ -34,7 +34,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          # 24 : voir scripts/boards/parquet.mjs (décompression ZSTD).
+          node-version: "24"
+
+      - name: Dépendances des scripts
+        run: npm ci
 
       - name: Tests des modules de l'index
         run: node --test "scripts/boards/*.test.mjs"

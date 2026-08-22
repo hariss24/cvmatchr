@@ -46,8 +46,68 @@ d'être du marché caché — contourner le problème plutôt que l'affronter.
 
 `docs/superpowers/specs/2026-08-04-marche-cache-index-design.md`, « Hors scope » :
 
-- ~~**ATS exigeant l'URL du locataire** : Workday, SuccessFactors, Talentsoft.~~ **Levé pour Workday le 06/08/2026** (commit de la brique 3) : les adresses ne se devinent toujours pas, elles se **lisent** dans l'index public de Common Crawl (`scripts/boards/crawl.mjs`). 2 467 vitrines énumérées, **361 boards français, 8 538 offres**. La contrainte reste entière pour **SuccessFactors et Talentsoft**, dont l'API n'a pas été mesurée — les traiter d'un bloc aurait empilé trois inconnues au lieu d'en lever une.
+- ~~**ATS exigeant l'URL du locataire** : Workday, SuccessFactors, Talentsoft.~~ **Levé pour Workday le 06/08/2026** (commit de la brique 3) : les adresses ne se devinent toujours pas, elles se **lisent** dans l'index public de Common Crawl (`scripts/boards/crawl.mjs`). 2 467 vitrines énumérées, **361 boards français, 8 538 offres**. **Levé pour Talentsoft le 21/08/2026** : voir §2.2 quater. La contrainte reste entière pour **SuccessFactors** — voir §2.2 ter.
 - **ATS à authentification** : Taleez, Flatchr, Digitalrecruiters, Welcome to the Jungle. Aucune piste.
+
+### 2.2 ter SuccessFactors reste hors de portée — mesuré, pas supposé
+
+Sondé le 21/08/2026 depuis `careers.bouygues-construction.com`. La plateforme est
+bien identifiée (CDN `rmkcdn.successfactors.com`), et l'extraction serait facile
+une fois l'adresse connue : `sitemap.xml` liste toutes les offres avec la ville
+dans le slug. **C'est la DÉCOUVERTE qui bloque, pas la moisson.**
+
+- L'espace de noms partagé de SuccessFactors est `*.jobs2web.com` : **39 hôtes
+  dans Common Crawl, aucun français** (Assa Abloy, BNSF, Illinois, London-gov).
+- `bouygues-construction.jobs2web.com` n'existe pas : les clients français sont
+  tous sur un domaine propre.
+- Les préfixes `successfactors.eu` et `successfactors.com` rendent **0 bloc**
+  dans l'index CDX.
+- Le seul endpoint structuré documenté (OData `JobRequisition`) exige des
+  permissions Recruteur non publiques, côté employeur.
+
+⚠️ Deux pistes séduisantes ont été **réfutées** lors de la recherche du
+21/08/2026, et ne doivent pas être reprises sans preuve neuve : SuccessFactors
+n'expose **pas** de `sitemap.xml` public standard à la racine du domaine, et
+l'agrégateur tiers qui annonce moissonner 275 000 offres SuccessFactors n'a
+fourni aucune preuve vérifiable.
+
+**Piste non épuisée** : il existerait une liste publique d'instances RMK
+(`cetteup.com`), non vérifiée faute de budget. À tester en premier le jour où le
+sujet est rouvert — l'effort est faible.
+
+### 2.2 quater Ce que Talentsoft coûte et ne dit pas
+
+Intégré le 21/08/2026 (`scripts/boards/talentsoft.mjs`). Un seul appel RSS
+(`/handlers/offerRss.ashx?LCID=1036&top=1000`) rend tout le board avec titre,
+lieu, description et date — c'est l'ATS le moins cher de la chaîne. Mais :
+
+- **Plafond de 1 000 offres par board, silencieux.** Mesuré le 21/08/2026 :
+  SPIE et EDF rendent exactement 1 000 offres avec `top=2000`. Aucun champ ne
+  signale la troncature et **aucune pagination n'a été trouvée** sur cet
+  endpoint. Les boards les plus fournis sont donc incomplets, sans qu'on sache
+  de combien.
+- **Aucun code pays dans le flux.** `LCID=1036` sélectionne la **langue**
+  française, pas le pays : PSA y publie Kenitra et Amsterdam, et des locataires
+  entiers sont suisses ou allemands (Chur, Vaduz, 130 adresses argoviennes).
+  C'est le géocodage Base Adresse Nationale qui tranche le pays — un libellé
+  qu'elle situe est en France. Conséquence : **une offre française dont le
+  libellé ne se géocode pas est perdue**, et sur PSA cela représente une part
+  des 77 offres écartées sur 243.
+- **`estFrancais` est inutilisable sur cette source.** Sans code pays ni région
+  dans le libellé, elle rejette « SOCHAUX », « Poissy », « Marcoule » et
+  « Vélizy-Villacoublay », qui sont bien françaises. L'avoir retenue aurait vidé
+  la moisson en silence — le même mode de panne que le tri alphabétique du 04/08
+  et la clé de tri manquante du 06/08.
+- **Le lieu ne se lit PAS dans la dernière `<category>`.** PSA, BRGM et Dassault
+  y mettent la ville, mais Orange et Kronospan y mettent le type de contrat : la
+  règle positionnelle inventait des villes nommées « CDI », « Stage » et
+  « Unbefristet ». Le lieu est lu dans les étiquettes de la description, elles
+  aussi renommées par chaque entreprise (« Ville », « Lieu de travail »).
+- **Certains locataires ne publient aucun lieu** (Orange, Kronospan). Leurs
+  offres n'entrent pas dans l'index, conformément à la règle générale.
+- **Le nom de l'employeur est déduit de l'hôte** (`nomTalentsoft`), comme chez
+  Workday : les sigles ressortent capitalisés (« Brgm » et non « BRGM »).
+  Lisible, jamais trompeur, non raffiné davantage.
 
 ### 2.2 bis Ce que Workday coûte et ne dit pas
 
@@ -298,3 +358,31 @@ une seconde entre deux requêtes, que la moisson ne respecte pas encore
 À côté de ça, deux points sains vérifiés le même jour : les scripts ne se font
 **pas** passer pour un navigateur (l'en-tête émis est le `user-agent: node` par
 défaut), et l'index committé ne contient **aucune donnée personnelle**.
+
+### 8.3 Talentsoft est sondé sans lire son `robots.txt` — décision assumée du 21/08/2026
+
+La moisson Talentsoft (`scripts/boards/talentsoft.mjs`) frappe le flux RSS de
+chaque hôte candidat **sans vérifier au préalable son `robots.txt`**. C'est un
+choix explicite de l'auteur, pas un oubli : le contrôle coûterait une requête
+supplémentaire par candidat sur un gisement d'environ 60 000 hôtes.
+
+⚠️ Ce choix a un coût juridique connu, et il est chiffré. La **CNIL** exige
+d'exclure de la collecte les sites qui s'opposent au moissonnage via `robots.txt`
+ou CAPTCHA — c'est une condition explicite pour pouvoir invoquer l'intérêt
+légitime comme base légale RGPD (fiche « Intérêt légitime : collecte par
+moissonnage »). Par ailleurs, l'arrêt **CJUE C-30/14** (*Ryanair c. PR Aviation*,
+15/01/2015) établit que même sur une base de données protégée ni par le droit
+d'auteur ni par le droit *sui generis*, **les CGU du site restent pleinement
+opposables** — donc celles de Cegid Talentsoft et de chaque entreprise hôte.
+
+**Ce qu'il faudrait faire pour lever la limite** : lire `https://<hôte>/robots.txt`
+avant le sondage et écarter les hôtes qui refusent, en mémorisant le refus dans
+`memo.mjs` pour ne pas le redemander chaque semaine. Le point d'insertion est
+unique — l'entrée de `listerTalentsoftFR` — précisément pour que ce revirement
+reste bon marché.
+
+Cette limite rejoint celle de SmartRecruiters (§8.2) : le projet moissonne
+aujourd'hui **trois** sources dont le `robots.txt` n'est jamais consulté
+(`api.smartrecruiters.com`, `data.commoncrawl.org`, et désormais les hôtes
+Talentsoft). Le jour où l'app aura des utilisateurs, c'est une décision d'ensemble
+à prendre, pas trois correctifs séparés.

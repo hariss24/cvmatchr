@@ -17,13 +17,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          # 24 et pas 22 : la lecture de l'index columnar de Common Crawl passe
+          # par le décompresseur ZSTD de node:zlib (voir scripts/boards/parquet.mjs).
+          node-version: "24"
           cache: "npm"
           cache-dependency-path: web/package-lock.json
 
       - name: Tests des scripts de la boucle
         working-directory: .
         run: node --test "boucle/bin/*.test.mjs"
+
+      # Dépendances de scripts/ (hyparquet), distinctes de celles de web/.
+      - name: Dépendances des scripts
+        working-directory: .
+        run: npm ci
 
       - name: Tests des scripts de l'index des boards
         working-directory: .

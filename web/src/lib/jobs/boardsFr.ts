@@ -24,7 +24,7 @@ import {
 import boardsOffresData from "./data/boards-offres.json";
 
 export interface OffreLegere {
-  ats: "greenhouse" | "lever" | "ashby" | "smartrecruiters" | "workday";
+  ats: "greenhouse" | "lever" | "ashby" | "smartrecruiters" | "workday" | "talentsoft";
   slug: string;
   entreprise: string;
   id: string;
@@ -123,6 +123,7 @@ const NOMS_ATS: Record<OffreLegere["ats"], string> = {
   ashby: "Ashby",
   smartrecruiters: "SmartRecruiters",
   workday: "Workday",
+  talentsoft: "Talentsoft",
 };
 
 /**

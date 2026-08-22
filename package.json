@@ -1,0 +1,12 @@
+{
+  "name": "cvmatchr-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Dépendances des scripts d'indexation (scripts/). L'application vit dans web/ et a son propre package.json.",
+  "scripts": {
+    "test": "node --test \"scripts/boards/*.test.mjs\""
+  },
+  "dependencies": {
+    "hyparquet": "^1.19.1"
+  }
+}

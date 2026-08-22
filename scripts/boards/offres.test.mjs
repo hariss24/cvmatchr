@@ -114,3 +114,31 @@ test("SmartRecruiters : une page en échec en cours de pagination vaut null (pas
   };
   assert.equal(await listerOffresFR("smartrecruiters", "accor", f), null);
 });
+
+test("talentsoft : le slug est un nom d'hôte, et les offres viennent du flux RSS", async () => {
+  // Talentsoft est le seul ATS dont le « slug » est un hôte complet — il vit
+  // aussi bien sur *.talent-soft.com que sur le domaine propre du client.
+  const rss = `<?xml version="1.0"?><rss version="2.0"><channel><item>
+    <link>https://jobs.groupe-psa.com/Pages/Offre/detailoffre.aspx?idOffre=19516</link>
+    <title>2026-19516 - Chargé de Développement</title>
+    <description>&lt;b&gt;Ville : &lt;/b&gt;SOCHAUX&lt;br /&gt;</description>
+    <pubDate>Fri, 21 Aug 2026 07:39:24 Z</pubDate>
+  </item></channel></rss>`;
+
+  const f = async (url) => {
+    if (String(url).includes("offerRss.ashx")) return new Response(rss, { status: 200 });
+    // Base Adresse Nationale : elle ne connaît que la France, c'est elle qui
+    // tranche le pays pour cette source.
+    return new Response(JSON.stringify({
+      features: [{
+        properties: { name: "Sochaux", city: "Sochaux", postcode: "25600", score: 0.9, type: "municipality", context: "25, Doubs" },
+        geometry: { coordinates: [6.8, 47.5] },
+      }],
+    }), { status: 200 });
+  };
+
+  const r = await listerOffresFR("talentsoft", "jobs.groupe-psa.com", f);
+  assert.equal(r.length, 1);
+  assert.equal(r[0].titre, "Chargé de Développement");
+  assert.equal(r[0].lieu, "SOCHAUX");
+});

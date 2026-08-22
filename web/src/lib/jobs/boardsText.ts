@@ -146,6 +146,45 @@ async function textesLever(
   return out;
 }
 
+/**
+ * Un seul appel RSS pour toutes les offres candidates d'un même hôte Talentsoft.
+ *
+ * ⚠️ Talentsoft ne peut pas être oublié ici. Une offre absente de cette table
+ * est écartée par `searchBoards` (elle ne s'affiche pas « à moitié ») : sans
+ * cette fonction, la source entière serait invisible dans l'app tout en pesant
+ * dans l'index. C'est le même piège qui a déjà éliminé Workday en silence, sous
+ * une autre forme (voir LIMITES.md §2.4 bis).
+ *
+ * Le flux porte déjà la description complète de chaque offre : il n'y a rien à
+ * demander de plus, contrairement à Greenhouse ou Workday qui exigent un appel
+ * par offre.
+ */
+async function textesTalentsoft(
+  hote: string,
+  ids: Set<string>,
+  fetchImpl: FetchLike,
+): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  try {
+    const res = await fetchImpl(`https://${hote}/handlers/offerRss.ashx?LCID=1036&top=1000`);
+    if (!res.ok) return out;
+    const xml = await res.text();
+
+    for (const bloc of xml.split("<item>").slice(1)) {
+      const lien = /<link>([\s\S]*?)<\/link>/.exec(bloc)?.[1] ?? "";
+      const id = /[?&]idOffre=(\d+)/i.exec(lien.replace(/&amp;/g, "&"))?.[1];
+      if (!id || !ids.has(id)) continue;
+      const desc = /<description>([\s\S]*?)<\/description>/.exec(bloc)?.[1] ?? "";
+      // `texteBrut` décode deux fois : le flux encode le HTML dans du XML,
+      // c'est exactement le cas qu'il traite.
+      out.set(id, texteBrut(desc));
+    }
+  } catch {
+    // Hôte injoignable : ses offres resteront sans texte, écartées en aval.
+  }
+  return out;
+}
+
 /** Un seul appel liste pour toutes les offres candidates d'un même board Ashby. */
 async function textesAshby(
   slug: string,
@@ -190,7 +229,7 @@ export async function obtenirTextes(
   });
   for (const r of resultatsParId) if (r) out.set(r.cle, r.texte);
 
-  for (const ats of ["lever", "ashby"] as const) {
+  for (const ats of ["lever", "ashby", "talentsoft"] as const) {
     const parBoard = new Map<string, Set<string>>();
     for (const o of offres) {
       if (o.ats !== ats) continue;
@@ -199,9 +238,11 @@ export async function obtenirTextes(
       else parBoard.set(o.slug, new Set([o.id]));
     }
     const boards = [...parBoard.entries()];
-    const resultats = await parVagues(boards, ([slug, ids]) =>
-      ats === "lever" ? textesLever(slug, ids, fetchImpl) : textesAshby(slug, ids, fetchImpl),
-    );
+    const resultats = await parVagues(boards, ([slug, ids]) => {
+      if (ats === "lever") return textesLever(slug, ids, fetchImpl);
+      if (ats === "talentsoft") return textesTalentsoft(slug, ids, fetchImpl);
+      return textesAshby(slug, ids, fetchImpl);
+    });
     boards.forEach(([slug], i) => {
       for (const [id, texte] of resultats[i]) out.set(cleOffre({ ats, slug, id }), texte);
     });

@@ -191,3 +191,34 @@ test("un homonyme nettement mieux noté que les autres reste retenu", async () =
   const r = await coordonneesDe("Machinville", f);
   assert.equal(Math.round(r.lat), 48);
 });
+
+test("une commune écrite sous sa forme courte est reconnue", async () => {
+  // ⚠️ Cas réel mesuré le 21/08/2026 sur le flux Talentsoft de Stellantis :
+  // les offres du site de Vélizy écrivent « Vélizy », jamais le nom complet de
+  // la commune. Le garde-fou exigeait que le nom trouvé soit CONTENU dans la
+  // demande ; ici c'est l'inverse, et les offres étaient perdues.
+  const f = fauxFetch({ "q=velizy": trait("Vélizy-Villacoublay", 0.86, 48.786, 2.19) });
+  const r = await coordonneesDe("Vélizy", f);
+  assert.equal(r.ville, "Vélizy-Villacoublay");
+});
+
+test("la forme courte n'ouvre pas la porte aux communes qui se ressemblent", async () => {
+  // ⚠️ Ces trois-là sont des cas RÉELS du même flux, tous étrangers. La Base
+  // Adresse Nationale leur propose une commune française plausible : sans
+  // garde-fou, Turin atterrit près de Lyon et Amsterdam dans les Terres
+  // australes. La règle du préfixe ne doit surtout pas les laisser passer.
+  const f = fauxFetch({
+    "q=turin": trait("Thurins", 0.38),
+    "q=amsterdam": trait("Îles Saint-Paul et Nouvelle-Amsterdam", 0.64),
+    "q=sept fons": trait("Saint-Fons", 0.38),
+  });
+  assert.equal(await coordonneesDe("Turin", f), null);
+  assert.equal(await coordonneesDe("Amsterdam", f), null);
+  assert.equal(await coordonneesDe("Sept-Fons", f), null);
+});
+
+test("un préfixe trop court ne suffit pas à désigner une commune", async () => {
+  // « Bar » ne nomme rien : Bar-le-Duc, Bar-sur-Aube, Bar-sur-Seine…
+  const f = fauxFetch({ "q=bar": trait("Bar-le-Duc", 0.9) });
+  assert.equal(await coordonneesDe("Bar", f), null);
+});

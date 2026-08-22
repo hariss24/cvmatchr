@@ -146,10 +146,40 @@ function motsUtiles(texte, exclus = new Set()) {
  * `null` : mieux vaut aucune coordonnée — la recherche retombe alors sur le
  * libellé — qu'une offre placée dans le mauvais département.
  */
+/**
+ * Longueur minimale d'une forme courte pour qu'elle désigne quelque chose.
+ * « Bar » ne nomme rien — Bar-le-Duc, Bar-sur-Aube, Bar-sur-Seine.
+ */
+const PREFIXE_MIN = 5;
+
+/**
+ * Le nom trouvé correspond-il à ce qu'on a demandé ?
+ *
+ * Deux formes acceptées, et deux seulement :
+ *   - le nom est CONTENU dans la demande — « Vélizy-Villacoublay, France » ;
+ *   - la demande est le PREMIER MOT ENTIER du nom — « Vélizy » pour
+ *     « Vélizy-Villacoublay ».
+ *
+ * ⚠️ La seconde a été ajoutée le 21/08/2026 après mesure sur le flux Stellantis,
+ * où les offres du site de Vélizy n'écrivent jamais le nom complet de la commune.
+ *
+ * ⚠️ L'espace final n'est pas décoratif : il exige un mot entier. Sans lui,
+ * « Turin » validerait « Thurins » et « Amsterdam » les « Îles Saint-Paul et
+ * Nouvelle-Amsterdam » — deux cas réels du même flux, tous deux étrangers, que
+ * la Base Adresse Nationale propose spontanément. Ce garde-fou est la seule
+ * chose qui empêche une offre italienne d'atterrir près de Lyon.
+ */
+function nomCorrespond(requete, nom) {
+  const q = normaliser(requete);
+  const n = normaliser(nom);
+  if (q.includes(n)) return true;
+  return q.length >= PREFIXE_MIN && n.startsWith(`${q} `);
+}
+
 function departager(traits, requete, libelle) {
   const recevables = traits.filter((t) => {
     const nom = t?.properties?.city ?? t?.properties?.name ?? "";
-    return normaliser(requete).includes(normaliser(nom)) && (t?.properties?.score ?? 0) >= SCORE_MIN;
+    return nomCorrespond(requete, nom) && (t?.properties?.score ?? 0) >= SCORE_MIN;
   });
   if (recevables.length === 0) return null;
 

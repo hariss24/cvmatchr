@@ -232,6 +232,35 @@ vitrines qui ne se recoupent pas** (`Workday` vs `Workday_Early_Career`,
 produisait 26 484 fausses offres. Détail des deux voies dans
 `scripts/boards/workday.mjs`.
 
+**Talentsoft se découvre par l'index COLUMNAR** (`scripts/build-boards-talentsoft.mjs`,
+étape distincte du même workflow hebdomadaire, ajoutée le 21/08/2026). C'est le
+premier ATS installé aussi souvent sur le **domaine propre du client**
+(`jobs.groupe-psa.com`) que sur un sous-domaine partagé (`*.talent-soft.com`) —
+et un domaine propre n'est trouvable **ni** par préfixe de domaine (`crawl.mjs`)
+**ni** par devinage de slug (`sources.mjs`). D'où une troisième voie de
+découverte :
+
+- `scripts/boards/parquet.mjs` — lit l'index **columnar** de Common Crawl (Parquet,
+  distinct de l'index CDX) **colonne par colonne, par plages HTTP**. ⚠️ C'est ce
+  qui rend l'opération abordable : un fichier pèse 604 Mo mais sa colonne
+  `url_host_name` seulement 0,8 Mo — soit **~600 Mo pour les 300 fichiers**,
+  contre 181 Go en lisant les fichiers entiers. Common Crawl ne documente que la
+  voie Amazon Athena (compte AWS, facturation) ; ce module fait le même travail
+  en HTTP pur. ⚠️ Deux pièges verrouillés par test : hyparquet ne décompresse pas
+  ZSTD (Node le fait, on lui branche), et un serveur qui **ignore `Range` et
+  répond 200** avec le fichier entier décale tous les offsets.
+- `scripts/boards/carrieres.mjs` — garde, parmi les ~19 millions de noms d'hôtes
+  ainsi obtenus, les **~61 000** qui se nomment comme un site de recrutement.
+  ⚠️ La frontière de mot est essentielle : sans elle « jobteaser » et
+  « careerbuilder » entreraient.
+- `scripts/boards/talentsoft.mjs` — sonde chaque candidat. **L'empreinte et la
+  moisson sont la même requête** : un seul appel RSS rend tout le board, ou 404.
+
+⚠️ Cette brique est **réutilisable pour tout futur ATS** ayant une empreinte
+reconnaissable : la découverte est faite, il ne reste qu'à écrire le sondage.
+Pièges propres à Talentsoft (plafond silencieux de 1 000 offres, absence de code
+pays, lieu illisible dans les catégories) : voir `LIMITES.md` §2.2 quater.
+
 **Quatrième source « Marché caché »** (`lib/jobs/boardsFr.ts`, décochée par
 défaut) : lit l'index léger `lib/jobs/data/boards-offres.json`
 (titre/entreprise/lieu/url/date, sans texte, rafraîchi **chaque jour** par

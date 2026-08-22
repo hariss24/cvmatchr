@@ -14,3 +14,4 @@ playwright-report/
 
 # Journal d'avancement de la moisson Workday (voir scripts/build-boards-workday.mjs)
 boards-workday-suivi.log
+boards-talentsoft-suivi.log
