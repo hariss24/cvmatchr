@@ -28,36 +28,53 @@ export const FAKE_SESSION = {
 };
 
 /**
+ * Identifiant du projet Supabase, lu dans l'adresse configurée.
+ *
+ * ⚠️ Il DOIT être dérivé, jamais écrit en dur. Le client Supabase range la
+ * session sous la clé `sb-<projet>-auth-token` : une clé figée ne fonctionne
+ * que tant que l'adresse pointe sur ce projet précis. C'est ce qui a laissé la
+ * CI rouge du 14 au 22/08/2026 — la fixture déposait la session sous le projet
+ * de développement (`czbpdmkdcssiitpynpxm`) pendant que le navigateur, servi
+ * avec l'adresse factice du workflow, cherchait `sb-exemple-ci-auth-token` et
+ * ne trouvait rien. Neuf tests tombaient, tous ceux qui exigent d'être connecté,
+ * et ils passaient en local pour la seule raison que les deux valeurs
+ * coïncidaient sur la machine de développement.
+ */
+function refProjet(): string {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  const hote = url.replace(/^https?:\/\//, "").split(/[.:/]/)[0];
+  return hote || "localhost";
+}
+
+/**
  * Injecte une session Supabase factice et intercepte les appels PostgREST (rest/v1).
  * Permet aux tests e2e de tourner sans accès réseau Supabase réel.
  */
 export async function connecte(page: Page) {
   const sessionStr = JSON.stringify(FAKE_SESSION);
+  const ref = refProjet();
 
   // 1. Initialiser le localStorage et les cookies dans la page avant tout chargement
-  await page.addInitScript((sessionJson) => {
+  await page.addInitScript(({ sessionJson, projet }) => {
     try {
-      const keys = [
-        'sb-czbpdmkdcssiitpynpxm-auth-token',
-        'sb-supabase-auth-token',
-        'supabase.auth.token',
-      ];
+      const cle = `sb-${projet}-auth-token`;
+      const keys = [cle, 'sb-supabase-auth-token', 'supabase.auth.token'];
       for (const k of keys) {
         window.localStorage.setItem(k, sessionJson);
       }
 
       // Encodage base64 standard de la session pour @supabase/ssr
       const b64 = btoa(unescape(encodeURIComponent(sessionJson)));
-      document.cookie = `sb-czbpdmkdcssiitpynpxm-auth-token=${encodeURIComponent(
+      document.cookie = `${cle}=${encodeURIComponent(
         'base64-' + b64,
       )}; path=/; max-age=3600000`;
-      document.cookie = `sb-czbpdmkdcssiitpynpxm-auth-token.0=${encodeURIComponent(
+      document.cookie = `${cle}.0=${encodeURIComponent(
         'base64-' + b64,
       )}; path=/; max-age=3600000`;
     } catch {
       // no-op
     }
-  }, sessionStr);
+  }, { sessionJson: sessionStr, projet: ref });
 
   // 2. Intercepter les appels Auth Supabase
   await page.route('**/auth/v1/user*', async (route) => {

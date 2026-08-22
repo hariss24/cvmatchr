@@ -315,7 +315,10 @@ d'erreur résiduel est structurel.
 
 ⚠️ Ce garde-fou n'est pas cosmétique. Simulé le 06/08/2026 : les cinq API tombant le même matin, `reprendreIndetermines` republiait les 19 555 offres du dernier passage réussi, le fichier produit était **identique à l'octet**, `git diff` ne voyait rien et le job restait vert. L'index serait resté gelé indéfiniment sans que personne le sache. Contrepartie ajoutée : une offre qu'aucun passage n'a revue depuis **14 jours** sort de l'index au lieu d'être republiée à vie (`sansPerimees`, champ `vuLe`).
 
-**Un angle mort demeure** : un cron qui ne se déclenche pas du tout ne produit aucun événement, donc aucune alerte.
+**Deux angles morts demeurent** :
+
+1. Un cron qui ne se déclenche pas du tout ne produit aucun événement, donc aucune alerte.
+2. **Une alerte que personne ne lit ne vaut pas mieux qu'une absence d'alerte.** Constaté le 22/08/2026 : la CI « Web Next.js CI » avait échoué à **chaque push depuis le 14/08**, soit huit jours et dix-neuf exécutions, avec toujours les mêmes 9 tests E2E. Le dispositif avait pourtant fonctionné — l'issue #45 était bien ouverte. Cause de la panne : la fixture de session E2E était soudée à un identifiant de projet Supabase en dur (voir `WORK_HISTORY.md`, 22/08/2026). Les tests passaient en local parce que la valeur en dur y coïncidait, et échouaient en CI où l'adresse est factice. **Rien ne rend une issue `alerte-workflow` ouverte visible ailleurs que dans l'onglet Issues.**
 
 ### 8.1 bis Ce que les tests ne verrouillent pas
 

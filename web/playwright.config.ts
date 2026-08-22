@@ -1,4 +1,18 @@
 import { defineConfig, devices } from "@playwright/test";
+import { loadEnvConfig } from "@next/env";
+
+/**
+ * Charge `.env.local` dans le PROCESSUS DE TEST, pas seulement dans l'app.
+ *
+ * ⚠️ Sans cela, la fixture de session ne voit pas la même adresse Supabase que
+ * le navigateur : `npm run dev` lit `.env.local`, le processus Playwright non.
+ * Or la fixture doit connaître cette adresse pour déposer la session sous la
+ * clé que le client Supabase ira réellement lire (voir `fixtures/session.ts`).
+ *
+ * `loadEnvConfig` n'écrase jamais une variable déjà présente : en CI, ce sont
+ * les valeurs du workflow qui gagnent, comme il se doit.
+ */
+loadEnvConfig(process.cwd());
 
 /**
  * Tests E2E de l'app web (CV Forge). Lance `npm run dev` et teste l'UI principale.

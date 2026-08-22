@@ -41,6 +41,16 @@
 
 ## Journal
 
+### 2026-08-22 : CI — la fixture de session était soudée à un projet Supabase
+
+- **Quoi :** `tests/e2e/fixtures/session.ts` dérive désormais l'identifiant du projet Supabase de `NEXT_PUBLIC_SUPABASE_URL` au lieu de l'écrire en dur, et `playwright.config.ts` charge `.env.local` dans le processus de test (`loadEnvConfig`) pour que la fixture voie la même adresse que le navigateur.
+- **Pourquoi :** la CI « Web Next.js CI » échouait **à chaque push depuis le 14/08/2026**, soit huit jours et dix-neuf exécutions. Toujours les mêmes 9 tests : les 8 de `jobs.spec.ts` et celui de `profile.spec.ts`, c'est-à-dire exactement ceux qui exigent d'être connecté.
+- **Racine :** le client Supabase range la session sous `sb-<projet>-auth-token`, où `<projet>` vient de l'adresse configurée. La fixture écrivait `sb-czbpdmkdcssiitpynpxm-auth-token` en dur — le projet de développement. En CI, le workflow fournit l'adresse factice `https://exemple-ci.supabase.co`, donc le navigateur cherchait `sb-exemple-ci-auth-token` et ne trouvait rien : aucune session, et tout ce qui en dépend s'effondrait. Les tests passaient en local pour la seule raison que les deux valeurs coïncidaient sur la machine de l'auteur — un « ça marche chez moi » parfait.
+- **Reproduction :** `NEXT_PUBLIC_SUPABASE_URL=https://exemple-ci.supabase.co npx playwright test` reproduit l'échec à l'identique en local. C'est ce qui a permis de trancher au lieu de deviner.
+- ⚠️ **Ce que l'incident dit du dispositif d'alerte :** il a fonctionné. L'issue #45 « Échec automatique : Web Next.js CI » était bien ouverte. Le trou n'est pas technique, il est humain : personne n'a lu l'alerte pendant huit jours. `LIMITES.md` §8 disait que l'angle mort restant était « un cron qui ne se déclenche pas » ; il faut y ajouter « une alerte que personne ne lit ».
+- **Fichiers touchés :** `web/tests/e2e/fixtures/session.ts`, `web/playwright.config.ts`, `LIMITES.md`, `WORK_HISTORY.md`.
+- **Résultat vérifs :** `playwright` **44/44 avec l'environnement de la CI reproduit** (le point qui manquait), et 44/44 avec l'environnement local — les deux, pour prouver l'absence de régression. `tsc` OK, `lint` 0 erreur / 1 warning préexistant.
+
 ### 2026-08-21 : Marché caché — Talentsoft, et la découverte par l'index columnar
 
 - **Quoi :** Sixième ATS de l'index (`talentsoft`), et surtout une **troisième voie de découverte** réutilisable. Trois modules neufs : `scripts/boards/parquet.mjs` (lecture de l'index columnar de Common Crawl, colonne par colonne, par plages HTTP), `scripts/boards/carrieres.mjs` (repérage des noms d'hôtes « site carrière »), `scripts/boards/talentsoft.mjs` (sondage et moisson). Orchestration : `scripts/build-boards-talentsoft.mjs`. Côté app : `talentsoft` ajouté au type `OffreLegere`, à `NOMS_ATS`, et surtout à `obtenirTextes` (`boardsText.ts`).
