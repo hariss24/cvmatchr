@@ -21243,5 +21243,48 @@
     "lng": -1.596972,
     "via": "commune",
     "departement": "35"
-  }
+  },
+  "Blagnac / Toulouse": {
+    "ville": "Blagnac",
+    "lat": 43.63735,
+    "lng": 1.38326,
+    "via": "commune",
+    "departement": "31"
+  },
+  "ARLES, , France": {
+    "ville": "Arles",
+    "lat": 43.596721,
+    "lng": 4.645086,
+    "via": "commune",
+    "departement": "13"
+  },
+  "scionzier, , France": {
+    "ville": "Scionzier",
+    "lat": 46.058873,
+    "lng": 6.549565,
+    "via": "commune",
+    "departement": "74"
+  },
+  "GUICHAINVILLE, FRANCE, France": {
+    "ville": "Guichainville",
+    "lat": 48.983387,
+    "lng": 1.181556,
+    "via": "commune",
+    "departement": "27"
+  },
+  "ATHIS-MONS (91)": {
+    "ville": "Athis-Mons",
+    "lat": 48.70896,
+    "lng": 2.384591,
+    "via": "commune",
+    "departement": "91"
+  },
+  "Valbonne , , France": {
+    "ville": "Valbonne",
+    "lat": 43.627339,
+    "lng": 7.016557,
+    "via": "commune",
+    "departement": "06"
+  },
+  "France - Update Location": null
 }
